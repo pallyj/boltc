@@ -1,5 +1,7 @@
 # boltcc
 
+![Bolt logo](https://github.com/pallyj/boltcc/blob/main/assets/logo.svg?raw=true)
+
 Boltcc is a C compiler updated for the modern day.
 
 The most painful parts of writing C are keeping separate headers from the source code, and project management. Boltcc solves both of these issues.
