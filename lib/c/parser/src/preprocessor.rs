@@ -1,16 +1,15 @@
 use std::collections::{HashMap, HashSet};
 use std::iter::Peekable;
 use std::sync::Arc;
+use std::vec::IntoIter;
 
 use prelude::{CharIter, CharExts, WithSource, HasSource, SourceFile, Source, GenericLexer};
 
 use crate::{is_ident_body, Token, LexError};
 use crate::lexer::*;
 
-// TODO: Add recursion
 // TODO: Add if equals
 // TODO: Add else if
-// TODO: Add spaces before macro
 pub struct Preprocessor {
 	macros: HashMap<String, Macro>,
 	pub tokens: Vec<WithSource<Token>>,
@@ -45,7 +44,8 @@ impl Preprocessor {
 					while peekable.next().map(|t| t.value() != &Token::Directive("endif".to_string())).unwrap_or(false) {}
 				}
 				Token::Ident(name) if self.has_macro(name) => {
-					self.expand_macro(&mut peekable, name, tok.source());
+					let expanded = self.expand_macro(&mut peekable, name, tok.source());
+					self.tokens.extend(expanded);
 				}
 				Token::Directive(dir) if dir.as_str() == "endif" => {}
 				_ => { self.tokens.push(tok) }
@@ -115,49 +115,101 @@ impl Preprocessor {
 		self.lex_if(tokens, !self.has_macro(&name))
 	}
 
-	pub fn expand_macro<T: Iterator<Item=WithSource<Token>>>(&mut self, tokens: &mut Peekable<T>, macro_name: &str, source: &Source) {
+	pub fn expand_macro<T: Iterator<Item=WithSource<Token>>>(&self, tokens: &mut Peekable<T>, macro_name: &str, source: &Source, ) -> Vec<WithSource<Token>> {
 		let mac = &self.macros[macro_name];
 
 		if mac.params.len() == 0 {
-			self.tokens.extend(mac.replace_seq.iter().map(|t| t.clone().with_source(source.clone())));
-			return;
+			return Self::add_source_to_sequence(&mac.replace_seq, source);
 		}
 
-		if !tokens.next_if(|t| t.value() == &Token::Symbol("(".to_string())).is_some() {
+		if !tokens.next_if(Self::is_open_paren).is_some() {
 			// Error
 			println!("Next is not (");
-			return;
+			return vec![];
 		}
 
 		let mut pars = vec![];
 
-		'outer: while tokens.next_if(|t| t.value() == &Token::Symbol(")".to_string())).is_none() {
+		let mut depth = 0;
+
+		'outer: loop {
 			let mut toks = vec![];
 
-			while tokens.next_if(|t| t.value() == &Token::Symbol(",".to_string())).is_none() {
-				if tokens.next_if(|t| t.value() == &Token::Symbol(")".to_string())).is_some() {
-					pars.push(toks);
-					break 'outer;
+			while tokens.next_if(Self::is_comma).is_none() {
+				if let Some(next) = tokens.next_if(Self::is_close_paren) {
+					if depth > 0 {
+						depth -= 1;
+						toks.push(next)
+					} else {
+						pars.push(toks);
+						break 'outer;
+					}
+				} else if let Some(next) = tokens.next_if(Self::is_open_paren){
+					depth += 1;
+					toks.push(next);
 				} else if let Some(next) = tokens.next() {
 					toks.push(next);
 				} else {
 					// Error
 					println!("Ran out");
-					return;
+					return vec![];
 				}
 			}
 
 			pars.push(toks)
 		}
 
-		for t in self.macros[macro_name].replace_seq.iter() {
-			if let Token::MacroReplace(idx) = t {
-				// TODO: Check if idx is in range
-				self.tokens.extend(pars[*idx].iter().map(|p| p.clone()));
-			} else {
-				self.tokens.push(t.clone().with_source(source.clone()));
+		let mut tokens = vec![];
+
+		let mut macro_iter = Self::add_source_to_sequence(&mac.replace_seq, source)
+			.into_iter()
+			.peekable();
+
+		self.match_tokens(&mut tokens, &mut macro_iter, &mut pars, &source);
+
+		tokens
+	}
+
+	pub fn match_tokens(&self, tokens: &mut Vec<WithSource<Token>>, macro_iter: &mut Peekable<IntoIter<WithSource<Token>>>, pars: &Vec<Vec<WithSource<Token>>>, source: &Source) {	
+		while let Some(t) = macro_iter.next() {
+			match t.value() {
+				Token::MacroReplace(idx) => {
+					let mut from_iter = pars[*idx]
+						.clone()
+						.into_iter()
+						.peekable();
+
+					self.match_tokens(tokens, &mut from_iter, pars, source);
+
+					// TODO: Check if idx is in range
+					//tokens.extend(pars[*idx].iter().map(Clone::clone));
+				}
+				Token::Ident(id) if self.has_macro(id.as_str()) => {
+					let toks = self.expand_macro(macro_iter, id, source);
+
+					tokens.extend(toks);
+				}
+				_ => tokens.push(t.clone()),
 			}
 		}
+	}
+
+	pub fn add_source_to_sequence(seq: &Vec<Token>, source: &Source) -> Vec<WithSource<Token>> {
+		seq.iter()
+			.map(|t| t.clone().with_source(source.clone()))
+			.collect()
+	}
+
+	fn is_open_paren(t: &WithSource<Token>) -> bool {
+		t.value() == &Token::Symbol("(".to_string())
+	}
+
+	fn is_close_paren(t: &WithSource<Token>) -> bool {
+		t.value() == &Token::Symbol(")".to_string())
+	}
+
+	fn is_comma(t: &WithSource<Token>) -> bool {
+		t.value() == &Token::Symbol(",".to_string())
 	}
 
 	pub fn lex_if<T: Iterator<Item=WithSource<Token>>>(&mut self, tokens: &mut Peekable<T>, success: bool) {
@@ -182,6 +234,10 @@ impl Preprocessor {
 				}
 			}
 		}
+	}
+
+	pub fn tokens(&self) -> &Vec<WithSource<Token>> {
+		&self.tokens
 	}
 
 	pub fn lex_elif<T: Iterator<Item=WithSource<Token>>>(&mut self, tokens: &mut Peekable<T>) {

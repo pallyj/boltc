@@ -1,9 +1,14 @@
+use std::ptr::NonNull;
+
 use prelude::{WithSource, BoltMessage};
 
 use crate::Token;
 
 #[derive(Debug, Clone)]
 pub enum ParseError {
+    /// Expected identifier in struct definition, found 
+    /// ^^^^
+    /// Add label
 	ExpectedIdentInStruct(Token),
 	ExpectedIdentInEnum(Token),
 	ExpectedIdentInUnion(Token),
@@ -23,6 +28,8 @@ pub enum ParseError {
 
     ExpectedArrayLen(Token),
 
+    ExpectedIdent(Token),
+
 	EOF
 }
 
@@ -35,17 +42,31 @@ impl BoltMessage for ParseError {
         "C001".to_string()
     }
 
-    fn name(&self) -> String {
-        todo!()
+    fn suggestion(&self) -> Option<String> {
+        match self {
+            Self::ExpectedIdentInStruct(tok) => {
+                None
+            }
+            Self::MissingSemicolon(tok) => {
+                Some("Add semicolon".to_string())
+            }
+            Self::ExpectedArrayLen(tok) => {
+                None
+            }
+            _ => None
+        }
     }
 
     fn description(&self) -> String {
         match self {
+            Self::ExpectedIdentInStruct(tok) => {
+                format!("Expected identifier in struct definition, found {}", tok)
+            }
             Self::MissingSemicolon(tok) => {
-                format!("Expected semicolon, found {:?}", tok)
+                format!("Expected semicolon, found {}", tok)
             }
             Self::ExpectedArrayLen(tok) => {
-                format!("Expected array length, found {:?}", tok)
+                format!("Expected array length, found {}", tok)
             }
             _ => "".to_string()
         }
@@ -61,8 +82,8 @@ impl BoltMessage for LexError {
         todo!()
     }
 
-    fn name(&self) -> String {
-        todo!()
+    fn suggestion(&self) -> Option<String> {
+        None
     }
 
     fn description(&self) -> String {

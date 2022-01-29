@@ -1,6 +1,6 @@
 use std::{sync::Arc, collections::HashSet};
 
-use crate::{BoltMessage, WithSource, SourceFile, Source, HasSource, GenericLexer, GenericToken};
+use crate::{BoltMessage, WithSource, SourceFile, Source, HasSource, GenericLexer, GenericToken, Try};
 
 pub struct Parser<T: GenericToken, E: BoltMessage> {
 	/// The file we are parsing on
@@ -17,6 +17,8 @@ pub struct Parser<T: GenericToken, E: BoltMessage> {
 
 	/// Messages outputted by the parser
 	messages: Vec<E>,
+
+	eof: WithSource<T>,
 }
 
 impl<T: GenericToken, E: BoltMessage> Parser<T, E> {
@@ -24,12 +26,19 @@ impl<T: GenericToken, E: BoltMessage> Parser<T, E> {
 	pub fn new<U: GenericLexer<Token = T>>(lexer: U) -> Self {
 		let (file, tokens, whitespaces) = lexer.into();
 
+		let last_span = tokens.last().map(|t| t.source().clone()).unwrap_or(Source {
+			file: file.clone(),
+			char_index: 0,
+			len: 0,
+		});
+
 		Self {
 			file,
 			whitespaces,
 			tokens,
 			idx: 0,
 			messages: vec![],
+			eof: T::eof().with_source(last_span),
 		}
 	}
 
@@ -39,8 +48,12 @@ impl<T: GenericToken, E: BoltMessage> Parser<T, E> {
 	}
 
 	/// Peeks at the next token
-	pub fn peek(&self) -> Option<&WithSource<T>> {
-		self.tokens.get(self.idx)
+	pub fn peek(&self) -> &WithSource<T> {
+		if let Some(t) = self.tokens.get(self.idx) {
+			t
+		} else {
+			&self.eof
+		}
 	}
 
 	/// Requires a whitespace at the current location
@@ -114,8 +127,8 @@ impl<T: GenericToken, E: BoltMessage> Parser<T, E> {
 
 	/// Runs a function in this context, and returns
 	/// a value that was parsed.
-	pub fn slice_map<F, U: HasSource>(&mut self, f: F) -> WithSource<U>
-		where F: FnOnce(&mut Self) -> U
+	pub fn slice_map<F, U: HasSource>(&mut self, f: F) -> Try<WithSource<U>, WithSource<E>>
+		where F: FnOnce(&mut Self) -> Try<U, WithSource<E>>
 	{
 		let start_idx = self.idx;
 		let parsed = f(self);
@@ -123,11 +136,15 @@ impl<T: GenericToken, E: BoltMessage> Parser<T, E> {
 
 		let source = Source {
 			file: self.file.clone(),
-			char_index: start_idx,
-			len: end_idx - start_idx,
+			char_index: self.tokens[start_idx].source().char_index,
+			len: self.tokens[end_idx].source().char_index.checked_sub(self.tokens[start_idx].source().char_index).unwrap_or(0),
 		};
 
-		parsed.with_source(source)
+		match parsed {
+			Try::Some(s) => Try::Some(s.with_source(source)),
+			Try::None(e) => Try::None(e),
+			Try::Err(e) => Try::Err(e),
+		}
 	}
 
 	/// Runs a function in the context, and returns
@@ -141,8 +158,8 @@ impl<T: GenericToken, E: BoltMessage> Parser<T, E> {
 
 		let source = Source {
 			file: self.file.clone(),
-			char_index: start_idx,
-			len: end_idx - start_idx,
+			char_index: self.tokens[start_idx].source().char_index,
+			len: self.tokens[end_idx].source().char_index.checked_sub(self.tokens[start_idx].source().char_index).unwrap_or(0),
 		};
 
 		match parsed {
@@ -158,5 +175,19 @@ impl<T: GenericToken, E: BoltMessage> Parser<T, E> {
 	pub fn next_source(&self) -> Option<Source> {
 		self.tokens.get(self.idx)
 			.map(|t| t.source().clone())
+	}
+
+	/*pub fn get_slice_since(&self, start: usize) -> Option<Source> {
+		if start < self.tokens.l
+
+		let source = Source {
+			file: self.file.clone(),
+			char_index: start,
+			len: self.idx - start,
+		};
+	}*/
+
+	pub fn is_at_eof(&self) -> bool {
+		self.idx >= self.tokens.len()
 	}
 }

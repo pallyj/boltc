@@ -19,7 +19,7 @@ pub struct TypeDef {
 
 #[derive(Debug)]
 pub struct Variable {
-	pub name: String,
+	pub name: Option<String>,
 	pub typ: Type,
 	//pub default: Option<Expression>,
 }
@@ -40,7 +40,7 @@ impl Display for TypeDef {
 
 impl Display for Variable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?} {};", self.typ, self.name)
+        write!(f, "{:?} {};", self.typ, self.name.as_ref().map(|s| s.as_str()).unwrap_or(&""))
     }
 }
 

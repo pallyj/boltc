@@ -122,9 +122,22 @@ impl SourceFile {
             .unwrap_or(self.code.len());
 
 
-        let slice = self.code[(line_start + 1)..line_end].iter().collect::<String>();
+        let slice = self.code[(line_start)..line_end].iter().collect::<String>();
 
         Some(slice)
+    }
+
+    pub fn index_of_line(&self, idx: usize, len: usize) -> Option<usize> {
+        if (idx + len) >= self.code.len() {
+            return None;
+        }
+
+        let line_start = self.line_breaks.range(..idx)
+            .next_back()
+            .map(|idx| *idx)
+            .unwrap_or(0);
+
+        Some(idx - line_start)
     }
 
     pub fn anon(self: &Arc<Self>) -> Source {

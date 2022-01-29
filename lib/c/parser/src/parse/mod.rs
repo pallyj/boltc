@@ -42,13 +42,14 @@ impl<T: Parse> Parse for ParenCsl<T> {
 
     fn parse(parser: &mut Parser) -> Try<WithSource<Self::Output>, WithSource<ParseError>> {
         if !parser.consume_if_equal(Token::Symbol("(".to_string())) {
-			let (t, s) = parser.peek().unwrap().clone().unwrap(); // TODO: Errors can take none
+			let (t, s) = parser.peek().clone().unwrap();
 			return Try::None(ParseError::ExpectedOpeningParen(t).with_source(s))
 		}
 
 		let mut items = vec![];
 
-		while let Some(next) = parser.peek() {
+		loop {
+			let next = parser.peek();
 			if parser.consume_if_equal(Token::Symbol(")".to_string())) {
 				return Try::Some(items.with_source(parser.last_source()))
 			}
@@ -80,13 +81,13 @@ impl<T: Parse> Parse for BracedSemicolonList<T> {
 
     fn parse(parser: &mut Parser) -> Try<WithSource<Self::Output>, WithSource<ParseError>> {
         if !parser.consume_if_equal(Token::Symbol("{".to_string())) {
-			let (t, s) = parser.peek().unwrap().clone().unwrap(); // TODO: Errors can take none
+			let (t, s) = parser.peek().clone().unwrap();
 			return Try::None(ParseError::ExpectedOpeningBrace(t).with_source(s))
 		}
 
 		let mut items = vec![];
 
-		while let Some(next) = parser.peek() {
+		while !parser.is_at_eof() {
 			if parser.consume_if_equal(Token::Symbol("}".to_string())) {
 				return Try::Some(items.with_source(parser.last_source()))
 			}
@@ -94,8 +95,8 @@ impl<T: Parse> Parse for BracedSemicolonList<T> {
 			items.push(require!(T::parse(parser)));
 
 			if !parser.consume_if_equal(Token::Symbol(";".to_string())) {
-				let (t, s) = parser.peek().unwrap().clone().unwrap(); // TODO: Errors can take none
-				return Try::None(ParseError::MissingSemicolon(t).with_source(s))
+				let (t, s) = parser.peek().clone().unwrap();
+				return Try::Err(ParseError::MissingSemicolon(t).with_source(s))
 			}
 		}
 

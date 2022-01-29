@@ -19,44 +19,38 @@ impl Parse for TypeDecl {
 		};
         let mut base = require!(type_pointer(parser));
 
-		let mut name = String::new();
+		let mut name = None;
 
-		let Some(t) = parser.peek() else {
-			return Try::Some(base.map(|typ| {
-				TypeDecl {
-					name,
-					typ,
+		let (t, _) = parser.peek().clone().unwrap();
+
+		let mut has_const = false;
+
+		loop {
+			let (t, s) = parser.peek().clone().unwrap();
+
+			match t {
+				Token::Keyword(ref kw) if (!has_const) && kw.as_str() == "const" => {
+					parser.consume();
+					let source = start.clone().until(parser.last_source());
+					base = Type::Const(Box::new(base)).with_source(source);
+					has_const = true;
 				}
-			}));
-		};
+				Token::Ident(bind_name) => {
+					parser.consume();
+					name = Some(bind_name.to_string());
+					base = require!(make_array(parser, base, &start));
 
-		let (t, _) = t.clone().unwrap();
-
-		match t {
-			Token::Keyword(kw) if kw.as_str() == "const" => {
-				parser.consume();
-				let source = start.clone().until(parser.last_source());
-				base = Type::Const(Box::new(base)).with_source(source);
+					break;
+				}
+				Token::Symbol(sym) if sym.as_str() == "(" => {
+					let decl = require!(function_pointer(parser, base));
+					let source = start.clone().until(parser.last_source());
+					base = decl.typ.with_source(source);
+					name = decl.name;
+					break;
+				}
+				_ => { break; }
 			}
-			Token::Ident(bind_name) => {
-				parser.consume();
-				name = bind_name.to_string();
-				base = require!(make_array(parser, base, &start));
-
-				return Try::Some(base.map(|typ| {
-					TypeDecl {
-						name,
-						typ,
-					}
-				}));
-			}
-			Token::Symbol(sym) if sym.as_str() == "(" => {
-				let decl = require!(function_pointer(parser, base));
-				let source = start.clone().until(parser.last_source());
-				base = decl.typ.with_source(source);
-				name = decl.name;
-			}
-			_ => {}
 		}
 
 		Try::Some(base.map(|typ| {
@@ -76,7 +70,7 @@ fn make_array(parser: &mut super::Parser, mut base: WithSource<Type>, start: &So
 		let next_int = parser.consume_if(is_token_kind!(Token::NumberLit));
 
 		let Some(next_int) = next_int else {
-			let (t, s) = parser.peek().unwrap().clone().unwrap();
+			let (t, s) = parser.peek().clone().unwrap();
 			return Try::Err(ParseError::ExpectedArrayLen(t).with_source(parser.last_source()))
 		};
 
@@ -99,15 +93,15 @@ fn make_array(parser: &mut super::Parser, mut base: WithSource<Type>, start: &So
 fn function_pointer(parser: &mut super::Parser, base: WithSource<Type>) -> Try<TypeDecl, WithSource<ParseError>> {
 	parser.consume();
 	if !parser.consume_if_equal(Token::Operator("*".to_string())) {
-		let (t, s) = parser.peek().unwrap().clone().unwrap(); // TODO: Errors can take none
+		let (t, s) = parser.peek().clone().unwrap();
 		return Try::Err(ParseError::ExpectedFunctionPointerStar(t).with_source(s))
 	}
 
 	// Get the name
-	let name = parser.consume_if_map(take_token_kind!(Token::Ident)).unwrap_or("".to_string());
+	let name = parser.consume_if_map(take_token_kind!(Token::Ident));
 
 	if !parser.consume_if_equal(Token::Symbol(")".to_string())) {
-		let (t, s) = parser.peek().unwrap().clone().unwrap(); // TODO: Errors can take none
+		let (t, s) = parser.peek().clone().unwrap();
 		return Try::Err(ParseError::ExpectedClosingParen(t).with_source(s))
 	}
 
@@ -122,10 +116,7 @@ fn function_pointer(parser: &mut super::Parser, base: WithSource<Type>) -> Try<T
 fn type_pointer(parser: &mut super::Parser) -> Try<WithSource<Type>, WithSource<ParseError>> {
 	let atom = unwrap!(type_atom(parser));
 
-	let star = match parser.peek() {
-		Some(star) => star,
-		None => return Try::Some(atom),
-	};
+	let star = parser.peek();
 
 	match star.value() {
 		Token::Operator(op) if op.as_str() == "*" => {
@@ -139,11 +130,11 @@ fn type_pointer(parser: &mut super::Parser) -> Try<WithSource<Type>, WithSource<
 }
 
 fn type_atom(parser: &mut super::Parser) -> Try<WithSource<Type>, WithSource<ParseError>> {
-	parser.slice_map(|parser| -> Try<Type, ParseError> {
+	parser.slice_map(|parser| {
 		// TODO: Don't unwrap the first time
-		let (head, _) = match parser.consume() {
+		let (head, head_source) = match parser.consume() {
 			Some(x) => x.clone(),
-			None => return Try::None(ParseError::EOF),
+			None => return Try::None(ParseError::EOF.with_source(parser.last_source())),
 		}.unwrap();
 
 		match head {
@@ -154,11 +145,11 @@ fn type_atom(parser: &mut super::Parser) -> Try<WithSource<Type>, WithSource<Par
 				Try::Some(match kw.as_str() {
 					"const" => {
 						let atom = type_atom(parser);
-						Type::Const(Box::new(unwrap!(atom.discard_error_source())))
+						Type::Const(Box::new(unwrap!(atom)))
 					}
 					"struct" => {
 						// TODO: We can have implicit definition
-						require!(parse_struct(parser).discard_error_source())
+						require!(parse_struct(parser))
 					}
 					"enum" => {
 						// TODO: We can have implicit definition
@@ -168,7 +159,7 @@ fn type_atom(parser: &mut super::Parser) -> Try<WithSource<Type>, WithSource<Par
 					}
 					"union" => {
 						// TODO: We can have implicit definition
-						require!(parse_union(parser).discard_error_source())
+						require!(parse_union(parser))
 					}
 					"void" => {
 						Type::Unit
@@ -176,26 +167,49 @@ fn type_atom(parser: &mut super::Parser) -> Try<WithSource<Type>, WithSource<Par
 					intrinsic @ ("unsigned" | "signed" | "long" | "int" | "short" | "char" | "float" | "double") => {
 						Type::Intrinsic(parse_intrinsic(parser, intrinsic))
 					}
-					_ => return Try::Err(ParseError::ExpectedType(Token::Keyword(kw.clone())))
+					_ => return Try::Err(ParseError::ExpectedType(Token::Keyword(kw.clone())).with_source(head_source))
 				})
 			}
-			t => Try::Err(ParseError::UnexpectedToken(t.clone()))
+			t => Try::Err(ParseError::UnexpectedToken(t.clone()).with_source(head_source))
 		}
-	}).take()
+	})
+}
+
+pub struct StructItem {}
+
+impl Parse for StructItem {
+    type Output = TypeDecl;
+
+    fn parse(parser: &mut Parser) -> Try<WithSource<Self::Output>, WithSource<ParseError>> {
+        let decl = unwrap!(TypeDecl::parse(parser));
+
+		if decl.value().name.is_none() {
+			let (t, s) = parser.peek().clone().unwrap();
+
+			return Try::Err(ParseError::ExpectedIdentInStruct(t).with_source(s))
+		}
+
+		return Try::Some(decl);
+    }
 }
 
 fn parse_struct(parser: &mut super::Parser) -> Try<Type, WithSource<ParseError>> {
 	let name = parser.consume_if_map(take_token_kind!(Token::Ident));
 
-	match BracedSemicolonList::<TypeDecl>::parse(parser) {
+	match BracedSemicolonList::<StructItem>::parse(parser) {
 		Try::Some(items) => {
 			let (items, _) = items.unwrap();
 			Try::Some(Type::Struct(name, items.into_iter().map(|i| Box::new(i)).collect() ))
 		}
 
-		Try::None(_) => {
+		Try::None(e) => {
 			// If name is (none), it is an error
-			Try::Some(Type::StructRef(name.unwrap()))
+			if let Some(name) = name {
+				Try::Some(Type::StructRef(name))
+			} else {
+				let (t, s) = parser.peek().as_ref().unwrap();
+				return Try::Err(ParseError::ExpectedIdentInStruct(t.clone()).with_source(s.clone()));
+			}
 		}
 
 		Try::Err(e) => return Try::Err(e)
@@ -236,20 +250,15 @@ fn parse_intrinsic(parser: &mut super::Parser, head: &str) -> String {
 	rest
 }
 
-fn ident_anon(parser: &mut Parser) -> Try<String, ParseError> {
-	if let Some(struct_name) = parser.peek() {
-		let (struct_name, _) = struct_name.as_ref().unwrap();
+fn ident_anon(parser: &mut Parser) -> Try<String, WithSource<ParseError>> {
+	let (struct_name, source) = parser.peek().as_ref().unwrap();
 
-		match struct_name {
-			Token::Ident(id) => { let id = id.clone(); parser.consume(); Try::Some(id) },
-			t => {
-				// x is not a valid struct name
-				Try::Err(ParseError::ExpectedIdentInStruct(t.clone()))
-			}
+	match struct_name {
+		Token::Ident(id) => { let id = id.clone(); parser.consume(); Try::Some(id) },
+		t => {
+			// x is not a valid struct name
+			Try::Err(ParseError::ExpectedIdent(t.clone()).with_source(source))
 		}
-	} else {
-		// Reached EOF
-		Try::Err(ParseError::EOF)
 	}
 }
 
