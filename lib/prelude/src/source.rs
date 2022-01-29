@@ -61,6 +61,15 @@ impl Source {
 		self.file.line_slice(self.char_index, self.len)
 			.unwrap_or("".to_string())
 	}
+
+	pub fn index_of_line(&self) -> usize {
+		self.file.index_of_line(self.char_index, self.len)
+			.unwrap_or(0)
+	}
+
+	pub fn len(&self) -> usize {
+		self.len
+	}
 }
 
 pub struct WithSource<T> {

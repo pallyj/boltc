@@ -25,5 +25,5 @@ pub enum Type {
 #[derive(Debug)]
 pub struct TypeDecl {
 	pub typ: Type,
-	pub name: String
+	pub name: Option<String>
 }

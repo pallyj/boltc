@@ -9,7 +9,7 @@ pub trait BoltMessage {
 	fn code(&self) -> String;
 
 	/// The error name
-	fn name(&self) -> String;
+	fn suggestion(&self) -> Option<String>;
 
 	/// The error description
 	fn description(&self) -> String;

@@ -24,18 +24,23 @@ The boltcc compiler is very new, (and not current working), so a clang backend i
 
 
 
-## Features
-
-- [x] C lexer
+## Done
 
 ## WIP
 
+- [ ] C lexer
+	- [ ] Floats
 - [ ] C preprocessor
+	- [ ] Include
+	- [ ] #if
+	- [ ] #elif
 - [ ] C parser
+	- [ ] Expression
+	- [ ] Statement
+- [ ] Error messages
 
 ## TODO
 
-- [ ] Error messages
 - [ ] C LLVM Backend
 - [ ] Clang backend
 - [ ] Project system

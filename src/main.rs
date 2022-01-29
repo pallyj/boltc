@@ -38,7 +38,6 @@ fn main() {
             }
             Try::Err(e) => {
                 let (err, source) = e.unwrap();
-                println!("{err:?}");
                 print_error(&err, source);
                 break;
             }
@@ -59,6 +58,20 @@ fn print_error(e: &(dyn BoltMessage), source: Source) {
     } else {
         println!("{}: {}", format!("error[{}]",  e.code()).red().bold(), e.description().bold());
     }
+    println!(" {} {}:{}:{}", "-->".blue().bold(), source.file_name(), source.line(), source.col());
+    println!("  {}", "|".blue().bold());
 
-    println!("{}", source.line_slice());
+    for line in source.line_slice().split('\n') {
+        println!("  {} {}", "|".blue().bold(), line);
+    }
+
+    let offset = source.index_of_line();
+
+    e.suggestion()
+     .map(|suggestion| {
+        println!("  {}{}{} {}", "|".blue().bold(), " ".repeat(offset), "^".repeat(source.len()).red().bold(), suggestion.red().bold() );
+     });
+
+    println!("  {}", "|".blue().bold());
+    println!();
 }

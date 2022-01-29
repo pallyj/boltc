@@ -7,6 +7,7 @@
 	T* ptr;
 } \
 
-SLICE(int) get_slice() {
 
+struct X {
+	SLICE(int)
 }

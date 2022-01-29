@@ -95,6 +95,8 @@ impl<'a> Lexer<'a> {
 	}
 
 	fn lex_macro(&mut self) -> Option<Token> {
+		self.iter.advance_while(|c| c.is_whitespace());
+
 		let macro_name = self.iter.advance_collect(is_ident_body);
 
 		Some(Token::Directive(macro_name))
