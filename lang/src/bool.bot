@@ -1,0 +1,17 @@
+import intrinsics;
+
+public let true = Bool(repr: llvm_true);
+public let false = Bool(repr: llvm_false);
+
+@transparent
+public struct Bool: FromBoolLiteral {
+	private var repr: i1
+
+	public init(repr: i1) {
+		self.repr = repr
+	}
+
+	@operator(.invert) func(): Bool {
+		Bool(repr: integer1bitNot(self.repr))
+	}
+}

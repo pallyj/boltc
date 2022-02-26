@@ -1,0 +1,24 @@
+import intrinsics
+
+let oneTwoThree = [1: "one", 2: "two", 3: "three"];
+
+@transparent
+public struct Int: FromIntLiteral {
+	private var intVal: i64;
+
+	public init(from: i64): Self {
+		self.intVal = from;
+	}
+
+	@operator(.add) func (left: Self, right: Self): Self {
+		Int(intVal: integer64Add(left.intVal, right.intVal))
+	}	
+
+	public func isPositive(): Bool {
+		if integer64Gt(self.intVal, 0) {
+			true
+		} else {
+			false
+		}
+	}
+}

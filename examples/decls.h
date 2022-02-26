@@ -1,1 +1,0 @@
-typedef struct { long x } x;

@@ -1,0 +1,4 @@
+public enum Optional /*<T>*/ {
+	case some(T)
+	case none
+}
