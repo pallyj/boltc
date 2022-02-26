@@ -6,9 +6,31 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-prelude = { path = "lib/prelude" }
-header = { path = "lib/header" }
-parser = { path = "lib/c/parser" }
-syntax = { path = "lib/c/syntax" }
 colored = "2.0.0"
 clap = { version = "3.0.10", features = [ "derive" ] }
+
+prelude = { path = "tools/prelude" }
+header = { path = "tools/header" }
+project = { path = "tools/project" }
+
+bolt-parser = { path = "compiler/parser" }
+bolt-ast = { path = "compiler/ast" }
+lower_ast = { path = "compiler/lower_ast" }
+passes = { path = "compiler/passes" }
+blir = { path = "compiler/blir" }
+type_infer = { path = "compiler/type_infer" }
+
+[workspace]
+
+members = [
+	"compiler/blir",
+	"compiler/lower_ast",
+	"compiler/ast",
+	"compiler/mangle",
+	"compiler/parser",
+	"compiler/blir",
+	"compiler/lower_ast",
+	"compiler/passes",
+	"compiler/type_infer",
+	"compiler/passes"
+]

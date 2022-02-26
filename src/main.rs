@@ -1,9 +1,10 @@
-use clap::Args;
+use args::Args;
+use blir::{Walker, Library};
+use bolt_parser::{Parse as BoltParse, asttree::AstTree, Context, Parser};
 use colored::Colorize;
-use parser::{Lexer, Preprocessor};
-use prelude::{SourceFile, Parser, Try, BoltMessage, MessageLevel, Source, GenericLexer};
-use syntax::{TypeDecl, Decl};
-use parser::Parse;
+use lower_ast::lower_file;
+use prelude::{BoltMessage, MessageLevel, Source};
+use project::Project;
 
 use clap::Parser as ClapParser;
 
@@ -13,43 +14,79 @@ mod args;
 // TODO: Statements
 // TODO: Expressions
 
+macro_rules! handle_error {
+    ($val:expr) => {
+        match $val {
+            Ok(e) => e,
+            Err(err) => {
+                print_anon_error(&err);
+                return;
+            }
+        }
+    };
+}
+
 fn main() {
-    let args = args::Args::parse();
+    let args = Args::parse();
 
-    let file = SourceFile::open_file(&args.file).unwrap();
+    let mut project = handle_error!(Project::new(args.file.clone()));
+        
+    handle_error!(project.read_config());
 
-    let mut lexer = Lexer::new(file.iter());
-    let start = std::time::Instant::now();
-
-    lexer.lex();
-
-    let (file, tokens, ws) = GenericLexer::into(lexer);
-
-    let mut preprocessor = Preprocessor::new(file, ws);
-
-    preprocessor.process(tokens.into_iter());
-
-    let mut parser = Parser::new(preprocessor);
-
-    loop {
-        match Decl::parse(&mut parser) {
-            Try::Some(t) => {
-                println!("{}", t.value());
-            }
-            Try::Err(e) => {
-                let (err, source) = e.unwrap();
-                print_error(&err, source);
-                break;
-            }
-            _ => {
-                break
-            }
+    match project.search() {
+        Ok(_) => {},
+        Err(err) => {
+            print_anon_error(&*err);
+            return;
         }
     }
 
-    let interval = ((std::time::Instant::now() - start).as_nanos() as f64) / (1000000.);
+    let config = project.config();
+    let source_files = project.source_files();
 
-    print!( "Took {} ms", interval );
+    let ast_files = source_files
+        .iter()
+        .map(|source_file| {
+            let mut lexer = bolt_parser::Lexer::new(source_file.iter());
+
+            lexer.lex();
+
+            // Handle lexer errors
+
+            let ctx = Context::new();
+
+            let mut parser = Parser::new(lexer);
+
+            let file = AstTree::parse(&mut parser, &ctx);
+
+            for msg in parser.messages() {
+                let (msg, s) = msg.clone().unwrap();
+
+                println!("{msg:?} at {s:?}");
+            }
+
+            file
+        }).collect::<Vec<_>>();
+
+        
+    let library = Library::new("lang".to_string());
+    for ast_file in ast_files {
+        lower_file(ast_file.into_declarations(), library.clone());
+    }
+
+    let sym_resolver = passes::SymbolResolver::new();
+    sym_resolver.walk_library(&library);
+
+    let type_inferer = type_infer::InferWalker::new();
+    type_inferer.walk_library(&library);
+
+    type_inferer.context().collect();
+    type_inferer.context().solve();
+
+    let replacer = type_infer::ReplacementWalker::new(type_inferer);
+    replacer.walk_library(&library);
+
+    println!("{}", library);
 }
 
 fn print_error(e: &(dyn BoltMessage), source: Source) {
@@ -73,5 +110,15 @@ fn print_error(e: &(dyn BoltMessage), source: Source) {
      });
 
     println!("  {}", "|".blue().bold());
+    println!();
+}
+
+fn print_anon_error(e: &(dyn BoltMessage)) {
+    if e.level() == MessageLevel::Warning {
+        println!("{}:", "warning".yellow().bold())
+    } else {
+        println!("{}: {}", format!("error[{}]",  e.code()).red().bold(), e.description().bold());
+    }
+
     println!();
 }
