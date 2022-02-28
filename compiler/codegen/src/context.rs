@@ -1,20 +1,23 @@
 use std::{collections::HashMap, ops::Deref, sync::Mutex};
 
-use inkwell::{module::Module, builder::Builder, context::Context, values::{FunctionValue, BasicValueEnum}, OptimizationLevel};
+use inkwell::{module::Module, builder::Builder, context::Context, values::{FunctionValue, BasicValueEnum}, OptimizationLevel, passes::PassManager};
 
 #[derive(Copy, Clone)]
 pub struct LibraryGenContext<'a, 'ctx> {
 	context: &'ctx Context,
 	module: &'a Module<'ctx>,
 	builder: &'a Builder<'ctx>,
+	pub fpm: &'a PassManager<FunctionValue<'ctx>>,
+
 }
 
 impl<'a, 'ctx> LibraryGenContext<'a, 'ctx> {
-	pub fn new(context: &'ctx Context, module: &'a Module<'ctx>, builder: &'a Builder<'ctx>) -> Self {
+	pub fn new(context: &'ctx Context, module: &'a Module<'ctx>, builder: &'a Builder<'ctx>, fpm: &'a PassManager<FunctionValue<'ctx>>) -> Self {
 		Self {
 			context,
 			module,
-			builder
+			builder,
+			fpm
 		}
 	}
 	pub fn context(&self) -> &'ctx Context {
