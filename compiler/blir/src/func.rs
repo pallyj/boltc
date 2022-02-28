@@ -155,6 +155,10 @@ impl FuncParam {
 		}
 	}
 
+	pub fn typ(&self) -> &Type {
+		&self.typ
+	}
+
 	pub fn typ_mut(&mut self) -> &mut Type {
 		&mut self.typ
 	}

@@ -1,6 +1,7 @@
 use args::Args;
 use blir::{Walker, Library};
 use bolt_parser::{Parse as BoltParse, asttree::AstTree, Context, Parser};
+use codegen::codegen_library;
 use colored::Colorize;
 use lower_ast::lower_file;
 use prelude::{BoltMessage, MessageLevel, Source};
@@ -86,7 +87,9 @@ fn main() {
     let replacer = type_infer::ReplacementWalker::new(type_inferer);
     replacer.walk_library(&library);
 
-    println!("{}", library);
+    //println!("{}", library);
+
+    codegen_library(&library);
 }
 
 fn print_error(e: &(dyn BoltMessage), source: Source) {

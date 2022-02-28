@@ -147,6 +147,10 @@ impl Library {
 			.insert(name, Symbol::new(SymbolKind::Function(f), Visibility::Public));
 	}
 
+	pub fn name(&self) -> &String {
+		&self.name
+	}
+
 	pub fn funcs(&self) -> MutexGuard<Vec<Arc<FuncDef>>> {
 		self.funcs.lock().unwrap()
 	}
