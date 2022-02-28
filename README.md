@@ -1,6 +1,6 @@
 # Bolt
 
-![Bolt logo](https://github.com/pallyj/boltcc/blob/main/assets/logo.svg?raw=true =256x256)
+<img src="https://github.com/pallyj/boltcc/blob/main/assets/logo.svg?raw=true" width="256" height="256"/>
 
 Bolt is a powerful coding language designed for expressiveness and speed. Bolt combines the ease-of-use of functional programming with the speed of C to make the ultimate language, suitable for any use-case.
 
