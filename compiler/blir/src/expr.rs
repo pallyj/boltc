@@ -75,8 +75,16 @@ impl SelectBranch {
 		}
 	}
 
+	pub fn condition(&self) -> &Expr {
+		&self.condition
+	}
+
 	pub fn condition_mut(&mut self) -> &mut Expr {
 		&mut self.condition
+	}
+
+	pub fn code(&self) -> &CodeBlock {
+		&self.code
 	}
 
 	pub fn code_mut(&mut self) -> &mut CodeBlock {

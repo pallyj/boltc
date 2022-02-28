@@ -15,6 +15,9 @@ pub fn generate_type<'a, 'ctx>(typ: &Type, ctx: LibraryGenContext<'a, 'ctx>) -> 
 				_ => return None
 			}))
 		}
-		_ => panic!()
+		_ => {
+			println!("{}", typ);
+			panic!()
+		}
 	}
 }

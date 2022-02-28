@@ -34,6 +34,7 @@ impl Intrinsics {
         self.add_integer_type(16);
         self.add_integer_type(32);
         self.add_integer_type(64);
+        self.add_type("i1".to_string());
     }
 
     /// Adds an integer type, with arithmatic, binary, comparison, and conversion operations
