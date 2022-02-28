@@ -50,7 +50,6 @@ impl Intrinsics {
         self.add_func(format!("integer{bits}Mul"), sig!((t, t): t));
         self.add_func(format!("integer{bits}Div"), sig!((t, t): t));
         self.add_func(format!("integer{bits}Rem"), sig!((t, t): t));
-        self.add_func(format!("integer{bits}MulSig"), sig!((t, t): t));
         self.add_func(format!("integer{bits}DivSig"), sig!((t, t): t));
         self.add_func(format!("integer{bits}RemSig"), sig!((t, t): t));
 
@@ -77,7 +76,6 @@ impl Intrinsics {
         self.add_func(format!("integer{bits}CmpGteSig"), sig!((t, t): b));
 
         // Unary
-        self.add_func(format!("integer{bits}Invert"), sig!((t): t));
         self.add_func(format!("integer{bits}Negate"), sig!((t): t));
         
         // Extension
@@ -98,8 +96,7 @@ impl Intrinsics {
         while b >= 8 {
             let o = Type::new_anon(TypeKind::Intrinsic(format!("i{b}")));
 
-            self.add_func(format!("integer{bits}TruncZero{b}"), sig!((t): o));
-            self.add_func(format!("integer{bits}TruncSig{b}"), sig!((t): o));
+            self.add_func(format!("integer{bits}Trunc{b}"), sig!((t): o));
 
             b /= 2;
         }

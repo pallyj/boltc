@@ -19,3 +19,10 @@ finally:                                          ; preds = %factorial
 continue:                                         ; preds = %then
   ret i64 0
 }
+
+define i64 @number(i64 %0, i64 %1, i64 %2) {
+number:
+  %div = sdiv i64 %0, %1
+  %sum = add i64 %div, %2
+  ret i64 %sum
+}
