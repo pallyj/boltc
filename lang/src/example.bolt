@@ -3,7 +3,7 @@ import intrinsics
 let x = "hello";
 let y = (x -> len, x -> ptr, x[0]);
 
-public func main(): i64 {
+/*public func main(): i64 {
 	factorial(5)
 }
 
@@ -13,7 +13,7 @@ func factorial(n: i64): i64 {
 	} else {
 		return integer64Mul( n, factorial(integer64Sub(n, 1)) );
 	}
-}
+}*/
 
 func multiplyAccumulate(a: i64, b: i64, c: i64): i64 {
 	let d = integer64Mul(a, b);
@@ -22,5 +22,5 @@ func multiplyAccumulate(a: i64, b: i64, c: i64): i64 {
 }
 
 func returnInfer(): i32 {
-	return 0
+	return 1;
 }

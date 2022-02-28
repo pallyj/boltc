@@ -113,6 +113,10 @@ impl CodeBlock {
 	pub fn statements_mut(&mut self) -> &mut Vec<(Statement, bool)> {
 		&mut self.statements
 	}
+
+	pub fn statements(&self) -> &Vec<(Statement, bool)> {
+		&self.statements
+	}
 }
 
 impl Display for StatementKind {

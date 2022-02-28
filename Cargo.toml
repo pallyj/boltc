@@ -19,6 +19,7 @@ lower_ast = { path = "compiler/lower_ast" }
 passes = { path = "compiler/passes" }
 blir = { path = "compiler/blir" }
 type_infer = { path = "compiler/type_infer" }
+codegen = { path = "compiler/codegen" }
 
 [workspace]
 
@@ -32,5 +33,6 @@ members = [
 	"compiler/lower_ast",
 	"compiler/passes",
 	"compiler/type_infer",
-	"compiler/passes"
+	"compiler/passes",
+	"compiler/codegen"
 ]
