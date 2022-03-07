@@ -1,0 +1,10 @@
+import intrinsics
+
+func factorial(n: i64): i64 {
+	if integer64CmpEq(n, 0) {
+		return 1
+	} else {
+		return integer64Mul( n, factorial(integer64Sub(n, 1)) )
+	}
+	return 0
+}

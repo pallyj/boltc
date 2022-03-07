@@ -1,6 +1,5 @@
 #![feature(let_else)]
 
-#[macro_use]
 extern crate lazy_static;
 
 mod token;

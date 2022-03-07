@@ -1,6 +1,6 @@
 use std::{sync::{Mutex, Arc, MutexGuard}, collections::HashMap, fmt::{Display}};
 
-use crate::{sym::Symbol, func::FuncDef, structdef::StructDef, metadata::Metadata, Type, Visibility, SymbolKind, TypeKind, ExprKind, Expr, Scope, ScopeKind, FileScope};
+use crate::{sym::Symbol, func::FuncDef, structdef::StructDef, metadata::Metadata, Type, Visibility, SymbolKind, TypeKind, ExprKind, Expr, Scope, FileScope, ExternFuncDef};
 
 pub struct Library {
 	/// The library's name
@@ -13,10 +13,12 @@ pub struct Library {
 	symbols: Mutex<HashMap<String, Symbol>>,
 
 	/// The structs in a library
-	structs: Mutex<Vec<Arc<Mutex<StructDef>>>>,
+	structs: Mutex<Vec<Arc<StructDef>>>,
 
 	/// Global functions in a library
 	funcs: Mutex<Vec<Arc<FuncDef>>>,
+
+	extern_funcs: Mutex<Vec<Arc<ExternFuncDef>>>,
 
 	files: Mutex<Vec<Arc<FileScope>>>
 }
@@ -30,6 +32,7 @@ impl Library {
 			symbols: Mutex::new(HashMap::new()),
 			structs: Mutex::new(Vec::new()),
 			funcs: Mutex::new(Vec::new()),
+			extern_funcs: Mutex::new(Vec::new()),
 			files: Mutex::new(Vec::new())
 		};
 
@@ -116,14 +119,14 @@ impl Library {
 			.push(file);
 	}
 
-	pub fn define_struct(&self, r#struct: Arc<Mutex<StructDef>>) {
+	pub fn define_struct(&self, r#struct: Arc<StructDef>) {
 		self.structs
 			.lock()
 			.unwrap()
 			.push(r#struct.clone());
 
 		// Something with visibility
-		let name = r#struct.lock().unwrap().name().clone();
+		let name = r#struct.name().clone();
 
 		self.symbols
 			.lock()
@@ -147,17 +150,41 @@ impl Library {
 			.insert(name, Symbol::new(SymbolKind::Function(f), Visibility::Public));
 	}
 
+	pub fn define_extern_function(&self, func: Arc<ExternFuncDef>) {
+		self.extern_funcs
+			.lock()
+			.unwrap()
+			.push(func.clone());
+
+		let name = func.name().clone();
+
+		let f = Expr::new_anon(ExprKind::ExternFunction(func), Type::new_anon(TypeKind::Infer(u64::MAX)));
+
+		self.symbols
+			.lock()
+			.unwrap()
+			.insert(name, Symbol::new(SymbolKind::Function(f), Visibility::Public));
+	}
+
 	pub fn name(&self) -> &String {
 		&self.name
+	}
+
+	pub fn structs(&self) -> MutexGuard<Vec<Arc<StructDef>>> {
+		self.structs.lock().unwrap()
 	}
 
 	pub fn funcs(&self) -> MutexGuard<Vec<Arc<FuncDef>>> {
 		self.funcs.lock().unwrap()
 	}
+
+	pub fn extern_funcs(&self) -> MutexGuard<Vec<Arc<ExternFuncDef>>> {
+		self.extern_funcs.lock().unwrap()
+	}
 }
 
 impl Scope for Library {
-    fn parent(&self) -> Option<&dyn Scope> {
+    fn parent(&self) -> Option<Arc<dyn Scope>> {
         None
     }
 
@@ -165,19 +192,19 @@ impl Scope for Library {
         &self.name
     }
 
-    fn kind(&self) -> crate::ScopeKind {
-        ScopeKind::Library
+    fn symbol(&self) -> mangle::symbol::Symbol {
+        mangle::symbol::Symbol::new(mangle::symbol::SymbolKind::Library(self.name.clone()))
     }
 
     fn lookup_symbol(&self, name: &String) -> Option<Symbol> {
         self.get_symbol(name)
     }
-
-    fn define_expr(&self, name: String, value: Expr) {
+	
+	fn define_expr(&self, _name: String, _value: Expr) {
         todo!()
     }
-	
-	fn scoped_type(&self, name: &str) -> Option<TypeKind> {
+
+	fn scoped_type(&self, _name: &str) -> Option<TypeKind> {
 		None
 	}
 
@@ -192,9 +219,9 @@ impl Display for Library {
 
 		writeln!(f, "{:?}", self.metadata.lock().unwrap())?;
 
-		/*for s in self.structs.lock().unwrap().iter() {
-			writeln!(f, "{:?}", s.lock().unwrap())?;
-		}*/
+		for s in self.structs.lock().unwrap().iter() {
+			writeln!(f, "{}", s)?;
+		}
 
 		for func in self.funcs.lock().unwrap().iter() {
 			writeln!(f, "{}", func)?;

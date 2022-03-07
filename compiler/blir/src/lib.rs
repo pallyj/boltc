@@ -1,4 +1,5 @@
 #![feature(associated_type_defaults)]
+#![feature(arc_new_cyclic)]
 
 use std::fmt::Display;
 

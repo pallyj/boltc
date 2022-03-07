@@ -69,14 +69,18 @@ fn main() {
     let sym_resolver = passes::SymbolResolver::new();
     sym_resolver.walk_library(&library);
 
+    let mangler = passes::ManglePass::new();
+    mangler.walk_library(&library);
+
     let type_inferer = type_infer::InferWalker::new();
     type_inferer.walk_library(&library);
 
-    type_inferer.context().collect();
     type_inferer.context().solve();
 
     let replacer = type_infer::ReplacementWalker::new(type_inferer);
     replacer.walk_library(&library);
+
+    println!("{}", library);
 
     codegen_library(&library);
 }

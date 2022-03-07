@@ -4,15 +4,6 @@ use prelude::{Try, WithSource, HasSource, require};
 
 use crate::{Token, ParseError, Context};
 
-macro_rules! is_token_kind {
-	($tt:path) => {
-		|tok| match tok {
-			$tt(_) => true,
-			_ => false
-		}
-	};
-}
-
 macro_rules! take_token_kind {
 	($tt:path) => {
 		|tok| match tok.value() {

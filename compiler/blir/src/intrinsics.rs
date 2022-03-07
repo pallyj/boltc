@@ -1,6 +1,6 @@
-use std::collections::{HashMap, HashSet};
+use std::{collections::{HashMap, HashSet}, sync::Arc};
 
-use crate::{FuncSig, Type, TypeKind, Scope, ScopeKind, Symbol, Visibility, SymbolKind, Metadata, Expr, ExprKind};
+use crate::{FuncSig, Type, TypeKind, Scope, Symbol, Visibility, SymbolKind, Metadata, Expr, ExprKind};
 
 macro_rules! sig {
     ( ($($params:expr),*): $ret:expr ) => {
@@ -17,7 +17,7 @@ macro_rules! sig {
 pub struct Intrinsics {
     types: HashSet<String>,
     funcs: HashMap<String, FuncSig>,
-    metadata: Metadata
+    _metadata: Metadata
 }
 
 impl Intrinsics {
@@ -25,7 +25,7 @@ impl Intrinsics {
         Intrinsics {
             types: HashSet::new(),
             funcs: HashMap::new(),
-            metadata: Metadata::new(),
+            _metadata: Metadata::new(),
         }
     }
 
@@ -34,7 +34,84 @@ impl Intrinsics {
         self.add_integer_type(16);
         self.add_integer_type(32);
         self.add_integer_type(64);
+
+        self.add_float_type(16);
+        self.add_float_type(32);
+        self.add_float_type(64);
+
+        self.add_bool_type();
+    }
+
+    /// Adds a float type with arithmatic
+    pub fn add_float_type(&mut self, bits: usize) {
+        self.add_type(format!("f{bits}"));
+
+        let t = Type::new_anon(TypeKind::Intrinsic(format!("f{bits}")));
+        let b = Type::new_anon(TypeKind::Intrinsic("i1".to_string()));
+
+        // Arithmatic
+        self.add_func(format!("float{bits}Add"), sig!((t, t): t));
+        self.add_func(format!("float{bits}Sub"), sig!((t, t): t));
+        self.add_func(format!("float{bits}Mul"), sig!((t, t): t));
+        self.add_func(format!("float{bits}Div"), sig!((t, t): t));
+        self.add_func(format!("float{bits}Rem"), sig!((t, t): t));
+
+        // Comparison
+        self.add_func(format!("float{bits}CmpEq"), sig!((t, t): b));
+        self.add_func(format!("float{bits}CmpNeq"), sig!((t, t): b));
+        self.add_func(format!("float{bits}CmpLt"), sig!((t, t): b));
+        self.add_func(format!("float{bits}CmpGt"), sig!((t, t): b));
+        self.add_func(format!("float{bits}CmpLte"), sig!((t, t): b));
+        self.add_func(format!("float{bits}CmpGte"), sig!((t, t): b));
+
+        // Unary
+        self.add_func(format!("float{bits}Negate"), sig!((t): t));
+
+        // Extension
+        let mut b = bits * 2;
+
+        while b <= 64 {
+            let o = Type::new_anon(TypeKind::Intrinsic(format!("f{b}")));
+
+            self.add_func(format!("float{bits}Ext{b}"), sig!((t): o));
+
+            b *= 2;
+        }
+
+        // Truncation
+        let mut b = bits / 2;
+
+        while b >= 8 {
+            let o = Type::new_anon(TypeKind::Intrinsic(format!("f{b}")));
+
+            self.add_func(format!("float{bits}Trunc{b}"), sig!((t): o));
+
+            b /= 2;
+        }
+
+        // To int
+        let i = Type::new_anon(TypeKind::Intrinsic("i64".to_string()));
+
+        self.add_func(format!("float{bits}ToInt"), sig!((t): i));
+        self.add_func(format!("float{bits}ToIntSig"), sig!((t): i));
+        self.add_func(format!("float{bits}FromInt"), sig!((i): t));
+        self.add_func(format!("float{bits}FromIntSig"), sig!((i): t));
+    }
+
+    /// Adds a boolean type
+    pub fn add_bool_type(&mut self) {
         self.add_type("i1".to_string());
+
+        let b = Type::new_anon(TypeKind::Intrinsic("i1".to_string()));
+
+        self.add_func("integer1And".to_string(), sig!((b, b): b));
+        self.add_func("integer1Xor".to_string(), sig!((b, b): b));
+        self.add_func("integer1Or".to_string(), sig!((b, b): b));
+
+        self.add_func("integer1CmpEq".to_string(), sig!((b, b): b));
+        self.add_func("integer1CmpNeq".to_string(), sig!((b, b): b));
+
+        self.add_func("integer1Invert".to_string(), sig!((b): b));
     }
 
     /// Adds an integer type, with arithmatic, binary, comparison, and conversion operations
@@ -127,7 +204,7 @@ impl Intrinsics {
 }
 
 impl Scope for Intrinsics {
-    fn parent(&self) -> Option<&dyn Scope> {
+    fn parent(&self) -> Option<Arc<dyn Scope>> {
         None
     }
 
@@ -135,8 +212,9 @@ impl Scope for Intrinsics {
         "intrinsics"
     }
 
-    fn kind(&self) -> ScopeKind {
-        ScopeKind::Library
+
+    fn symbol(&self) -> mangle::symbol::Symbol {
+        mangle::symbol::Symbol::new(mangle::symbol::SymbolKind::Intrinsic("".to_string()))
     }
 
     fn lookup_symbol(&self, name: &String) -> Option<Symbol> {
@@ -154,11 +232,11 @@ impl Scope for Intrinsics {
         return None
     }
 
-    fn define_expr(&self, name: String, value: Expr) {
+    fn define_expr(&self, _name: String, _value: Expr) {
         todo!()
     }
 
-    fn scoped_type(&self, name: &str) -> Option<TypeKind> {
+    fn scoped_type(&self, _name: &str) -> Option<TypeKind> {
         None
     }
 

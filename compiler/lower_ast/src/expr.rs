@@ -1,11 +1,9 @@
-use std::env::args_os;
-
 use bolt_ast::{
 	Expression as AstExpression
 };
 use blir::{
 	Expr as BlirExpr,
-	ExprKind as BlirExprKind, FuncArg, Type, TypeKind, FuncSig, CodeBlock, SelectBranch,
+	ExprKind as BlirExprKind, FuncArg, Type, TypeKind, FuncSig, SelectBranch,
 };
 use prelude::*;
 use type_infer::type_infer_ctx;
@@ -88,6 +86,8 @@ pub fn lower_expr(expr: WithSource<AstExpression>) -> Try<BlirExpr, ()> {
 			}
 
 			(BlirExprKind::FuncCall { func: Box::new(func), args: blir_args }, type_infer_ctx())
+
+			
 		}
 
 		AstExpression::If { condition, positive, negative } => {
@@ -123,6 +123,10 @@ pub fn lower_expr(expr: WithSource<AstExpression>) -> Try<BlirExpr, ()> {
 			}
 
 			(BlirExprKind::Select { branches, finally }, type_infer_ctx())
+		}
+
+		AstExpression::Member(parent, member) => {
+			(BlirExprKind::Member(Box::new(require!(lower_expr(*parent))), member), type_infer_ctx())
 		}
 
 		_ => (BlirExprKind::Unit, Type::new_anon(TypeKind::Unit))

@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use crate::{typ::Type, Visibility, var::GlobalVariableDef, Expr};
+use crate::{typ::Type, Visibility, var::GlobalVariableDef, Expr, MethodDef, VariableDef};
 
 #[derive(Clone)]
 pub enum SymbolKind {
@@ -13,8 +13,11 @@ pub enum SymbolKind {
 	/// A symbol that resolves to a function
 	Function(Expr),
 
+	StaticMethod(Arc<MethodDef>),
+
 	Value(Expr),
 
+	InstanceVariable(Arc<VariableDef>)
 }
 
 #[derive(Clone)]

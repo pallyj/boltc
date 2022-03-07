@@ -2,7 +2,7 @@ use std::{sync::{Arc, Mutex}, fmt::Display};
 
 use prelude::Source;
 
-use crate::{func::FuncSig, structdef::StructDef, class::ClassDef, protocol::ProtocolDef, enumdef::EnumDef};
+use crate::{func::FuncSig, structdef::StructDef, class::ClassDef, protocol::ProtocolDef, enumdef::EnumDef, Symbol};
 
 #[derive(Clone)]
 pub enum TypeKind {
@@ -19,7 +19,7 @@ pub enum TypeKind {
 	Func(Box<FuncSig>),
 
 	/// A type respresenting a struct
-	StructRef(Arc<Mutex<StructDef>>),
+	StructRef(Arc<StructDef>),
 
 	/// A type representing a class
 	ClassRef(Arc<Mutex<ClassDef>>),
@@ -36,7 +36,15 @@ pub enum TypeKind {
 	/// A type inference context
 	Infer(u64),
 
-	Diverging
+	Diverging,
+
+	Type(Box<TypeKind>)
+}
+
+impl TypeKind {
+	pub fn anon(self) -> Type {
+		Type::new_anon(self)
+	}
 }
 
 #[derive(Clone)]
@@ -60,6 +68,20 @@ impl Type {
 
 	pub fn kind_mut(&mut self) -> &mut TypeKind {
 		&mut self.kind
+	}
+
+	pub fn lookup_static_member(&self, name: &String) -> Option<Symbol> {
+		match self.kind() {
+			TypeKind::StructRef(r#struct) => r#struct.lookup_static_member(name),
+			_ => None,
+		}
+	}
+
+	pub fn lookup_instance_member(&self, name: &String) -> Option<Symbol> {
+		match self.kind() {
+			TypeKind::StructRef(r#struct) => r#struct.lookup_instance_member(name),
+			_ => None,
+		}
 	}
 }
 
@@ -97,7 +119,7 @@ impl Display for TypeKind {
 			}
 
 			Self::StructRef(r#struct) => {
-				write!(f, "struct")
+				write!(f, "struct {}", r#struct.name())
 			}
 
 			Self::ClassRef(r#class) => {
@@ -112,7 +134,11 @@ impl Display for TypeKind {
 				write!(f, "protocol")
 			}
 
-			Self::Diverging => write!(f, "!")
+			Self::Diverging => write!(f, "!"),
+
+			Self::Type(ty) => {
+				write!(f, "<{ty}>")
+			}
 		}
     }
 }

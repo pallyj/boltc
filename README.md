@@ -6,8 +6,85 @@ Bolt is a powerful coding language designed for expressiveness and speed. Bolt c
 
 ## Development
 
-The current version is Bolt 0.1.0. Bolt 0.1.0 has support for
+### Bolt 1.0
 
-- Integer intrinsics
-- Functions
-- Lexer and parser errors
+- Fix bugs
+- Release-optimized code
+- Finalized version 1.0 of lang and intrinsics
+
+### Bolt 0.14
+
+- Iterators
+- For loop
+
+### Bolt 0.13
+
+- Generics
+
+### Bolt 0.12
+
+- Dataflow operators
+
+### Bolt 0.11
+
+- C interop
+- Better frontend
+
+### Bolt 0.10
+
+- Syntactic sugar for options/results
+- Strings
+
+### Bolt 0.9
+
+- Lang library
+- Project manager
+
+### Bolt 0.8
+
+- Classes
+- Protocols
+
+### Bolt 0.7
+
+- Mutable variables
+- Loops
+- Catch/Guard
+
+### Bolt 0.6
+
+- Patterns
+- Match
+
+### Bolt 0.5
+
+- Rewrite type inference
+- Enums
+
+### Bolt 0.4
+
+- Typed code blocks
+- Operators
+- Polymorphism
+
+### Bolt 0.3
+
+- Rewrite parser, lexer, and AST
+- Type checking
+- New lower level IR
+
+### Bolt 0.2
+
+- Floating point types
+- Boolean functions
+- Name mangling
+- Structs
+- Methods
+- External functions
+
+### Bolt 0.1
+
+- Integer types
+- Type interference
+- Function calls
+- Compiles to LLVM

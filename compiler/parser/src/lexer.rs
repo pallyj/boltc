@@ -27,12 +27,11 @@ pub (crate) const SYMBOLS: [char; 11] = [
 	'`', '@'
 ];
 
-pub (crate) const KEYWORDS: [&str; 41] = [
+pub (crate) const KEYWORDS: [&str; 40] = [
 	"struct",
 	"class",
 	"enum",
 	"case",
-	"union",
 	"protocol",
 	"extension",
 	"import",
@@ -126,7 +125,28 @@ impl<'a> Lexer<'a> {
 		} else if c.is_whitespace() {
 			self.whitespaces.insert(self.iter.index());
 			return None
-		} else if c.is_decimal_digit() {
+		} else if c == '0' {
+			return match self.iter.peek() {
+				Some('x') => {
+					self.iter.advance();
+					Some(self.lex_base_number(16))
+				}
+				Some('o') => {
+					self.iter.advance();
+					Some(self.lex_base_number(8))
+				}
+				Some('b') => {
+					self.iter.advance();
+					Some(self.lex_base_number(2))
+				}
+				Some(c) if c.is_decimal_digit() => {
+					Some(self.lex_number('0'))
+				}
+				_ => {
+					Some(Token::IntLit(0))
+				}
+			}
+		}  else if c.is_decimal_digit() {
 			return Some(self.lex_number(c))
 		} else if c == '/' {
 			return match self.iter.peek() {
@@ -181,20 +201,55 @@ impl<'a> Lexer<'a> {
 		None
 	}
 
+	pub (crate) fn lex_base_number(&mut self, base: u32) -> Token {
+		let mut acc = 0;
+	
+		self.iter.advance_while(|c| {
+			c.to_digit(base)
+				.map(|digit| {
+					acc = acc * (base as u64) + u64::from(digit)
+				}).is_some()
+		});
+
+		Token::IntLit(acc)
+	}
+
 	pub (crate) fn lex_number(&mut self, first_digit: char) -> Token {
 		let mut acc = first_digit.to_digit(10).unwrap() as u64;
 	
 		self.iter.advance_while(|c| {
-			if let Some(digit) = c.to_digit(10) {
-				acc *= 10;
-				acc += u64::from(digit);
-				true
-			} else {
-				false
-			}
+			c.to_digit(10)
+				.map(|digit| {
+					acc = acc * 10 + u64::from(digit)
+				}).is_some()
 		});
 	
-		Token::IntLit(acc)
+		self.lex_float(acc)
+	}
+
+	pub (crate) fn lex_float(&mut self, number: u64) -> Token {
+		if self.iter.advance_if(|c| c == '.').is_some() {
+			if !is_ident_head(self.iter.peek().unwrap_or('0')) {
+				if self.iter.peek().unwrap_or(' ').is_decimal_digit() {
+					let mut denominator = 0.0;
+					let mut i = 0.1;
+
+					self.iter.advance_while(|c| {
+						c.to_digit(10)
+							.map(|digit| {
+								denominator += f64::from(digit) * i;
+								i /= 10.;
+							}).is_some()
+					});
+
+					return Token::FloatLit(number as f64 + denominator)
+				} else {
+					return Token::FloatLit(number as f64)
+				}
+			}
+		}
+
+		return Token::IntLit(number)
 	}
 }
 

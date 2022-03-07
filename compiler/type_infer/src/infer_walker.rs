@@ -1,6 +1,6 @@
 use std::{sync::{Mutex, Arc, MutexGuard}};
 
-use blir::{Walker, TypeKind, ExprKind, Scope, StatementKind, Library, Type};
+use blir::{Walker, TypeKind, ExprKind, Scope, StatementKind, Library, Type, StructDef, MethodDef};
 
 use crate::{TypeInferenceCtx, constraint::Constraint};
 
@@ -10,29 +10,52 @@ pub struct InferWalker {
 
 impl Walker for InferWalker {
     type ChildWalker = blir::ChildWalker<Self>;
-	type Context = Arc<dyn Scope>;
 
-    fn walk_function(&self, func: &Arc<blir::FuncDef>, scope: &Self::Context) {
+    fn walk_library(&self, library: &Arc<Library>) {
+		for r#struct in library.structs().iter() {
+            let parent = r#struct.parent().unwrap();
+
+            self.walk_struct(&r#struct, &parent);
+        }
+
+		for func in library.funcs().iter() {
+			let parent = func.parent();
+
+			self.walk_function(&func, &parent);
+		}
+	}
+
+    fn walk_function(&self, func: &Arc<blir::FuncDef>, _scope: &Arc<dyn Scope>) {
 		let func_scope: Arc<dyn Scope> = func.clone();
 
         self.walk_code_block(&mut func.code(), &func_scope);
     }
 
-    fn walk_struct(&self, r#struct: &mut blir::StructDef, scope: &Self::Context) {
-        //Self::ChildWalker::walk_struct(self, r#struct, scope)
-    }
-
-    fn walk_method(&self, method: &mut blir::MethodDef, scope: &Self::Context) {
+    fn walk_extern_function(&self, func: &Arc<blir::ExternFuncDef>, scope: &Arc<dyn Scope>) {
         todo!()
     }
 
-    fn walk_code_block(&self, code_block: &mut blir::CodeBlock, scope: &Self::Context) {
+    fn walk_variable(&self, variable: &Arc<blir::VariableDef>, scope: &Arc<dyn Scope>) {
+		self.walk_type(&mut variable.typ(), scope) 
+    }
+
+    fn walk_struct(&self, r#struct: &Arc<StructDef>, scope: &Arc<dyn Scope>) {
+        Self::ChildWalker::walk_struct(self, r#struct, scope)
+    }
+
+    fn walk_method(&self, method: &Arc<MethodDef>, _scope: &Arc<dyn Scope>) {
+        let func_scope: Arc<dyn Scope> = method.clone();
+
+        self.walk_code_block(&mut method.code(), &func_scope);
+    }
+
+    fn walk_code_block(&self, code_block: &mut blir::CodeBlock, scope: &Arc<dyn Scope>) {
         for smt in code_block.statements_mut().iter_mut().rev() {
 			self.walk_statement(&mut smt.0, scope)
 		}
     }
 
-    fn walk_statement(&self, smt: &mut blir::Statement, scope: &Self::Context) {
+    fn walk_statement(&self, smt: &mut blir::Statement, scope: &Arc<dyn Scope>) {
         match smt.kind_mut() {
 			StatementKind::Eval(e) => self.walk_expr(e, scope),
 
@@ -89,7 +112,7 @@ impl Walker for InferWalker {
 		}
     }
 
-    fn walk_expr(&self, expr: &mut blir::Expr, scope: &Self::Context) {
+    fn walk_expr(&self, expr: &mut blir::Expr, scope: &Arc<dyn Scope>) {
 		Self::ChildWalker::walk_expr(self, expr, scope);
 
 		let TypeKind::Infer(infer_ctx) = expr.typ_ref().kind() else {
@@ -144,13 +167,25 @@ impl Walker for InferWalker {
 				constraint = Some(Constraint::Absolute(sig.return_type().clone()))
 			}
 
+			ExprKind::ExternFunction(def) => {
+				let sig = def.signature();
+
+				*expr.typ_mut() = Type::new_anon(TypeKind::Func(Box::new(sig)));
+			}
+
 			ExprKind::Function(def) => {
 				let sig = def.signature();
 
 				*expr.typ_mut() = Type::new_anon(TypeKind::Func(Box::new(sig)));
 			}
 
-			ExprKind::Select { branches, finally } => {
+			ExprKind::StaticMethod(def) => {
+				let sig = def.signature();
+
+				*expr.typ_mut() = Type::new_anon(TypeKind::Func(Box::new(sig)));
+			}
+
+			ExprKind::Select { branches: _branches, finally: _finally } => {
 				*expr.typ_mut() = Type::new_anon(TypeKind::Unit);
 			}
 
@@ -165,17 +200,9 @@ impl Walker for InferWalker {
 		}
     }
 
-    fn walk_type(&self, typ: &mut blir::Type, scope: &Self::Context) {
+    fn walk_type(&self, typ: &mut blir::Type, scope: &Arc<dyn Scope>) {
         Self::ChildWalker::walk_type(self, typ, scope)
     }
-
-    fn walk_library(&self, library: &Arc<Library>) {
-		for func in library.funcs().iter() {
-			let parent = func.parent();
-
-			self.walk_function(&func, &parent);
-		}
-	}
 }
 
 impl InferWalker {
@@ -197,9 +224,21 @@ pub struct ReplacementWalker {
 }
 
 impl Walker for ReplacementWalker {
-	type Context = dyn Scope;
+    fn walk_library(&self, library: &Arc<Library>) {
+		for r#struct in library.structs().iter() {
+            let parent = r#struct.parent().unwrap();
 
-    fn walk_function(&self, func: &Arc<blir::FuncDef>, scope: &Self::Context) {
+            self.walk_struct(&r#struct, &parent);
+        }
+
+		for func in library.funcs().iter() {
+			let parent = func.parent();
+
+			self.walk_function(&func, &parent);
+		}
+	}
+
+    fn walk_function(&self, func: &Arc<blir::FuncDef>, scope: &Arc<dyn Scope>) {
         for t in func.params().iter_mut() {
             self.walk_type(t.typ_mut(), scope);
         }
@@ -207,24 +246,37 @@ impl Walker for ReplacementWalker {
 
 		let func_scope: Arc<dyn Scope> = func.clone();
 
-        self.walk_code_block(&mut func.code(), func_scope.as_ref());
+        self.walk_code_block(&mut func.code(), &func_scope);
     }
 
-    fn walk_struct<'a>(&'a self, r#struct: &mut blir::StructDef, scope: &'a Self::Context) {
-        //Self::ChildWalker::walk_struct(self, r#struct, scope)
+    fn walk_variable(&self, variable: &Arc<blir::VariableDef>, scope: &Arc<dyn Scope>) {
+        self.walk_type(&mut variable.typ(), scope) 
     }
 
-    fn walk_method(&self, method: &mut blir::MethodDef, scope: &Self::Context) {
-        todo!()
+    fn walk_struct<'a>(&'a self, r#struct: &Arc<StructDef>, scope: &'a Arc<dyn Scope>) {
+        Self::ChildWalker::walk_struct(self, r#struct, scope)
     }
 
-    fn walk_code_block(&self, code_block: &mut blir::CodeBlock, scope: &Self::Context) {
+    fn walk_method(&self, method: &Arc<MethodDef>, scope: &Arc<dyn Scope>) {
+        for t in method.params().iter_mut() {
+            self.walk_type(t.typ_mut(), scope);
+        }
+        self.walk_type(&mut method.return_type(), scope);
+
+		let func_scope: Arc<dyn Scope> = method.clone();
+
+        self.walk_code_block(&mut method.code(), &func_scope);
+    }
+
+    type ChildWalker = blir::ChildWalker<Self>;
+
+    fn walk_code_block(&self, code_block: &mut blir::CodeBlock, scope: &Arc<dyn Scope>) {
 		for smt in code_block.statements_mut() {
             self.walk_statement(&mut smt.0, scope);
         }
     }
 
-    fn walk_statement(&self, smt: &mut blir::Statement, scope: &Self::Context) {
+    fn walk_statement(&self, smt: &mut blir::Statement, scope: &Arc<dyn Scope>) {
         match smt.kind_mut() {
             StatementKind::Eval(ref mut expr) => self.walk_expr(expr, scope),
             StatementKind::Return { ref mut value } => {
@@ -249,15 +301,13 @@ impl Walker for ReplacementWalker {
         }
     }
 
-    type ChildWalker = blir::ChildWalker<Self>;
-
-    fn walk_expr<'a>(&'a self, expr: &mut blir::Expr, scope: &'a Self::Context) {
+    fn walk_expr<'a>(&'a self, expr: &mut blir::Expr, scope: &'a Arc<dyn Scope>) {
         Self::ChildWalker::walk_expr(self, expr, scope);
 
 		self.walk_type(expr.typ_mut(), scope);
     }
 
-    fn walk_type<'a>(&'a self, typ: &mut blir::Type, scope: &'a Self::Context) {
+    fn walk_type<'a>(&'a self, typ: &mut blir::Type, scope: &'a Arc<dyn Scope>) {
 		Self::ChildWalker::walk_type(self, typ, scope);
 
 		match typ.kind_mut() {
@@ -271,13 +321,9 @@ impl Walker for ReplacementWalker {
 		}
     }
 
-    fn walk_library(&self, library: &Arc<Library>) {
-		for func in library.funcs().iter() {
-			let parent = func.parent();
-
-			self.walk_function(&func, parent.as_ref());
-		}
-	}
+    fn walk_extern_function(&self, func: &Arc<blir::ExternFuncDef>, scope: &Arc<dyn Scope>) {
+        todo!()
+    }
 }
 
 impl ReplacementWalker {
