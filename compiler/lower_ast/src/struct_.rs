@@ -1,46 +1,50 @@
-use std::{collections::HashSet, sync::{Arc, Mutex}};
+use std::sync::Arc;
 
 use prelude::*;
 use bolt_ast::{
 	Struct as AstStruct, StructItem
 };
 use blir::{
-	StructDef as BlirStruct
+	StructDef as BlirStruct, Scope
 };
+
+use crate::{lower_method, lower_var};
 
 ///
 ///  Lowers the abstract syntax tree of a struct into Bolt IR
 /// 
-pub fn lower_struct(r#struct: WithSource<AstStruct>) -> Try<Arc<Mutex<BlirStruct>>, ()> {
+pub fn lower_struct(r#struct: WithSource<AstStruct>, scope: &Arc<dyn Scope>) -> Try<Arc<BlirStruct>, ()> {
 	let (r#struct, source) = r#struct.unwrap();
 
 	let visibility = lower_visibility(r#struct.visibility().clone());
 	let name = r#struct.name().clone();
 
-	let ir_struct = BlirStruct::new(visibility, name.unwrap_or("".to_string()), source);
-
-	let mut ir_struct_view = ir_struct.lock().unwrap();
-
-	// TODO: Move this into BlirStruct and add a symbol field
-	let mut symbols = HashSet::new();
+	let ir_struct = BlirStruct::new(scope, visibility, name.unwrap_or("".to_string()), source);
+	let struct_scope: Arc<dyn Scope> = ir_struct.clone();
 
 	for struct_item in r#struct.into_items() {
 		let (struct_item, source) = struct_item.unwrap();
 
 		match struct_item {
 			StructItem::SubStruct(substruct) => {
-				let ir_substruct = require!(lower_struct(substruct.with_source(source)));
+				let ir_substruct = require!(lower_struct(substruct.with_source(source), &struct_scope));
 
-				{
-					let ir_substruct_view = ir_substruct.lock().unwrap();
-
-					// Move this into add_substruct
-					let substruct_name = ir_substruct_view.name().clone();
-					symbols.insert(substruct_name);
-				}
-
-				if let Err(err) = ir_struct_view.add_substruct(ir_substruct) {
+				if let Err(_err) = ir_struct.add_substruct(ir_substruct) {
 					//error_ctx.raise(err);
+				}
+			}
+			StructItem::Method(method) => {
+				let ir_method = require!(lower_method(method.with_source(source), &struct_scope));
+
+				if let Err(_err) = ir_struct.add_method(ir_method) {
+					// error_ctx.raise(err);
+				}
+			}
+			StructItem::Variable(var) => {
+				let ir_var = require!(lower_var(var.with_source(source), &struct_scope));
+
+				if let Err(_err) = ir_struct.add_variable(ir_var) {
+					// error_ctx.raise(err);
 				}
 			}
 			_ => {
@@ -49,7 +53,6 @@ pub fn lower_struct(r#struct: WithSource<AstStruct>) -> Try<Arc<Mutex<BlirStruct
 		}
 	}
 
-	drop(ir_struct_view);
 
 	return Try::Some(ir_struct)
 }

@@ -39,7 +39,7 @@ impl Parse for Case {
     type Output = Vec<WithSource<EnumVariant>>;
 
     fn parse(parser: &mut crate::Parser, ctx: &Context) -> Try<prelude::WithSource<Self::Output>, prelude::WithSource<crate::ParseError>> {
-        let Some(start) = parser.consume_if_equal(Token::Keyword("case".to_string())) else {
+        let Some(_start) = parser.consume_if_equal(Token::Keyword("case".to_string())) else {
 			// error
 			let (t, s) = parser.peek().clone().unwrap();
 
@@ -48,7 +48,7 @@ impl Parse for Case {
 
 		let variants = require!(Csl::<EnumVariant>::parse(parser, ctx));
 
-		let source = start.until(parser.last_source());
+		let _source = _start.until(parser.last_source());
 
 		Try::Some(variants)
     }

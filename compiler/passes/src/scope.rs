@@ -1,6 +1,6 @@
 use std::{sync::{Weak, Mutex, Arc}, collections::HashMap};
 
-use blir::{Scope, ScopeKind, Symbol, SymbolKind, Visibility, TypeKind};
+use blir::{Scope, Symbol, SymbolKind, Visibility, TypeKind};
 
 pub struct CodeBlockScope {
 	parent: Weak<dyn Scope>,
@@ -19,16 +19,12 @@ impl CodeBlockScope {
 }
 
 impl Scope for CodeBlockScope {
-    fn parent(&self) -> Option<&dyn Scope> {
-		None
+    fn parent(&self) -> Option<Arc<dyn Scope>> {
+		self.parent.upgrade()
     }
 
     fn name(&self) -> &str {
         "code_block"
-    }
-
-    fn kind(&self) -> blir::ScopeKind {
-        ScopeKind::IfBlock
     }
 
     fn lookup_symbol(&self, name: &String) -> Option<blir::Symbol> {
@@ -55,5 +51,9 @@ impl Scope for CodeBlockScope {
 
     fn take_index(&self) -> u64 {
         self.parent.upgrade().unwrap().take_index()
+    }
+
+    fn symbol(&self) -> mangle::symbol::Symbol {
+        self.parent().unwrap().symbol()
     }
 }

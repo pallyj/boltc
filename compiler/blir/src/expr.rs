@@ -2,7 +2,7 @@ use std::{sync::{Arc}, fmt::Display};
 
 use prelude::Source;
 
-use crate::{typ::Type, func::FuncDef, CodeBlock};
+use crate::{typ::Type, func::FuncDef, CodeBlock, MethodDef, ExternFuncDef, VariableDef};
 
 #[derive(Clone)]
 pub enum ExprKind {
@@ -34,8 +34,12 @@ pub enum ExprKind {
 		reciever: Box<Expr>,
 	},
 	/// A static method
-	StaticMethod {
-		of: Type
+	StaticMethod(Arc<MethodDef>),
+	ExternFunction(Arc<ExternFuncDef>),
+
+	InstanceVariable {
+		instance: Box<Expr>,
+		variable: Arc<VariableDef>
 	},
 
 	/// Index into a type
@@ -57,6 +61,8 @@ pub enum ExprKind {
 
 	FunctionParameter(usize),
 	LocalVariable(String),
+
+	Type(Type),
 
 	None,
 }
@@ -224,6 +230,13 @@ impl Display for ExprKind {
 				write!(f, "{}", func.name())
 			}
 
+			Self::StaticMethod(func) => {
+				write!(f, "{}", func.name())
+			}
+			Self::ExternFunction(func) => {
+				write!(f, "{}", func.name())
+			}
+
 			Self::Select { branches, finally } => {
 				writeln!(f, "select {{")?;
 				for branch in branches {
@@ -237,6 +250,9 @@ impl Display for ExprKind {
 
 			Self::FunctionParameter(idx) => write!(f, "%par{idx}"),
 			Self::LocalVariable(var) => write!(f, "%{var}"),
+
+			Self::Member (par, member) => write!(f, "{par}.{member}"),
+			Self::Type(ty) => write!(f, "{ty}"),
 
 			_ => write!(f, "unknown")
 		}

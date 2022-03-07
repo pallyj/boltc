@@ -15,7 +15,7 @@ pub struct Func {
 
 	return_type: Option<WithSource<Type>>,
 
-	code: WithSource<CodeBlock>
+	code: Option<WithSource<CodeBlock>>,
 }
 
 impl Func {
@@ -26,7 +26,18 @@ impl Func {
 			name,
 			pars,
 			return_type,
-			code
+			code: Some(code),
+		}
+	}
+
+	pub fn new_extern(name: Option<String>, pars: Vec<WithSource<FuncPar>>, return_type: Option<WithSource<Type>>) -> Func {
+		Func {
+			attributes: vec![],
+			visibility: None,
+			name,
+			pars,
+			return_type,
+			code: None,
 		}
 	}
 
@@ -40,8 +51,8 @@ impl Func {
 		self
 	}
 
-	pub fn code(&self) -> &CodeBlock {
-		self.code.value()
+	pub fn code(&self) -> Option<&CodeBlock> {
+		self.code.as_ref().map(|code| code.value())
 	}
 
 	pub fn node(&self) -> AstNode {
@@ -51,7 +62,9 @@ impl Func {
 		node.fold("visibility", &self.visibility);
 		node.fold("return-type", &self.return_type);
 
-		self.code.value().nodes(&mut node);
+		self.code
+			.as_ref()
+			.map(|code| code.value().nodes(&mut node));
 
 		node
 	}

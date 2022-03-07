@@ -1,12 +1,14 @@
 use std::{sync::{Weak, Arc, Mutex, MutexGuard, atomic::{AtomicU64, Ordering}}, fmt::Display};
 use prelude::*;
-use crate::{typ::Type, CodeBlock, Scope, ScopeKind, Symbol, SymbolKind, Expr, ExprKind, Visibility, TypeKind};
+use crate::{typ::Type, CodeBlock, Scope, Symbol, SymbolKind, Expr, ExprKind, Visibility, TypeKind};
 
 pub struct FuncDef {
 	// TODO: Add attributes
 
 	/// The name of the function
 	name: String,
+
+	link_name: Mutex<String>,
 
 	// TODO: Add generic parameters
 
@@ -39,7 +41,8 @@ impl FuncDef {
 	pub fn new(name: String, parameters: Vec<FuncParam>, return_type: Type, code: CodeBlock, parent: &Arc<dyn Scope>) -> Arc<FuncDef> {
 		Arc::new(
 			FuncDef {
-				name,
+				name: name.clone(),
+				link_name: Mutex::new(name),
 
 				parameters: Mutex::new(parameters),
 				return_type: Mutex::new(return_type),
@@ -66,6 +69,18 @@ impl FuncDef {
 	/// 
 	pub fn name(&self) -> &String {
 		&self.name
+	}
+
+	pub fn link_name(&self) -> MutexGuard<String> {
+		self.link_name
+			.lock()
+			.unwrap()
+	}
+
+	pub fn set_link_name(&self, link_name: String) {
+		*self.link_name
+			.lock()
+			.unwrap() = link_name
 	}
 
 	/// 
@@ -96,17 +111,19 @@ impl FuncDef {
 }
 
 impl Scope for FuncDef {
-    fn parent(&self) -> Option<&dyn Scope> {
-		None
+    fn parent(&self) -> Option<Arc<dyn Scope>> {
+		self.parent.upgrade()
     }
 
     fn name(&self) -> &str {
         self.name.as_str()
     }
 
-    fn kind(&self) -> crate::ScopeKind {
-        ScopeKind::Function
-    }
+    fn symbol(&self) -> mangle::symbol::Symbol {
+		self.parent()
+			.symbol()
+			.append(mangle::symbol::SymbolKind::Function(self.name().clone()))
+	}
 
     fn lookup_symbol(&self, name: &String) -> Option<crate::Symbol> {
         for (i, param) in self.params().iter().enumerate() {
@@ -122,7 +139,7 @@ impl Scope for FuncDef {
 		self.parent().lookup_symbol(name)
     }
 
-    fn define_expr(&self, name: String, value: Expr) {
+    fn define_expr(&self, _name: String, _value: Expr) {
         todo!()
     }
 
@@ -161,6 +178,14 @@ impl FuncParam {
 
 	pub fn typ_mut(&mut self) -> &mut Type {
 		&mut self.typ
+	}
+
+	pub fn bind_name(&self) -> &String {
+		&self.bind_name
+	}
+
+	pub fn label(&self) -> Option<&String> {
+		self.label.as_ref()
 	}
 }
 
@@ -229,4 +254,101 @@ impl Display for FuncDef {
 
 		write!(f, "}}")
     }
+}
+
+pub struct ExternFuncDef {
+	// TODO: Add attributes
+
+	/// The name of the function
+	name: String,
+
+	link_name: Mutex<String>,
+
+	// TODO: Add generic parameters
+
+	/// Parameters to the function
+	parameters: Mutex<Vec<FuncParam>>,
+
+	/// The type this function returns
+	return_type: Mutex<Type>,
+
+	/// The source code defining the function
+	source: Option<Source>,
+
+	/// The scope the function is defined in
+	parent: Weak<dyn Scope>,
+}
+
+impl ExternFuncDef {
+	/// 
+	/// Creates a new FuncDef in `library` named `name` accepting parameters `parameters`, and returning `return_type`
+	/// 
+	/// # Example
+	/// 
+	/// let lib = Library::new("FooBar");
+	/// let foo: Arc<Mutex<FuncDef>> = FuncDef::new("foo".to_string(), vec![], Type::Unit, &lib);
+	/// 
+	pub fn new(name: String, parameters: Vec<FuncParam>, return_type: Type, parent: &Arc<dyn Scope>) -> Arc<ExternFuncDef> {
+		Arc::new(
+			ExternFuncDef {
+				name: name.clone(),
+				link_name: Mutex::new(name),
+
+				parameters: Mutex::new(parameters),
+				return_type: Mutex::new(return_type),
+
+				source: None,
+				parent: Arc::downgrade(parent),
+			}
+		)
+	}
+
+	/// 
+	/// Sets the source of the function in source code
+	/// 
+	pub fn set_source(&mut self, source: Source) {
+		self.source = Some(source)
+	}
+
+	///
+	/// The function's name
+	/// 
+	pub fn name(&self) -> &String {
+		&self.name
+	}
+
+	pub fn link_name(&self) -> MutexGuard<String> {
+		self.link_name
+			.lock()
+			.unwrap()
+	}
+
+	pub fn set_link_name(&self, link_name: String) {
+		*self.link_name
+			.lock()
+			.unwrap() = link_name
+	}
+
+	/// 
+	/// The function's parameters
+	/// 
+	pub fn params(&self) -> MutexGuard<Vec<FuncParam>> {
+		self.parameters.lock().unwrap()
+	}
+
+	///
+	/// The function's return type
+	/// 
+	pub fn return_type(&self) -> MutexGuard<Type> {
+		self.return_type.lock().unwrap()
+	}
+
+
+	pub fn signature(&self) -> FuncSig {
+		FuncSig::new(self.parameters.lock().unwrap().iter().map(|par| par.typ.clone()).collect(), self.return_type.lock().unwrap().clone())
+	}
+
+	pub fn parent(&self) -> Arc<dyn Scope> {
+		self.parent.upgrade().unwrap()
+	}
 }

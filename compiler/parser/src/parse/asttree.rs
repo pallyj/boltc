@@ -1,4 +1,4 @@
-use std::{sync::Arc, fmt::Display};
+use std::{sync::Arc};
 
 use bolt_ast::{Decl, AstNode};
 use prelude::{SourceFile, WithSource, Try};

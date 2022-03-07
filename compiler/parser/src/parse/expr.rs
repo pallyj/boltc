@@ -160,6 +160,7 @@ fn expression_atom(parser: &mut super::Parser, ctx: &Context, before_brace: bool
 		return Try::Some(Expression::Variant(ident).with_source(source));
 	}
 	// Check for a function
+	
 	// Check for an list or a record literal
 	else if let Ok(items) = into_result!(BracketedCsl::<MultipleLiteralItem>::parse(parser, ctx)) {
 		let is_collection = items.value().iter().all(|i| i.value().is_collection());

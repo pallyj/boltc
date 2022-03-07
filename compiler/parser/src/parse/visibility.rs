@@ -6,7 +6,7 @@ use crate::{Parse, Token, ParseError, Context};
 impl Parse for Visibility {
     type Output = Self;
 
-    fn parse(parser: &mut crate::Parser, ctx: &Context) -> Try<WithSource<Self::Output>, WithSource<crate::ParseError>> {
+    fn parse(parser: &mut crate::Parser, _ctx: &Context) -> Try<WithSource<Self::Output>, WithSource<crate::ParseError>> {
         let (t, s) = parser.peek().clone().unwrap();
 
 		match t {

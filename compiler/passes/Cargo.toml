@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 prelude = { path = "../../tools/prelude" }
 blir = { path = "../blir" }
-rand = "0.8.4"
+mangle = { path = "../mangle" }
+type_infer = { path = "../type_infer" }

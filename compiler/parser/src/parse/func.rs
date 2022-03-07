@@ -27,11 +27,15 @@ impl Parse for Func {
 			None
 		};
 
-		let code = require!(Braced::<CodeBlock>::parse(parser, ctx));
+		let code = into_result!(Braced::<CodeBlock>::parse(parser, ctx)).ok();
 
-		let end_span = parser.last_source();
+		let span = start_span.until(parser.last_source());
 
-		return Try::Some(Func::new(name, pars, return_typ, code).with_source(start_span.until(end_span)));
+		if let Some(code) = code {
+			return Try::Some(Func::new(name, pars, return_typ, code).with_source(span));
+		} else {
+			return Try::Some(Func::new_extern(name, pars, return_typ).with_source(span));
+		}
     }
 }
 

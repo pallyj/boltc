@@ -49,7 +49,7 @@ impl TypeInferenceCtx {
         self.atoms.get_mut(&ctx).unwrap()
     }
 
-    pub fn collect(&mut self) {
+    fn collect(&mut self) {
         for i in 0..self.constraints.len() {
             let constraint = self.constraints[i].clone();
 
@@ -79,6 +79,8 @@ impl TypeInferenceCtx {
     }
 
     pub fn solve(&mut self) {
+        self.collect();
+
         self
             .atoms
             .retain(|ctx_num, atom| {
@@ -93,6 +95,11 @@ impl TypeInferenceCtx {
     
                         self.solved.insert(*ctx_num, sug.clone());
                         false
+                    } else if atom.is_float {
+                        // Check if its a float
+
+                        self.solved.insert(*ctx_num, sug.clone());
+                        false
                     } else {
                         true
                     }
@@ -101,6 +108,11 @@ impl TypeInferenceCtx {
                         // Set it to the default integer type
     
                         self.solved.insert(*ctx_num, Type::new_anon(TypeKind::Intrinsic("i64".to_string())));
+                        false
+                    } else if atom.is_float {
+                        // Set it to the default integer type
+    
+                        self.solved.insert(*ctx_num, Type::new_anon(TypeKind::Intrinsic("f32".to_string())));
                         false
                     } else {
                         true

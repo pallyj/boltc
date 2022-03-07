@@ -6,7 +6,7 @@ use crate::{Parse, ParseError, Token, Context};
 impl Parse for Import {
     type Output = Self;
 
-    fn parse(parser: &mut crate::Parser, ctx: &Context) -> Try<WithSource<Self::Output>, WithSource<crate::ParseError>> {
+    fn parse(parser: &mut crate::Parser, _ctx: &Context) -> Try<WithSource<Self::Output>, WithSource<crate::ParseError>> {
         let Some(start_span) = parser.consume_if_equal(Token::Keyword("import".to_string())) else {
 			let (t, s) = parser.peek().clone().unwrap();
 			return Try::None(ParseError::ExpectedImport(t).with_source(s))

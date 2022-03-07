@@ -1,11 +1,11 @@
 use std::sync::{Arc, Mutex, Weak};
 
-use crate::{Scope, Library, Intrinsics, ScopeKind, Metadata, TypeKind};
+use crate::{Scope, Library, Intrinsics, Metadata, TypeKind};
 
 pub struct FileScope {
 	imports: Mutex<Vec<Arc<dyn Scope>>>,
 	library: Weak<Library>,
-	metadata: Metadata,
+	_metadata: Metadata,
 }
 
 impl FileScope {
@@ -14,7 +14,7 @@ impl FileScope {
 			FileScope {
 				imports: Mutex::new(vec![]),
 				library: Arc::downgrade(library),
-				metadata: Metadata::new(),
+				_metadata: Metadata::new(),
 			}
 		)
 	}
@@ -47,16 +47,18 @@ impl FileScope {
 }
 
 impl Scope for FileScope {
-    fn parent(&self) -> Option<&dyn Scope> {
-        None
+    fn parent(&self) -> Option<Arc<dyn Scope>> {
+        let scope: Arc<dyn Scope> = self.library.upgrade().unwrap();
+
+		Some(scope)
     }
 
     fn name(&self) -> &str {
         ""
     }
 
-    fn kind(&self) -> crate::ScopeKind {
-        ScopeKind::Library
+	fn symbol(&self) -> mangle::symbol::Symbol {
+        self.parent().unwrap().symbol()
     }
 
     fn lookup_symbol(&self, name: &String) -> Option<crate::Symbol> {
@@ -73,11 +75,11 @@ impl Scope for FileScope {
 		}
     }
 
-    fn define_expr(&self, name: String, value: crate::Expr) {
+    fn define_expr(&self, _name: String, _value: crate::Expr) {
         todo!()
     }
 
-	fn scoped_type(&self, name: &str) -> Option<TypeKind> {
+	fn scoped_type(&self, _name: &str) -> Option<TypeKind> {
 		None
 	}
 

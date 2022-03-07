@@ -71,6 +71,18 @@ impl Var {
 		}
 	}
 
+	pub fn name(&self) -> &String {
+		return &self.name
+	}
+
+	pub fn typ(&self) -> Option<&WithSource<Type>> {
+		self.typ.as_ref()
+	}
+
+	pub fn default_value(&self) -> Option<&WithSource<Expression>> {
+		self.value.as_ref()
+	}
+
 	pub fn with_attributes(mut self, attrs: Vec<WithSource<Attribute>>) -> Self {
 		self.attributes = attrs;
 		self
