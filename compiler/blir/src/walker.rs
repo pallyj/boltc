@@ -73,6 +73,9 @@ impl<T: Walker> ChildWalker<T> {
 			ExprKind::Member(par, _) => {
 				walker.walk_expr(&mut *par, scope);
 			}
+			ExprKind::Method { method: _, reciever } => {
+				walker.walk_expr(&mut *reciever, scope);
+			}
 			_ => {}
 		}
 	}

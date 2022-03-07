@@ -14,7 +14,7 @@ pub struct Struct {
 
 	implements: Vec<WithSource<Type>>,
 
-	items: Vec<WithSource<StructItem>>,	
+	items: Vec<WithSource<StructItem>>,
 }
 
 #[derive(Debug, Clone)]

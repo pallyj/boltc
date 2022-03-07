@@ -102,16 +102,29 @@ impl StructDef {
 			.unwrap()
 			.push(method.clone());
 
-		let method_sym = Symbol::new(SymbolKind::StaticMethod(method), visibility);
+		if method.is_static() {
+			let method_sym = Symbol::new(SymbolKind::StaticMethod(method), visibility);
 
-		if self.static_symbols
-			.lock()
-			.unwrap()
-			.insert(name, method_sym).is_some() {
-				Err(())
-			} else {
-				Ok(())
-			}
+			if self.static_symbols
+				.lock()
+				.unwrap()
+				.insert(name, method_sym).is_some() {
+					Err(())
+				} else {
+					Ok(())
+				}
+		} else {
+			let method_sym = Symbol::new(SymbolKind::InstanceMethod(method), visibility);
+
+			if self.instance_symbols
+				.lock()
+				.unwrap()
+				.insert(name, method_sym).is_some() {
+					Err(())
+				} else {
+					Ok(())
+				}
+		}
 	}
 
 	pub fn add_variable(&self, variable: Arc<VariableDef>) -> Result<(), ()> {

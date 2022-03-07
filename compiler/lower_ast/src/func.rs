@@ -96,5 +96,5 @@ pub fn lower_method(func: WithSource<AstFunc>, scope: &Arc<dyn Scope>) -> Try<Ar
 
 	let code = require!(lower_code_block(func.code().unwrap().clone()));
 
-	Try::Some(MethodDef::new(name, parameters, return_type, code, scope))
+	Try::Some(MethodDef::new(func.is_static(), func.is_mutating(), name, parameters, return_type, code, scope))
 }

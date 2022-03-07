@@ -7,7 +7,11 @@ use crate::{Attribute, Visibility, Expression, CodeBlock, Type, AstNode};
 #[derive(Debug, Clone)]
 pub struct Func {
 	attributes: Vec<WithSource<Attribute>>,
+
 	visibility: Option<WithSource<Visibility>>,
+
+	is_static: bool,
+	is_mutating: bool,
 
 	name: Option<String>,
 
@@ -19,10 +23,12 @@ pub struct Func {
 }
 
 impl Func {
-	pub fn new( name: Option<String>, pars: Vec<WithSource<FuncPar>>, return_type: Option<WithSource<Type>>, code: WithSource<CodeBlock> ) -> Func {
+	pub fn new( is_static: bool, is_mutating: bool, name: Option<String>, pars: Vec<WithSource<FuncPar>>, return_type: Option<WithSource<Type>>, code: WithSource<CodeBlock> ) -> Func {
 		Func {
 			attributes: vec![],
 			visibility: None,
+			is_static,
+			is_mutating,
 			name,
 			pars,
 			return_type,
@@ -33,6 +39,8 @@ impl Func {
 	pub fn new_extern(name: Option<String>, pars: Vec<WithSource<FuncPar>>, return_type: Option<WithSource<Type>>) -> Func {
 		Func {
 			attributes: vec![],
+			is_mutating: false,
+			is_static: false,
 			visibility: None,
 			name,
 			pars,
@@ -79,6 +87,14 @@ impl Func {
 
 	pub fn return_type(&self) -> &Option<WithSource<Type>> {
 		&self.return_type
+	}
+
+	pub fn is_static(&self) -> bool {
+		self.is_static
+	}
+
+	pub fn is_mutating(&self) -> bool {
+		self.is_mutating
 	}
 }
 

@@ -27,7 +27,7 @@ pub (crate) const SYMBOLS: [char; 11] = [
 	'`', '@'
 ];
 
-pub (crate) const KEYWORDS: [&str; 40] = [
+pub (crate) const KEYWORDS: [&str; 41] = [
 	"struct",
 	"class",
 	"enum",
@@ -43,6 +43,7 @@ pub (crate) const KEYWORDS: [&str; 40] = [
 	"var",
 
 	"static",
+	"mutating",
 
 	"public",
 	"private",

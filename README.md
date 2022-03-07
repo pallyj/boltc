@@ -73,7 +73,7 @@ Bolt is a powerful coding language designed for expressiveness and speed. Bolt c
 - Type checking
 - New lower level IR
 
-### Bolt 0.2
+### Bolt 0.2 [ Current version ]
 
 - Floating point types
 - Boolean functions
@@ -81,6 +81,7 @@ Bolt is a powerful coding language designed for expressiveness and speed. Bolt c
 - Structs
 - Methods
 - External functions
+- Default literal initializers
 
 ### Bolt 0.1
 

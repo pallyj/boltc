@@ -80,7 +80,10 @@ fn main() {
     let replacer = type_infer::ReplacementWalker::new(type_inferer);
     replacer.walk_library(&library);
 
-    println!("{}", library);
+    let literal_replacer = passes::LiteralReplace {};
+    literal_replacer.walk_library(&library);
+
+    //println!("{library}");
 
     codegen_library(&library);
 }

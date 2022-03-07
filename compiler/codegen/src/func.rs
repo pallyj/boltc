@@ -6,17 +6,7 @@ use inkwell::{types::{BasicType}, values::FunctionValue, module::Linkage};
 use crate::{context::{LibraryGenContext, FuncGenContext}, typ::generate_type, smt::generate_smt};
 
 pub fn generate_func<'a, 'ctx: 'a>(func: &Arc<FuncDef>, context: LibraryGenContext<'a, 'ctx>) -> FunctionValue<'ctx> {
-	let return_type = generate_type(&func.return_type(), context).unwrap();
-
-	let param_types = func.params()
-		.iter()
-		.map(|p| generate_type(p.typ(), context))
-		.map(|p| p.unwrap().into())
-		.collect::<Vec<_>>();
-
-	let fn_type = return_type.fn_type(&param_types, false);
-
-	let function = context.module().add_function(&func.link_name(), fn_type, None);
+	let function = context.module().get_function(&func.link_name()).unwrap();
 
 	let entry_block = context.context().append_basic_block(function, func.name());
 	context.builder().position_at_end(entry_block);
@@ -52,17 +42,7 @@ pub fn generate_extern_func<'a, 'ctx: 'a>(func: &Arc<ExternFuncDef>, context: Li
 }
 
 pub fn generate_method<'a, 'ctx: 'a>(func: &Arc<MethodDef>, context: LibraryGenContext<'a, 'ctx>) -> FunctionValue<'ctx> {
-	let return_type = generate_type(&func.return_type(), context).unwrap();
-
-	let param_types = func.params()
-		.iter()
-		.map(|p| generate_type(p.typ(), context))
-		.map(|p| p.unwrap().into())
-		.collect::<Vec<_>>();
-
-	let fn_type = return_type.fn_type(&param_types, false);
-
-	let function = context.module().add_function(&func.link_name(), fn_type, None);
+	let function = context.module().get_function(&func.link_name()).unwrap();
 
 	let entry_block = context.context().append_basic_block(function, func.name());
 	context.builder().position_at_end(entry_block);

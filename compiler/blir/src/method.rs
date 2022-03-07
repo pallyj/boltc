@@ -7,6 +7,9 @@ use crate::{Visibility, scope::Scope, func::FuncParam, typ::Type, CodeBlock, Fun
 pub struct MethodDef {
 	// TODO: Add attributes
 
+	is_static: bool,
+	is_mutating: bool,
+
 	/// The name of the function
 	name: String,
 
@@ -40,9 +43,12 @@ impl MethodDef {
 	/// let lib = Library::new("FooBar");
 	/// let foo: Arc<Mutex<MethodDef>> = MethodDef::new("foo".to_string(), vec![], Type::Unit, &lib);
 	/// 
-	pub fn new(name: String, parameters: Vec<FuncParam>, return_type: Type, code: CodeBlock, parent: &Arc<dyn Scope>) -> Arc<MethodDef> {
+	pub fn new(is_static: bool, is_mutating: bool, name: String, parameters: Vec<FuncParam>, return_type: Type, code: CodeBlock, parent: &Arc<dyn Scope>) -> Arc<MethodDef> {
 		Arc::new(
 			MethodDef {
+				is_static,
+				is_mutating,
+
 				name: name.clone(),
 				link_name: Mutex::new(name),
 
@@ -109,6 +115,10 @@ impl MethodDef {
 
 	pub fn parent(&self) -> Arc<dyn Scope> {
 		self.parent.upgrade().unwrap()
+	}
+
+	pub fn is_static(&self) -> bool {
+		self.is_static
 	}
 }
 
@@ -182,7 +192,10 @@ impl Display for MethodDef {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let params = self.params().iter().map(|p| p.to_string()).collect::<Vec<_>>().join(", ");
 
-		writeln!(f, "func {}({}): {} {{", self.name, params, self.return_type.lock().unwrap())?;
+		let is_static = if self.is_static { "static " } else { "" }; 
+		let is_mutating = if self.is_mutating { "mutating " } else { "" }; 
+
+		writeln!(f, "{}{}func {}({}): {} {{", is_static, is_mutating, self.name, params, self.return_type.lock().unwrap())?;
 
 		writeln!(f, "\t{}", self.code.lock().unwrap().to_string().replace("\n", "\n\t"))?;
 
