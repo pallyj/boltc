@@ -1,6 +1,6 @@
 use std::{sync::{Mutex, Arc, MutexGuard}};
 
-use blir::{Walker, TypeKind, ExprKind, Scope, StatementKind, Library, Type, StructDef, MethodDef};
+use blir::{Walker, TypeKind, ExprKind, Scope, StatementKind, Library, Type, StructDef, MethodDef, FuncSig, FuncArg};
 
 use crate::{TypeInferenceCtx, constraint::Constraint};
 
@@ -115,12 +115,6 @@ impl Walker for InferWalker {
     fn walk_expr(&self, expr: &mut blir::Expr, scope: &Arc<dyn Scope>) {
 		Self::ChildWalker::walk_expr(self, expr, scope);
 
-		let TypeKind::Infer(infer_ctx) = expr.typ_ref().kind() else {
-			return
-		};
-
-		let infer_ctx = *infer_ctx;
-
 		let mut constraint = None;
 
 		match expr.kind_mut() {
@@ -142,12 +136,19 @@ impl Walker for InferWalker {
 					_ => return
 				};
 
-				if args.len() != sig.parameters().len() {
-					return;
-				}
+				let first_par = match func.kind() {
+					ExprKind::Method { method: _, reciever } => Some(&**reciever),
+					_ => None,
+				};
 
-				for (i, par) in sig.parameters().iter().enumerate() {
-					match (par.kind(), args[i].value().typ().kind()) {
+				let mapped_pars = args.iter().map(|arg| arg.value());
+
+				let args_iter = first_par.into_iter().chain(mapped_pars);
+
+				let par_args = sig.parameters().iter().zip(args_iter);
+
+				for p in par_args {
+					match (p.0.kind(), p.1.typ().kind()) {
 						(TypeKind::Infer(par), TypeKind::Infer(arg)) => {
 							self.infer_ctx
 								.lock()
@@ -158,7 +159,7 @@ impl Walker for InferWalker {
 							self.infer_ctx
 								.lock()
 								.unwrap()
-								.add_constraint(*arg, Constraint::Suggestion(par.clone()));
+								.add_constraint(*arg, Constraint::Suggestion(p.0.clone()));
 						}
 						_ => {}
 					}
@@ -191,6 +192,12 @@ impl Walker for InferWalker {
 
 			_ => { Self::ChildWalker::walk_expr(self, expr, scope) }
 		}
+
+		let TypeKind::Infer(infer_ctx) = expr.typ_ref().kind() else {
+			return
+		};
+
+		let infer_ctx = *infer_ctx;
 		
 		if let Some(constraint) = constraint {
 			self.infer_ctx

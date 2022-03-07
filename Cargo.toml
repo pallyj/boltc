@@ -25,6 +25,7 @@ codegen = { path = "compiler/codegen" }
 
 members = [
 	"compiler/blir",
+	"compiler/blirssa",
 	"compiler/lower_ast",
 	"compiler/ast",
 	"compiler/mangle",

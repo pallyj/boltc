@@ -160,7 +160,7 @@ fn generate_func_call<'a, 'ctx>(func: &Expr, args: &Vec<AnyValueEnum<'ctx>>, con
 				"integer8ExtSig16" => AnyValueEnum::IntValue(context.builder().build_int_s_extend(a.into_int_value(), context.context().i16_type(), "zext16")),
 
 				"integer16Trunc8" | "integer32Trunc8" | "integer64Trunc8" => AnyValueEnum::IntValue(context.builder().build_int_truncate(a.into_int_value(), context.context().i8_type(), "trunc8")),
-				"integer32Trun16" | "integer64Trun16" => AnyValueEnum::IntValue(context.builder().build_int_truncate(a.into_int_value(), context.context().i16_type(), "trunc16")),
+				"integer32Trunc16" | "integer64Trunc16" => AnyValueEnum::IntValue(context.builder().build_int_truncate(a.into_int_value(), context.context().i16_type(), "trunc16")),
 				"integer64Trunc32" => AnyValueEnum::IntValue(context.builder().build_int_truncate(a.into_int_value(), context.context().i32_type(), "trunc32")),
 				
 
@@ -202,7 +202,7 @@ fn generate_func_call<'a, 'ctx>(func: &Expr, args: &Vec<AnyValueEnum<'ctx>>, con
 				"integer1CmpEq" => AnyValueEnum::IntValue(context.builder().build_int_compare(IntPredicate::EQ, a.into_int_value(), b.unwrap().into_int_value(), "cmpEq")),
 				"integer1CmpNeq" => AnyValueEnum::IntValue(context.builder().build_int_compare(IntPredicate::EQ, a.into_int_value(), b.unwrap().into_int_value(), "cmpNeq")),
 
-				_ => panic!(),
+				_ => panic!("No intrinsic {name}"),
 			})
 		}
 
@@ -227,6 +227,22 @@ fn generate_func_call<'a, 'ctx>(func: &Expr, args: &Vec<AnyValueEnum<'ctx>>, con
 				.map(|a| a.into()).collect::<Vec<_>>();
 
 			context.builder().build_call(func, &args, "call")
+				.try_as_basic_value()
+				.left()
+				.map(|a| a.as_any_value_enum())
+		}
+
+		ExprKind::Method { method, reciever } => {
+			let method = context.module().get_function(&method.link_name()).unwrap();
+
+			let args = generate_expr(reciever, context) 
+				.iter()
+				.chain(args.iter())
+				.filter_map(|a| BasicValueEnum::try_from(*a).ok())
+				.map(|a| a.into())
+				.collect::<Vec<_>>();
+
+			context.builder().build_call(method, &args, "call")
 				.try_as_basic_value()
 				.left()
 				.map(|a| a.as_any_value_enum())

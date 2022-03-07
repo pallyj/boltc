@@ -14,6 +14,8 @@ pub enum SymbolKind {
 	Function(Expr),
 
 	StaticMethod(Arc<MethodDef>),
+	
+	InstanceMethod(Arc<MethodDef>),
 
 	Value(Expr),
 

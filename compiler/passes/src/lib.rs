@@ -6,7 +6,7 @@ mod scope;
 
 use std::{sync::{Arc}};
 
-use blir::{Walker, ExprKind, TypeKind, Expr, Scope, Type, SymbolKind, MethodDef, StatementKind, Library, StructDef};
+use blir::{Walker, ExprKind, TypeKind, Expr, Scope, Type, SymbolKind, MethodDef, StatementKind, Library, StructDef, FuncParam, FuncSig, FuncArg};
 use prelude::ErrorCtx;
 use scope::CodeBlockScope;
 use type_infer::type_infer_ctx;
@@ -66,6 +66,17 @@ impl Walker for SymbolResolver {
             self.walk_type(t.typ_mut(), scope);
         }
         self.walk_type(&mut method.return_type(), scope);
+
+        if !method.is_static() {
+            let self_type = match scope.lookup_symbol(&"Self".to_string()).unwrap().kind() {
+                SymbolKind::Type(t) => t.clone(),
+                _ => panic!(),
+            };
+            let self_param = FuncParam::new(None, "self".to_string(), self_type);
+
+            method.params()
+                .insert(0, self_param);
+        }
 
         let func_scope: Arc<dyn Scope> = method.clone();
 
@@ -146,10 +157,23 @@ impl Walker for SymbolResolver {
 
                 match func.kind() {
                     ExprKind::Type(ty) => {
-                        let ty = ty.clone();
+                        let pars = match ty.kind() {
+                            TypeKind::StructRef(r#struct) => {
+                                r#struct.variables()
+                                    .iter()
+                                    .map(|var| var.typ().clone())
+                                    .collect::<Vec<_>>()
+                            }
+                            _ => return
+                        };
+
+                        let rt = ty.clone();
+        
+                        let sig = FuncSig::new(pars, ty.clone());
                         
                         *func.kind_mut() = ExprKind::Init(ty.clone());
-                        *expr.typ_mut() = ty;
+                        *func.typ_mut() = TypeKind::Func(Box::new(sig)).anon();
+                        *expr.typ_mut() = rt;
                     }
                     _ => {
                         match func.typ().kind() {
@@ -201,10 +225,16 @@ impl Walker for SymbolResolver {
 
                         let member = match sym.kind().clone() {
                             SymbolKind::InstanceVariable(var) => {
-                                println!("IV");
                                 let parent = std::mem::replace(parent.as_mut(), Expr::new_anon(ExprKind::Unit,TypeKind::Unit.anon()));
     
                                 Expr::new_anon(ExprKind::InstanceVariable { instance: Box::new(parent), variable: var.clone() }, var.typ().clone())
+                            }
+
+                            SymbolKind::InstanceMethod(method) => {
+                                let parent = std::mem::replace(parent.as_mut(), Expr::new_anon(ExprKind::Unit,TypeKind::Unit.anon()));
+                                let ty = TypeKind::Func(Box::new(method.signature())).anon();
+
+                                Expr::new_anon(ExprKind::Method { method, reciever: Box::new(parent) }, ty)
                             }
 
                             _ => { return }
@@ -323,3 +353,129 @@ impl Walker for ManglePass {
     }
 }
 
+pub struct LiteralReplace { }
+
+impl Walker for LiteralReplace {
+    type ChildWalker = blir::ChildWalker<Self>;
+
+    fn walk_library(&self, lib: &Arc<Library>) {
+        for r#struct in lib.structs().iter() {
+            let parent = r#struct.parent().unwrap();
+
+            self.walk_struct(&r#struct, &parent);
+        }
+
+		for func in lib.funcs().iter() {
+			let parent = func.parent();
+
+			self.walk_function(&func, &parent);
+		}
+    }
+
+    fn walk_function(&self, func: &Arc<blir::FuncDef>, scope: &Arc<dyn Scope>) {
+        for t in func.params().iter_mut() {
+            self.walk_type(t.typ_mut(), scope);
+        }
+        self.walk_type(&mut func.return_type(), scope);
+
+        let func_scope: Arc<dyn Scope> = func.clone();
+
+        self.walk_code_block(&mut func.code(), &func_scope);
+    }
+
+    fn walk_extern_function(&self, func: &Arc<blir::ExternFuncDef>, scope: &Arc<dyn Scope>) {
+        todo!()
+    }
+
+    fn walk_variable(&self, variable: &Arc<blir::VariableDef>, scope: &Arc<dyn Scope>) {
+        //variable.default_value()
+        //    .map(|default| self.walk_expr(default, scope));
+    }
+
+    fn walk_struct(&self, r#struct: &Arc<StructDef>, scope: &Arc<dyn Scope>) {
+        Self::ChildWalker::walk_struct(self, r#struct, scope)
+    }
+
+    fn walk_method(&self, method: &Arc<MethodDef>, scope: &Arc<dyn Scope>) {
+        for t in method.params().iter_mut() {
+            self.walk_type(t.typ_mut(), scope);
+        }
+        self.walk_type(&mut method.return_type(), scope);
+
+        let func_scope: Arc<dyn Scope> = method.clone();
+
+        self.walk_code_block(&mut method.code(), &func_scope);
+    }
+
+    fn walk_code_block(&self, code_block: &mut blir::CodeBlock, scope: &Arc<dyn Scope>) {
+        for smt in code_block.statements_mut() {
+            self.walk_statement(&mut smt.0, &scope);
+        }
+    }
+
+    fn walk_statement(&self, smt: &mut blir::Statement, scope: &Arc<dyn Scope>) {
+        match smt.kind_mut() {
+            StatementKind::Eval(ref mut expr) => self.walk_expr(expr, scope),
+            StatementKind::Return { ref mut value } => {
+                if let Some(ref mut value) = value {
+                    self.walk_expr(value, scope)
+                } 
+            }
+            StatementKind::Throw { value } => self.walk_expr(value, scope),
+            StatementKind::Repeat { ref mut code } => self.walk_code_block(code, scope),
+            StatementKind::While { ref mut condition, ref mut code } => {
+                self.walk_expr(condition, scope);
+                self.walk_code_block(code, scope);
+            }
+            StatementKind::Bind { name, ref mut typ, ref mut value } => {
+                let var_name = name.clone();
+                
+                self.walk_type(typ, scope);
+
+                if let Some(ref mut value) = value {
+                    self.walk_expr(value, scope);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    fn walk_expr(&self, expr: &mut Expr, scope: &Arc<dyn Scope>) {
+        match expr.kind() {
+            ExprKind::IntLiteral(n) => {
+                let n = *n;
+
+                match expr.typ().kind() {
+                    TypeKind::StructRef(r#struct) => {
+                        let vars = r#struct.variables();
+                        if vars.len() != 1 {
+                            return
+                        }
+
+                        let literal_typ = vars[0].typ();
+
+                        match literal_typ.kind() {
+                            TypeKind::Intrinsic(i) if i.as_str() == "i64" => {
+                                let literal = Expr::new_anon(ExprKind::IntLiteral(n), TypeKind::Intrinsic("i64".to_string()).anon());
+                                let fn_ty = TypeKind::Func(Box::new(FuncSig::new(vec![TypeKind::Intrinsic("i64".to_string()).anon()], expr.typ()))).anon();
+
+                                *expr.kind_mut() = ExprKind::FuncCall {
+                                    func: Box::new(Expr::new_anon( ExprKind::Init(expr.typ()),  fn_ty)),
+                                    args: vec![ FuncArg::new(literal, Some(vars[0].name().clone())) ]
+                                }
+                            }
+                            _ => { /* */}
+                        }
+                    }
+                    _ => {}
+                }
+            },
+
+            _ => Self::ChildWalker::walk_expr(self, expr, scope)
+        }
+    }
+
+    fn walk_type(&self, typ: &mut Type, scope: &Arc<dyn Scope>) {
+        Self::ChildWalker::walk_type(self, typ, scope)
+    }
+}

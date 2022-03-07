@@ -28,9 +28,10 @@ pub enum ExprKind {
 	Function(Arc<FuncDef>),
 	/// An initializer for a type
 	Init(Type),
+
 	/// A method
 	Method {
-		of: Type,
+		method: Arc<MethodDef>,
 		reciever: Box<Expr>,
 	},
 	/// A static method
@@ -251,10 +252,19 @@ impl Display for ExprKind {
 			Self::FunctionParameter(idx) => write!(f, "%par{idx}"),
 			Self::LocalVariable(var) => write!(f, "%{var}"),
 
-			Self::Member (par, member) => write!(f, "{par}.{member}"),
+			Self::Member (par, member) => write!(f, "~{par}.{member}"),
 			Self::Type(ty) => write!(f, "{ty}"),
 
-			_ => write!(f, "unknown")
+			Self::Init(ty) => write!(f, "{ty}"),
+
+			Self::InstanceVariable { instance, variable } => write!(f, "{instance}.{var_name}", var_name = variable.name()),
+
+			Self::Method { method, reciever } => write!(f, "{reciever}.{method_name}", method_name = method.name()),
+
+			Self::OptionalMember(..) => write!(f, "unsupported"),
+			Self::Index(..) => write!(f, "unsupported"),
+
+			//_ => write!(f, "unknown")
 		}
     }
 }

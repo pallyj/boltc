@@ -11,6 +11,9 @@ impl Parse for Func {
     fn parse(parser: &mut super::Parser, ctx: &Context) -> Try<WithSource<Self::Output>, WithSource<crate::ParseError>> {
 		let (start_tok, start_span) = parser.peek().clone().unwrap();
 
+		let is_static = parser.consume_if_equal(Token::Keyword("static".to_string())).is_some();
+		let is_mutating = parser.consume_if_equal(Token::Keyword("mutating".to_string())).is_some();
+
 		let name = if parser.consume_if_equal(Token::Keyword("func".to_string())).is_some() {
 			parser.consume_if_map(take_token_kind!(Token::Ident))
 		} else if parser.consume_if_equal(Token::Keyword("init".to_string())).is_some() {
@@ -32,7 +35,7 @@ impl Parse for Func {
 		let span = start_span.until(parser.last_source());
 
 		if let Some(code) = code {
-			return Try::Some(Func::new(name, pars, return_typ, code).with_source(span));
+			return Try::Some(Func::new(is_static, is_mutating, name, pars, return_typ, code).with_source(span));
 		} else {
 			return Try::Some(Func::new_extern(name, pars, return_typ).with_source(span));
 		}
