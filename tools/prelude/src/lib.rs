@@ -82,6 +82,10 @@ impl SourceFile {
         &self.file_name
     }
 
+    pub fn code(&self) -> String {
+        self.code.iter().collect()
+    }
+
     /// Gets the line number of the character at `idx`
     pub fn line(&self, idx: usize) -> usize {
         self.line_breaks.range(..idx).count() + 1

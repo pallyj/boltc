@@ -19,26 +19,26 @@ Bolt is a powerful coding language designed for expressiveness and speed. Bolt c
 
 ### Bolt 0.13
 
-- Generics
-
-### Bolt 0.12
-
 - Dataflow operators
 
-### Bolt 0.11
+### Bolt 0.12
 
 - C interop
 - Better frontend
 
-### Bolt 0.10
+### Bolt 0.11
 
 - Syntactic sugar for options/results
 - Strings
 
-### Bolt 0.9
+### Bolt 0.10
 
 - Lang library
 - Project manager
+
+### Bolt 0.9
+
+- Generics
 
 ### Bolt 0.8
 
@@ -58,20 +58,20 @@ Bolt is a powerful coding language designed for expressiveness and speed. Bolt c
 
 ### Bolt 0.5
 
-- Rewrite type inference
 - Enums
 
 ### Bolt 0.4
 
-- Typed code blocks
 - Operators
 - Polymorphism
+- Globals
 
 ### Bolt 0.3
 
-- Rewrite parser, lexer, and AST
+- Rewrite compiler
 - Type checking
 - New lower level IR
+- Codeblock analysis
 
 ### Bolt 0.2 [ Current version ]
 

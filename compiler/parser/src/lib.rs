@@ -1,15 +1,6 @@
-#![feature(let_else)]
+pub mod ast;
+pub mod lexer;
+pub mod parser;
 
-extern crate lazy_static;
-
-mod token;
-mod lexer;
-mod parse;
-mod error;
-mod context;
-
-pub use token::Token;
-pub use lexer::Lexer;
-pub use error::*;
-pub use parse::*;
-pub use context::*;
+#[cfg(test)]
+mod tests;
