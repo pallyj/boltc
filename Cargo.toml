@@ -9,31 +9,17 @@ edition = "2021"
 colored = "2.0.0"
 clap = { version = "3.0.10", features = [ "derive" ] }
 
-prelude = { path = "tools/prelude" }
-header = { path = "tools/header" }
-project = { path = "tools/project" }
-
-bolt-parser = { path = "compiler/parser" }
-bolt-ast = { path = "compiler/ast" }
-lower_ast = { path = "compiler/lower_ast" }
-passes = { path = "compiler/passes" }
-blir = { path = "compiler/blir" }
-type_infer = { path = "compiler/type_infer" }
-codegen = { path = "compiler/codegen" }
+parser = { path = "compiler/parser" }
+blirssa = { path = "compiler/blirssa" }
+lower_blirssa = { path = "compiler/lower_blirssa" }
+logos = "0.12.0"
 
 [workspace]
 
 members = [
-	"compiler/blir",
-	"compiler/blirssa",
-	"compiler/lower_ast",
-	"compiler/ast",
-	"compiler/mangle",
+	"compiler/errors",
 	"compiler/parser",
 	"compiler/blir",
-	"compiler/lower_ast",
-	"compiler/passes",
-	"compiler/type_infer",
-	"compiler/passes",
-	"compiler/codegen"
+	"compiler/blirssa",
+	"compiler/lower_blirssa",
 ]

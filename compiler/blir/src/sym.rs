@@ -1,42 +1,45 @@
-use std::sync::{Arc, Mutex};
+use crate::{typ::{TypeKind}, Visibility, intrinsics::{UnaryIntrinsicFn, BinaryIntrinsicFn}, code::{FunctionRef, MethodRef}};
 
-use crate::{typ::Type, Visibility, var::GlobalVariableDef, Expr, MethodDef, VariableDef};
+use std::hash::Hash;
 
-#[derive(Clone)]
-pub enum SymbolKind {
-	/// A symbol that resolves to a type e.g. a struct
-	Type(Type),
+pub enum Symbol {
+	UnaryIntrinsicFn(UnaryIntrinsicFn),
+	BinaryIntrinsicFn(BinaryIntrinsicFn),
 
-	/// A symbol that resolves to a global var
-	GlobalVar(Arc<Mutex<GlobalVariableDef>>),
+	Function(FunctionRef),
+	StaticMethod(MethodRef),
+	InstanceMethod(MethodRef),
 
-	/// A symbol that resolves to a function
-	Function(Expr),
-
-	StaticMethod(Arc<MethodDef>),
-	
-	InstanceMethod(Arc<MethodDef>),
-
-	Value(Expr),
-
-	InstanceVariable(Arc<VariableDef>)
+	Type(TypeKind),
 }
 
-#[derive(Clone)]
-pub struct Symbol {
+#[derive(Eq)]
+pub struct SymbolKey {
 	visibility: Visibility,
-	kind: SymbolKind,
+	name: String,
 }
 
-impl Symbol {
-	pub fn new(kind: SymbolKind, visibility: Visibility) -> Self {
+impl SymbolKey {
+	pub fn new(name: String, visibility: Visibility) -> Self {
 		Self {
-			kind,
-			visibility
+			name,
+			visibility,
 		}
 	}
 
-	pub fn kind(&self) -> &SymbolKind {
-		&self.kind
+	pub fn visibility(&self) -> Visibility {
+		self.visibility
 	}
+}
+
+impl Hash for SymbolKey {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.name.hash(state);
+    }
+}
+
+impl PartialEq for SymbolKey {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+    }
 }

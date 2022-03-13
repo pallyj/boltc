@@ -1,232 +1,61 @@
-use std::{sync::{Mutex, Arc, MutexGuard}, collections::HashMap, fmt::{Display}};
+use std::collections::HashMap;
 
-use crate::{sym::Symbol, func::FuncDef, structdef::StructDef, metadata::Metadata, Type, Visibility, SymbolKind, TypeKind, ExprKind, Expr, Scope, FileScope, ExternFuncDef};
+use crate::{typ::{StructRef, TypeKind}, code::FunctionRef, SymbolKey, Symbol};
 
 pub struct Library {
-	/// The library's name
 	name: String,
 
-	/// Metadata of the library
-	metadata: Mutex<Metadata>,
+	symbols: HashMap<SymbolKey, Symbol>,
 
-	/// Symbols in the library
-	symbols: Mutex<HashMap<String, Symbol>>,
-
-	/// The structs in a library
-	structs: Mutex<Vec<Arc<StructDef>>>,
-
-	/// Global functions in a library
-	funcs: Mutex<Vec<Arc<FuncDef>>>,
-
-	extern_funcs: Mutex<Vec<Arc<ExternFuncDef>>>,
-
-	files: Mutex<Vec<Arc<FileScope>>>
+	functions: Vec<FunctionRef>,
+	structs: Vec<StructRef>,
 }
 
 impl Library {
-	/// Creates a new library
-	pub fn new(name: String) -> Arc<Library> {
-		let lib = Library {
+	pub fn new(name: String) -> Library {
+		Library {
 			name,
-			metadata: Mutex::new(Metadata::new()),
-			symbols: Mutex::new(HashMap::new()),
-			structs: Mutex::new(Vec::new()),
-			funcs: Mutex::new(Vec::new()),
-			extern_funcs: Mutex::new(Vec::new()),
-			files: Mutex::new(Vec::new())
-		};
-
-		Arc::new(lib)
-	}
-
-	/// 
-	/// Adds metadata to the library
-	/// 
-	/// Common metadata keys are 
-	/// 
-	/// `description`
-	/// `authors`
-	/// `version`
-	/// `comment`
-	/// 
-	pub fn insert_metadata(&self, key: String, value: String) {
-		self.metadata
-			.lock()
-			.unwrap()
-			.insert(key, value);
-	}
-
-	///
-	/// Adds a doc comment to the library
-	/// 
-	pub fn doc_comment(&self, comment: &str) {
-		self.metadata
-			.lock()
-			.unwrap()
-			.doc_comment(comment);
-	}
-
-	///
-	/// Defines a new symbol in the library's scope
-	/// 
-	/// # Example
-	/// 
-	/// func define_alias(lib: &blir::Library, alias: String, type: Type) {
-	/// 	lib.define_symbol(alias, Symbol::Type(type))
-	/// }
-	/// 
-	pub fn define_symbol(&self, key: String, sym: Symbol) {
-		self.symbols
-			.lock()
-			.unwrap()
-			.insert(key, sym);
-	}
-
-	///
-	/// Does the library contain the symbol?
-	/// 
-	/// # Example
-	/// 
-	/// let lib = Library::new("FooBar");
-	/// add_ast_to_lib(lib)
-	/// 
-	/// if lib.has_symbol("Foo") {
-	/// 	println!("Foo")
-	/// }
-	/// 
-	pub fn has_symbol(&self, key: &str) -> bool {
-		self.symbols
-			.lock()
-			.unwrap()
-			.contains_key(key)
-	}
-
-	/// 
-	/// Gets a symbol in the library, or returns None if it doesn't exist
-	/// 
-	pub fn get_symbol(&self, key: &str) -> Option<Symbol> {
-		self.symbols
-			.lock()
-			.unwrap()
-			.get(key)
-			.cloned()
-	}
-
-	pub fn add_file(&self, file: Arc<FileScope>) {
-		self.files
-			.lock()
-			.unwrap()
-			.push(file);
-	}
-
-	pub fn define_struct(&self, r#struct: Arc<StructDef>) {
-		self.structs
-			.lock()
-			.unwrap()
-			.push(r#struct.clone());
-
-		// Something with visibility
-		let name = r#struct.name().clone();
-
-		self.symbols
-			.lock()
-			.unwrap()
-			.insert(name, Symbol::new(SymbolKind::Type(Type::new_anon(TypeKind::StructRef(r#struct))), Visibility::Public));
-	}
-
-	pub fn define_function(&self, func: Arc<FuncDef>) {
-		self.funcs
-			.lock()
-			.unwrap()
-			.push(func.clone());
-
-		let name = func.name().clone();
-
-		let f = Expr::new_anon(ExprKind::Function(func), Type::new_anon(TypeKind::Infer(u64::MAX)));
-
-		self.symbols
-			.lock()
-			.unwrap()
-			.insert(name, Symbol::new(SymbolKind::Function(f), Visibility::Public));
-	}
-
-	pub fn define_extern_function(&self, func: Arc<ExternFuncDef>) {
-		self.extern_funcs
-			.lock()
-			.unwrap()
-			.push(func.clone());
-
-		let name = func.name().clone();
-
-		let f = Expr::new_anon(ExprKind::ExternFunction(func), Type::new_anon(TypeKind::Infer(u64::MAX)));
-
-		self.symbols
-			.lock()
-			.unwrap()
-			.insert(name, Symbol::new(SymbolKind::Function(f), Visibility::Public));
+			symbols: HashMap::new(),
+			functions: Vec::new(),
+			structs: Vec::new(),
+		}
 	}
 
 	pub fn name(&self) -> &String {
 		&self.name
 	}
 
-	pub fn structs(&self) -> MutexGuard<Vec<Arc<StructDef>>> {
-		self.structs.lock().unwrap()
+	pub fn add_function(&mut self, func: FunctionRef) -> Option<Symbol> {
+		// Add the function to the list of functions
+		self.functions.push(func.clone());
+
+		// Add the functions symbol, returning another symbol if it exists
+		let (visibility, name) = {
+			let func_ref = func.borrow();
+
+			(func_ref.visibility, func_ref.name.clone())
+		};
+
+		let key = SymbolKey::new(name, visibility);
+		let symbol = Symbol::Function(func);
+
+		self.symbols.insert(key, symbol)
 	}
 
-	pub fn funcs(&self) -> MutexGuard<Vec<Arc<FuncDef>>> {
-		self.funcs.lock().unwrap()
+	pub fn add_struct(&mut self, r#struct: StructRef) -> Option<Symbol> {
+		// Add the substruct to the list of substructs
+		self.structs.push(r#struct.clone());
+
+		// Add the substructs symbol, returning another symbol if it exists
+		let (visibility, name) = {
+			let substruct_ref = r#struct.borrow();
+
+			(substruct_ref.visibility, substruct_ref.name.clone())
+		};
+
+		let key = SymbolKey::new(name, visibility);
+		let symbol = Symbol::Type(TypeKind::Struct(r#struct));
+
+		self.symbols.insert(key, symbol)
 	}
-
-	pub fn extern_funcs(&self) -> MutexGuard<Vec<Arc<ExternFuncDef>>> {
-		self.extern_funcs.lock().unwrap()
-	}
-}
-
-impl Scope for Library {
-    fn parent(&self) -> Option<Arc<dyn Scope>> {
-        None
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn symbol(&self) -> mangle::symbol::Symbol {
-        mangle::symbol::Symbol::new(mangle::symbol::SymbolKind::Library(self.name.clone()))
-    }
-
-    fn lookup_symbol(&self, name: &String) -> Option<Symbol> {
-        self.get_symbol(name)
-    }
-	
-	fn define_expr(&self, _name: String, _value: Expr) {
-        todo!()
-    }
-
-	fn scoped_type(&self, _name: &str) -> Option<TypeKind> {
-		None
-	}
-
-	fn take_index(&self) -> u64 {
-		0
-	}
-}
-
-impl Display for Library {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "library {}\n", self.name)?;
-
-		writeln!(f, "{:?}", self.metadata.lock().unwrap())?;
-
-		for s in self.structs.lock().unwrap().iter() {
-			writeln!(f, "{}", s)?;
-		}
-
-		for func in self.funcs.lock().unwrap().iter() {
-			writeln!(f, "{}", func)?;
-		}
-
-		Ok(())
-    }
 }

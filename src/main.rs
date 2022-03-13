@@ -1,158 +1,42 @@
 #![feature(path_file_prefix)]
 
-use std::path::Path;
+use std::{path::Path, time::{SystemTime, Instant}};
 
-use args::Args;
-use blir::{Walker, Library};
-use bolt_parser::{Parse as BoltParse, asttree::AstTree, Context, Parser};
-use codegen::codegen_library;
-use colored::Colorize;
-use lower_ast::lower_file;
-use prelude::{BoltMessage, MessageLevel, Source, SourceFile};
-use project::Project;
-
-use clap::Parser as ClapParser;
-
-mod args;
-
-// TODO: Better errors
-// TODO: Statements
-// TODO: Expressions
-
-macro_rules! handle_error {
-    ($val:expr) => {
-        match $val {
-            Ok(e) => e,
-            Err(err) => {
-                print_anon_error(&err);
-                return;
-            }
-        }
-    };
-}
+use blirssa::{Builder, code::Function, typ::{Type, StructField}, value::BinaryIntrinsicFn, Library};
+use lower_blirssa::lower_blirssa_library;
 
 fn main() {
-    let args = Args::parse();
+    let mut builder = Builder::new();
+    let mut library = Library::new("helloWorld".to_string());
 
-    let file_path = Path::new(&args.file);
+    library.add_struct("Int64", false, false);
+    let int = library.get_struct("Int64").unwrap();
+    int.add_field(StructField::new("repr".to_string(), Type::Integer { bits: 64 }));
+    let int_ty = int.typ();
 
-    let library_name = file_path.file_prefix().unwrap().to_str().unwrap().to_string();
+	library.add_function("add", Type::Integer { bits: 64 }.func_type(vec![ int_ty.clone().pointer(), int_ty.pointer() ]));
+    let func = library.get_function("add").unwrap();
 
-    let source_file = match SourceFile::open_file(file_path) {
-        Ok(file) => file,
-        Err(e) => {
-            print_anon_error(&e);
-            return;
-        },
-    };
+	let block = func.append_block("start");
 
-    let mut lexer = bolt_parser::Lexer::new(source_file.iter());
-    lexer.lex();
+	builder.position_at_end(&block);
 
-    // Handle lexer errors
+    let a = func.arg(0);
+	let b = func.arg(1);
 
-    let ctx = Context::new();
+    let a = builder.build_deref_struct_field(a, "repr");
+    let b = builder.build_deref_struct_field(b, "repr");
 
-    let mut parser = Parser::new(lexer);
-    let ast_file = AstTree::parse(&mut parser, &ctx);
+	let c = builder.build_binary_intrinsic(BinaryIntrinsicFn::IntegerAdd, a, b);
 
-    for msg in parser.messages() {
-        let (msg, s) = msg.clone().unwrap();
+	builder.build_return(Some(c));
 
-        println!("{msg:?} at {s:?}");
-    }
+	println!("{func}");
 
-    let library = Library::new(library_name);
-
-    lower_file(ast_file.into_declarations(), library.clone());
-
-    let sym_resolver = passes::SymbolResolver::new();
-    sym_resolver.walk_library(&library);
-
-    let mangler = passes::ManglePass::new();
-    mangler.walk_library(&library);
-
-    let type_inferer = type_infer::InferWalker::new();
-    type_inferer.walk_library(&library);
-
-    type_inferer.context().solve();
-
-    let replacer = type_infer::ReplacementWalker::new(type_inferer);
-    replacer.walk_library(&library);
-
-    let literal_replacer = passes::LiteralReplace {};
-    literal_replacer.walk_library(&library);
-
-    //println!("{library}");
-
-    codegen_library(&library);
+    lower_blirssa_library(library).unwrap();
 }
 
-/*fn main() {
-    let args = Args::parse();
-
-    let mut project = handle_error!(Project::new(args.file.clone()));
-        
-    handle_error!(project.read_config());
-
-    match project.search() {
-        Ok(_) => {},
-        Err(err) => {
-            print_anon_error(&*err);
-            return;
-        }
-    }
-
-    let config = project.config();
-    let source_files = project.source_files();
-
-    let ast_files = source_files
-        .iter()
-        .map(|source_file| {
-            let mut lexer = bolt_parser::Lexer::new(source_file.iter());
-
-            lexer.lex();
-
-            // Handle lexer errors
-
-            let ctx = Context::new();
-
-            let mut parser = Parser::new(lexer);
-
-            let file = AstTree::parse(&mut parser, &ctx);
-
-            for msg in parser.messages() {
-                let (msg, s) = msg.clone().unwrap();
-
-                println!("{msg:?} at {s:?}");
-            }
-
-            file
-        }).collect::<Vec<_>>();
-
-        
-    let library = Library::new("lang".to_string());
-    for ast_file in ast_files {
-        lower_file(ast_file.into_declarations(), library.clone());
-    }
-
-    let sym_resolver = passes::SymbolResolver::new();
-    sym_resolver.walk_library(&library);
-
-    let type_inferer = type_infer::InferWalker::new();
-    type_inferer.walk_library(&library);
-
-    type_inferer.context().collect();
-    type_inferer.context().solve();
-
-    let replacer = type_infer::ReplacementWalker::new(type_inferer);
-    replacer.walk_library(&library);
-
-    //println!("{}", library);
-
-    codegen_library(&library);
-}*/
-
+/*
 fn print_error(e: &(dyn BoltMessage), source: Source) {
     if e.level() == MessageLevel::Warning {
         println!("{}:", "warning".yellow().bold())
@@ -185,4 +69,4 @@ fn print_anon_error(e: &(dyn BoltMessage)) {
     }
 
     println!();
-}
+}*/
