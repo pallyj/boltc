@@ -4,10 +4,6 @@ public struct Int64 {
 	var repr: i64
 
 	public struct Int32 {}
-	
-	/*public init (_ repr: i64) {
-		self.repr = repr;
-	}*/
 
 	public static func max(): Int64 {
 		return Self(repr: 0x7fffffffffffffff)

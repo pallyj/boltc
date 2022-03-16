@@ -192,10 +192,10 @@ impl<'a> Parser<'a> {
 	pub fn parse_visibility(&mut self) {
 		self.start_node(SyntaxKind::Visibility);
 
-		if self.check(SyntaxKind::PublicKw) ||
-		   self.check(SyntaxKind::InternalKw) ||
-		   self.check(SyntaxKind::FilePrivateKw) ||
-		   self.check(SyntaxKind::PrivateKw) { }
+		if self.eat(SyntaxKind::PublicKw) ||
+		   self.eat(SyntaxKind::InternalKw) ||
+		   self.eat(SyntaxKind::FilePrivateKw) ||
+		   self.eat(SyntaxKind::PrivateKw) { }
 		else { }
 
 		self.finish_node();

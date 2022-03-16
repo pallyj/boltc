@@ -133,10 +133,9 @@ impl CodeBlock {
 
 impl Debug for CodeBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let statements = self.0
-			.children()
-			.map(|smt| Smt::cast(smt.clone()))
-			.map(|smt| format!("{smt:?}").replace("\n", "\n\t"))
+        let statements = self.statements()
+			.iter()
+			.map(|smt| format!("\t{smt:?}").replace("\n", "\n\t"))
 			.collect::<Vec<_>>()
 			.join("\n");
 
