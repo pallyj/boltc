@@ -1,8 +1,6 @@
 #![feature(path_file_prefix)]
 
-use std::{path::Path, time::{SystemTime, Instant}};
-
-use blirssa::{Builder, code::Function, typ::{Type, StructField}, value::BinaryIntrinsicFn, Library};
+use blirssa::{Builder, typ::{Type, StructField}, value::BinaryIntrinsicFn, Library};
 use lower_blirssa::lower_blirssa_library;
 
 fn main() {

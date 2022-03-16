@@ -1,6 +1,6 @@
 use logos::Logos;
 
-#[derive(Logos, Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Logos, Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[repr(u16)]
 pub enum SyntaxKind {
     // class, enum, case, protocol, extension, alias
@@ -61,19 +61,19 @@ pub enum SyntaxKind {
     #[regex("false")]
     LiteralFalse,
 
-    #[regex("[0-9_]+")]
+    #[regex("[0-9][0-9_]*")]
     LiteralDecInt,
 
-    #[regex("0x[0-9A-Fa-f]+")]
+    #[regex("0x[0-9A-Fa-f_]+")]
     LiteralHexInt,
 
-    #[regex("0o[0-7]+")]
+    #[regex("0o[0-7_]+")]
     LiteralOctInt,
 
-    #[regex("0b[0|1]+")]
+    #[regex("0b[0|1_]+")]
     LiteralBinInt,
 
-    #[regex("[0-9_]+\\.[0-9_]*")]
+    #[regex("[0-9][0-9_]*\\.[0-9_]*")]
     LiteralDecFloat,
 
 
@@ -110,9 +110,16 @@ pub enum SyntaxKind {
     #[token(".")]
     Period,
 
+    #[token("=")]
+    Equals,
+
 
     #[token("@")]
     At,
+
+    #[regex("//.*\n", logos::skip)]
+    #[regex(r"/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/", logos::skip)]
+    Comment,
 
 
     #[error]
@@ -122,12 +129,49 @@ pub enum SyntaxKind {
     Root,
     NamedType,
     MemberType,
-    ChildType,
     UnitType,
     InferType,
     FuncType,
 
     FuncReturn,
+
+    PrefixExpr,
+    ParenthesizedExpr,
+    IfExpr,
+    UnitExpr,
+    MemberExpr,
+    FuncCallExpr,
+    PostfixExpr,
+    InfixExpr,
+    NamedExpr,
+    Literal,
+
+    Condition,
+    Positive,
+    Negative,
+
+    EvalSmt,
+    ReturnSmt,
+    LetSmt,
+    BindType,
+    AssignValue,
+    NoOp,
+
+    CodeBlock,
+
+    FuncDef,
+    FuncPar,
+    FuncName,
+
+    VarDef,
+    LetDef,
+
+    StructDef,
+    StructBody,
+
+    Visibility,
+
+    Import,
     
 
     CommaSeparatedList,
@@ -137,7 +181,7 @@ pub enum SyntaxKind {
 }
 
 pub struct Lexer<'a> {
-    lexer: logos::Lexer<'a, SyntaxKind>
+    lexer: logos::Lexer<'a, SyntaxKind>,
 }
 
 impl<'a> Lexer<'a> {
