@@ -1,4 +1,4 @@
-use cstree::{Checkpoint, Language};
+use rowan::{Checkpoint, Language};
 
 use crate::{lexer::SyntaxKind, ast::BoltLanguage};
 
