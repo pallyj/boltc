@@ -10,10 +10,11 @@ impl<'a> Parser<'a> {
 			return false;
 		}
 
-		if !self.eat(SyntaxKind::Ident) {
+		if !self.eat_and_start_node(SyntaxKind::Ident, SyntaxKind::FuncName) {
 			// Recover
-			self.bump()
+			self.bump();
 		}
+		self.finish_node();
 
 		self.parse_delim(
 			SyntaxKind::StructBody,
@@ -30,6 +31,8 @@ impl<'a> Parser<'a> {
 		let checkpoint = self.builder.checkpoint();
 
 		self.parse_visibility();
+
+		self.eat(SyntaxKind::StaticKw);
 
 		if self.parse_func(checkpoint) {
 

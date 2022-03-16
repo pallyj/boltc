@@ -1,6 +1,8 @@
 use std::fmt::Debug;
 
-use crate::{lexer::SyntaxKind, ast::{func::FuncDef}};
+use crate::{lexer::SyntaxKind};
+
+use self::{file::FileItem};
 
 pub type SyntaxNode = rowan::SyntaxNode<BoltLanguage>;
 pub type SyntaxToken = rowan::SyntaxToken<BoltLanguage>;
@@ -77,10 +79,24 @@ macro_rules! ast {
 
 ast!(struct Root(Root));
 
+impl Root {
+	pub fn items(&self) -> Vec<FileItem> {
+		self.0
+			.children()
+			.map(|child| FileItem::cast(child))
+			.collect()
+	}
+}
+
 impl Debug for Root {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", FuncDef::cast(self.0
-			.first_child().unwrap().clone()))
+        let code = self.items()
+			.iter()
+			.map(|item| format!("{item:?}"))
+			.collect::<Vec<_>>()
+			.join("\n");
+
+		write!(f, "{code}")
     }
 }
 

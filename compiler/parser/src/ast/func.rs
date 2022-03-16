@@ -42,7 +42,7 @@ impl FuncDef {
 	pub fn parameters(&self) -> Vec<FuncPar> {
 		self.0
 			.children()
-			.find(|child| child.kind() == SyntaxKind::Visibility)
+			.find(|child| child.kind() == SyntaxKind::CommaSeparatedList)
 			.unwrap()
 			.children()
 			.map(|par| FuncPar::cast(par).unwrap())
@@ -78,7 +78,7 @@ impl Debug for FuncDef {
 		let return_type = if let Some(rt) = self.return_type() { format!(": {rt:?}") } else { "".to_string() };
 		let code = format!("{:?}", self.code());
 
-		write!(f, "{vis}func {name}{params}{return_type} {code}")
+		write!(f, "{vis}func {name}({params}){return_type} {code}")
     }
 }
 

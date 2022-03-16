@@ -40,38 +40,10 @@ impl<'a> Parser<'a> {
 
 		let mut last_idx = usize::MAX;
 
-		while last_idx != self.index {
+		while (last_idx != self.index) && self.lexer.peek().is_some() {
 			last_idx = self.index;
 			self.parse_file_item();
 		}
-
-		self.finish_node();
-
-		let green = self.builder.finish();
-
-		Parse {
-			root: SyntaxNode::new_root(green)
-		}
-	}
-
-	pub fn parse_file_expr(mut self) -> Parse {
-		self.start_node(SyntaxKind::Root);
-
-		self.parse_expr();
-
-		self.finish_node();
-
-		let green = self.builder.finish();
-
-		Parse {
-			root: SyntaxNode::new_root(green)
-		}
-	}
-
-	pub fn parse_file_block(mut self) -> Parse {
-		self.start_node(SyntaxKind::Root);
-
-		self.parse_codeblock();
 
 		self.finish_node();
 
