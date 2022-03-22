@@ -9,7 +9,7 @@ pub type SyntaxToken = rowan::SyntaxToken<BoltLanguage>;
 pub type SyntaxElement = rowan::SyntaxElement<BoltLanguage>;
 
 pub struct Parse {
-	pub (crate) root: SyntaxNode,
+	pub root: SyntaxNode,
 }
 
 impl Debug for Parse {
@@ -43,6 +43,10 @@ macro_rules! ast {
 		impl $name {
 			pub const KIND: $crate::lexer::SyntaxKind = $crate::lexer::SyntaxKind::$kind;
 
+			pub fn range(&self) -> rowan::TextRange {
+				self.0.text_range()
+			}
+
 			pub fn cast(node: $crate::ast::SyntaxNode) -> Option<Self> {
 				if node.kind() == $crate::lexer::SyntaxKind::$kind {
 					Some(Self(node))
@@ -71,6 +75,15 @@ macro_rules! ast {
 						$name::KIND => unsafe { <$enum_name>::$name($name::unsafe_cast(node)) },
 					)*
 					_ => $enum_name::Error,
+				}
+			}
+
+			pub fn range(&self) -> rowan::TextRange {
+				match self {
+					$(
+						Self::$name(node) => node.range(),
+					)*
+					Self::Error => rowan::TextRange::new(0.into(), 1.into())
 				}
 			}
 		}

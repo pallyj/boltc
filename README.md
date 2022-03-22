@@ -68,6 +68,10 @@ Bolt is a powerful coding language designed for expressiveness and speed. Bolt c
 - Polymorphism
 - Globals
 
+### Bolt 0.3.1
+
+- Error Catching
+
 ### Bolt 0.3
 
 - Rewrite compiler

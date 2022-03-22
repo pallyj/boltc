@@ -1,37 +1,29 @@
 #![feature(path_file_prefix)]
 
-use blirssa::{Builder, typ::{Type, StructField}, value::BinaryIntrinsicFn, Library};
-use lower_blirssa::lower_blirssa_library;
-
 fn main() {
-    let mut builder = Builder::new();
-    let mut library = Library::new("helloWorld".to_string());
+	let mut parser = Parser::new(r#"
+import intrinsics
 
-    library.add_struct("Int64", false, false);
-    let int = library.get_struct("Int64").unwrap();
-    int.add_field(StructField::new("repr".to_string(), Type::Integer { bits: 64 }));
-    let int_ty = int.typ();
+func factorial(n: i64): i64 {
+    if integer64CmpEq( n, 0 ) {
+        1
+    } else {
+        integer64Mul( n, factorial(integer64Sub(n, 1)) )
+    }
+}
+	"#);
 
-	library.add_function("add", Type::Integer { bits: 64 }.func_type(vec![ int_ty.clone().pointer(), int_ty.pointer() ]));
-    let func = library.get_function("add").unwrap();
+	parser.operator_factory().register_intrinsics();
 
-	let block = func.append_block("start");
+	let mut lib = Library::new("");
 
-	builder.position_at_end(&block);
+	AstLowerer::new(parser.parse_file())
+		.lower_file(&mut lib);
 
-    let a = func.arg(0);
-	let b = func.arg(1);
+    blir_passes::type_resolve::run_pass(&mut lib);
+    blir_passes::type_infer::run_pass(&mut lib);
 
-    let a = builder.build_deref_struct_field(a, "repr");
-    let b = builder.build_deref_struct_field(b, "repr");
-
-	let c = builder.build_binary_intrinsic(BinaryIntrinsicFn::IntegerAdd, a, b);
-
-	builder.build_return(Some(c));
-
-	println!("{func}");
-
-    lower_blirssa_library(library).unwrap();
+	println!("{lib:?}");
 }
 
 /*
@@ -68,3 +60,7 @@ fn print_anon_error(e: &(dyn BoltMessage)) {
 
     println!();
 }*/
+
+use blir::Library;
+use lower_ast::AstLowerer;
+use parser::parser::Parser;
