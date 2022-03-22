@@ -1,8 +1,7 @@
 import intrinsics
 
-let oneTwoThree = [1: "one", 2: "two", 3: "three"];
-
 @transparent
+@defaultInteger
 public struct Int: FromIntLiteral {
 	private var intVal: i64;
 

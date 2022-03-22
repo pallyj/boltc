@@ -6,7 +6,7 @@ pub use var::*;
 use std::ops::{DerefMut, Deref};
 use std::fmt::Debug;
 
-use crate::code::FunctionRef;
+use crate::code::{FunctionRef, MethodRef};
 use crate::intrinsics::{UnaryIntrinsicFn, BinaryIntrinsicFn};
 use crate::{typ::{Type, TypeKind}, code::CodeBlock};
 
@@ -22,6 +22,7 @@ pub enum ValueKind {
 		function: Box<Value>,
 		args: FunctionArgs,
 	},
+	SelfVal,
 
 	// Literal Values
 	IntLiteral(u64),
@@ -37,6 +38,11 @@ pub enum ValueKind {
 	UnaryIntrinsicFn(UnaryIntrinsicFn),
 	BinaryIntrinsicFn(BinaryIntrinsicFn),
 	StaticFunc(FunctionRef),
+	StaticMethod(MethodRef),
+	InstanceMethod {
+		reciever: Box<Value>,
+		method: MethodRef,
+	},
 
 
 	// Logic
@@ -149,6 +155,7 @@ impl Debug for Value {
             ValueKind::Named(name) => write!(f, "%{name}"),
             ValueKind::Member { parent, member } => write!(f, "{parent:?}.{member}"),
             ValueKind::FuncCall { function, args } => write!(f, "{function:?}({args:?})"),
+			ValueKind::SelfVal => write!(f, "self"),
             ValueKind::IntLiteral(i) => write!(f, "{i}"),
             ValueKind::FloatLiteral(fl) => write!(f, "{}", fl),
             ValueKind::BoolLiteral(b) => write!(f, "{b}"),
@@ -158,6 +165,8 @@ impl Debug for Value {
             ValueKind::UnaryIntrinsicFn(intrinsic) => write!(f, "{intrinsic:?}"),
             ValueKind::BinaryIntrinsicFn(intrinsic) => write!(f, "{intrinsic:?}"),
 			ValueKind::StaticFunc(func) => write!(f, "{}", func.borrow().name),
+			ValueKind::StaticMethod(func) => write!(f, "{}", func.borrow().name),
+			ValueKind::InstanceMethod { reciever, method } => write!(f, "{reciever:?}.{}", method.borrow().name),
             ValueKind::If(if_value) => {
 				if let Some(neg) = &if_value.negative {
 					write!(f, "if {:?} {:?} else {:?}", if_value.condition, if_value.positive, neg)

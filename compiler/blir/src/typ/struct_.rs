@@ -41,9 +41,13 @@ impl Struct {
 			instance_vars: Vec::new()
 		};
 
-		StructRef {
+		let struct_ref = StructRef {
 			r#struct: Arc::new(Struct { inner: RefCell::new(r#struct) }),
-		}
+		};
+
+		struct_ref.add_type("Self".to_string(), Visibility::Private, TypeKind::Struct(struct_ref.clone()));
+
+		struct_ref
 	}
 
 	pub fn add_substruct(&self, substruct: StructRef) -> Option<SymbolWrapper> {
@@ -95,6 +99,12 @@ impl Struct {
 		self.borrow().scope.add_instance_symbol(name, visibility, symbol)
 	}
 
+	pub fn add_type(&self, name: String, visibility: Visibility, typ: TypeKind) -> Option<SymbolWrapper> {
+		let sym = Symbol::Type(typ);
+
+		self.borrow().scope.add_symbol(name, visibility, sym)
+	}
+
 	pub fn borrow(&self) -> Ref<StructInner> {
 		self.inner.borrow()
 	}
@@ -109,6 +119,18 @@ impl Struct {
 
 	pub fn name(&self) -> String {
 		self.inner.borrow().name.clone()
+	}
+
+	pub fn lookup_static_item(&self, name: &str) -> Option<Symbol> {
+		self.borrow().scope()
+			.lookup_static_member(name)
+			.map(|sym| sym.resolve())
+	}
+
+	pub fn lookup_instance_item(&self, name: &str) -> Option<Symbol> {
+		self.borrow().scope()
+			.lookup_instance_member(name)
+			.map(|sym| sym.resolve())
 	}
 }
 

@@ -1,10 +1,39 @@
-use blir::{Library, code::{FunctionRef, CodeBlock, Statement, StatementKind}, typ::{Type, TypeKind}, value::{Value, ValueKind, IfValue, IfBranch}};
+use blir::{Library, code::{FunctionRef, CodeBlock, Statement, StatementKind, MethodRef}, typ::{Type, TypeKind, StructRef}, value::{Value, ValueKind, IfValue, IfBranch}};
 use hminfer::{TypeInferCtx, TypeTable};
 
 pub fn run_pass(library: &mut Library) {
+	for r#struct in library.structs.iter() {
+		infer_struct(r#struct)
+	}
+
 	for func in library.functions.iter() {
 		infer_func(func);
 	}
+}
+
+fn infer_struct(r#struct: &StructRef) {
+	// TODO: Have an infer thingy
+
+	let borrowed = r#struct.borrow_mut();
+
+	for method in &borrowed.methods {
+		infer_method(method);
+	}
+}
+
+fn infer_method(method: &MethodRef) {
+	let mut infer_ctx = TypeInferCtx::new();
+
+	let mut method = method.borrow_mut();
+	let ty = method.return_type.clone();
+
+	let scope = method.scope().clone();
+
+	infer_ctx.infer_codeblock(&mut method.code, &ty, &scope);
+
+	let type_table = infer_ctx.finalize();
+
+	replace_code_block(&mut method.code, &type_table);
 }
 
 fn infer_func(func: &FunctionRef) {

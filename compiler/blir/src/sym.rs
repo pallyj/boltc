@@ -2,7 +2,7 @@ use crate::{
 	code::{FunctionRef, MethodRef},
 	scope::{ScopeRelation},
 	value::{VarRef, Value},
-	typ::{TypeKind, Type},
+	typ::{TypeKind},
 	Visibility
 };
 

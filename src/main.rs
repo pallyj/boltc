@@ -4,6 +4,18 @@ fn main() {
 	let mut parser = Parser::new(r#"
 import intrinsics
 
+struct Int64 {
+    var repr: i64
+
+    func add(b: i64): i64 {
+        self.uni(b)
+    }
+
+    func uni(a: i64): i64 {
+        a
+    }
+}
+
 func factorial(n: i64): i64 {
     if integer64CmpEq( n, 0 ) {
         1
@@ -22,6 +34,7 @@ func factorial(n: i64): i64 {
 
     blir_passes::type_resolve::run_pass(&mut lib);
     blir_passes::type_infer::run_pass(&mut lib);
+    blir_passes::type_check::run_pass(&mut lib);
 
 	println!("{lib:?}");
 }

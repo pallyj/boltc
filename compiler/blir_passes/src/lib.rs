@@ -3,3 +3,4 @@
 
 pub mod type_resolve;
 pub mod type_infer;
+pub mod type_check;

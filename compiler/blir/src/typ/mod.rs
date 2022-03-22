@@ -5,6 +5,8 @@ use std::{ops::{Deref, DerefMut}, fmt::{Debug}, sync::atomic::{AtomicU64, Orderi
 use errors::Span;
 pub use struct_::*;
 
+use crate::Symbol;
+
 static NEXT_INFER_KEY: AtomicU64 = AtomicU64::new(1);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -86,6 +88,21 @@ impl Type {
 		let key = NEXT_INFER_KEY.fetch_add(1, Ordering::AcqRel);
 
 		Type { kind: TypeKind::Infer { key }, span: None }
+	}
+
+	pub fn lookup_static_item(&self, named: &str) -> Option<Symbol> {
+		match &self.kind {
+			TypeKind::Struct(r#struct) => r#struct.lookup_static_item(named),
+			_ => None
+		}
+	}
+
+	pub fn lookup_instance_item(&self, named: &str) -> Option<Symbol> {
+		match &self.kind {
+			TypeKind::Metatype(ty) => ty.clone().anon().lookup_static_item(named),
+			TypeKind::Struct(r#struct) => r#struct.lookup_instance_item(named),
+			_ => None
+		}
 	}
 }
 

@@ -59,6 +59,14 @@ impl ScopeRef {
 		self.inner.borrow().lookup_symbol(name)
 	}
 
+	pub fn lookup_instance_member(&self, name: &str) -> Option<SymbolWrapper> {
+		self.inner.borrow().lookup_instance_member(name)
+	}
+
+	pub fn lookup_static_member(&self, name: &str) -> Option<SymbolWrapper> {
+		self.inner.borrow().lookup_static_member(name)
+	}
+
 	pub fn define_variable(&self, name: &str, typ: Type) -> String {
 		self.inner.borrow_mut().define_variable(name, typ)
 	}
@@ -84,7 +92,7 @@ impl Scope {
 	fn add_instance_symbol(&mut self, name: String, vis: Visibility, sym: Symbol) -> Option<SymbolWrapper> {
 		let wrapper = SymbolWrapper::new(sym, vis);
 
-		self.symbols.insert(name, wrapper)
+		self.instance_symbols.insert(name, wrapper)
 	}
 
 	fn import(&mut self, scope: ScopeRef) {
@@ -128,6 +136,22 @@ impl Scope {
 		}
 
 		self.lookup_symbol(name)
+	}
+
+	fn lookup_static_member(&self, name: &str) -> Option<SymbolWrapper> {
+		if let Some(sym) = self.symbols.get(name) {
+			return Some(sym.clone())
+		}
+
+		None
+	}
+
+	fn lookup_instance_member(&self, name: &str) -> Option<SymbolWrapper> {
+		if let Some(sym) = self.instance_symbols.get(name) {
+			return Some(sym.clone())
+		}
+
+		None
 	}
 
 	fn parent(&self) -> Option<Arc<RefCell<Scope>>> {

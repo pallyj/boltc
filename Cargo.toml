@@ -26,6 +26,8 @@ members = [
 	"compiler/blir",
 	"compiler/blir_passes",
 	"compiler/hminfer",
+	"compiler/mangle",
+	"compiler/lower_blir",
 	"compiler/blirssa",
 	"compiler/lower_blirssa",
 	"compiler/codegen"

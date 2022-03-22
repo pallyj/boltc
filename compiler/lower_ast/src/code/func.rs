@@ -27,7 +27,7 @@ impl AstLowerer {
 		let span = self.span(range);
 
 		let visibility = self.lower_visibility(func.visibility());
-		let is_static = false;
+		let is_static = func.is_static();
 		let name = func.name();
 		let params = func.parameters()
 			.iter()

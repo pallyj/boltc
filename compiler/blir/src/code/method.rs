@@ -2,7 +2,7 @@ use std::{sync::Arc, cell::{RefCell, Ref, RefMut}, ops::Deref, fmt::Debug};
 
 use errors::Span;
 
-use crate::{Visibility, typ::{Type}, scope::{ScopeRef, ScopeRelation}};
+use crate::{Visibility, typ::{Type, TypeKind}, scope::{ScopeRef, ScopeRelation}, value::ValueKind, Symbol};
 
 use super::{CodeBlock, FuncParam};
 
@@ -28,6 +28,33 @@ pub struct MethodInner {
 impl MethodInner {
 	pub fn scope(&self) -> &ScopeRef {
 		&self.scope
+	}
+
+	pub fn add_params(&self) {
+		let sym = Symbol::Value(ValueKind::SelfVal.anon(self.self_type.clone()));
+		self.scope.add_symbol("self".to_string(), Visibility::Public, sym);
+
+		for p in self.params.iter() {
+			let val = ValueKind::FunctionParam(p.bind_name.clone())
+				.anon(p.typ.clone());
+				
+			self.scope.add_symbol(p.bind_name.clone(), Visibility::Public, Symbol::Value(val));
+		}
+	}
+
+	pub fn typ(&self) -> Type {
+		if self.is_static {
+			let params = self.params.iter().map(|param| param.typ.clone()).collect::<Vec<_>>();
+
+			TypeKind::Function { return_type: Box::new(self.return_type.clone()), params, labels: vec![] }.anon()
+		} else {
+			let self_iter = std::iter::once(self.self_type.clone());
+			let params_iter: Vec<Type> = self.params.iter().map(|param| param.typ.clone()).collect();
+
+			let params = self_iter.chain(params_iter).collect();
+
+			TypeKind::Function { return_type: Box::new(self.return_type.clone()), params, labels: vec![] }.anon()
+		}
 	}
 }
 
@@ -75,6 +102,12 @@ impl Method {
 #[derive(Clone)]
 pub struct MethodRef {
 	func: Arc<Method>
+}
+
+impl MethodRef {
+	pub fn take_typ(&self) -> Type {
+		unsafe { &*self.func.inner.as_ptr() }.typ()
+	}
 }
 
 impl Deref for MethodRef {
