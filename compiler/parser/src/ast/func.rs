@@ -30,6 +30,13 @@ impl FuncDef {
 			.map(|tok| tok.kind())
 	}
 
+	pub fn is_static(&self) -> bool {
+		self.0
+			.children_with_tokens()
+			.find(|child| child.kind() == SyntaxKind::StaticKw)
+			.is_some()
+	}
+
 	pub fn name(&self) -> String {
 		self.0
 			.children()

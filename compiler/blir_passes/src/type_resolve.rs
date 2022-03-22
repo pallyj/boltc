@@ -2,7 +2,7 @@ use blir::{Library,
 	code::{FunctionRef, MethodRef, CodeBlock, Statement, StatementKind},
 	typ::{StructRef, Type, TypeKind},
 	scope::ScopeRef,
-	value::VarRef,
+	value::{VarRef, Value, ValueKind},
 	Symbol};
 
 pub fn run_pass(library: &mut Library) {
@@ -15,6 +15,10 @@ pub fn run_pass(library: &mut Library) {
 
 	for func in &library.functions {
 		walk_function(&func, &scope);
+	}
+
+	for func in &library.functions {
+		walk_function_code(&func);
 	}
 }
 
@@ -33,6 +37,10 @@ fn walk_struct(r#struct: &StructRef, _scope: &ScopeRef) {
 	for method in &r#struct.methods {
 		walk_method(&method, &scope);
 	}
+
+	for method in &r#struct.methods {
+		walk_method_code(&method);
+	}
 }
 
 fn walk_variable( var: &VarRef, scope: &ScopeRef ) {
@@ -48,7 +56,15 @@ fn walk_method( method: &MethodRef, scope: &ScopeRef ) {
 		.iter_mut()
 		.for_each(|param| walk_type(&mut param.typ, scope));
 
-	walk_code_block(&mut method.code, scope);
+	method.add_params();
+}
+
+fn walk_method_code( method: &MethodRef) {
+	let mut method = method.borrow_mut();
+
+	let scope = method.scope().clone();
+
+	walk_code_block(&mut method.code, &scope);
 }
 
 fn walk_function( function: &FunctionRef, scope: &ScopeRef ) {
@@ -61,8 +77,14 @@ fn walk_function( function: &FunctionRef, scope: &ScopeRef ) {
 		.for_each(|param| walk_type(&mut param.typ, scope));
 
 	function.add_params();
+}
 
-	walk_code_block(&mut function.code, scope);
+fn walk_function_code( function: &FunctionRef ) {
+	let mut function = function.borrow_mut();
+
+	let scope = function.scope().clone();
+
+	walk_code_block(&mut function.code, &scope);
 }
 
 fn walk_code_block( code: &mut CodeBlock, scope: &ScopeRef ) {
@@ -73,11 +95,101 @@ fn walk_code_block( code: &mut CodeBlock, scope: &ScopeRef ) {
 
 fn walk_statement(smt: &mut Statement, scope: &ScopeRef) {
 	match &mut smt.kind {
-		StatementKind::Bind { name, typ, value: _ } => {
+		StatementKind::Bind { name, typ, value } => {
 			walk_type(typ, scope);
 
 			*name = scope.define_variable(&name, typ.clone());
+
+			value.as_mut().map(|value| walk_value(value, scope));
 		}
+
+		StatementKind::Eval { value, escaped: _ } => {
+			walk_value(value, scope);
+		}
+
+		StatementKind::Return { value } => {
+			value.as_mut().map(|value| walk_value(value, scope));
+		}
+	}
+}
+
+fn walk_value(value: &mut Value, scope: &ScopeRef) {
+	match &mut value.kind {
+		ValueKind::Named(name) => {
+			let Some(sym) = scope.lookup_symbol(name).map(|sym| sym.resolve()) else {
+				println!("Error: can't find symbol {name}");
+				return
+			};
+
+			match sym {
+				Symbol::Type(ty) => {
+					value.set_kind(ValueKind::Metatype(ty.clone()));
+					value.typ.set_kind(TypeKind::Metatype(Box::new(ty)));
+				}
+
+				Symbol::Value(res_val) => {
+					value.set_kind(res_val.kind);
+					value.typ = res_val.typ;
+				}
+
+				Symbol::Function(function) => {
+					value.set_type(function.take_typ());
+					value.set_kind(ValueKind::StaticFunc(function));
+				}
+
+				_ => {
+					println!("Error");
+				}
+			}
+		}
+
+		ValueKind::FuncCall { function, args } => {
+			walk_value(function.as_mut(), scope);
+
+			args.args
+				.iter_mut()
+				.for_each(|arg| walk_value(arg, scope));
+		}
+
+		ValueKind::Member { parent, member } => {
+			walk_value(parent.as_mut(), scope);
+
+			let Some(sym) = parent.typ.lookup_instance_item(member) else {
+				println!("Error: Couldn't find instance member {member}");
+				return;
+			};
+
+			match sym {
+				Symbol::Type(ty) => {
+					value.set_kind(ValueKind::Metatype(ty.clone()));
+					value.typ.set_kind(TypeKind::Metatype(Box::new(ty)));
+				}
+
+				Symbol::Value(res_val) => {
+					value.set_kind(res_val.kind);
+					value.typ = res_val.typ;
+				}
+
+				Symbol::StaticMethod(method) => {
+					value.set_type(method.take_typ());
+					value.set_kind(ValueKind::StaticMethod(method));
+				}
+
+				Symbol::InstanceMethod(method) => {
+					let parent = std::mem::replace(parent.as_mut(), ValueKind::Unit.anon(TypeKind::Void.anon()));
+					value.set_type(method.take_typ());
+					let kind = ValueKind::InstanceMethod {
+						reciever: Box::new(parent),
+						method };
+					value.set_kind(kind);
+				}
+
+				s => {
+					println!("Error: Symbol is something else {s:?}");
+				}
+			}
+		}
+
 		_ => {}
 	}
 }
@@ -98,6 +210,22 @@ fn walk_type( typ: &mut Type, scope: &ScopeRef ) {
 			};
 
 			typ.set_kind(resolved_typ);
+		}
+
+		TypeKind::Member { parent, member } => {
+			walk_type(parent.as_mut(), scope);
+
+			let Some(sym) = parent.lookup_static_item(member.as_str()) else {
+				println!("Error: member not found");
+				return;
+			};
+
+			let Symbol::Type(tk) = sym else {
+				println!("Error: member not a type");
+				return;
+			};
+
+			typ.set_kind(tk);
 		}
 
 		TypeKind::Function { return_type, params, labels: _ } => {

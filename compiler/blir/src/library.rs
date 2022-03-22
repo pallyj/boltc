@@ -1,5 +1,7 @@
 use std::fmt::Debug;
 
+use mangle::{Mangled, MangleComponent};
+
 use crate::{
 	scope::{ScopeRelation, ScopeRef},
 	typ::{StructRef, TypeKind},
@@ -12,6 +14,8 @@ pub struct Library {
 
 	scope: ScopeRef,
 
+	pub mangled: Mangled,
+
 	pub functions: Vec<FunctionRef>,
 	pub structs: Vec<StructRef>,
 }
@@ -20,6 +24,7 @@ impl Library {
 	pub fn new(name: &str) -> Library {
 		Library {
 			name: name.to_string(),
+			mangled: Mangled::new(MangleComponent::Library(name.to_string())),
 			scope: ScopeRef::new(None, ScopeRelation::None, false),
 			functions: Vec::new(),
 			structs: Vec::new(),
@@ -35,10 +40,10 @@ impl Library {
 		self.functions.push(func.clone());
 
 		// Add the functions symbol, returning another symbol if it exists
-		let (visibility, name, typ) = {
+		let (visibility, name) = {
 			let func_ref = func.borrow();
 
-			(func_ref.visibility, func_ref.name.clone(), func_ref.typ())
+			(func_ref.visibility, func_ref.name.clone())
 		};
 
 		let symbol = Symbol::Function(func);
@@ -60,6 +65,10 @@ impl Library {
 
 	pub fn scope(&self) -> &ScopeRef {
 		&self.scope
+	}
+
+	pub fn mangled(&self) -> &Mangled {
+		&self.mangled
 	}
 }
 
