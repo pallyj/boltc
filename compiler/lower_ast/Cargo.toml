@@ -1,5 +1,5 @@
 [package]
-name = "errors"
+name = "lower_ast"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,3 +7,6 @@ edition = "2021"
 
 [dependencies]
 rowan = "0.15.4"
+parser = { path = "../parser" }
+blir = { path = "../blir" }
+errors = { path = "../errors" }

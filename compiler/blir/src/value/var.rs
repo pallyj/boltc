@@ -1,42 +1,63 @@
-use std::{sync::Arc, cell::{RefCell, Ref, RefMut}};
+use std::{cell::{Ref, RefCell, RefMut}, sync::Arc, ops::Deref, fmt::Debug};
 
-use crate::{typ::Type, Visibility};
+use crate::{Visibility, value::Value};
 
-use super::Value;
+use super::Type;
 
-pub struct Variable {
+pub struct VarInner {
 	pub visibility: Visibility,
+
 	pub name: String,
+
 	pub typ: Type,
-	pub value: Option<Value>,
+
+	pub default_value: Option<Value>,
 }
 
-impl Variable {
-	pub fn new(visibility: Visibility, name: String, typ: Type, value: Option<Value>) -> VariableRef {
-		let var = Variable {
+pub struct Var {
+	var: RefCell<VarInner>,
+}
+
+impl Var {
+	pub fn new(visibility: Visibility, name: String, typ: Type, default_value: Option<Value>) -> VarRef {
+		let var_inner = VarInner {
 			visibility,
 			name,
 			typ,
-			value
+			default_value
 		};
 
-		VariableRef {
-			var: Arc::new(RefCell::new(var))
-		}
+		VarRef { var: Arc::new(Var { var: RefCell::new(var_inner) }) }
+	}
+
+	pub fn borrow(&self) -> Ref<VarInner> {
+		self.var.borrow()
+	}
+
+	pub fn borrow_mut(&self) -> RefMut<VarInner> {
+		self.var.borrow_mut()
 	}
 }
 
 #[derive(Clone)]
-pub struct VariableRef {
-	var: Arc<RefCell<Variable>>,
+pub struct VarRef {
+	var: Arc<Var>,
 }
 
-impl VariableRef {
-	pub fn borrow(&self) -> Ref<Variable> {
-		self.var.borrow()
-	}
+impl Deref for VarRef {
+    type Target = Var;
 
-	pub fn borrow_mut(&mut self) -> RefMut<Variable> {
-		self.var.borrow_mut()
-	}
+    fn deref(&self) -> &Self::Target {
+        self.var.deref()
+    }
+}
+
+impl Debug for VarRef {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		if let Some(val) = &self.borrow().default_value {
+        	write!(f, "{visibility} var {name}: {typ:?} = {value:?}", visibility = self.borrow().visibility, name = self.borrow().name, typ = self.borrow().typ, value = val)
+		} else {
+			write!(f, "{visibility} var {name}: {typ:?}", visibility = self.borrow().visibility, name = self.borrow().name, typ = self.borrow().typ)
+		}
+    }
 }

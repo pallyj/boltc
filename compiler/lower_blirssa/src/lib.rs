@@ -11,9 +11,7 @@ pub (crate) mod func;
 pub (crate) mod value;
 pub (crate) mod struct_;
 
-pub fn lower_blirssa_library(library: Library) -> Result<(), String> {
-    let context = Context::create();
-
+pub fn lower_blirssa_library(library: Library, context: &Context) -> Result<Module, String> {
     let module = context.create_module(library.name());
     let builder = context.create_builder();
 
@@ -51,12 +49,7 @@ pub fn lower_blirssa_library(library: Library) -> Result<(), String> {
         lower_function(func, &module_context)?;
     }
 
-    // Handle the llvm code
-    // Right now, spit it out on the console
-
-    module.print_to_stderr();
-
-    Ok(())
+    Ok(module)
 }
 
 pub struct ModuleContext<'a, 'ctx> {

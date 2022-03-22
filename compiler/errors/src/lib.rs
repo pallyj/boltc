@@ -1,3 +1,27 @@
+#[derive(Debug, Copy, Clone)]
+pub struct Span {
+    range: TextRange,
+    file: u32,
+}
+
+impl Span {
+    pub fn new(range: TextRange, file: u32) -> Span {
+        Span {
+            range,
+            file
+        }
+    }
+
+    pub fn range(&self) -> TextRange {
+        self.range
+    }
+
+    pub fn file_key(&self) -> u32 {
+        self.file
+    }
+}
+
+
 /*pub struct Debugger<T> {
     errors: Vec<T>,
     warnings: Vec<T>,
@@ -19,8 +43,8 @@ type Value =
     Int |
     Record;
 
-func print(rec: Record) =>
-    rec.forEach => match {
+func print(rec: Record) =
+    rec.forEach -> match {
         String str => println(str),
         Int i => println(i),
         Record r => print(r)
@@ -38,7 +62,7 @@ let printJson = parseJson -> printRecord;
 func parseJson(s: String): Record 
 
 func printRecord(r: Record) =
-    r.items.forEach => match {
+    r.items.forEach -> match {
         .string -> println,
         .int -> println,
         .record -> printRecord
@@ -68,3 +92,5 @@ Named currying:
 func square = mul($1, $1)
 
 */
+
+use rowan::TextRange;

@@ -1,45 +1,45 @@
-use crate::{typ::{TypeKind}, Visibility, intrinsics::{UnaryIntrinsicFn, BinaryIntrinsicFn}, code::{FunctionRef, MethodRef}};
+use crate::{
+	code::{FunctionRef, MethodRef},
+	scope::{ScopeRelation},
+	value::{VarRef, Value},
+	typ::{TypeKind, Type},
+	Visibility
+};
 
-use std::hash::Hash;
-
+#[derive(Debug, Clone)]
 pub enum Symbol {
-	UnaryIntrinsicFn(UnaryIntrinsicFn),
-	BinaryIntrinsicFn(BinaryIntrinsicFn),
+	Value(Value),
 
 	Function(FunctionRef),
 	StaticMethod(MethodRef),
 	InstanceMethod(MethodRef),
 
+	InstanceVariable(VarRef),
+
 	Type(TypeKind),
 }
 
-#[derive(Eq)]
-pub struct SymbolKey {
-	visibility: Visibility,
-	name: String,
+#[derive(Clone)]
+pub struct SymbolWrapper {
+	sym: Symbol,
+	vis: Visibility
 }
 
-impl SymbolKey {
-	pub fn new(name: String, visibility: Visibility) -> Self {
+impl SymbolWrapper {
+	pub fn new(sym: Symbol, vis: Visibility) -> Self {
 		Self {
-			name,
-			visibility,
+			sym,
+			vis
 		}
 	}
-
-	pub fn visibility(&self) -> Visibility {
-		self.visibility
+	pub fn filter(self, relation: ScopeRelation) -> Option<SymbolWrapper> {
+		if relation.can_access(self.vis) {
+			Some(self)
+		} else {
+			None
+		}
 	}
-}
-
-impl Hash for SymbolKey {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.name.hash(state);
-    }
-}
-
-impl PartialEq for SymbolKey {
-    fn eq(&self, other: &Self) -> bool {
-        self.name == other.name
-    }
+	pub fn resolve(self) -> Symbol {
+		self.sym
+	}
 }
