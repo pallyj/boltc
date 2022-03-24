@@ -32,7 +32,9 @@ impl MethodInner {
 
 	pub fn add_params(&self) {
 		let sym = Symbol::Value(ValueKind::SelfVal.anon(self.self_type.clone()));
-		self.scope.add_symbol("self".to_string(), Visibility::Public, sym);
+		if !self.is_static {
+			self.scope.add_symbol("self".to_string(), Visibility::Public, sym);
+		}
 
 		for p in self.params.iter() {
 			let val = ValueKind::FunctionParam(p.bind_name.clone())
@@ -48,12 +50,9 @@ impl MethodInner {
 
 			TypeKind::Function { return_type: Box::new(self.return_type.clone()), params, labels: vec![] }.anon()
 		} else {
-			let self_iter = std::iter::once(self.self_type.clone());
-			let params_iter: Vec<Type> = self.params.iter().map(|param| param.typ.clone()).collect();
+			let params = self.params.iter().map(|param| param.typ.clone()).collect::<Vec<_>>();
 
-			let params = self_iter.chain(params_iter).collect();
-
-			TypeKind::Function { return_type: Box::new(self.return_type.clone()), params, labels: vec![] }.anon()
+			TypeKind::Method { reciever: Box::new(self.self_type.clone()), return_type: Box::new(self.return_type.clone()), params }.anon()
 		}
 	}
 }

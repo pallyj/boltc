@@ -10,3 +10,4 @@ rowan = "0.15.4"
 parser = { path = "../parser" }
 blir = { path = "../blir" }
 errors = { path = "../errors" }
+fast-float = "0.2.0"

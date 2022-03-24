@@ -2,7 +2,7 @@
 
 use blirssa::{Library, typ::Type};
 use func::lower_function;
-use inkwell::{context::Context, module::{Module}, builder::Builder};
+use inkwell::{context::Context, module::{Module, Linkage}, builder::Builder};
 use struct_::lower_struct;
 use typ::lower_function_type;
 
@@ -29,6 +29,19 @@ pub fn lower_blirssa_library(library: Library, context: &Context) -> Result<Modu
     // Fill in the fields for the structs
     for r#struct in library.structs() {
         lower_struct(r#struct, &module_context);
+    }
+
+    // Create a definition for each extern function
+    for func in library.extern_functions() {
+        let Type::Function { return_type, pars } = func.typ() else {
+            panic!("Error: Function created with non function type");
+        };
+
+        let Some(function_type) = lower_function_type(&*return_type, &pars, &module_context) else {
+            return Err(format!("Error creating function type {}", func.typ()));
+        };
+
+        module.add_function(func.name(), function_type, Some(Linkage::External));
     }
 
     // Create a definition for each function

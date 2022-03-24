@@ -99,9 +99,9 @@ impl Struct {
 }
 
 impl StructField {
-	pub fn new(name: String, typ: Type) -> StructField {
+	pub fn new(name: &str, typ: Type) -> StructField {
 		StructField {
-			name,
+			name: name.to_string(),
 			typ
 		}
 	}

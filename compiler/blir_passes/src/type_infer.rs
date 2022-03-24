@@ -48,6 +48,8 @@ fn infer_func(func: &FunctionRef) {
 
 	let type_table = infer_ctx.finalize();
 
+	//println!("{:?}", type_table);
+
 	replace_code_block(&mut func.code, &type_table);
 }
 
@@ -78,6 +80,10 @@ fn replace_value(value: &mut Value, table: &TypeTable) {
 			args.args
 				.iter_mut()
 				.for_each(|arg| replace_value(arg, table));
+		}
+
+		ValueKind::InstanceMethod { reciever, method: _ } => {
+			replace_value(reciever, table);
 		}
 
 		ValueKind::If(if_value) => replace_if_value(if_value, table),

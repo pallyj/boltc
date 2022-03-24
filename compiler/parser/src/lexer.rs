@@ -160,6 +160,7 @@ pub enum SyntaxKind {
     CodeBlock,
 
     FuncDef,
+    InitDef,
     FuncPar,
     FuncName,
 

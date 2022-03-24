@@ -1,5 +1,5 @@
 use crate::{
-	code::{FunctionRef, MethodRef},
+	code::{FunctionRef, MethodRef, ExternFunctionRef},
 	scope::{ScopeRelation},
 	value::{VarRef, Value},
 	typ::{TypeKind},
@@ -13,6 +13,7 @@ pub enum Symbol {
 	Function(FunctionRef),
 	StaticMethod(MethodRef),
 	InstanceMethod(MethodRef),
+	ExternFunction(ExternFunctionRef),
 
 	InstanceVariable(VarRef),
 
@@ -41,5 +42,9 @@ impl SymbolWrapper {
 	}
 	pub fn resolve(self) -> Symbol {
 		self.sym
+	}
+
+	pub fn visibility(&self) -> Visibility {
+		self.vis
 	}
 }

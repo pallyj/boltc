@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::{typ::Type, code::FunctionRef};
+use crate::{typ::Type, code::{FunctionRef, ExternFunctionRef}};
 
 use super::{LabelValue, BinaryIntrinsicFn, UnaryIntrinsicFn};
 
@@ -54,6 +54,9 @@ pub enum Value {
 	},
 
 	Function { function: FunctionRef },
+
+	ExternFunction { function: ExternFunctionRef },
+
 	Call { function: LabelValue, args: Vec<LabelValue>, typ: Type }
 }
 
@@ -67,6 +70,7 @@ impl Value {
 			Self::BinaryIntrinsic { return_type, .. } => return_type,
 
 			Self::Function { function } => return function.typ(),
+			Self::ExternFunction { function } => return function.typ(),
 			Self::Call { typ, .. } => typ,
 
 			Self::AllocOnStackUndef { typ, .. } => typ,
@@ -93,6 +97,7 @@ impl Display for Value {
 			Value::Deref { pointer, typ } => write!(f, "deref {pointer} : {typ}"),
 
 			Value::Function { function } => write!(f, "function \"{name}\" : {typ}", name = function.name(), typ = function.typ()),
+			Value::ExternFunction { function } => write!(f, "function \"{name}\" : {typ}", name = function.name(), typ = function.typ()),
 			Value::Call { function, args, typ } => {
 				let args = args
 					.iter()

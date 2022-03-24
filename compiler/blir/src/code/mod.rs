@@ -1,6 +1,7 @@
 mod smt;
 mod func;
 mod method;
+mod extern_func;
 
 use std::{fmt::Debug};
 
@@ -8,6 +9,7 @@ use errors::Span;
 pub use smt::*;
 pub use func::*;
 pub use method::*;
+pub use extern_func::*;
 
 use crate::{typ::{Type, TypeKind}};
 

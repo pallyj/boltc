@@ -16,13 +16,18 @@ impl AstLowerer {
 			}.spanned_infer(span),
 
 			AstExpr::LiteralExpr(literal) => {
-				let _text = literal.text();
+				let text = literal.text().replace("_", "");
 
 				match literal.literal_kind() {
 					LiteralKind::True => ValueKind::BoolLiteral(true).spanned_infer(span),
 					LiteralKind::False => ValueKind::BoolLiteral(false).spanned_infer(span),
 					// TODO: Add parsing
-					LiteralKind::DecInteger => ValueKind::IntLiteral(u64::from_str_radix(&_text, 10).unwrap()).spanned_infer(span),
+					LiteralKind::DecInteger => ValueKind::IntLiteral(u64::from_str_radix(&text, 10).unwrap()).spanned_infer(span),
+					LiteralKind::HexInteger => ValueKind::IntLiteral(u64::from_str_radix(&text[2..], 16).unwrap()).spanned_infer(span),
+					LiteralKind::OctInteger => ValueKind::IntLiteral(u64::from_str_radix(&text[2..], 8).unwrap()).spanned_infer(span),
+					LiteralKind::BinInteger => ValueKind::IntLiteral(u64::from_str_radix(&text[2..], 2).unwrap()).spanned_infer(span),
+
+					LiteralKind::DecFloat => ValueKind::FloatLiteral(fast_float::parse(&text).unwrap()).spanned_infer(span),
 
 					_ => ValueKind::BoolLiteral(true).spanned_infer(span),
 				}

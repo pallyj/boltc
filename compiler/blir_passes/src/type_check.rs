@@ -28,7 +28,7 @@ fn check_smt(smt: &Statement, return_type: &Type) {
 
 				if !is_assignable_from(typ, &value.typ) {
 					// Error
-					println!("Error: Not assignable from");
+					println!("Error: {typ:?} is not assignable from {:?}", value.typ);
 				}
 			}
 		}
@@ -38,7 +38,7 @@ fn check_smt(smt: &Statement, return_type: &Type) {
 
 				if !is_assignable_from(return_type, &value.typ) {
 					// Error
-					println!("Error");
+					println!("Error: Not assignable from");
 				}
 			}
 		}

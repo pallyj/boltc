@@ -1,7 +1,7 @@
 use std::{collections::HashMap, cell::RefCell};
 
 use blirssa::{code::{FunctionRef, BlockRef}, value::{Instruction, LabelValue}, typ::Type};
-use inkwell::values::FunctionValue;
+use inkwell::{values::FunctionValue, basic_block::BasicBlock};
 
 use crate::{ModuleContext, value::{lower_value, LLVMValue}};
 
@@ -12,18 +12,17 @@ pub fn lower_function<'a, 'ctx>(func: &FunctionRef, context: &ModuleContext<'a, 
 	// associating a name with each one.
 	// This step is necessary to allow for reference to later blocks.
 
-	let mut basic_blocks_lookup = HashMap::new();
+	// Create a function context
+	let function_context = FunctionContext::new();
+
 	let mut basic_blocks = Vec::new();
 
 	for block in func.blocks().iter() {
-		let basic_block = context.context.append_basic_block(llvm_func,block.label());
+		let basic_block = context.context.append_basic_block(llvm_func, block.label());
 
-		basic_blocks_lookup.insert(block.label().clone(), basic_block);
+		function_context.add_basic_block(block.index(), basic_block);
 		basic_blocks.push(basic_block);
 	}
-
-	// Create a function context
-	let function_context = FunctionContext::new();
 
 	// Define the functions arguments
 	let Type::Function { pars, .. } = func.typ() else {
@@ -62,12 +61,29 @@ fn lower_block<'a, 'ctx>(blir_block: &BlockRef, context: &ModuleContext<'a, 'ctx
 				context.builder.build_store(pointer.into_pointer_value(), value);
 			}
 
+			Instruction::Branch { condition, positive, negative } => {
+				let condition = fn_ctx.get_local(condition).basic().into_int_value();
+
+				let then_block = fn_ctx.get_basic_block(positive.index());
+				let else_block = fn_ctx.get_basic_block(negative.index());
+
+				context.builder.build_conditional_branch(condition, then_block, else_block);
+			}
+
+			Instruction::AlwaysBranch { block } => {
+				let block = fn_ctx.get_basic_block(block.index());
+
+				context.builder.build_unconditional_branch(block);
+			}
+
 			Instruction::Return { value } => {
 				if let Some(value) = value {
 					// Get the value from the local context
-					let llvm_value = fn_ctx.get_local(value).basic();
-
-					context.builder.build_return(Some(&llvm_value));
+					if let Some(llvm_value) = fn_ctx.get_local(value).try_basic() {
+						context.builder.build_return(Some(&llvm_value));
+					} else {
+						context.builder.build_return(None);
+					}
 				} else {
 					// Return a void
 					context.builder.build_return(None);
@@ -82,12 +98,14 @@ fn lower_block<'a, 'ctx>(blir_block: &BlockRef, context: &ModuleContext<'a, 'ctx
 
 pub struct FunctionContext<'ctx> {
 	locals: RefCell<HashMap<u64, LLVMValue<'ctx>>>,
+	basic_blocks: RefCell<HashMap<u64, BasicBlock<'ctx>>>,
 }
 
 impl<'ctx> FunctionContext<'ctx> {
 	pub fn new() -> Self {
 		FunctionContext {
-			locals: RefCell::new(HashMap::new())
+			locals: RefCell::new(HashMap::new()),
+			basic_blocks: RefCell::new(HashMap::new())
 		}
 	}
 
@@ -111,5 +129,18 @@ impl<'ctx> FunctionContext<'ctx> {
 			.get(&label.label())
 			.expect("Undefined label")
 			.clone()
+	}
+
+	pub fn add_basic_block(&self, n: u64, block: BasicBlock<'ctx>) {
+		self.basic_blocks
+			.borrow_mut()
+			.insert(n, block);
+	}
+
+	pub fn get_basic_block(&self, n: u64) -> BasicBlock {
+		*self.basic_blocks
+			.borrow()
+			.get(&n)
+			.unwrap()
 	}
 }

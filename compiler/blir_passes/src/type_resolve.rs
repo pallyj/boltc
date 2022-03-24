@@ -1,5 +1,5 @@
 use blir::{Library,
-	code::{FunctionRef, MethodRef, CodeBlock, Statement, StatementKind},
+	code::{FunctionRef, MethodRef, CodeBlock, Statement, StatementKind, ExternFunctionRef},
 	typ::{StructRef, Type, TypeKind},
 	scope::ScopeRef,
 	value::{VarRef, Value, ValueKind},
@@ -11,6 +11,10 @@ pub fn run_pass(library: &mut Library) {
 
 	for r#struct in &library.structs {
 		walk_struct(r#struct, &scope);
+	}
+
+	for func in &library.extern_functions {
+		walk_extern_function(&func, &scope);
 	}
 
 	for func in &library.functions {
@@ -79,6 +83,16 @@ fn walk_function( function: &FunctionRef, scope: &ScopeRef ) {
 	function.add_params();
 }
 
+fn walk_extern_function( function: &ExternFunctionRef, scope: &ScopeRef ) {
+	let mut function = function.borrow_mut();
+
+	walk_type(&mut function.return_type, scope);
+
+	function.params
+		.iter_mut()
+		.for_each(|param| walk_type(&mut param.typ, scope));
+}
+
 fn walk_function_code( function: &FunctionRef ) {
 	let mut function = function.borrow_mut();
 
@@ -137,8 +151,13 @@ fn walk_value(value: &mut Value, scope: &ScopeRef) {
 					value.set_kind(ValueKind::StaticFunc(function));
 				}
 
+				Symbol::ExternFunction(function) => {
+					value.set_type(function.take_typ());
+					value.set_kind(ValueKind::ExternFunc(function));
+				}
+
 				_ => {
-					println!("Error");
+					println!("Error: Invalid symbol");
 				}
 			}
 		}
@@ -149,45 +168,6 @@ fn walk_value(value: &mut Value, scope: &ScopeRef) {
 			args.args
 				.iter_mut()
 				.for_each(|arg| walk_value(arg, scope));
-		}
-
-		ValueKind::Member { parent, member } => {
-			walk_value(parent.as_mut(), scope);
-
-			let Some(sym) = parent.typ.lookup_instance_item(member) else {
-				println!("Error: Couldn't find instance member {member}");
-				return;
-			};
-
-			match sym {
-				Symbol::Type(ty) => {
-					value.set_kind(ValueKind::Metatype(ty.clone()));
-					value.typ.set_kind(TypeKind::Metatype(Box::new(ty)));
-				}
-
-				Symbol::Value(res_val) => {
-					value.set_kind(res_val.kind);
-					value.typ = res_val.typ;
-				}
-
-				Symbol::StaticMethod(method) => {
-					value.set_type(method.take_typ());
-					value.set_kind(ValueKind::StaticMethod(method));
-				}
-
-				Symbol::InstanceMethod(method) => {
-					let parent = std::mem::replace(parent.as_mut(), ValueKind::Unit.anon(TypeKind::Void.anon()));
-					value.set_type(method.take_typ());
-					let kind = ValueKind::InstanceMethod {
-						reciever: Box::new(parent),
-						method };
-					value.set_kind(kind);
-				}
-
-				s => {
-					println!("Error: Symbol is something else {s:?}");
-				}
-			}
 		}
 
 		_ => {}

@@ -111,6 +111,7 @@ impl BinaryIntrinsicFn {
 #[derive(Clone, Copy)]
 pub enum UnaryIntrinsicFn {
 	IntegerNegate,
+	IntegerInvert,
 
 	IntegerExt64,
 	IntegerExt32,
@@ -140,12 +141,13 @@ pub enum UnaryIntrinsicFn {
 	FloatTrunc16,
 
 	FloatToInt,
+	FloatToIntSig,
 }
 
 impl UnaryIntrinsicFn {
 	pub fn output_type(&self) -> IntrinsicFnOutput {
 		match self {
-			Self::IntegerNegate | Self::FloatNegate => IntrinsicFnOutput::Same,
+			Self::IntegerNegate | Self::IntegerInvert | Self::FloatNegate => IntrinsicFnOutput::Same,
 
 			Self::IntegerExt64 | Self::IntegerExt64Sig => IntrinsicFnOutput::Integer(64),
 			Self::IntegerExt32 | Self::IntegerExt32Sig |
@@ -162,13 +164,14 @@ impl UnaryIntrinsicFn {
 			Self::FloatExt32 | Self::FloatTrunc32 => IntrinsicFnOutput::Float(32),
 			Self::FloatTrunc16 => IntrinsicFnOutput::Float(16),
 
-			Self::FloatToInt => IntrinsicFnOutput::Integer(64),
+			Self::FloatToInt | Self::FloatToIntSig => IntrinsicFnOutput::Integer(64),
 		}
 	}
 
 	pub fn name(&self) -> &str {
 		match self {
 			Self::IntegerNegate => "integer.negate",
+			Self::IntegerInvert => "integer.invert",
 			Self::FloatNegate => "float.negate",
 
 			Self::IntegerExt64 => "integer.ext.64",
@@ -195,7 +198,8 @@ impl UnaryIntrinsicFn {
 			Self::FloatTrunc32 => "float.trunc.32",
 			Self::FloatTrunc16 => "float.trunc.16",
 
-			Self::FloatToInt => "float.toint"
+			Self::FloatToInt => "float.toint",
+			Self::FloatToIntSig => "float.toint.sig"
 		}
 	}
 }

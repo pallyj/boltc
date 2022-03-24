@@ -32,6 +32,11 @@ pub enum TypeKind {
 		params: Vec<Type>,
 		labels: Vec<Option<String>>,
 	},
+	Method {
+		reciever: Box<Type>,
+		return_type: Box<Type>,
+		params: Vec<Type>,
+	},
 	Struct(StructRef),
 
 	// Intrinsic types
@@ -104,6 +109,18 @@ impl Type {
 			_ => None
 		}
 	}
+
+	pub fn init_type(&self) -> TypeKind {
+		match &self.kind {
+			TypeKind::Struct(r#struct) => {
+				let params = r#struct.params();
+
+				TypeKind::Function { return_type: Box::new(self.clone()), params, labels: vec![] }
+			}
+
+			_ => TypeKind::Function { return_type: Box::new(self.clone()), params: vec![ self.clone() ], labels: vec![] }
+		}
+	}
 }
 
 impl Deref for Type {
@@ -145,6 +162,15 @@ impl Debug for Type {
 					.join(", ");
 
 				write!(f, "func ({params}): {return_type:?}")
+			},
+			TypeKind::Method { reciever, return_type, params } => {
+				let params = params
+					.iter()
+					.map(|par| format!("{par:?}"))
+					.collect::<Vec<_>>()
+					.join(", ");
+
+				write!(f, "func (self: {reciever:?}, {params}): {return_type:?}")
 			},
             TypeKind::Struct(struct_ref) => write!(f, "struct {}", struct_ref.name()),
             TypeKind::Integer { bits } => write!(f, "i{bits}"),

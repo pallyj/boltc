@@ -21,6 +21,7 @@ Bolt is a powerful coding language designed for expressiveness and speed. Bolt c
 
 - Dataflow operators
 - Function currying
+- Declarative function syntax
 
 ### Bolt 0.12
 
@@ -67,10 +68,13 @@ Bolt is a powerful coding language designed for expressiveness and speed. Bolt c
 - Operators
 - Polymorphism
 - Globals
+- Initializers
 
 ### Bolt 0.3.1
 
 - Error Catching
+- Visibilities
+- Struct constants
 
 ### Bolt 0.3
 

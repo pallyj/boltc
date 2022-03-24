@@ -7,14 +7,26 @@ import intrinsics
 struct Int64 {
     var repr: i64
 
-    func add(b: i64): i64 {
-        self.uni(b)
-    }
-
-    func uni(a: i64): i64 {
-        a
+    private func unit(): i64 {
+        self.repr
     }
 }
+
+func factorial(n: i64): i64 {
+    if integer64CmpEq(n, 0) {
+        1
+    } else {
+        integer64Mul(n, factorial(integer64Sub(n, 1)))
+    }
+}
+
+func main(a: i64) {
+    printi(factorial(5));
+}
+
+func printi(n: i64)
+"#);
+/*
 
 func factorial(n: i64): i64 {
     if integer64CmpEq( n, 0 ) {
@@ -23,7 +35,7 @@ func factorial(n: i64): i64 {
         integer64Mul( n, factorial(integer64Sub(n, 1)) )
     }
 }
-	"#);
+	"#);*/
 
 	parser.operator_factory().register_intrinsics();
 
@@ -36,7 +48,15 @@ func factorial(n: i64): i64 {
     blir_passes::type_infer::run_pass(&mut lib);
     blir_passes::type_check::run_pass(&mut lib);
 
-	println!("{lib:?}");
+    let mut lowerer = BlirLowerer::new(lib);
+
+    lowerer.lower();
+
+    let library = lowerer.finish();
+
+    let config = BuildConfig::new(BuildProfile::Debug, BuildOutput::Object, None);
+
+    codegen::compile(library, config);
 }
 
 /*
@@ -75,5 +95,7 @@ fn print_anon_error(e: &(dyn BoltMessage)) {
 }*/
 
 use blir::Library;
+use codegen::config::{BuildConfig, BuildProfile, BuildOutput};
 use lower_ast::AstLowerer;
+use lower_blir::BlirLowerer;
 use parser::parser::Parser;
