@@ -165,6 +165,12 @@ fn walk_value(value: &mut Value, scope: &ScopeRef) {
 		ValueKind::FuncCall { function, args } => {
 			walk_value(function.as_mut(), scope);
 
+			if let ValueKind::Metatype(t) = &mut function.kind {
+				let t = std::mem::replace(t, TypeKind::Void);
+
+				function.set_kind(ValueKind::Init(t.anon()));
+			}
+
 			args.args
 				.iter_mut()
 				.for_each(|arg| walk_value(arg, scope));

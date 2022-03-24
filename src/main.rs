@@ -4,27 +4,34 @@ fn main() {
 	let mut parser = Parser::new(r#"
 import intrinsics
 
-struct Int64 {
+struct Int {
     var repr: i64
 
-    private func unit(): i64 {
-        self.repr
+    static func one(): Self {
+        1
+    }
+
+    func add(b: Int): Int {
+        Int( integer64Add(self.repr, b.repr) )
     }
 }
 
-func factorial(n: i64): i64 {
-    if integer64CmpEq(n, 0) {
-        1
+func factorial(n: f64): f64 {
+    if float64CmpLt(n, 2.0) {
+        1.0
     } else {
-        integer64Mul(n, factorial(integer64Sub(n, 1)))
+        float64Mul(n, factorial(float64Sub(n, 1.0)))
     }
 }
 
 func main(a: i64) {
-    printi(factorial(5));
+    let n: Int = Int.one()
+
+    printi(n.add(100))
 }
 
-func printi(n: i64)
+func printi(n: Int)
+func printfl(n: f64)
 "#);
 /*
 
@@ -54,12 +61,14 @@ func factorial(n: i64): i64 {
 
     let library = lowerer.finish();
 
+    //println!("{library}");
+
     let config = BuildConfig::new(BuildProfile::Debug, BuildOutput::Object, None);
 
     codegen::compile(library, config);
 
     Command::new("clang")
-        .args([ "test/test.o", "output.o", "-e", "_main" ])
+        .args([ "test/test.o", "output.o", "-e", "_2L0F4main" ])
         .output()
         .unwrap();
     

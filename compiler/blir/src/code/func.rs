@@ -1,6 +1,7 @@
 use std::{sync::Arc, cell::{RefCell, Ref, RefMut}, fmt::Debug, ops::Deref};
 
 use errors::Span;
+use mangle::{Mangled, MangleComponent};
 
 use crate::{Visibility, typ::{Type, TypeKind}, scope::{ScopeRef, ScopeRelation}, value::ValueKind, Symbol};
 
@@ -16,6 +17,7 @@ pub struct FunctionInner {
 	pub code: CodeBlock,
 	pub span: Span,
 	scope: ScopeRef,
+	parent_mangled: Mangled,
 }
 
 impl FunctionInner {
@@ -36,6 +38,12 @@ impl FunctionInner {
 
 	pub fn scope(&self) -> &ScopeRef {
 		&self.scope
+	}
+
+	pub fn mangled(&self) -> Mangled {
+		self.parent_mangled
+			.clone()
+			.append(MangleComponent::Function(self.name.clone()))
 	}
 }
 
@@ -61,7 +69,7 @@ impl Debug for FuncParam {
 }
 
 impl Function {
-	pub fn new(visibility: Visibility, name: String, params: Vec<FuncParam>, return_type: Type, code: CodeBlock, span: Span, parent: &ScopeRef) -> FunctionRef {
+	pub fn new(visibility: Visibility, name: String, params: Vec<FuncParam>, return_type: Type, code: CodeBlock, span: Span, parent: &ScopeRef, parent_mangled: Mangled) -> FunctionRef {
 		let func = FunctionInner {
 			visibility,
 			link_name: name.clone(),
@@ -70,7 +78,8 @@ impl Function {
 			return_type,
 			code,
 			span,
-			scope: ScopeRef::new(Some(parent), ScopeRelation::SameFile, false)
+			scope: ScopeRef::new(Some(parent), ScopeRelation::SameFile, false),
+			parent_mangled,
 		};
 		
 

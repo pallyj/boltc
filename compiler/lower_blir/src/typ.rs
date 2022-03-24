@@ -14,7 +14,7 @@ impl BlirLowerer {
 			TypeKind::Integer { bits } => BlirType::Integer { bits: *bits as u32 },
 			TypeKind::Float { bits } => BlirType::Float { bits: *bits as u32 },
 
-			TypeKind::Struct(sref) => BlirType::Struct { container: self.ssa_library().get_struct(&sref.name()).cloned().unwrap() },
+			TypeKind::Struct(sref) => BlirType::Struct { container: self.ssa_library().get_struct(&sref.link_name()).cloned().unwrap() },
 			TypeKind::Function { return_type, params, labels: _ } => {
 				BlirType::Function {
 					return_type: Box::new(self.lower_type(return_type)),

@@ -108,14 +108,14 @@ impl Builder {
 					panic!();
 				};
 		
-				let typ = container.get_field_type(field).pointer();
+				let typ = container.get_field_type(field);
 				
 				let value = Value::DerefStructField { r#struct, field: field.to_string(), typ };
 		
 				self.build_av(value)
 			}
 			Type::Struct { container } => {
-				let typ = container.get_field_type(field).pointer();
+				let typ = container.get_field_type(field);
 				
 				let value = Value::DerefStructField { r#struct, field: field.to_string(), typ };
 		

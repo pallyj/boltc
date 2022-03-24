@@ -74,7 +74,7 @@ Bolt is a powerful coding language designed for expressiveness and speed. Bolt c
 
 - Error Catching
 - Visibilities
-- Struct constants
+- Comments
 
 ### Bolt 0.3
 

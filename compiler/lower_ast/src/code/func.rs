@@ -1,10 +1,11 @@
 use blir::{code::{Function, FunctionRef, FuncParam, Method, MethodRef, ExternFunction, ExternFunctionRef}, Visibility, typ::{TypeKind, Type}, scope::ScopeRef};
+use mangle::Mangled;
 use parser::{ast::{func::FuncDef}, lexer::SyntaxKind};
 
 use crate::AstLowerer;
 
 impl AstLowerer {
-	pub fn lower_func(&self, func: FuncDef, parent: &ScopeRef) -> FunctionRef {
+	pub fn lower_func(&self, func: FuncDef, parent: &ScopeRef, parent_mangled: Mangled) -> FunctionRef {
 		let range = func.range();
 		let span = self.span(range);
 
@@ -19,7 +20,7 @@ impl AstLowerer {
 			.unwrap_or(TypeKind::Void.anon());
 		let code = self.lower_code_block(func.code().unwrap());
 		
-		Function::new(visibility, name, params, return_type, code, span, parent)
+		Function::new(visibility, name, params, return_type, code, span, parent, parent_mangled)
 	}
 
 	pub fn lower_extern_func(&self, func: FuncDef) -> ExternFunctionRef {
@@ -39,7 +40,7 @@ impl AstLowerer {
 		ExternFunction::new(visibility, name, params, return_type, span)
 	}
 
-	pub fn lower_method(&self, func: FuncDef, reciever: Type, parent: &ScopeRef) -> MethodRef {
+	pub fn lower_method(&self, func: FuncDef, reciever: Type, parent: &ScopeRef, parent_mangled: Mangled) -> MethodRef {
 		let range = func.range();
 		let span = self.span(range);
 
@@ -55,7 +56,7 @@ impl AstLowerer {
 			.unwrap_or(TypeKind::Void.anon());
 		let code = self.lower_code_block(func.code().unwrap());
 		
-		Method::new(reciever, is_static, visibility, name, params, return_type, code, span, parent)
+		Method::new(reciever, is_static, visibility, name, params, return_type, code, span, parent, parent_mangled)
 	}
 
 	pub fn lower_visibility(&self, visibility: Option<SyntaxKind>) -> Visibility {

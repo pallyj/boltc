@@ -167,7 +167,7 @@ impl Debug for Value {
             ValueKind::IntLiteral(i) => write!(f, "{i}"),
             ValueKind::FloatLiteral(fl) => write!(f, "{}", fl),
             ValueKind::BoolLiteral(b) => write!(f, "{b}"),
-            ValueKind::Metatype(t) => write!(f, "{:?}", t.clone().anon()),
+            ValueKind::Metatype(t) => write!(f, "<{:?}>", t.clone().anon()),
             ValueKind::LocalVariable(name) => write!(f, "{name}"),
             ValueKind::FunctionParam(name) => write!(f, "{name}"),
             ValueKind::UnaryIntrinsicFn(intrinsic) => write!(f, "{intrinsic:?}"),
