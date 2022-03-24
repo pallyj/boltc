@@ -86,14 +86,14 @@ cargo run -- test/main.bolt --lib=test
 - Visibilities
 - Comments
 
-### Bolt 0.3
+### Bolt 0.3 [Current Version]
 
 - Rewrite compiler
 - Type checking
 - New lower level IR
 - Codeblock analysis
 
-### Bolt 0.2 [ Current version ]
+### Bolt 0.2
 
 - Floating point types
 - Boolean functions
