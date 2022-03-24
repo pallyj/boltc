@@ -57,6 +57,15 @@ func factorial(n: i64): i64 {
     let config = BuildConfig::new(BuildProfile::Debug, BuildOutput::Object, None);
 
     codegen::compile(library, config);
+
+    Command::new("clang")
+        .args([ "test/test.o", "output.o", "-e", "_main" ])
+        .output()
+        .unwrap();
+    
+    Command::new("./a.out")
+        .spawn()
+        .unwrap();
 }
 
 /*
@@ -93,6 +102,8 @@ fn print_anon_error(e: &(dyn BoltMessage)) {
 
     println!();
 }*/
+
+use std::process::Command;
 
 use blir::Library;
 use codegen::config::{BuildConfig, BuildProfile, BuildOutput};
