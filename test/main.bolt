@@ -7,13 +7,37 @@ public struct Int {
 		Int(integer64Add(self.repr, b.repr))
 	}
 
+	public func mod(b: Int): Int {
+		Int(integer64RemSig(self.repr, b.repr))
+	}
+
+	public func lt(b: Int): i1 {
+		integer64CmpLt(self.repr, b.repr)
+	}
+
+	public func eq(b: Int): i1 {
+		integer64CmpEq(self.repr, b.repr)
+	}
+
 	public func print() {
 		printInt(self.repr)
 	}
 }
 
-func main() {
-	let a: Int = 10;
+func gcd(a: Int, b: Int): Int {
+	if a.lt(b) {
+		gcd(b, a)
+	} else if a.mod(b).eq(0) {
+		b
+	} else {
+		gcd(b, a.mod(b))
+	}
+}
 
-	a.add(20).print()
+func main() {
+	gcd(1, 1).print()
+	gcd(10, 5).print()
+	gcd(100, 70).print()
+	gcd(60, 40).print()
+	gcd(7, 11).print()
 }
