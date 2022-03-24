@@ -89,7 +89,7 @@ impl BlirLowerer {
 		match &func.kind {
 			ValueKind::ExternFunc(extern_func) => {
 				let extern_func = self.ssa_library()
-					.get_extern_function(&extern_func.borrow().link_name)
+					.get_extern_function(&extern_func.borrow().name)
 					.cloned()
 					.unwrap();
 

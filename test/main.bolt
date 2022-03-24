@@ -1,0 +1,19 @@
+import intrinsics
+
+public struct Int {
+	var repr: i64
+
+	public func add(b: Int): Int {
+		Int(integer64Add(self.repr, b.repr))
+	}
+
+	public func print() {
+		printInt(self.repr)
+	}
+}
+
+func main() {
+	let a: Int = 10;
+
+	a.add(20).print()
+}

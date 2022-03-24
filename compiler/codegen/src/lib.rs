@@ -10,11 +10,13 @@ pub mod config;
 pub fn compile(library: Library, config: BuildConfig) {
     let context = Context::create();
 
+    let output_file = format!("bin/lib{}", library.name());
+
     let module = lower_blirssa_library(library, &context).unwrap();
 
     if config.output == BuildOutput::LLVM {
         let _ = module
-            .print_to_file("output.ll");
+            .print_to_file(format!("{output_file}.ll"));
         return;
     }
 
@@ -44,8 +46,14 @@ pub fn compile(library: Library, config: BuildConfig) {
     let file_type = match config.output {
         BuildOutput::ASM => FileType::Assembly,
         BuildOutput::Object => FileType::Object,
-        _ => FileType::Object,
+        _ => panic!(),
     };
 
-    let _ = target_machine.write_to_file(&module, file_type, Path::new("output.o"));
+    let file_name = match config.output {
+        BuildOutput::ASM => format!("{output_file}.s"),
+        BuildOutput::Object => format!("{output_file}.o"),
+        _ => panic!()
+    };
+
+    let _ = target_machine.write_to_file(&module, file_type, Path::new(&file_name));
 }

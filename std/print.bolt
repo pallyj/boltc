@@ -1,0 +1,19 @@
+import intrinsics
+
+public func printInt(i: i64)
+public func printUInt(i: i64)
+
+public func printInt8(i: i8) 
+public func printUInt8(i: i8)
+
+public func printInt16(i: i16)
+public func printUInt16(i: i16)
+
+public func printInt32(i: i32)
+public func printUInt32(i: i32)
+
+public func printInt64(i: i64)
+public func printUInt64(i: i64)
+
+public func printDouble(n: f64)
+public func printFloat(n: f64)

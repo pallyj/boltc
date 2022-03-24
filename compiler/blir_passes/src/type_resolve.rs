@@ -9,12 +9,12 @@ pub fn run_pass(library: &mut Library) {
 	let scope = library
 		.scope();
 
-	for r#struct in &library.structs {
-		walk_struct(r#struct, &scope);
-	}
-
 	for func in &library.extern_functions {
 		walk_extern_function(&func, &scope);
+	}
+
+	for r#struct in &library.structs {
+		walk_struct(r#struct, &scope);
 	}
 
 	for func in &library.functions {
