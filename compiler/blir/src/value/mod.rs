@@ -6,7 +6,7 @@ pub use var::*;
 use std::ops::{DerefMut, Deref};
 use std::fmt::Debug;
 
-use crate::code::{FunctionRef, MethodRef};
+use crate::code::{FunctionRef, MethodRef, ExternFunctionRef};
 use crate::intrinsics::{UnaryIntrinsicFn, BinaryIntrinsicFn};
 use crate::{typ::{Type, TypeKind}, code::CodeBlock};
 
@@ -39,9 +39,17 @@ pub enum ValueKind {
 	BinaryIntrinsicFn(BinaryIntrinsicFn),
 	StaticFunc(FunctionRef),
 	StaticMethod(MethodRef),
+	ExternFunc(ExternFunctionRef),
 	InstanceMethod {
 		reciever: Box<Value>,
 		method: MethodRef,
+	},
+	Init(Type),
+
+	// Variable Values
+	InstanceVariable {
+		reciever: Box<Value>,
+		var: VarRef,
 	},
 
 
@@ -167,6 +175,9 @@ impl Debug for Value {
 			ValueKind::StaticFunc(func) => write!(f, "{}", func.borrow().name),
 			ValueKind::StaticMethod(func) => write!(f, "{}", func.borrow().name),
 			ValueKind::InstanceMethod { reciever, method } => write!(f, "{reciever:?}.{}", method.borrow().name),
+			ValueKind::ExternFunc(extern_func) => write!(f, "{}", extern_func.borrow().name),
+			ValueKind::Init(t) => write!(f, "{t:?}"),
+			ValueKind::InstanceVariable { reciever, var } => write!(f, "{reciever:?}.{}", var.borrow().name),
             ValueKind::If(if_value) => {
 				if let Some(neg) = &if_value.negative {
 					write!(f, "if {:?} {:?} else {:?}", if_value.condition, if_value.positive, neg)

@@ -5,6 +5,21 @@ use crate::{lexer::SyntaxKind};
 use super::Parser;
 
 impl<'a> Parser<'a> {
+	pub fn parse_init(&mut self, checkpoint: Checkpoint) -> bool {
+		if !self.eat_and_start_node_at(SyntaxKind::InitKw, SyntaxKind::InitDef, checkpoint) {
+			return false;
+		}
+
+		println!("InitKW");
+
+		self.parse_paren_comma_seq(|parser| parser.parse_func_par());
+
+		self.parse_codeblock();
+
+		self.finish_node();
+
+		return true
+	}
 	pub fn parse_func(&mut self, checkpoint: Checkpoint) -> bool {
 		if !self.eat_and_start_node_at(SyntaxKind::FuncKw, SyntaxKind::FuncDef, checkpoint) {
 			return false;
@@ -20,7 +35,9 @@ impl<'a> Parser<'a> {
 
 		self.parse_ty_return();
 
-		self.parse_codeblock();
+		if self.check(SyntaxKind::OpenBrace) {
+			self.parse_codeblock();
+		}
 
 		self.finish_node();
 

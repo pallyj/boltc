@@ -11,7 +11,9 @@ pub struct FunctionRef {
 
 impl FunctionRef {
 	pub fn append_block(&self, name: &str) -> BlockRef {
-		let block = Block::new(name.to_string(), self);
+		let block_idx = self.blocks().len() as u64;
+
+		let block = Block::new(name.to_string(), block_idx, self);
 
 		self.blocks
 			.borrow_mut()

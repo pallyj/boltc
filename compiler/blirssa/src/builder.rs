@@ -1,4 +1,4 @@
-use crate::{code::{BlockRef, FunctionRef}, value::{LabelValue, Value, IntrinsicFnOutput, UnaryIntrinsicFn, BinaryIntrinsicFn, Instruction}, typ::Type};
+use crate::{code::{BlockRef, FunctionRef, ExternFunctionRef}, value::{LabelValue, Value, IntrinsicFnOutput, UnaryIntrinsicFn, BinaryIntrinsicFn, Instruction}, typ::Type};
 
 pub struct Builder {
 	current_func: Option<FunctionRef>,
@@ -72,8 +72,7 @@ impl Builder {
 	pub fn build_return(&mut self, value: Option<LabelValue>) {
 		let instruction = Instruction::Return { value };
 
-		self.block()
-			.insert_instruction(self.current_block_head, instruction);
+		self.build_i(instruction);
 	}
 
 	pub fn build_assign_ptr(&mut self, pointer: LabelValue, value: LabelValue) {
@@ -87,8 +86,7 @@ impl Builder {
 
 		let instruction = Instruction::AssignPtr { pointer, value };
 
-		self.block()
-			.insert_instruction(self.current_block_head, instruction);
+		self.build_i(instruction);
 	}
 
 	pub fn build_deref(&mut self, pointer: LabelValue) -> LabelValue {
@@ -144,7 +142,7 @@ impl Builder {
 	}
 
 	pub fn build_stack_alloc_undef(&mut self, typ: Type) -> LabelValue {
-		let value = Value::AllocOnStackUndef { typ };
+		let value = Value::AllocOnStackUndef { typ: Type::Pointer { pointee: Box::new(typ) } };
 
 		self.build_av(value)
 	}
@@ -163,6 +161,12 @@ impl Builder {
 		return self.build_av(function_value);
 	}
 
+	pub fn build_extern_function(&mut self, function: &ExternFunctionRef) -> LabelValue {
+		let function_value = Value::ExternFunction { function: function.clone() };
+
+		return self.build_av(function_value);
+	}
+
 	pub fn build_call(&mut self, function: LabelValue, args: Vec<LabelValue>) -> LabelValue {
 		let function_type = match function.typ_ref() {
 			Type::Function { return_type, .. } => return_type.as_ref().clone(),
@@ -174,6 +178,22 @@ impl Builder {
 		let call_value = Value::Call { function, args, typ: function_type  };
 
 		return self.build_av(call_value);
+	}
+
+	pub fn build_branch(&mut self, condition: LabelValue, positive: &BlockRef, negative: &BlockRef) {
+		let instruction = Instruction::Branch {
+			condition,
+			positive: positive.clone(),
+			negative: negative.clone() };
+
+			self.build_i(instruction);
+	}
+
+	pub fn build_always_branch(&mut self, block: &BlockRef) {
+		let instruction = Instruction::AlwaysBranch {
+			block: block.clone() };
+
+		self.build_i(instruction);
 	}
 
 	fn build_av(&mut self, value: Value) -> LabelValue {
@@ -191,6 +211,13 @@ impl Builder {
 		self.current_block_head += 1;
 
 		label
+	}
+
+	fn build_i(&mut self, instruction: Instruction) {
+		self.block()
+			.insert_instruction(self.current_block_head, instruction);
+
+		self.current_block_head += 1;
 	}
 
 	fn block(&self) -> &BlockRef {

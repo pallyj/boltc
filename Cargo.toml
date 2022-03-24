@@ -13,8 +13,9 @@ parser = { path = "compiler/parser" }
 lower_ast = { path = "compiler/lower_ast" }
 blir = { path = "compiler/blir" }
 blir_passes = { path = "compiler/blir_passes" }
+lower_blir = { path = "compiler/lower_blir" }
 blirssa = { path = "compiler/blirssa" }
-lower_blirssa = { path = "compiler/lower_blirssa" }
+codegen = { path = "compiler/codegen" }
 logos = "0.12.0"
 
 [workspace]

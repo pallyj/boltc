@@ -5,6 +5,7 @@ mod tests;
 mod variant;
 mod table;
 
+use table::GuessTable;
 pub use table::TypeTable;
 
 use std::{collections::HashMap};
@@ -15,14 +16,16 @@ use variant::TypeVariant;
 
 pub struct TypeInferCtx {
 	checker: VarlessTypeChecker<TypeVariant>,
-	infer_keys: HashMap<u64, TcKey>
+	infer_keys: HashMap<u64, TcKey>,
+	guesses: GuessTable,
 }
 
 impl TypeInferCtx {
 	pub fn new() -> TypeInferCtx {
 		TypeInferCtx {
 			checker: VarlessTypeChecker::new(),
-			infer_keys: HashMap::new()
+			infer_keys: HashMap::new(),
+			guesses: GuessTable::new(),
 		}
 	}
 
@@ -95,6 +98,39 @@ impl TypeInferCtx {
 					}
 
 					self.constrain_one_way(&value.typ, return_type.as_ref())
+				} else if let TypeKind::Method { reciever: _, return_type, params } = function.as_ref().typ.kind() {
+					self.constrain_one_way(&value.typ, return_type.as_ref());
+
+					// Ensure params and args are the same length
+					if params.len() != args.args.len() {
+						return;
+					}
+
+					// Match function parameters against the args
+					for (arg, param_ty) in args.args.iter().zip(params.iter()) {
+						self.constrain_one_way(&arg.typ, param_ty);
+					}
+				} else if let TypeKind::Metatype(t) = function.as_ref().typ.kind() {
+					self.constrain_one_way(&value.typ, &t.as_ref().clone().anon());
+
+					let initializer = t.clone().anon().init_type().anon();
+
+					let TypeKind::Function { return_type: _, params, labels: _ } = initializer.kind() else {
+						return;
+					};
+
+					// Ensure params and args are the same length
+					if params.len() != args.args.len() {
+						return;
+					}
+
+					// Match function parameters against the args
+					for (arg, param_ty) in args.args.iter().zip(params.iter()) {
+						self.constrain_one_way(&arg.typ, param_ty);
+					}
+
+					self.constrain_one_way(&function.typ, &initializer);
+					function.set_type(initializer);
 				}
 			}
 
@@ -107,15 +143,108 @@ impl TypeInferCtx {
 				match sym.resolve() {
 					Symbol::Value(resolved_value) => {
 						value.set_kind(resolved_value.kind);
-						value.set_type(resolved_value.typ);
+						
+						let typ = resolved_value.typ;
+
+						self.constrain_one_way(&value.typ, &typ);
+						value.set_type(typ);
 					}
 					Symbol::Function(function) => {
-						value.set_type(function.take_typ());
+						let typ = function.take_typ();
+
+						self.constrain_one_way(&value.typ, &typ);
+						value.set_type(typ);
+
 						value.set_kind(ValueKind::StaticFunc(function));
+					}
+					Symbol::ExternFunction(function) => {
+						let typ = function.take_typ();
+
+						self.constrain_one_way(&value.typ, &typ);
+						value.set_type(typ);
+
+						value.set_kind(ValueKind::ExternFunc(function));
 					}
 					_ => {
 						// ERROR: Symbol isn't a value
 						return;
+					}
+				}
+			}
+
+			ValueKind::Member { parent, member } => {
+				self.infer_value(parent.as_mut(), scope);
+
+				let Some(parent_type) = (match parent.typ.kind() {
+					TypeKind::Infer { key } => self.guesses.get(key),
+					_ => Some(&parent.typ),
+				}) else {
+					println!("Error: couldn't infer type of {parent:?}");
+					return;
+				};
+
+				let Some(sym) = parent_type.lookup_instance_item(member.as_str()) else {
+					println!("Error: couldn't find instance member");
+					return
+				};
+
+				match sym {
+					Symbol::Type(ty) => {
+						value.set_kind(ValueKind::Metatype(ty.clone()));
+						let typ = TypeKind::Metatype(Box::new(ty)).anon();
+
+						self.constrain_one_way(&value.typ, &typ);
+						value.set_type(typ);
+					}
+	
+					Symbol::Value(res_val) => {
+						value.set_kind(res_val.kind);
+						let typ = res_val.typ.clone();
+
+						self.constrain_one_way(&value.typ, &typ);
+						value.set_type(typ);
+
+					}
+	
+					Symbol::StaticMethod(method) => {
+						let typ = method.take_typ();
+
+						self.constrain_one_way(&value.typ, &typ);
+						value.set_type(typ);
+
+						value.set_kind(ValueKind::StaticMethod(method));
+					}
+	
+					Symbol::InstanceMethod(method) => {
+						let parent = std::mem::replace(parent.as_mut(), ValueKind::Unit.anon(TypeKind::Void.anon()));
+
+						let typ = method.take_typ();
+
+						self.constrain_one_way(&value.typ, &typ);
+						value.set_type(typ);
+
+						let kind = ValueKind::InstanceMethod {
+							reciever: Box::new(parent),
+							method };
+						value.set_kind(kind);
+					}
+
+					Symbol::InstanceVariable(var) => {
+						let parent = std::mem::replace(parent.as_mut(), ValueKind::Unit.anon(TypeKind::Void.anon()));
+
+						let typ = var.borrow().typ.clone();
+
+						self.constrain_one_way(&value.typ, &typ);
+						value.set_type(typ);
+
+						let kind = ValueKind::InstanceVariable {
+							reciever: Box::new(parent),
+							var: var.clone() };
+						value.set_kind(kind);
+					}
+	
+					s => {
+						println!("Error: Symbol is something else {s:?}");
 					}
 				}
 			}
@@ -140,6 +269,7 @@ impl TypeInferCtx {
 	}
 
 	fn constrain_two_way(&mut self, one: &Type, two: &Type) {
+		//println!("{one:?} <=> {two:?}");
 		if let Some((key1, key2)) = self.get_infer_key(one).zip(self.get_infer_key(two)) {
 			self.checker
 				.impose(key1.equate_with(key2))
@@ -157,9 +287,54 @@ impl TypeInferCtx {
 					.unwrap();
 			}
 		}
+
+		// Add it to the guess table
+		if let (TypeKind::Infer { key: key1 }, TypeKind::Infer { key: key2 })
+			= (one.kind(), two.kind())
+		{
+			// If either is unresolved, set it to the other
+			let (one_t, two_t) = (self.guesses.get(key1), self.guesses.get(key2));
+
+			match (one_t, two_t) {
+				(Some(one_t), None) => {
+					let one_t = one_t.clone();
+					self.guesses.insert(*key2, one_t);
+				}
+
+				(None, Some(two_t)) => {
+					let two_t = two_t.clone();
+					self.guesses.insert(*key1, two_t);
+				}
+
+				(None, None) => {
+					// Do something
+				}
+
+				(Some(_), Some(_)) => {
+					// Do nothing
+				}
+			}
+		} else if let TypeKind::Infer { key: key1 } = one.kind() {
+			if let TypeKind::Infer { key: abs_key } = two.kind() {
+				self.guesses.get(&abs_key)
+					.cloned()
+					.map(|absolute| self.guesses.insert(*key1, absolute));
+			} else {
+				self.guesses.insert(*key1, two.clone())
+			}
+		} else if let TypeKind::Infer { key: key2 } = two.kind() {
+			if let TypeKind::Infer { key: abs_key } = one.kind() {
+				self.guesses.get(abs_key)
+					.cloned()
+					.map(|absolute| self.guesses.insert(*key2, absolute));
+			} else {
+				self.guesses.insert(*key2, one.clone())
+			}
+		}
 	}
 
 	fn constrain_one_way(&mut self, constrain: &Type, absolute: &Type) {
+		//println!("{constrain:?} <- {absolute:?}");
 		if let Some((c_key, a_key)) = self.get_infer_key(constrain).zip(self.get_infer_key(absolute)) {
 			self.checker
 				.impose(c_key.concretizes(a_key))
@@ -171,9 +346,21 @@ impl TypeInferCtx {
 					.unwrap();
 			}
 		}
+
+		// Now add it to the guess table
+		if let TypeKind::Infer { key } = constrain.kind() {
+			if let TypeKind::Infer { key: abs_key } = absolute.kind() {
+				self.guesses.get(abs_key)
+					.cloned()
+					.map(|absolute| self.guesses.insert(*key, absolute));
+			} else {
+				self.guesses.insert(*key, absolute.clone())
+			}
+		}
 	}
 
 	fn constrain_integer(&mut self, ty: &Type) {
+		//println!("{ty:?} <- some Integer");
 		if let Some(key) = self.get_infer_key(ty) {
 			self.checker
 				.impose(key.concretizes_explicit(TypeVariant::SomeInteger))
@@ -182,6 +369,7 @@ impl TypeInferCtx {
 	}
 
 	fn constrain_bool(&mut self, ty: &Type) {
+		//println!("{ty:?} <- some Bool");
 		if let Some(key) = self.get_infer_key(ty) {
 			self.checker
 				.impose(key.concretizes_explicit(TypeVariant::SomeBoolean))
@@ -190,6 +378,7 @@ impl TypeInferCtx {
 	}
 
 	fn constrain_float(&mut self, ty: &Type) {
+		//println!("{ty:?} <- some Float");
 		if let Some(key) = self.get_infer_key(ty) {
 			self.checker
 				.impose(key.concretizes_explicit(TypeVariant::SomeFloat))
@@ -215,8 +404,14 @@ impl TypeInferCtx {
 
 	fn get_variant(&self, ty: &Type) -> Option<TypeVariant> {
 		Some(match ty.kind() {
+			TypeKind::Divergent => TypeVariant::Diverges,
+			TypeKind::Void => TypeVariant::Void,
+
+			TypeKind::Integer { bits: 1 } => TypeVariant::IntrinsicBool,
 			TypeKind::Integer { bits } => TypeVariant::IntrinsicInteger { bits: *bits },
 			TypeKind::Float { bits } => TypeVariant::IntrinsicFloat { bits: *bits },
+
+			TypeKind::Struct(r#struct) => TypeVariant::Struct(r#struct.clone()),
 
 			_ => return None
 		})

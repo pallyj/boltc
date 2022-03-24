@@ -49,9 +49,15 @@ impl AstLowerer {
 				}
 
 				FileItem::FuncDef(func_def) => {
-					let lowered_function = self.lower_func(func_def, &parent);
+					if func_def.code().is_some() {
+						let lowered_function = self.lower_func(func_def, &parent);
 
-					library.add_function(lowered_function);
+						library.add_function(lowered_function);
+					} else {
+						let lowered_function = self.lower_extern_func(func_def);
+
+						library.add_extern_function(lowered_function);
+					}
 				}
 
 				FileItem::StructDef(struct_def) => {

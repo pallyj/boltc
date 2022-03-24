@@ -4,7 +4,7 @@ typedef struct {
 	long repr;
 } Int64;
 
-unsigned long printi(Int64 i) {
-	printf("%ld\n", i.repr);
+unsigned long printi(unsigned long i) {
+	printf("%ld\n", i);
 	return 0;
 }

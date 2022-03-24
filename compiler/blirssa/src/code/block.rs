@@ -25,6 +25,7 @@ impl Display for BlockRef {
 
 pub struct Block {
 	label: String,
+	idx: u64,
 
 	instructions: RefCell<Vec<Instruction>>,
 
@@ -32,10 +33,11 @@ pub struct Block {
 }
 
 impl Block {
-	pub fn new(label: String, func: &FunctionRef) -> BlockRef {
+	pub fn new(label: String, idx: u64, func: &FunctionRef) -> BlockRef {
 		BlockRef {
 			block: Arc::new(Self {
 				label,
+				idx,
 				instructions: RefCell::new(Vec::new()),
 				func: func.downgrade(),
 			})
@@ -58,6 +60,10 @@ impl Block {
 
 	pub fn label(&self) -> &String {
 		&self.label
+	}
+
+	pub fn index(&self) -> u64 {
+		self.idx
 	}
 }
 

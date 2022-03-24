@@ -64,12 +64,11 @@ impl FuncDef {
 			.map(|return_ty| Type::cast(return_ty))
 	}
 
-	pub fn code(&self) -> CodeBlock {
+	pub fn code(&self) -> Option<CodeBlock> {
 		self.0
 			.children()
 			.find(|child| child.kind() == SyntaxKind::CodeBlock)
 			.and_then(|block_node| CodeBlock::cast(block_node))
-			.unwrap()
 	}
 }
 

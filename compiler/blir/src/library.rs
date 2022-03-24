@@ -5,7 +5,7 @@ use mangle::{Mangled, MangleComponent};
 use crate::{
 	scope::{ScopeRelation, ScopeRef},
 	typ::{StructRef, TypeKind},
-	code::FunctionRef,
+	code::{FunctionRef, ExternFunctionRef},
 	Symbol,
 	SymbolWrapper};
 
@@ -17,6 +17,7 @@ pub struct Library {
 	pub mangled: Mangled,
 
 	pub functions: Vec<FunctionRef>,
+	pub extern_functions: Vec<ExternFunctionRef>,
 	pub structs: Vec<StructRef>,
 }
 
@@ -27,6 +28,7 @@ impl Library {
 			mangled: Mangled::new(MangleComponent::Library(name.to_string())),
 			scope: ScopeRef::new(None, ScopeRelation::None, false),
 			functions: Vec::new(),
+			extern_functions: Vec::new(),
 			structs: Vec::new(),
 		}
 	}
@@ -47,6 +49,22 @@ impl Library {
 		};
 
 		let symbol = Symbol::Function(func);
+
+		self.scope.add_symbol(name, visibility, symbol)
+	}
+
+	pub fn add_extern_function(&mut self, func: ExternFunctionRef) -> Option<SymbolWrapper> {
+		// Add the function to the list of functions
+		self.extern_functions.push(func.clone());
+
+		// Add the functions symbol, returning another symbol if it exists
+		let (visibility, name) = {
+			let func_ref = func.borrow();
+
+			(func_ref.visibility, func_ref.name.clone())
+		};
+
+		let symbol = Symbol::ExternFunction(func);
 
 		self.scope.add_symbol(name, visibility, symbol)
 	}
@@ -79,6 +97,10 @@ impl Debug for Library {
 		}
 
         for func in &self.functions {
+			writeln!(f, "{func:?}")?;
+		}
+
+		for func in &self.extern_functions {
 			writeln!(f, "{func:?}")?;
 		}
 

@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::{value::Value, typ::Type};
+use crate::{value::Value, typ::Type, code::BlockRef};
 
 #[derive(Clone)]
 pub struct LabelValue {
@@ -37,6 +37,14 @@ pub enum Instruction {
 		pointer: LabelValue,
 		value: LabelValue,
 	},
+	Branch {
+		condition: LabelValue,
+		positive: BlockRef,
+		negative: BlockRef
+	},
+	AlwaysBranch {
+		block: BlockRef,
+	},
 	Return {
 		value: Option<LabelValue>,
 	}
@@ -51,6 +59,16 @@ impl Display for Instruction {
 
 			Instruction::AssignPtr { pointer, value } => {
 				write!(f, "assign-ptr {pointer}, {value}")
+			}
+
+			Instruction::Branch { condition, positive, negative } => {
+				write!(f, "br if {condition} {positive}; else {negative}",
+					positive = positive.label(),
+					negative = negative.label())
+			}
+
+			Instruction::AlwaysBranch { block } => {
+				write!(f, "br {block}", block = block.label())
 			}
 
 			Instruction::Return { value } => {

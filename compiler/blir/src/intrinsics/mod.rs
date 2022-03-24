@@ -75,7 +75,6 @@ pub enum BinaryIntrinsicFn {
 
 	FloatCmpEq,
 	FloatCmpNeq,
-	FloatCmpNew,
 	FloatCmpGt,
 	FloatCmpGte,
 	FloatCmpLt,

@@ -40,6 +40,8 @@ impl<'a> Parser<'a> {
 
 		} else if self.parse_let(checkpoint) {
 
+		} else if self.parse_init(checkpoint) {
+			
 		} else if self.parse_struct(checkpoint) {
 			
 		} else {

@@ -2,7 +2,7 @@ use std::path::Path;
 
 use blirssa::Library;
 use config::{BuildConfig, BuildOutput, BuildProfile};
-use inkwell::{context::Context, targets::{Target, InitializationConfig, TargetTriple, RelocMode, CodeModel, FileType}, OptimizationLevel};
+use inkwell::{context::Context, targets::{Target, InitializationConfig, TargetTriple, RelocMode, CodeModel, FileType, TargetMachine}, OptimizationLevel};
 use lower_blirssa::lower_blirssa_library;
 
 pub mod config;
@@ -27,14 +27,14 @@ pub fn compile(library: Library, config: BuildConfig) {
 
     let target_triple = match config.target {
         Some(triple) => TargetTriple::create(&triple),
-        None => TargetTriple::create("x86_64-pc-linux-gnu")
+        None => TargetMachine::get_default_triple(),
     };
 
     let target = Target::from_triple(&target_triple).unwrap();
 
     let target_machine = target
         .create_target_machine(&target_triple,
-            "x86_64-64",
+            TargetMachine::get_host_cpu_name().to_str().unwrap(),
             "+avx2",
             optimization_level,
             RelocMode::Static,

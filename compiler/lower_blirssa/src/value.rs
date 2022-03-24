@@ -78,6 +78,13 @@ pub fn lower_value<'a, 'ctx>(value: &Value, context: &ModuleContext<'a, 'ctx>, f
 			LLVMValue::Function(function)
 		}
 
+		Value::ExternFunction { function } => {
+			let function = context.module.get_function(function.name())
+				.expect("Function doesn't exist");
+
+			LLVMValue::Function(function)
+		}
+
 		Value::Call { function, args, .. } => {
 			let function = fn_ctx.get_local(&function);
 
@@ -221,6 +228,7 @@ fn build_binary_intrinsic<'ctx>(name: BinaryIntrinsicFn, lhs: BasicValueEnum<'ct
 fn build_unary_intrinsic<'ctx>(name: UnaryIntrinsicFn, value: BasicValueEnum<'ctx>, context: &'ctx Context, builder: &Builder<'ctx>) -> BasicValueEnum<'ctx> {
 	match name {
 		UnaryIntrinsicFn::IntegerNegate => builder.build_int_neg(value.into_int_value(), "negate").as_basic_value_enum(),
+		UnaryIntrinsicFn::IntegerInvert => builder.build_not(value.into_int_value(), "invert").as_basic_value_enum(),
 
 		UnaryIntrinsicFn::IntegerExt64 => builder.build_int_z_extend(value.into_int_value(), context.i64_type(), "zext64").as_basic_value_enum(),
 		UnaryIntrinsicFn::IntegerExt32 => builder.build_int_z_extend(value.into_int_value(), context.i32_type(), "zext32").as_basic_value_enum(),
@@ -251,6 +259,7 @@ fn build_unary_intrinsic<'ctx>(name: UnaryIntrinsicFn, value: BasicValueEnum<'ct
 
 		// TODO: Add float to signed int
 		UnaryIntrinsicFn::FloatToInt => builder.build_float_to_unsigned_int(value.into_float_value(), context.i64_type(), "ftoui").as_basic_value_enum(),
+		UnaryIntrinsicFn::FloatToIntSig => builder.build_float_to_signed_int(value.into_float_value(), context.i64_type(), "ftosi").as_basic_value_enum(),
 	}
 }
 

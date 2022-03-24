@@ -2,7 +2,7 @@ use std::{cell::{RefCell, Ref, RefMut}, sync::Arc, ops::Deref, fmt::Debug};
 
 use crate::{Visibility, Symbol, code::MethodRef, SymbolWrapper, value::VarRef, scope::{ScopeRef, ScopeRelation}};
 
-use super::{TypeKind};
+use super::{TypeKind, Type};
 
 pub struct Struct {
 	inner: RefCell<StructInner>,
@@ -118,18 +118,25 @@ impl Struct {
 	}
 
 	pub fn name(&self) -> String {
-		self.inner.borrow().name.clone()
+		unsafe { &*self.inner.as_ptr() }
+			.name.clone()
 	}
 
 	pub fn lookup_static_item(&self, name: &str) -> Option<Symbol> {
-		self.borrow().scope()
+		unsafe { &*self.inner.as_ptr() }
+			.scope()
 			.lookup_static_member(name)
 			.map(|sym| sym.resolve())
 	}
 
 	pub fn lookup_instance_item(&self, name: &str) -> Option<Symbol> {
-		self.borrow().scope()
+		// TODO: Find the actual rel
+		let rel = ScopeRelation::SameContainer;
+
+		unsafe { &*self.inner.as_ptr() }
+			.scope()
 			.lookup_instance_member(name)
+			.and_then(|sym| sym.filter(rel))
 			.map(|sym| sym.resolve())
 	}
 }
@@ -137,6 +144,62 @@ impl Struct {
 #[derive(Clone)]
 pub struct StructRef {
 	r#struct: Arc<Struct>,
+}
+
+impl StructRef {
+	pub fn params(&self) -> Vec<Type> {
+		let struct_ptr = unsafe { &*self.inner.as_ptr() };
+
+		struct_ptr.instance_vars
+			.iter()
+			.map(|var| var.borrow().typ.clone())
+			.collect()
+	}
+
+	pub fn integer_repr(&self) -> bool {
+		let struct_ptr = unsafe { &*self.inner.as_ptr() };
+
+		let vars = &struct_ptr.instance_vars;
+
+		if vars.len() != 1 {
+			return false;
+		}
+
+		match vars[0].borrow().typ.kind() {
+			TypeKind::Integer { bits } => *bits > 1,
+			_ => false
+		}
+	}
+
+	pub fn float_repr(&self) -> bool {
+		let struct_ptr = unsafe { &*self.inner.as_ptr() };
+
+		let vars = &struct_ptr.instance_vars;
+
+		if vars.len() != 1 {
+			return false;
+		}
+
+		match vars[0].borrow().typ.kind() {
+			TypeKind::Float { .. } => true,
+			_ => false
+		}
+	}
+
+	pub fn bool_repr(&self) -> bool {
+		let struct_ptr = unsafe { &*self.inner.as_ptr() };
+
+		let vars = &struct_ptr.instance_vars;
+
+		if vars.len() != 1 {
+			return false;
+		}
+
+		match vars[0].borrow().typ.kind() {
+			TypeKind::Integer { bits } => *bits == 1,
+			_ => false
+		}
+	}
 }
 
 impl Deref for StructRef {

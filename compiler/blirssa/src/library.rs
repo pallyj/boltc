@@ -1,19 +1,21 @@
-use std::collections::{HashMap, hash_map::{Values}};
+use std::{collections::{HashMap, hash_map::{Values}}, fmt::Display};
 
-use crate::{code::{FunctionRef, Function}, typ::{Type, StructRef, Struct}};
+use crate::{code::{FunctionRef, Function, ExternFunctionRef, ExternFunction}, typ::{Type, StructRef, Struct}};
 
 pub struct Library {
 	name: String,
 	structs: HashMap<String, StructRef>,
-	functions: HashMap<String, FunctionRef>
+	functions: HashMap<String, FunctionRef>,
+	extern_functions: HashMap<String, ExternFunctionRef>,
 }
 
 impl Library {
-	pub fn new(name: String) -> Library {
+	pub fn new(name: &str) -> Library {
 		Library {
-			name,
+			name: name.to_string(),
 			structs: HashMap::new(),
 			functions: HashMap::new(),
+			extern_functions: HashMap::new(),
 		}		
 	}
 
@@ -27,7 +29,7 @@ impl Library {
 		self.structs.insert(name.to_string(), r#struct);
 	}
 
-	pub fn get_struct(&mut self, name: &str) -> Option<&StructRef> {
+	pub fn get_struct(&self, name: &str) -> Option<&StructRef> {
 		self.structs.get(name)
 	}
 
@@ -47,7 +49,33 @@ impl Library {
 		self.functions.get(name)
 	}
 
+	pub fn add_extern_function(&mut self, name: &str, function_type: Type) {
+		let function = ExternFunction::new(name, function_type);
+
+		// Check if the function already exists
+
+		self.extern_functions.insert(name.to_string(), function);
+	}
+
+	pub fn get_extern_function(&self, name: &str) -> Option<&ExternFunctionRef> {
+		self.extern_functions.get(name)
+	}
+
 	pub fn functions(&self) -> Values<String, FunctionRef> {
 		self.functions.values()
 	}
+
+	pub fn extern_functions(&self) -> Values<String, ExternFunctionRef> {
+		self.extern_functions.values()
+	}
+}
+
+impl Display for Library {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for func in &self.functions {
+			writeln!(f, "{}", func.1)?;
+		}
+
+		Ok(())
+    }
 }
