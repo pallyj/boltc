@@ -34,7 +34,18 @@ impl BlirLowerer {
 					.unwrap()
 			}
 
+			ValueKind::SelfVal => {
+				self.context
+					.lookup_var("self")
+					.cloned()
+					.unwrap()
+			}
+
 			ValueKind::If(if_value) => self.lower_if_value(if_value, &value.typ),
+
+			ValueKind::InstanceVariable { reciever, var } => {
+				self.lower_field_access(reciever.as_ref(), &var.borrow().name)
+			}
 
 			_ => panic!("{value:?}"),
 		}
@@ -43,6 +54,19 @@ impl BlirLowerer {
 	fn lower_int_literal(&mut self, n: u64, ty: &Type) -> LabelValue {
 		match ty.kind() {
 			TypeKind::Integer { bits } => self.builder().build_integer_literal(*bits as u32, n),
+			TypeKind::Struct(r#struct) => {
+				// TODO: Do this by insert value
+				if !r#struct.integer_repr() {
+					panic!()
+				}
+
+				let borrowed_struct = r#struct.borrow();
+				let borrowed_var = borrowed_struct.instance_vars[0].borrow();
+
+				let literal = self.lower_int_literal(n, &borrowed_var.typ);
+
+				self.lower_init(ty, vec![literal])
+			}
 			_ => panic!(),
 		}
 	}
@@ -61,11 +85,11 @@ impl BlirLowerer {
 		}
 	}
 	
-	fn lower_func_call(&mut self, func: &Value, args: Vec<LabelValue>) -> LabelValue {
+	fn lower_func_call(&mut self, func: &Value, mut args: Vec<LabelValue>) -> LabelValue {
 		match &func.kind {
 			ValueKind::ExternFunc(extern_func) => {
 				let extern_func = self.ssa_library()
-					.get_extern_function(&extern_func.borrow().name)
+					.get_extern_function(&extern_func.borrow().link_name)
 					.cloned()
 					.unwrap();
 
@@ -74,14 +98,38 @@ impl BlirLowerer {
 			}
 
 			ValueKind::StaticFunc(function) => {
-				let extern_func = self.ssa_library()
-					.get_function(&function.borrow().name)
+				let static_func = self.ssa_library()
+					.get_function(&function.borrow().link_name)
 					.cloned()
 					.unwrap();
 
-				let function = self.builder().build_function(&extern_func);
+				let function = self.builder().build_function(&static_func);
 				self.builder().build_call(function, args)
 			}
+
+			ValueKind::InstanceMethod { reciever, method } => {
+				let func = self.ssa_library()
+					.get_function(&method.borrow().link_name)
+					.cloned()
+					.unwrap();
+
+				let function = self.builder().build_function(&func);
+				let reciever = self.lower_value(&reciever);
+				args.insert(0, reciever);
+				self.builder().build_call(function, args)
+			}
+
+			ValueKind::StaticMethod(function) => {
+				let static_func = self.ssa_library()
+					.get_function(&function.borrow().link_name)
+					.cloned()
+					.unwrap();
+
+				let function = self.builder().build_function(&static_func);
+				self.builder().build_call(function, args)
+			}
+
+			ValueKind::Init(ty) => self.lower_init(ty, args),
 
 			ValueKind::BinaryIntrinsicFn(intrinsic) => {
 				let intrinsic = lower_binary_intrinsic(*intrinsic);
@@ -95,7 +143,7 @@ impl BlirLowerer {
 				self.builder().build_unary_intrinsic(intrinsic, args[0].clone())
 			}
 
-			_ => panic!(),
+			_ => panic!("Can't lower {:?}", func),
 		}
 	}
 
@@ -158,6 +206,39 @@ impl BlirLowerer {
 
 		// Position at the end of the if block
 		self.builder().position_at_end(&finally_block);
+	}
+
+	fn lower_field_access(&mut self, parent: &Value, field: &str) -> LabelValue {
+		let parent = self.lower_value(parent);
+
+		self.builder().build_deref_struct_field(parent, field)
+	}
+
+	fn lower_init(&mut self, ty: &Type, args: Vec<LabelValue>) -> LabelValue {
+		match ty.kind() {
+			TypeKind::Struct(r#struct) => {
+				let borrowed_struct = r#struct.borrow();
+
+				let field_names = borrowed_struct.instance_vars.iter().map(|field| field.borrow().name.clone()).collect::<Vec<_>>();
+
+				let struct_typ = self.lower_type(ty);
+				let container_literal = self.builder().build_stack_alloc_undef(struct_typ);
+
+				for (field, value) in field_names.iter().zip(args) {
+					let field_ptr = self.builder().build_access_struct_field(container_literal.clone(), &field);
+					self.builder().build_assign_ptr(field_ptr, value);
+				}
+		
+				self.builder().build_deref(container_literal)
+			}
+			_ => {
+				if args.len() == 1 {
+					args[0].clone()
+				} else {
+					panic!()
+				}
+			}
+		}
 	}
 }
 

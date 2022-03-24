@@ -1,4 +1,4 @@
-use std::{sync::Arc, ops::Deref, collections::HashMap, cell::{RefCell, Ref}};
+use std::{sync::Arc, ops::Deref, collections::HashMap, cell::{RefCell, Ref}, fmt::Display};
 
 use crate::typ::Type;
 
@@ -21,6 +21,12 @@ impl StructRef {
 			container: self.clone()
 		}
 	}
+}
+
+impl Display for StructRef {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.r#struct)
+    }
 }
 
 #[derive(PartialEq, Eq)]
@@ -109,4 +115,16 @@ impl StructField {
 	pub fn typ_ref(&self) -> &Type {
 		&self.typ
 	}
+}
+
+impl Display for Struct {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "struct {} {{", self.name)?;
+
+		for field in self.fields.borrow().iter() {
+			writeln!(f, "    {}: {}", field.name, field.typ)?;
+		}
+
+		writeln!(f, "}}")
+    }
 }

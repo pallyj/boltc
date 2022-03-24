@@ -4,14 +4,16 @@ use crate::BlirLowerer;
 
 impl BlirLowerer {
 	pub (super) fn lower_func_signature(&mut self, func: FunctionRef) {
-		let name = &func.borrow().name;
+		let link_name = func.borrow().mangled().mangle();
+
+		func.borrow_mut().link_name = link_name.clone();
 		let function_type = self.lower_type(&func.take_typ());
 
-		self.ssa_library_mut().add_function(name, function_type);
+		self.ssa_library_mut().add_function(&link_name, function_type);
 	}
 
 	pub (super) fn lower_extern_func_signature(&mut self, func: ExternFunctionRef) {
-		let name = &func.borrow().name;
+		let name = &func.borrow().link_name;
 		let function_type = self.lower_type(&func.take_typ());
 
 		self.ssa_library_mut().add_extern_function(name, function_type);
@@ -19,7 +21,7 @@ impl BlirLowerer {
 
 	pub (super) fn lower_func(&mut self, func: FunctionRef) {
 		let function = self.ssa_library()
-			.get_function(&func.borrow().name)
+			.get_function(&func.borrow().link_name)
 			.cloned()
 			.unwrap();
 

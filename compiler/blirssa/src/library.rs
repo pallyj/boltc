@@ -72,6 +72,9 @@ impl Library {
 
 impl Display for Library {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		for r#struct in &self.structs {
+			writeln!(f, "{}", r#struct.1)?;
+		}
         for func in &self.functions {
 			writeln!(f, "{}", func.1)?;
 		}

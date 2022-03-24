@@ -11,3 +11,4 @@ parser = { path = "../parser" }
 blir = { path = "../blir" }
 errors = { path = "../errors" }
 fast-float = "0.2.0"
+mangle = { path = "../mangle" }

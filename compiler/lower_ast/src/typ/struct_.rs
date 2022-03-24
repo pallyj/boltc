@@ -1,5 +1,6 @@
 use blir::scope::ScopeRef;
 use blir::typ::{TypeKind, Type};
+use mangle::Mangled;
 use parser::ast::containers::{StructDef, StructItem};
 use parser::ast::var::{VariableDef};
 use blir::{typ::{Struct, StructRef}, value::{VarRef, Var}};
@@ -19,14 +20,16 @@ impl AstLowerer {
 		Var::new(visibility, name, typ, default_value)
 	}
 
-	pub fn lower_struct(&self, def: StructDef, parent: &ScopeRef) -> StructRef {
+	pub fn lower_struct(&self, def: StructDef, parent: &ScopeRef, parent_mangle: Mangled) -> StructRef {
 		let visibility = self.lower_visibility(def.visibility());
 		let name = def.name();
 
-		let r#struct = Struct::new(visibility, name, parent);
+		let r#struct = Struct::new(visibility, name, parent, parent_mangle);
 		let scope = r#struct.borrow().scope().clone();
 
 		let self_ty = TypeKind::Struct(r#struct.clone()).anon();
+
+		let struct_mangled = r#struct.borrow().mangled().clone();
 
 		for struct_item in def.body()
 			.items()
@@ -34,13 +37,13 @@ impl AstLowerer {
 		{
 			match struct_item {
 				StructItem::FuncDef(func_def) => {
-					let lowered_method = self.lower_method(func_def, self_ty.clone(), &scope);
+					let lowered_method = self.lower_method(func_def, self_ty.clone(), &scope, struct_mangled.clone());
 
 					r#struct.add_method(lowered_method);
 				}
 
 				StructItem::StructDef(struct_def) => {
-					let lowered_struct = self.lower_struct(struct_def, &scope);
+					let lowered_struct = self.lower_struct(struct_def, &scope, struct_mangled.clone());
 
 					r#struct.add_substruct(lowered_struct);
 				}

@@ -1,5 +1,7 @@
 use std::{cell::{RefCell, Ref, RefMut}, sync::Arc, ops::Deref, fmt::Debug};
 
+use mangle::{Mangled, MangleComponent};
+
 use crate::{Visibility, Symbol, code::MethodRef, SymbolWrapper, value::VarRef, scope::{ScopeRef, ScopeRelation}};
 
 use super::{TypeKind, Type};
@@ -21,16 +23,24 @@ pub struct StructInner {
 	pub substructs: Vec<StructRef>,
 	pub methods: Vec<MethodRef>,
 	pub instance_vars: Vec<VarRef>,
+
+	parent_mangled: Mangled,
 }
 
 impl StructInner {
 	pub fn scope(&self) -> &ScopeRef {
 		&self.scope
 	}
+
+	pub fn mangled(&self) -> Mangled {
+		self.parent_mangled
+			.clone()
+			.append(MangleComponent::Struct(self.name.clone()))
+	}
 }
 
 impl Struct {
-	pub fn new(visibility: Visibility, name: String, parent: &ScopeRef) -> StructRef {
+	pub fn new(visibility: Visibility, name: String, parent: &ScopeRef, parent_mangled: Mangled) -> StructRef {
 		let r#struct = StructInner {
 			visibility,
 			link_name: name.clone(),
@@ -38,7 +48,8 @@ impl Struct {
 			scope: ScopeRef::new(Some(parent), ScopeRelation::SameFile, false),
 			substructs: Vec::new(),
 			methods: Vec::new(),
-			instance_vars: Vec::new()
+			instance_vars: Vec::new(),
+			parent_mangled
 		};
 
 		let struct_ref = StructRef {
@@ -120,6 +131,11 @@ impl Struct {
 	pub fn name(&self) -> String {
 		unsafe { &*self.inner.as_ptr() }
 			.name.clone()
+	}
+
+	pub fn link_name(&self) -> String {
+		unsafe { &*self.inner.as_ptr() }
+			.link_name.clone()
 	}
 
 	pub fn lookup_static_item(&self, name: &str) -> Option<Symbol> {

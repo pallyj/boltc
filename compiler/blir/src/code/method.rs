@@ -1,6 +1,7 @@
 use std::{sync::Arc, cell::{RefCell, Ref, RefMut}, ops::Deref, fmt::Debug};
 
 use errors::Span;
+use mangle::{Mangled, MangleComponent};
 
 use crate::{Visibility, typ::{Type, TypeKind}, scope::{ScopeRef, ScopeRelation}, value::ValueKind, Symbol};
 
@@ -21,8 +22,8 @@ pub struct MethodInner {
 	pub code: CodeBlock,
 	pub span: Span,
 	scope: ScopeRef,
-	// Todo: Make this a weak
 	self_type: Type,
+	parent_mangled: Mangled,
 }
 
 impl MethodInner {
@@ -55,10 +56,16 @@ impl MethodInner {
 			TypeKind::Method { reciever: Box::new(self.self_type.clone()), return_type: Box::new(self.return_type.clone()), params }.anon()
 		}
 	}
+
+	pub fn mangled(&self) -> Mangled {
+		self.parent_mangled
+			.clone()
+			.append(MangleComponent::Function(self.name.clone()))
+	}
 }
 
 impl Method {
-	pub fn new(self_type: Type, is_static: bool, visibility: Visibility, name: String, params: Vec<FuncParam>, return_type: Type, code: CodeBlock, span: Span, parent: &ScopeRef) -> MethodRef {
+	pub fn new(self_type: Type, is_static: bool, visibility: Visibility, name: String, params: Vec<FuncParam>, return_type: Type, code: CodeBlock, span: Span, parent: &ScopeRef, parent_mangled: Mangled) -> MethodRef {
 		let func = MethodInner {
 			visibility,
 			is_static,
@@ -70,6 +77,7 @@ impl Method {
 			span,
 			scope: ScopeRef::new(Some(parent), ScopeRelation::SameContainer, !is_static),
 			self_type,
+			parent_mangled
 		};
 
 		MethodRef {

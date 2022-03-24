@@ -141,6 +141,13 @@ impl TypeInferCtx {
 				};
 
 				match sym.resolve() {
+					Symbol::Type(ty) => {
+						value.set_kind(ValueKind::Metatype(ty.clone()));
+
+						self.constrain_one_way(&value.typ, &TypeKind::Metatype(Box::new(ty.clone())).anon());
+
+						value.typ.set_kind(TypeKind::Metatype(Box::new(ty)));
+					}
 					Symbol::Value(resolved_value) => {
 						value.set_kind(resolved_value.kind);
 						
@@ -343,7 +350,7 @@ impl TypeInferCtx {
 			if let Some(a_variant) = self.get_variant(absolute) {
 				self.checker
 					.impose(c_key.concretizes_explicit(a_variant))
-					.unwrap();
+					.unwrap()
 			}
 		}
 
