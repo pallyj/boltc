@@ -1,6 +1,0 @@
-name: "lang"
-description: "The bolt language core"
-version: "0.1.0"
-author: "The Bolt Project"
-
-target: lib

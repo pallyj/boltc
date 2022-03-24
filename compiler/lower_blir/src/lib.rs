@@ -60,6 +60,9 @@ impl BlirLowerer {
         }
 
         // Lower struct code
+        for r#struct in self.lib.structs.clone() {
+            self.lower_struct_code(r#struct);
+        }
 
         // Lower function code
         for func in self.lib.functions.clone() {

@@ -1,80 +1,78 @@
-#![feature(path_file_prefix)]
+mod args;
+
+use std::{process::Command, fs::File, io::Read};
+
+use args::Args;
+use blir::Library;
+use clap::StructOpt;
+use codegen::config::{BuildConfig, BuildProfile, BuildOutput};
+use lower_ast::AstLowerer;
+use lower_blir::BlirLowerer;
+use parser::parser::Parser;
 
 fn main() {
-	let mut parser = Parser::new(r#"
-import intrinsics
+    let args = Args::parse();
 
-struct Int {
-    var repr: i64
+    let mut project = Project::new(&args.lib);
 
-    static func one(): Self {
-        1
-    }
+    // Add standard library
+    project.open_file("std/print.bolt");
 
-    func add(b: Int): Int {
-        Int( integer64Add(self.repr, b.repr) )
-    }
-}
+    project.open_file(&args.file);
+    project.compile();
 
-func factorial(n: f64): f64 {
-    if float64CmpLt(n, 2.0) {
-        1.0
-    } else {
-        float64Mul(n, factorial(float64Sub(n, 1.0)))
-    }
-}
-
-func main(a: i64) {
-    let n: Int = Int.one()
-
-    printi(n.add(100))
-}
-
-func printi(n: Int)
-func printfl(n: f64)
-"#);
-/*
-
-func factorial(n: i64): i64 {
-    if integer64CmpEq( n, 0 ) {
-        1
-    } else {
-        integer64Mul( n, factorial(integer64Sub(n, 1)) )
-    }
-}
-	"#);*/
-
-	parser.operator_factory().register_intrinsics();
-
-	let mut lib = Library::new("");
-
-	AstLowerer::new(parser.parse_file())
-		.lower_file(&mut lib);
-
-    blir_passes::type_resolve::run_pass(&mut lib);
-    blir_passes::type_infer::run_pass(&mut lib);
-    blir_passes::type_check::run_pass(&mut lib);
-
-    let mut lowerer = BlirLowerer::new(lib);
-
-    lowerer.lower();
-
-    let library = lowerer.finish();
-
-    //println!("{library}");
-
-    let config = BuildConfig::new(BuildProfile::Debug, BuildOutput::Object, None);
-
-    codegen::compile(library, config);
-
+    // Link with the c standard library
     Command::new("clang")
-        .args([ "test/test.o", "output.o", "-e", "_2L0F4main" ])
+        .args([ "bin/print.o", &format!("bin/lib{}.o", args.lib), "-e", &format!("_2L{}F4{}main", args.lib.len(), args.lib), "-o", &format!("bin/{}", args.lib) ])
         .output()
         .unwrap();
     
-    Command::new("./a.out")
+    Command::new(&format!("bin/{}", args.lib))
         .spawn()
         .unwrap();
+}
+
+pub struct Project {
+    file_text: Vec<String>,
+    library: Option<Library>,
+}
+
+impl Project {
+    pub fn new(name: &str) -> Project {
+        Project {
+            file_text: vec![],
+            library: Some(Library::new(name))
+        }
+    }
+
+    pub fn open_file(&mut self, file: &str) {
+        let mut file = File::open(file).unwrap();
+
+        let mut code = String::new();
+        file.read_to_string(&mut code).unwrap();
+        let idx = self.file_text.len();
+        self.file_text.push(code);
+    
+        let mut parser = Parser::new(&self.file_text[idx]);    
+        parser.operator_factory().register_intrinsics();
+
+        AstLowerer::new(parser.parse_file()).lower_file(self.library.as_mut().unwrap());
+    }
+
+    pub fn compile(&mut self) {
+        blir_passes::type_resolve::run_pass(self.library.as_mut().unwrap());
+        blir_passes::type_infer::run_pass(self.library.as_mut().unwrap());
+        blir_passes::type_check::run_pass(self.library.as_mut().unwrap());
+
+        let mut lowerer = BlirLowerer::new(self.library.take().unwrap());
+        lowerer.lower();
+    
+        let library = lowerer.finish();
+
+        let config = BuildConfig::new(BuildProfile::Debug, BuildOutput::Object, None);
+        
+        codegen::compile(library, config);
+    }
 }
 
 /*
@@ -111,11 +109,3 @@ fn print_anon_error(e: &(dyn BoltMessage)) {
 
     println!();
 }*/
-
-use std::process::Command;
-
-use blir::Library;
-use codegen::config::{BuildConfig, BuildProfile, BuildOutput};
-use lower_ast::AstLowerer;
-use lower_blir::BlirLowerer;
-use parser::parser::Parser;

@@ -4,6 +4,16 @@
 
 Bolt is a powerful coding language designed for expressiveness and speed. Bolt combines the ease-of-use of functional programming with the speed of C to make the ultimate language, suitable for any use-case.
 
+## Using
+
+First, compile the standard library. Run std/compile.sh and libprint.o will be added to /bin.
+
+With the standard library compiled, a test program can be run with
+
+```
+cargo run -- test/main.bolt --lib=test
+```
+
 ## Development
 
 ### Bolt 1.0
