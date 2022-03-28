@@ -88,7 +88,7 @@ pub struct Intrinsics {
 impl Intrinsics {
     pub fn new() -> Intrinsics {
         Intrinsics {
-			scope: ScopeRef::new(None, ScopeRelation::None, false)
+			scope: ScopeRef::new(None, ScopeRelation::None, false, false)
         }
     }
 

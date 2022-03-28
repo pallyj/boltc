@@ -29,15 +29,17 @@ pub struct ScopeRef {
 }
 
 impl ScopeRef {
-	pub fn new(parent: Option<&ScopeRef>, relation: ScopeRelation, lookup_parent_instance: bool) -> ScopeRef {
+	pub fn new(parent: Option<&ScopeRef>, relation: ScopeRelation, lookup_parent_instance: bool, is_function: bool) -> ScopeRef {
 		let scope = Scope {
 			parent: parent.map(|parent| Arc::downgrade(&parent.inner)),
 			symbols: HashMap::new(),
 			instance_symbols: HashMap::new(),
+			scope_types: HashMap::new(),
 			imports: Vec::new(),
 			lookup_parent_instance,
 			relation,
 			counter: 1,
+			is_function,
 		};
 
 		ScopeRef { inner: Arc::new(RefCell::new(scope)) }
@@ -70,6 +72,18 @@ impl ScopeRef {
 	pub fn define_variable(&self, name: &str, typ: Type) -> String {
 		self.inner.borrow_mut().define_variable(name, typ)
 	}
+
+	pub fn define_scope_type(&self, name: &str, ty: Type) {
+		self.inner
+			.borrow_mut()
+			.define_scope_type(name, ty)
+	}
+
+	pub fn scope_type(&self, name: &str) -> Option<Type> {
+		self.inner
+			.borrow()
+			.scope_type(name)
+	}
 }
 
 struct Scope {
@@ -77,9 +91,11 @@ struct Scope {
 	symbols: HashMap<String, SymbolWrapper>,
 	imports: Vec<ScopeRef>,
 	instance_symbols: HashMap<String, SymbolWrapper>,
+	scope_types: HashMap<String, Type>,
 	lookup_parent_instance: bool,
 	relation: ScopeRelation,
 	counter: u64,
+	is_function: bool
 }
 
 impl Scope {
@@ -160,10 +176,24 @@ impl Scope {
 			.and_then(|parent| parent.upgrade())
 	}
 
-	fn define_variable(&mut self, name: &str, typ: Type) -> String {
-		let idx = self.counter;
+	fn next_index(&mut self) -> u64 {
+		if self.is_function {
+			let idx = self.counter;
 
-		self.counter += 1;
+			self.counter += 1;
+
+			idx
+		} else {
+			self.parent
+				.as_ref()
+				.map(|parent| parent.upgrade().unwrap().borrow_mut().next_index())
+				.unwrap_or(0)
+		}
+	}
+
+
+	fn define_variable(&mut self, name: &str, typ: Type) -> String {
+		let idx = self.next_index();
 
 		let mangled_name = format!("var{idx}_{name}");
 
@@ -172,5 +202,18 @@ impl Scope {
 		self.add_symbol(name.to_string(),Visibility::Public, sym);
 
 		mangled_name
+	}
+
+	fn define_scope_type(&mut self, name: &str, ty: Type) {
+		self.scope_types
+			.insert(name.to_string(), ty);
+	}
+
+	fn scope_type(&self, name: &str) -> Option<Type> {
+		if let Some(ty) = self.scope_types.get(name) {
+			return Some(ty.clone())
+		} else {
+			return self.parent().unwrap().borrow().scope_type(name)
+		}
 	}
 }

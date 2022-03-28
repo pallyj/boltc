@@ -35,7 +35,10 @@ impl MethodInner {
 		let sym = Symbol::Value(ValueKind::SelfVal.anon(self.self_type.clone()));
 		if !self.is_static {
 			self.scope.add_symbol("self".to_string(), Visibility::Public, sym);
+			self.scope.define_scope_type("self", self.self_type.clone());
 		}
+
+		self.scope.define_scope_type("return", self.return_type.clone());
 
 		for p in self.params.iter() {
 			let val = ValueKind::FunctionParam(p.bind_name.clone())
@@ -75,7 +78,7 @@ impl Method {
 			return_type,
 			code,
 			span,
-			scope: ScopeRef::new(Some(parent), ScopeRelation::SameContainer, !is_static),
+			scope: ScopeRef::new(Some(parent), ScopeRelation::SameContainer, !is_static, true),
 			self_type,
 			parent_mangled
 		};

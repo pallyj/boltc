@@ -118,12 +118,12 @@ pub enum SyntaxKind {
     At,
 
     #[regex("//.*\n", logos::skip)]
-    #[regex(r"/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/", logos::skip)]
+    #[regex(r#"/\*[^\*]*\*/"#, logos::skip)]
     Comment,
 
 
     #[error]
-    #[regex(r"[ \n\r\t]", logos::skip)]
+    #[regex(r"[ \n\r\f\t]", logos::skip)]
     Error,
 
     Root,

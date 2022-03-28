@@ -22,6 +22,8 @@ pub struct FunctionInner {
 
 impl FunctionInner {
 	pub fn add_params(&self) {
+		self.scope.define_scope_type("return", self.return_type.clone());
+		
 		for p in self.params.iter() {
 			let val = ValueKind::FunctionParam(p.bind_name.clone())
 				.anon(p.typ.clone());
@@ -78,7 +80,7 @@ impl Function {
 			return_type,
 			code,
 			span,
-			scope: ScopeRef::new(Some(parent), ScopeRelation::SameFile, false),
+			scope: ScopeRef::new(Some(parent), ScopeRelation::SameFile, false, true),
 			parent_mangled,
 		};
 		

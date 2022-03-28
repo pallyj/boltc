@@ -1,3 +1,4 @@
+pub mod error;
 #[derive(Debug, Copy, Clone)]
 pub struct Span {
     range: TextRange,

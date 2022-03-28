@@ -51,8 +51,10 @@ impl TypeInferCtx {
 
 		self.constrain_two_way(&block_ty, ty);
 
+		let block_scope = ScopeRef::new(Some(scope), blir::scope::ScopeRelation::SameContainer, false, false);
+
 		for smt in block.statements_mut() {
-			self.infer_smt(smt, scope)
+			self.infer_smt(smt, &block_scope)
 		}
 	}
 
@@ -69,7 +71,16 @@ impl TypeInferCtx {
 				self.infer_value(value, scope);
 			}
 
-			_ => {}
+			StatementKind::Return { value } => {
+				let Some(return_value) = &value else {
+					return
+				};
+
+				let function_return_type = scope.scope_type("return")
+					.expect("Compiler Error: Function return type is not defined");
+
+				self.constrain_one_way(&return_value.typ, &function_return_type);
+			}
 		}
 	}
 
@@ -135,48 +146,87 @@ impl TypeInferCtx {
 			}
 
 			ValueKind::Named(name) => {
-				let Some(sym) = scope.lookup_symbol(name.as_str()) else {
-					// ERROR: Could not find symbol
-					return;
-				};
+				let name = name.clone();
 
-				match sym.resolve() {
-					Symbol::Type(ty) => {
-						value.set_kind(ValueKind::Metatype(ty.clone()));
+				if let Some(sym) = scope.lookup_symbol(name.as_str()) {
+					match sym.resolve() {
+						Symbol::Type(ty) => {
+							value.set_kind(ValueKind::Metatype(ty.clone()));
+	
+							self.constrain_one_way(&value.typ, &TypeKind::Metatype(Box::new(ty.clone())).anon());
+	
+							value.typ.set_kind(TypeKind::Metatype(Box::new(ty)));
+						}
+						Symbol::Value(resolved_value) => {
+							value.set_kind(resolved_value.kind);
+							
+							let typ = resolved_value.typ;
+	
+							self.constrain_one_way(&value.typ, &typ);
+							value.set_type(typ);
+						}
+						Symbol::Function(function) => {
+							let typ = function.take_typ();
+	
+							self.constrain_one_way(&value.typ, &typ);
+							value.set_type(typ);
+	
+							value.set_kind(ValueKind::StaticFunc(function));
+						}
+						Symbol::ExternFunction(function) => {
+							let typ = function.take_typ();
+	
+							self.constrain_one_way(&value.typ, &typ);
+							value.set_type(typ);
+	
+							value.set_kind(ValueKind::ExternFunc(function));
+						}
+						Symbol::InstanceVariable(var) => {
+							if let Some(self_type) = scope.scope_type("self") {
+								let myself = ValueKind::SelfVal.anon(self_type.clone());
 
-						self.constrain_one_way(&value.typ, &TypeKind::Metatype(Box::new(ty.clone())).anon());
-
-						value.typ.set_kind(TypeKind::Metatype(Box::new(ty)));
+								let typ = var.borrow().typ.clone();
+		
+								self.constrain_one_way(&value.typ, &typ);
+								value.set_type(typ);
+		
+								let kind = ValueKind::InstanceVariable {
+									reciever: Box::new(myself),
+									var: var.clone() };
+								value.set_kind(kind);
+							} else {
+								println!("Compiler error: found instance variable in a context without self");
+							}
+						}
+						n => {
+							println!("{n:?}");
+							// ERROR: Symbol isn't a value
+						}
 					}
-					Symbol::Value(resolved_value) => {
-						value.set_kind(resolved_value.kind);
-						
-						let typ = resolved_value.typ;
+					return
+				}
 
-						self.constrain_one_way(&value.typ, &typ);
-						value.set_type(typ);
-					}
-					Symbol::Function(function) => {
-						let typ = function.take_typ();
+				if let Some(self_type) = scope.scope_type("self") {
 
-						self.constrain_one_way(&value.typ, &typ);
-						value.set_type(typ);
+					if let Some(static_symbol) = self_type.lookup_static_item(&name) {
+						match static_symbol {
+							Symbol::StaticMethod(method) => {
+								let typ = method.take_typ();
+		
+								self.constrain_one_way(&value.typ, &typ);
+								value.set_type(typ);
+		
+								value.set_kind(ValueKind::StaticMethod(method));
+							}
 
-						value.set_kind(ValueKind::StaticFunc(function));
-					}
-					Symbol::ExternFunction(function) => {
-						let typ = function.take_typ();
-
-						self.constrain_one_way(&value.typ, &typ);
-						value.set_type(typ);
-
-						value.set_kind(ValueKind::ExternFunc(function));
-					}
-					_ => {
-						// ERROR: Symbol isn't a value
-						return;
+							_ => {
+								// Invalid symbol
+							}
+						}
 					}
 				}
+
+				// Error: can't find symbol
 			}
 
 			ValueKind::Member { parent, member } => {

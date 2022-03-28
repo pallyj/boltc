@@ -1,5 +1,6 @@
 import intrinsics
 
+/* testing line comments */
 public struct Int {
 	var repr: i64
 
@@ -20,7 +21,7 @@ public struct Int {
 	}
 
 	public func print() {
-		printInt(self.repr)
+		printInt(repr)
 	}
 }
 
