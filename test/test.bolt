@@ -1,0 +1,17 @@
+/*
+hi
+*/
+
+struct Int {
+	var repr: i64
+
+	func getRepr(): i64 {
+		repr
+	}
+}
+
+func main() {
+	let i: Int = 100
+
+	printInt(i.getRepr())
+}

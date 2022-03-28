@@ -45,7 +45,7 @@ impl Struct {
 			visibility,
 			link_name: name.clone(),
 			name: name,
-			scope: ScopeRef::new(Some(parent), ScopeRelation::SameFile, false),
+			scope: ScopeRef::new(Some(parent), ScopeRelation::SameFile, false, false),
 			substructs: Vec::new(),
 			methods: Vec::new(),
 			instance_vars: Vec::new(),

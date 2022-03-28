@@ -2,7 +2,7 @@ use blir::{Library,
 	code::{FunctionRef, MethodRef, CodeBlock, Statement, StatementKind, ExternFunctionRef},
 	typ::{StructRef, Type, TypeKind},
 	scope::ScopeRef,
-	value::{VarRef, Value, ValueKind},
+	value::{VarRef, Value, ValueKind, IfBranch, IfValue},
 	Symbol};
 
 pub fn run_pass(library: &mut Library) {
@@ -156,8 +156,23 @@ fn walk_value(value: &mut Value, scope: &ScopeRef) {
 					value.set_kind(ValueKind::ExternFunc(function));
 				}
 
-				_ => {
-					println!("Error: Invalid symbol");
+				Symbol::StaticMethod(function) => {
+					value.set_type(function.take_typ());
+					value.set_kind(ValueKind::StaticMethod(function));
+				}
+
+				Symbol::InstanceVariable(instance) => {
+					value.set_type(instance.borrow().typ.clone());
+					let self_type = scope.scope_type("self").expect("Compiler Error: Expected self type when looking up instance variable");
+					let myself = ValueKind::SelfVal.anon(self_type);
+					value.set_kind(ValueKind::InstanceVariable { reciever: Box::new(myself), var: instance })
+				}
+
+				Symbol::InstanceMethod(method) => {
+					value.set_type(method.take_typ());
+					let self_type = scope.scope_type("self").expect("Compiler Error: Expected self type when looking up instance variable");
+					let myself = ValueKind::SelfVal.anon(self_type);
+					value.set_kind(ValueKind::InstanceMethod { reciever: Box::new(myself), method })
 				}
 			}
 		}
@@ -173,10 +188,39 @@ fn walk_value(value: &mut Value, scope: &ScopeRef) {
 
 			args.args
 				.iter_mut()
-				.for_each(|arg| walk_value(arg, scope));
+				.for_each(|arg| { walk_value(arg, scope) });
+
+			if let TypeKind::Function { return_type, params: _, labels: _ } = function.typ.kind() {
+				let return_type = return_type.as_ref().clone();
+
+				value.set_type(return_type);
+			} else if let TypeKind::Method { return_type, .. } = function.typ.kind() {
+				let return_type = return_type.as_ref().clone();
+
+				value.set_type(return_type);
+			}
 		}
 
+		ValueKind::Member { parent, member: _ } => {
+			walk_value(parent.as_mut(), scope)
+		}
+
+		ValueKind::If(if_value) => walk_if_value(if_value, scope),
+
 		_ => {}
+	}
+}
+
+fn walk_if_value(if_value: &mut IfValue, scope: &ScopeRef) {
+	walk_value(&mut if_value.condition, scope);
+
+	walk_code_block(&mut if_value.positive, scope);
+
+	if let Some(negative_block) = &mut if_value.negative {
+		match negative_block {
+			IfBranch::CodeBlock(codeblock) => walk_code_block(codeblock, scope),
+			IfBranch::Else(else_if_value) => walk_if_value(else_if_value, scope),
+		}
 	}
 }
 

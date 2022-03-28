@@ -67,7 +67,7 @@ impl BlirLowerer {
 
 				self.lower_init(ty, vec![literal])
 			}
-			_ => panic!(),
+			other => panic!("{other:?}"),
 		}
 	}
 	

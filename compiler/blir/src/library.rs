@@ -26,7 +26,7 @@ impl Library {
 		Library {
 			name: name.to_string(),
 			mangled: Mangled::new(MangleComponent::Library(name.to_string())),
-			scope: ScopeRef::new(None, ScopeRelation::None, false),
+			scope: ScopeRef::new(None, ScopeRelation::None, false, false),
 			functions: Vec::new(),
 			extern_functions: Vec::new(),
 			structs: Vec::new(),

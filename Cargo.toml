@@ -17,10 +17,12 @@ lower_blir = { path = "compiler/lower_blir" }
 blirssa = { path = "compiler/blirssa" }
 codegen = { path = "compiler/codegen" }
 logos = "0.12.0"
+proc-macro2 = "1.0.36"
 
 [workspace]
 
 members = [
+	"compiler/error-derive",
 	"compiler/errors",
 	"compiler/parser",
 	"compiler/lower_ast",
@@ -33,3 +35,6 @@ members = [
 	"compiler/lower_blirssa",
 	"compiler/codegen"
 ]
+
+[profile.release]
+debug = true
