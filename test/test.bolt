@@ -1,17 +1,38 @@
-/*
-hi
-*/
+import intrinsics
 
-struct Int {
+/* testing line comments */
+public struct Int {
 	var repr: i64
 
-	func getRepr(): i64 {
-		repr
+	public func add(b: Int): Int {
+		Int(integer64Add(self.repr, b.repr))
+	}
+
+	public func neq(b: Int): i1 {
+		integer64CmpNeq(self.repr, b.repr)
+	}
+
+	public func print() {
+		printInt(repr)
 	}
 }
 
 func main() {
-	let i: Int = 100
+	for (0, 20, loopBody)
+}
 
-	printInt(i.getRepr())
+func factorial(n: Int): Int {
+	if n.lt
+} 
+
+func loopBody(i: Int) {
+	factorial(i).print()
+}
+
+func for(low: Int, high: Int, f: func (Int)) {
+	if low.neq(high) {
+		f(low);
+		for(low.add(1), high, f)
+	};
+	// TODO: we shouldn't keep track of the if value if it returns void
 }

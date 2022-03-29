@@ -1,11 +1,9 @@
-use rowan::Checkpoint;
+use crate::{lexer::SyntaxKind};
 
-use crate::{lexer::SyntaxKind, ast::{SyntaxNode, Parse}};
+use super::{Parser, event::Event};
 
-use super::Parser;
-
-impl<'a> Parser<'a> {
-	pub fn parse_import(&mut self, checkpoint: Checkpoint) -> bool {
+impl<'input, 'l> Parser<'input, 'l> {
+	pub fn parse_import(&mut self, checkpoint: usize) -> bool {
 		if self.eat_and_start_node_at(SyntaxKind::ImportKw, SyntaxKind::Import, checkpoint) {
 			if !self.eat(SyntaxKind::Ident) {
 				// Recover
@@ -19,7 +17,7 @@ impl<'a> Parser<'a> {
 		return false;
 	}
 	pub fn parse_file_item(&mut self) {
-		let checkpoint = self.builder.checkpoint();
+		let checkpoint = self.checkpoint();
 
 		self.parse_visibility();
 
@@ -35,22 +33,20 @@ impl<'a> Parser<'a> {
 	}
 
 
-	pub fn parse_file(mut self) -> Parse {
+	pub fn parse_file(mut self) -> Vec<Event<'input>> {
 		self.start_node(SyntaxKind::Root);
 
 		let mut last_idx = usize::MAX;
 
-		while (last_idx != self.index) && self.lexer.peek().is_some() {
-			last_idx = self.index;
+		
+
+		while (last_idx != self.cursor) && (self.cursor < self.lexemes.len()) {
+			last_idx = self.cursor;
 			self.parse_file_item();
 		}
 
 		self.finish_node();
 
-		let green = self.builder.finish();
-
-		Parse {
-			root: SyntaxNode::new_root(green)
-		}
+		self.events
 	}
 }

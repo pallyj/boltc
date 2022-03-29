@@ -1,11 +1,9 @@
-use rowan::Checkpoint;
-
 use crate::lexer::SyntaxKind;
 
 use super::Parser;
 
-impl<'a> Parser<'a> {
-	pub fn parse_struct(&mut self, checkpoint: Checkpoint) -> bool {
+impl<'input, 'l> Parser<'input, 'l> {
+	pub fn parse_struct(&mut self, checkpoint: usize) -> bool {
 		if !self.eat_and_start_node_at(SyntaxKind::StructKw, SyntaxKind::StructDef, checkpoint) {
 			return false;
 		}
@@ -28,7 +26,7 @@ impl<'a> Parser<'a> {
 	}
 
 	pub fn parse_struct_item(&mut self) {
-		let checkpoint = self.builder.checkpoint();
+		let checkpoint = self.checkpoint();
 
 		self.parse_visibility();
 

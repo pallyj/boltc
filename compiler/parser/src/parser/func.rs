@@ -1,16 +1,12 @@
-use rowan::Checkpoint;
-
 use crate::{lexer::SyntaxKind};
 
 use super::Parser;
 
-impl<'a> Parser<'a> {
-	pub fn parse_init(&mut self, checkpoint: Checkpoint) -> bool {
+impl<'input, 'l> Parser<'input, 'l> {
+	pub fn parse_init(&mut self, checkpoint: usize) -> bool {
 		if !self.eat_and_start_node_at(SyntaxKind::InitKw, SyntaxKind::InitDef, checkpoint) {
 			return false;
 		}
-
-		println!("InitKW");
 
 		self.parse_paren_comma_seq(|parser| parser.parse_func_par());
 
@@ -20,7 +16,7 @@ impl<'a> Parser<'a> {
 
 		return true
 	}
-	pub fn parse_func(&mut self, checkpoint: Checkpoint) -> bool {
+	pub fn parse_func(&mut self, checkpoint: usize) -> bool {
 		if !self.eat_and_start_node_at(SyntaxKind::FuncKw, SyntaxKind::FuncDef, checkpoint) {
 			return false;
 		}

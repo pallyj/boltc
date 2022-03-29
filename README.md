@@ -85,6 +85,7 @@ cargo run -- test/main.bolt --lib=test
 - Error Catching
 - Visibilities
 - Comments
+- First-Class functions
 
 ### Bolt 0.3 [Current Version]
 

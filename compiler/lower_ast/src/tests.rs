@@ -1,6 +1,8 @@
 #[test]
 fn test_code() {
-	let mut parser = Parser::new(r#"
+	let mut debugger = Debugger::new();
+
+	let code = r#"
 import intrinsics
 
 struct Int64 {
@@ -26,13 +28,11 @@ func gcd(a: Int64, b: Int64): Int64 {
 
 	return gcd(b, a.mod(b))
 }
-	"#);
-
-	parser.operator_factory().register_intrinsics();
+	"#;
 
 	let mut lib = Library::new("");
 
-	AstLowerer::new(parser.parse_file())
+	AstLowerer::new(parse(&code, &mut debugger))
 		.lower_file(&mut lib);
 
 	println!("{lib:?}");
@@ -42,6 +42,7 @@ func gcd(a: Int64, b: Int64): Int64 {
 // Imports
 
 use blir::Library;
-use parser::{parser::Parser};
+use errors::debugger::Debugger;
+use parser::parser::parse;
 
 use crate::AstLowerer;

@@ -8,12 +8,24 @@ public struct Int {
 		Int(integer64Add(self.repr, b.repr))
 	}
 
+	public func sub(b: Int): Int {
+		Int(integer64Sub(self.repr, b.repr))
+	}
+
+	public func mul(b: Int): Int {
+		Int(integer64Mul(self.repr, b.repr))
+	}
+
 	public func mod(b: Int): Int {
 		Int(integer64RemSig(self.repr, b.repr))
 	}
 
 	public func lt(b: Int): i1 {
 		integer64CmpLt(self.repr, b.repr)
+	}
+
+	public func neq(b: Int): i1 {
+		integer64CmpNeq(self.repr, b.repr)
 	}
 
 	public func eq(b: Int): i1 {
@@ -35,10 +47,31 @@ func gcd(a: Int, b: Int): Int {
 	}
 }
 
+func factorial(n: Int): Int {
+	if n.lt(2) {
+		1
+	} else {
+		n.mul(factorial(n.sub(1)))
+	}
+}
+
 func main() {
-	gcd(1, 1).print()
+	/*gcd(1, 1).print()
 	gcd(10, 5).print()
 	gcd(100, 70).print()
 	gcd(60, 40).print()
-	gcd(7, 11).print()
+	gcd(7, 11).print()*/
+
+	for (15, 20, loopBody)
+}
+
+func loopBody(i: Int) {
+	factorial(i).print()
+}
+
+func for(low: Int, high: Int, f: func (Int)) {
+	if low.neq(high) {
+		f(low);
+		for(low.add(1), high, f)
+	}
 }

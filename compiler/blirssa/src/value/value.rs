@@ -57,7 +57,12 @@ pub enum Value {
 
 	ExternFunction { function: ExternFunctionRef },
 
-	Call { function: LabelValue, args: Vec<LabelValue>, typ: Type }
+	BuildFunctionPointer {
+		function: LabelValue,
+		func_type: Type,
+	},
+
+	Call { function: LabelValue, args: Vec<LabelValue>, typ: Type },
 }
 
 impl Value {
@@ -71,6 +76,7 @@ impl Value {
 
 			Self::Function { function } => return function.typ(),
 			Self::ExternFunction { function } => return function.typ(),
+			Self::BuildFunctionPointer { func_type, .. } => return Type::Pointer { pointee: Box::new(func_type.clone()) },
 			Self::Call { typ, .. } => typ,
 
 			Self::AllocOnStackUndef { typ, .. } => typ,
@@ -98,6 +104,7 @@ impl Display for Value {
 
 			Value::Function { function } => write!(f, "function \"{name}\" : {typ}", name = function.name(), typ = function.typ()),
 			Value::ExternFunction { function } => write!(f, "function \"{name}\" : {typ}", name = function.name(), typ = function.typ()),
+			Value::BuildFunctionPointer { function, func_type } => write!(f, "build-function-ptr {function} : &{func_type}"),
 			Value::Call { function, args, typ } => {
 				let args = args
 					.iter()

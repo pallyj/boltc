@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 rowan = "0.15.4"
 error-derive = { path = "../error-derive" }
+colored = "*"

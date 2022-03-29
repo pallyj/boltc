@@ -1,9 +1,13 @@
-use crate::{parser::Parser, ast::{Root}};
+use errors::debugger::Debugger;
+
+use crate::{parser::parse, ast::Root};
 
 
 #[test]
 fn test_code() {
-	let mut parser = Parser::new(r#"
+	let mut debugger = Debugger::new();
+
+	let input = r#"
 	import intrinsics
 
 public struct Int64 {
@@ -121,11 +125,9 @@ func gcd(a: Int64, b: Int64): Int64 {
 
 	return gcd(b, a.mod(b))
 }
-	"#);
+	"#;
 
-	parser.operator_factory().register_intrinsics();
-
-	let block = parser.parse_file();
+	let block = parse(input, &mut debugger);
 
 	println!("{:?}", block);
 

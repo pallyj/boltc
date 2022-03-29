@@ -15,15 +15,16 @@ import:
 
 */
 
-use super::{containers::StructDef, func::FuncDef};
+use crate::lexer::SyntaxKind;
+
+use super::{containers::StructDef, func::FuncDef, find_token};
 use core::fmt::Debug;
 
 ast!(struct ImportDef(Import));
 
 impl ImportDef {
 	pub fn import_library(&self) -> String {
-		self.0
-			.last_token()
+		find_token(&self.0, SyntaxKind::Ident)
 			.map(|token| token.text().to_string())
 			.unwrap_or("".to_string())
 	}

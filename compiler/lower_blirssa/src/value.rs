@@ -1,5 +1,5 @@
 use blirssa::{value::{Value, BinaryIntrinsicFn, UnaryIntrinsicFn}, typ::Type};
-use inkwell::{values::{BasicValueEnum, BasicValue, FunctionValue}, builder::Builder, IntPredicate, FloatPredicate, context::Context};
+use inkwell::{values::{BasicValueEnum, BasicValue, FunctionValue, CallableValue}, builder::Builder, IntPredicate, FloatPredicate, context::Context};
 
 use crate::{ModuleContext, func::FunctionContext, typ::lower_basic_typ};
 
@@ -85,6 +85,21 @@ pub fn lower_value<'a, 'ctx>(value: &Value, context: &ModuleContext<'a, 'ctx>, f
 			LLVMValue::Function(function)
 		}
 
+		Value::BuildFunctionPointer { function, .. } => {
+			let function = fn_ctx.get_local(&function);
+
+			let function = match function {
+				LLVMValue::Function(function) => function,
+
+				// Only handle second-class functions
+				_ => panic!(),
+			};
+
+			let function_pointer = function.as_global_value().as_pointer_value();
+
+			LLVMValue::Basic(function_pointer.as_basic_value_enum())
+		}
+
 		Value::Call { function, args, .. } => {
 			let function = fn_ctx.get_local(&function);
 
@@ -98,6 +113,25 @@ pub fn lower_value<'a, 'ctx>(value: &Value, context: &ModuleContext<'a, 'ctx>, f
 						.collect::<Vec<_>>();
 
 					match context.builder.build_call(function, &args, "call").try_as_basic_value().left() {
+						Some(basic_value) => LLVMValue::Basic(basic_value),
+						None => LLVMValue::Void,
+					}
+				}
+
+				LLVMValue::Basic(some_value) => {
+					let func_pointer = match some_value {
+						BasicValueEnum::PointerValue(some_pointer) => CallableValue::try_from(some_pointer).unwrap(),
+						_ => panic!(),
+					};
+		
+					// Maybe make a pointer to the function if it's an arg
+					let args = args
+						.iter()
+						.filter_map(|arg| fn_ctx.get_local(&arg).try_basic())
+						.map(|basic| basic.into())
+						.collect::<Vec<_>>();
+		
+					match context.builder.build_call(func_pointer, &args, "call").try_as_basic_value().left() {
 						Some(basic_value) => LLVMValue::Basic(basic_value),
 						None => LLVMValue::Void,
 					}

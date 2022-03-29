@@ -70,7 +70,16 @@ impl Builder {
 	}
 
 	pub fn build_return(&mut self, value: Option<LabelValue>) {
-		let instruction = Instruction::Return { value };
+		let instruction = match value {
+			Some(value) => {
+				if value.typ_ref() == &Type::Void {
+					Instruction::Return { value: None }
+				} else {
+					Instruction::Return { value: Some(value) }
+				}
+			}
+			None => Instruction::Return { value: None }
+		};
 
 		self.build_i(instruction);
 	}
@@ -165,6 +174,18 @@ impl Builder {
 		let function_value = Value::ExternFunction { function: function.clone() };
 
 		return self.build_av(function_value);
+	}
+
+	pub fn build_function_pointer(&mut self, function: LabelValue) -> LabelValue {
+		let func_type = function.typ();
+
+		let Type::Function { .. } = &func_type else {
+			panic!()
+		};
+
+		let function_ptr_value = Value::BuildFunctionPointer { function, func_type };
+
+		self.build_av(function_ptr_value)
 	}
 
 	pub fn build_call(&mut self, function: LabelValue, args: Vec<LabelValue>) -> LabelValue {
