@@ -121,3 +121,9 @@ pub mod smt;
 pub mod var;
 pub mod func;
 pub mod containers;
+
+fn find_token(node: &SyntaxNode, kind: SyntaxKind) -> Option<SyntaxToken> {
+	node.children_with_tokens()
+		.find(|child| child.kind() == kind)
+		.and_then(|matching_child| matching_child.into_token())
+}

@@ -20,6 +20,10 @@ impl LabelValue {
 	pub fn label(&self) -> u64 {
 		self.label
 	}
+
+	pub fn void() -> LabelValue {
+		LabelValue { label: u64::MAX, typ: Type::Void }
+	}
 }
 
 impl Display for LabelValue {

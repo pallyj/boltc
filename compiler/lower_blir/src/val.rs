@@ -1,6 +1,6 @@
 use std::panic;
 
-use blir::{value::{Value, ValueKind, IfValue, IfBranch}, typ::{Type, TypeKind}, intrinsics::{BinaryIntrinsicFn, UnaryIntrinsicFn}};
+use blir::{value::{Value, ValueKind, IfValue, IfBranch}, typ::{Type, TypeKind}, intrinsics::{BinaryIntrinsicFn, UnaryIntrinsicFn}, code::FunctionRef};
 use blirssa::value::{LabelValue, BinaryIntrinsicFn as SsaBinaryIntrinsicFn, UnaryIntrinsicFn as SsaUnaryIntrinsicFn};
 
 use crate::BlirLowerer;
@@ -47,8 +47,21 @@ impl BlirLowerer {
 				self.lower_field_access(reciever.as_ref(), &var.borrow().name)
 			}
 
+			ValueKind::StaticFunc(func) => self.lower_static_func(func),
+
 			_ => panic!("{value:?}"),
 		}
+	}
+
+	fn lower_static_func(&mut self, func: &FunctionRef) -> LabelValue {
+		let static_func = self.ssa_library()
+			.get_function(&func.borrow().link_name)
+			.cloned()
+			.unwrap();
+
+		let function = self.builder().build_function(&static_func);
+
+		self.builder().build_function_pointer(function)
 	}
 
 	fn lower_int_literal(&mut self, n: u64, ty: &Type) -> LabelValue {
@@ -143,20 +156,43 @@ impl BlirLowerer {
 				self.builder().build_unary_intrinsic(intrinsic, args[0].clone())
 			}
 
+			ValueKind::FunctionParam(param_name) => {
+				let function_value = self.context
+					.lookup_var(param_name)
+					.cloned()
+					.unwrap();
+
+				match function_value.typ_ref() {
+					blirssa::typ::Type::Function { .. } => {},
+					blirssa::typ::Type::Pointer { pointee } => match pointee.as_ref() {
+						blirssa::typ::Type::Function { .. } => {},
+						_ => panic!(),
+					},
+					_ => panic!(),
+				}
+
+				self.builder().build_call(function_value, args)
+			}
+
 			_ => panic!("Can't lower {:?}", func),
 		}
 	}
 
 	fn lower_if_value(&mut self, value: &IfValue, ty: &Type) -> LabelValue {
-		let ty = self.lower_type(ty);
+		if value.negative.is_none() {
+			self.lower_if_value_inner(value, None);
+			LabelValue::void()
+		} else {
+			let ty = self.lower_type(ty);
 
-		let assign_val_ptr = self.builder().build_stack_alloc_undef(ty);
+			let assign_val_ptr = self.builder().build_stack_alloc_undef(ty);
 
-		self.lower_if_value_inner(value, Some(assign_val_ptr.clone()));
+			self.lower_if_value_inner(value, Some(assign_val_ptr.clone()));
 
-		let assign_val = self.builder().build_deref(assign_val_ptr);
+			let assign_val = self.builder().build_deref(assign_val_ptr);
 
-		assign_val
+			assign_val
+		}
 	}
 
 	fn lower_if_value_inner(&mut self, value: &IfValue, yield_pointer: Option<LabelValue>) {

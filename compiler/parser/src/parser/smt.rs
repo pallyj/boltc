@@ -2,7 +2,7 @@ use crate::lexer::SyntaxKind;
 
 use super::Parser;
 
-impl<'a> Parser<'a> {
+impl<'input, 'l> Parser<'input, 'l> {
 	pub fn parse_smt(&mut self) {
 		if self.eat_and_start_node(SyntaxKind::ReturnKw, SyntaxKind::ReturnSmt) {
 			if self.check_expr() {

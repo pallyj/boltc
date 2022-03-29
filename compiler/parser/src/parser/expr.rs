@@ -1,15 +1,13 @@
-use rowan::{Language, /*Checkpoint*/};
-
-use crate::{lexer::SyntaxKind, ast::BoltLanguage, /*operators::{OperatorPrecedence, OperatorFix}*/};
+use crate::{lexer::SyntaxKind, /*operators::{OperatorPrecedence, OperatorFix}*/};
 
 use super::Parser;
 
-impl<'a> Parser<'a> {
+impl<'input, 'l> Parser<'input, 'l> {
 	pub fn parse_expr(&mut self) {
 		self.parse_expr_raw(/*OperatorPrecedence::None*/)
 	}
 	pub fn parse_expr_raw(&mut self/*, in_precedence: OperatorPrecedence*/) {
-		let checkpoint = self.builder.checkpoint();
+		let checkpoint = self.checkpoint();
 
 		self.parse_expr_atom();
 
@@ -97,15 +95,15 @@ impl<'a> Parser<'a> {
 			   self.finish_node();
 		   }
 		else if self.check(SyntaxKind::OpenParen) {
-			let checkpoint = self.builder.checkpoint();
+			let checkpoint = self.checkpoint();
 
 			self.bump();
 
 			if self.eat(SyntaxKind::CloseParen) {
-				self.builder.start_node_at(checkpoint, BoltLanguage::kind_to_raw(SyntaxKind::UnitExpr));
-				self.builder.finish_node();
+				self.start_node_at(SyntaxKind::UnitExpr, checkpoint);
+				self.finish_node();
 			} else {
-				self.builder.start_node_at(checkpoint, BoltLanguage::kind_to_raw(SyntaxKind::ParenthesizedExpr));
+				self.start_node_at(SyntaxKind::ParenthesizedExpr, checkpoint);
 
 				self.parse_expr();
 
@@ -113,7 +111,7 @@ impl<'a> Parser<'a> {
 					// Recover from errors
 					self.bump();
 				}
-				self.builder.finish_node();
+				self.finish_node();
 
 
 			}

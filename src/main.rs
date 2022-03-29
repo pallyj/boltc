@@ -6,9 +6,10 @@ use args::Args;
 use blir::Library;
 use clap::StructOpt;
 use codegen::config::{BuildConfig, BuildProfile, BuildOutput};
+use errors::debugger::Debugger;
 use lower_ast::AstLowerer;
 use lower_blir::BlirLowerer;
-use parser::parser::Parser;
+use parser::parser::parse;
 
 fn main() {
     let args = Args::parse();
@@ -35,13 +36,15 @@ fn main() {
 pub struct Project {
     file_text: Vec<String>,
     library: Option<Library>,
+    debugger: Debugger,
 }
 
 impl Project {
     pub fn new(name: &str) -> Project {
         Project {
             file_text: vec![],
-            library: Some(Library::new(name))
+            library: Some(Library::new(name)),
+            debugger: Debugger::new(),
         }
     }
 
@@ -53,10 +56,9 @@ impl Project {
         let idx = self.file_text.len();
         self.file_text.push(code);
     
-        let mut parser = Parser::new(&self.file_text[idx]);    
-        parser.operator_factory().register_intrinsics();
+        let parse = parse(&self.file_text[idx], &mut self.debugger);
 
-        AstLowerer::new(parser.parse_file()).lower_file(self.library.as_mut().unwrap());
+        AstLowerer::new(parse).lower_file(self.library.as_mut().unwrap());
     }
 
     pub fn compile(&mut self) {

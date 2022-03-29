@@ -4,8 +4,8 @@ use crate::lexer::SyntaxKind;
 
 use super::Parser;
 
-impl<'a> Parser<'a> {
-	pub fn parse_var(&mut self, checkpoint: Checkpoint) -> bool {
+impl<'input, 'l> Parser<'input, 'l> {
+	pub fn parse_var(&mut self, checkpoint: usize) -> bool {
 		if !self.eat_and_start_node_at(SyntaxKind::VarKw, SyntaxKind::VarDef, checkpoint) {
 			return false
 		}
@@ -39,7 +39,7 @@ impl<'a> Parser<'a> {
 		return true;
 	}
 
-	pub fn parse_let(&mut self, checkpoint: Checkpoint) -> bool {
+	pub fn parse_let(&mut self, checkpoint: usize) -> bool {
 		if !self.eat_and_start_node_at(SyntaxKind::LetKw, SyntaxKind::LetDef, checkpoint) {
 			return false
 		}

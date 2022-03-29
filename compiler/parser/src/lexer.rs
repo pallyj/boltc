@@ -117,13 +117,15 @@ pub enum SyntaxKind {
     #[token("@")]
     At,
 
-    #[regex("//.*\n", logos::skip)]
-    #[regex(r#"/\*[^\*]*\*/"#, logos::skip)]
+    #[regex("//.*")]
+    #[regex(r#"/\*[^\*]*\*/"#)]
     Comment,
+
+    #[regex(r"[ \n\r\f\t]")]
+    Whitespace,
 
 
     #[error]
-    #[regex(r"[ \n\r\f\t]", logos::skip)]
     Error,
 
     Root,
@@ -179,6 +181,16 @@ pub enum SyntaxKind {
 
 
     _Invalid
+}
+
+impl SyntaxKind {
+    pub (crate) fn is_trivia(self) -> bool {
+        match self {
+            SyntaxKind::Comment => true,
+            SyntaxKind::Whitespace => true,
+            _ => false
+        }
+    }
 }
 
 pub struct Lexer<'a> {

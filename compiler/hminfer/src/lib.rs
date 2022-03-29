@@ -339,9 +339,8 @@ impl TypeInferCtx {
 			}
 		} else if let Some(key2) = self.get_infer_key(two) {
 			if let Some(variant1) = self.get_variant(one) {
-				self.checker
-					.impose(key2.concretizes_explicit(variant1))
-					.unwrap();
+				let _ =self.checker
+					.impose(key2.concretizes_explicit(variant1));
 			}
 		}
 

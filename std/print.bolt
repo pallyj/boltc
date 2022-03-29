@@ -16,4 +16,4 @@ public func printInt64(i: i64)
 public func printUInt64(i: i64)
 
 public func printDouble(n: f64)
-public func printFloat(n: f64)
+public func printFloat(n: f32)

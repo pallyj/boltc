@@ -1,4 +1,6 @@
 pub mod error;
+pub mod debugger;
+
 #[derive(Debug, Copy, Clone)]
 pub struct Span {
     range: TextRange,
@@ -29,8 +31,6 @@ impl Span {
 }*/
 
 /*
-
-blink
 
 pub struct Record {
     x: m,

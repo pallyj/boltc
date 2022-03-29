@@ -1,12 +1,9 @@
-use rowan::{Checkpoint, Language};
-
-use crate::{lexer::SyntaxKind, ast::BoltLanguage};
-
+use crate::lexer::SyntaxKind;
 use super::Parser;
 
-impl<'a> Parser<'a> {
+impl<'input, 'l> Parser<'input, 'l> {
 	pub fn parse_ty(&mut self) {
-		let ty_start = self.builder.checkpoint();
+		let ty_start = self.checkpoint();
 
 		if self.eat_and_start_node(SyntaxKind::Ident, SyntaxKind::NamedType) {
 			// Check paths
@@ -62,16 +59,16 @@ impl<'a> Parser<'a> {
 		self.finish_node();
 	}
 
-	pub fn parse_ty_postfix(&mut self, checkpoint: Checkpoint) {
+	pub fn parse_ty_postfix(&mut self, checkpoint: usize) {
 		if self.eat(SyntaxKind::Period) {
-			self.builder.start_node_at(checkpoint, BoltLanguage::kind_to_raw(SyntaxKind::MemberType));
+			self.start_node_at(SyntaxKind::MemberType, checkpoint);
 
 			if self.eat(SyntaxKind::Ident) {
-				self.builder.finish_node();
+				self.finish_node();
 			} else {
 				// Expected ident, recover
 				self.bump();
-				self.builder.finish_node()
+				self.finish_node()
 			}
 
 			self.parse_ty_postfix(checkpoint);

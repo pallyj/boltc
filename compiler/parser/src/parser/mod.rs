@@ -5,27 +5,31 @@ mod smt;
 mod func;
 mod var;
 mod struct_;
+mod event;
+mod sink;
 
-use std::{iter::Peekable};
+use errors::{debugger::Debugger, error::ErrorCode, Span};
 
-use rowan::{GreenNodeBuilder, Language, Checkpoint};
+use crate::{lexer::{SyntaxKind, Lexer, Token}, operators::OperatorFactory, ast::{Parse, SyntaxNode}};
 
-use crate::{lexer::{SyntaxKind, Lexer}, ast::BoltLanguage, operators::OperatorFactory};
+use self::{event::Event, sink::Sink};
 
-pub struct Parser<'a> {
-	lexer: Peekable<Lexer<'a>>,
+struct Parser<'input, 'l> {
+	lexemes: &'l [Token<'input>],
+	debugger: &'input mut Debugger,
 	operators: OperatorFactory,
-	builder: GreenNodeBuilder<'static>,
-	index: usize
+	events: Vec<Event<'input>>,
+	cursor: usize
 }
 
-impl<'a> Parser<'a> {
-	pub fn new(input: &'a str) -> Self {
+impl<'input, 'l> Parser<'input, 'l> {
+	pub fn new(lexemes: &'l [Token<'input>], debugger: &'input mut Debugger) -> Self {
 		Self {
-			lexer: Lexer::new(input).peekable(),
-			builder: GreenNodeBuilder::new(),
+			lexemes,
+			debugger,
+			events: Vec::new(),
 			operators: OperatorFactory::new(),
-			index: 0,
+			cursor: 0,
 		}
 	}
 
@@ -34,8 +38,8 @@ impl<'a> Parser<'a> {
 	}
 
 	pub fn check(&mut self, token: SyntaxKind) -> bool {
-		self.lexer.peek()
-			.map(|next_token| next_token.kind == token)
+		self.peek()
+			.map(|next_token| next_token == token)
 			.unwrap_or(false)
 	}
 
@@ -59,7 +63,7 @@ impl<'a> Parser<'a> {
 		true
 	}
 
-	pub fn eat_and_start_node_at(&mut self, token: SyntaxKind, node: SyntaxKind, checkpoint: Checkpoint) -> bool {
+	pub fn eat_and_start_node_at(&mut self, token: SyntaxKind, node: SyntaxKind, checkpoint: usize) -> bool {
 		if !self.check(token) {
 			return false;
 		}
@@ -71,14 +75,21 @@ impl<'a> Parser<'a> {
 	}
 
 	pub fn bump(&mut self) {
-		if let Some(next) = self.lexer.next() {
-			self.builder.token(BoltLanguage::kind_to_raw(next.kind), next.source);
-			self.index += 1;
+		self.eat_trivia();
+		if let Some(next) = self.lexemes.get(self.cursor) {
+			self.events.push(Event::AddToken { kind: next.kind, text: next.source });
+			self.cursor += 1;
 		}
 	}
 
+	pub fn checkpoint(&self) -> usize {
+		self.events.len()
+	}
+
 	pub fn slice(&mut self) -> &str {
-		self.lexer.peek().unwrap().source
+		self.lexemes
+			.get(self.cursor)
+			.unwrap().source
 	}
 
 	fn parse_delim(
@@ -132,6 +143,12 @@ impl<'a> Parser<'a> {
 		self.finish_node();
 	}
 
+	pub fn error(&mut self, code: ErrorCode, spans: Vec<Span>) {
+		self.bump();
+
+		self.debugger.throw(code, spans);
+	}
+
 	/*
 	fn parse_delim_separated_at(
 		&mut self,
@@ -165,6 +182,23 @@ impl<'a> Parser<'a> {
 		self.finish_node();
 	}*/
 
+	fn eat_trivia(&mut self) {
+        while self.peek_raw().map(|peek| peek.is_trivia()).unwrap_or(false) {
+            self.cursor += 1;
+        }
+    }
+
+	fn peek(&mut self) -> Option<SyntaxKind> {
+        self.eat_trivia();
+        self.peek_raw()
+    }
+
+	fn peek_raw(&self) -> Option<SyntaxKind> {
+        self.lexemes
+            .get(self.cursor)
+            .map(|token| token.kind)
+    }
+
 	pub fn parse_paren_comma_seq(
 		&mut self,
 		f: impl FnMut(&mut Self))
@@ -178,15 +212,15 @@ impl<'a> Parser<'a> {
 	}
 
 	fn start_node(&mut self, kind: SyntaxKind) {
-        self.builder.start_node(BoltLanguage::kind_to_raw(kind));
+		self.events.push(Event::StartNode { kind });
     }
 
-	fn start_node_at(&mut self, kind: SyntaxKind, checkpoint: Checkpoint) {
-        self.builder.start_node_at(checkpoint, BoltLanguage::kind_to_raw(kind));
+	fn start_node_at(&mut self, kind: SyntaxKind, checkpoint: usize) {
+		self.events.push(Event::StartNodeAt { kind, at: checkpoint });
     }
 
     fn finish_node(&mut self) {
-        self.builder.finish_node();
+		self.events.push(Event::FinishNode);
     }
 
 	pub fn parse_visibility(&mut self) {
@@ -199,5 +233,18 @@ impl<'a> Parser<'a> {
 		else { }
 
 		self.finish_node();
+	}
+}
+
+pub fn parse<'input>(input: &'input str, debugger: &'input mut Debugger) -> Parse {
+	let lexemes: Vec<_> = Lexer::new(input).collect();
+
+	let parser = Parser::new(&lexemes, debugger);
+
+	let events = parser.parse_file();
+	let sink = Sink::new(events, &lexemes);
+
+	Parse {
+		root: SyntaxNode::new_root(sink.finish())
 	}
 }
