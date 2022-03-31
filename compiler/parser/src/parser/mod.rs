@@ -7,35 +7,34 @@ mod var;
 mod struct_;
 mod event;
 mod sink;
+mod marker;
 
-use errors::{debugger::Debugger, error::ErrorCode, Span};
+use errors::{debugger::Debugger};
 
-use crate::{lexer::{SyntaxKind, Lexer, Token}, operators::OperatorFactory, ast::{Parse, SyntaxNode}};
+use crate::{lexer::{SyntaxKind, Lexer, Token}, operators::OperatorFactory, ast::{Parse, SyntaxNode}, parse_error::ParseError};
 
-use self::{event::Event, sink::Sink};
+use self::{event::Event, sink::Sink, marker::Marker};
 
 struct Parser<'input, 'l> {
 	lexemes: &'l [Token<'input>],
-	debugger: &'input mut Debugger,
-	operators: OperatorFactory,
+	//operators: OperatorFactory,
 	events: Vec<Event<'input>>,
 	cursor: usize
 }
 
 impl<'input, 'l> Parser<'input, 'l> {
-	pub fn new(lexemes: &'l [Token<'input>], debugger: &'input mut Debugger) -> Self {
+	pub fn new(lexemes: &'l [Token<'input>]) -> Self {
 		Self {
 			lexemes,
-			debugger,
 			events: Vec::new(),
-			operators: OperatorFactory::new(),
+			//operators: OperatorFactory::new(),
 			cursor: 0,
 		}
 	}
 
-	pub fn operator_factory(&mut self) -> &mut OperatorFactory {
+	/*pub fn operator_factory(&mut self) -> &mut OperatorFactory {
 		&mut self.operators
-	}
+	}*/
 
 	pub fn check(&mut self, token: SyntaxKind) -> bool {
 		self.peek()
@@ -52,38 +51,12 @@ impl<'input, 'l> Parser<'input, 'l> {
 		true
 	}
 
-	pub fn eat_and_start_node(&mut self, token: SyntaxKind, node: SyntaxKind) -> bool {
-		if !self.check(token) {
-			return false;
-		}
-
-		self.start_node(node);
-
-		self.bump();
-		true
-	}
-
-	pub fn eat_and_start_node_at(&mut self, token: SyntaxKind, node: SyntaxKind, checkpoint: usize) -> bool {
-		if !self.check(token) {
-			return false;
-		}
-
-		self.start_node_at(node, checkpoint);
-
-		self.bump();
-		true
-	}
-
 	pub fn bump(&mut self) {
 		self.eat_trivia();
 		if let Some(next) = self.lexemes.get(self.cursor) {
 			self.events.push(Event::AddToken { kind: next.kind, text: next.source });
 			self.cursor += 1;
 		}
-	}
-
-	pub fn checkpoint(&self) -> usize {
-		self.events.len()
 	}
 
 	pub fn slice(&mut self) -> &str {
@@ -99,18 +72,17 @@ impl<'input, 'l> Parser<'input, 'l> {
 		ket: SyntaxKind,
 		mut f: impl FnMut(&mut Self))
 	{
-		self.start_node(node);
+		let marker = self.start();
 		if !self.eat(bra) {
 			// Throw an error
 			// Recover from this
 			self.bump();
-			return
+		} else {
+			while !self.eat(ket) {
+				f(self);
+			}
 		}
-
-		while !self.eat(ket) {
-			f(self);
-		}
-		self.finish_node();
+		marker.complete(self, node);
 	}
 
 	fn parse_delim_separated(
@@ -121,32 +93,63 @@ impl<'input, 'l> Parser<'input, 'l> {
 		sep: SyntaxKind,
 		mut f: impl FnMut(&mut Self))
 	{
-		self.start_node(node);
+		let marker = self.start();
+
 		if !self.eat(bra) {
 			// Throw an error
 			// Recover from this
 			self.bump();
-			return
-		}
-
-		while !self.eat(ket) {
-			f(self);
-
-			if !self.eat(sep) {
-				// End of list
-				if !self.eat(ket) {
-					// Recover from missing separator
+		} else {
+			while !self.eat(ket) {
+				f(self);
+	
+				if !self.eat(sep) {
+					// End of list
+					if !self.eat(ket) {
+						// Recover from missing separator
+					}
+					break
 				}
-				break
 			}
 		}
-		self.finish_node();
+
+		marker.complete(self, node);
 	}
 
-	pub fn error(&mut self, code: ErrorCode, spans: Vec<Span>) {
-		self.bump();
+	pub fn error(&mut self, error: ParseError) {
+		let event = Event::Error(error);
 
-		self.debugger.throw(code, spans);
+		self.events.push(event);
+
+		// Do error recovery
+	}
+
+	pub fn error_recover(&mut self, error: ParseError, recovery_set: &[SyntaxKind]) {
+		self.error(error);
+		if !self.peek().map(|peeked_token| recovery_set.contains(&peeked_token)).unwrap_or(false) {
+			self.bump();
+		}
+	}
+
+	pub fn expect(&mut self, kind: SyntaxKind) {
+		if !self.eat(kind) {
+			self.error(ParseError::Expected(kind))
+		}
+	}
+
+	pub fn start(&mut self) -> Marker {
+		let pos = self.events.len();
+		self.events.push(Event::Placeholder);
+
+		Marker::new(pos)
+	}
+
+	pub fn node<F: FnOnce(&mut Self)>(&mut self, kind: SyntaxKind, f: F) {
+		let node = self.start();
+
+		f(self);
+
+		node.complete(self, kind);
 	}
 
 	/*
@@ -211,20 +214,8 @@ impl<'input, 'l> Parser<'input, 'l> {
 			f)
 	}
 
-	fn start_node(&mut self, kind: SyntaxKind) {
-		self.events.push(Event::StartNode { kind });
-    }
-
-	fn start_node_at(&mut self, kind: SyntaxKind, checkpoint: usize) {
-		self.events.push(Event::StartNodeAt { kind, at: checkpoint });
-    }
-
-    fn finish_node(&mut self) {
-		self.events.push(Event::FinishNode);
-    }
-
 	pub fn parse_visibility(&mut self) {
-		self.start_node(SyntaxKind::Visibility);
+		let marker = self.start();
 
 		if self.eat(SyntaxKind::PublicKw) ||
 		   self.eat(SyntaxKind::InternalKw) ||
@@ -232,14 +223,14 @@ impl<'input, 'l> Parser<'input, 'l> {
 		   self.eat(SyntaxKind::PrivateKw) { }
 		else { }
 
-		self.finish_node();
+		marker.complete(self, SyntaxKind::Visibility);
 	}
 }
 
 pub fn parse<'input>(input: &'input str, debugger: &'input mut Debugger) -> Parse {
 	let lexemes: Vec<_> = Lexer::new(input).collect();
 
-	let parser = Parser::new(&lexemes, debugger);
+	let parser = Parser::new(&lexemes);
 
 	let events = parser.parse_file();
 	let sink = Sink::new(events, &lexemes);

@@ -4,47 +4,41 @@ use super::Parser;
 
 impl<'input, 'l> Parser<'input, 'l> {
 	pub fn parse_smt(&mut self) {
-		if self.eat_and_start_node(SyntaxKind::ReturnKw, SyntaxKind::ReturnSmt) {
+		let marker = self.start();
+
+		if self.eat(SyntaxKind::ReturnKw) {
 			if self.check_expr() {
 				self.parse_expr();
 			}
 
-			self.finish_node()
-		} else if self.eat_and_start_node(SyntaxKind::LetKw, SyntaxKind::LetSmt) {
+			marker.complete(self, SyntaxKind::ReturnSmt);
+		} else if self.eat(SyntaxKind::LetKw) {
 			if !self.eat(SyntaxKind::Ident) {
 				// Recover
 				self.bump();
 			}
 
-			self.start_node(SyntaxKind::BindType);
-
-			if self.eat(SyntaxKind::Colon) {
-				self.parse_ty();
-			}
-
-			self.finish_node();
-
+			self.node(SyntaxKind::BindType, |parser| {
+				if parser.eat(SyntaxKind::Colon) {
+					parser.parse_ty();
+				}
+			});
 
 			// Parse the default value
-			self.start_node(SyntaxKind::AssignValue);
+			self.node(SyntaxKind::AssignValue, |parser| {
+				if parser.eat(SyntaxKind::Equals) { parser.parse_expr(); }
+			});
 
-			if self.eat(SyntaxKind::Equals) {
-				self.parse_expr();
-			}
-
-			self.finish_node();
-
-			self.finish_node();
-		} else if self.eat_and_start_node(SyntaxKind::Semicolon, SyntaxKind::NoOp) {
-			self.finish_node()
+			marker.complete(self, SyntaxKind::LetSmt);
+		} else if self.eat(SyntaxKind::Semicolon) {
+			marker.complete(self, SyntaxKind::NoOp);
 		} else {
-			self.start_node(SyntaxKind::EvalSmt);
-			
 			self.parse_expr();
 
+			// Parse the trailing semicolon for an expr
 			self.eat(SyntaxKind::Semicolon);
 
-			self.finish_node();
+			marker.complete(self, SyntaxKind::EvalSmt);
 		}
 	}
 

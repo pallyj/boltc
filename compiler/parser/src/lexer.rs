@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use logos::Logos;
 
 #[derive(Logos, Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -219,6 +221,7 @@ impl<'a> Iterator for Lexer<'a> {
     }
 }
 
+#[derive(Clone)]
 pub struct Token<'a> {
     pub kind: SyntaxKind,
     pub source: &'a str
