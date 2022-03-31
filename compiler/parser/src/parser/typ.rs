@@ -1,6 +1,16 @@
 use crate::lexer::SyntaxKind;
 use super::{Parser, marker::{Marker, CompletedMarker}};
 
+const TYPE_RECOVERY_SET: &[SyntaxKind] = &[
+	SyntaxKind::LetKw,
+	SyntaxKind::ReturnKw,
+	SyntaxKind::Equals,
+	SyntaxKind::Colon,
+	SyntaxKind::OpenBrace,
+	SyntaxKind::Semicolon,
+	SyntaxKind::Period,
+];
+
 impl<'input, 'l> Parser<'input, 'l> {
 	pub fn parse_ty(&mut self) {
 		let ty = self.start();
@@ -16,8 +26,9 @@ impl<'input, 'l> Parser<'input, 'l> {
 		} else if self.eat(SyntaxKind::UnderscoreKw) {
 			ty.complete(self, SyntaxKind::InferType);
 		} else {
+			self.error_recover("expected type", TYPE_RECOVERY_SET);
+
 			ty.complete(self, SyntaxKind::Error);
-			// Recover from an error
 		}
 	}
 
@@ -25,12 +36,7 @@ impl<'input, 'l> Parser<'input, 'l> {
 		if self.eat(SyntaxKind::CloseParen) {
 			marker.complete(self, SyntaxKind::UnitType);
 		} else {
-			// Check for a CloseParen token ahead
-			// Continue parsing without a )
-			// Throw expected ) found ...
-
-			// For now, don't throw an error, just continue
-			//self.error(error);
+			self.error_recover("expected closing parenthesis", TYPE_RECOVERY_SET);
 
 			marker.complete(self, SyntaxKind::Error);
 		}
@@ -60,7 +66,7 @@ impl<'input, 'l> Parser<'input, 'l> {
 			let marker = parent.precede(self);
 
 			if !self.eat(SyntaxKind::Ident) {
-				// Error
+				self.error_recover("expected member name", TYPE_RECOVERY_SET);
 			}
 
 			let completed_marker = marker.complete(self, SyntaxKind::MemberType);

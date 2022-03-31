@@ -1,17 +1,13 @@
 use crate::lexer::SyntaxKind;
 
-use super::{Parser, marker::Marker};
+use super::{Parser, marker::Marker, file::ITEM_RECOVERY_SET};
 
 impl<'input, 'l> Parser<'input, 'l> {
 	pub fn parse_struct(&mut self, marker: Marker) {
 		debug_assert!(self.check(SyntaxKind::StructKw));
 		self.eat(SyntaxKind::StructKw);
 
-		let func_name = self.start();
-		if !self.eat(SyntaxKind::Ident) {
-
-		}
-		func_name.complete(self, SyntaxKind::FuncName);
+		self.name(ITEM_RECOVERY_SET);
 
 		self.parse_delim(
 			SyntaxKind::StructBody,
@@ -36,7 +32,7 @@ impl<'input, 'l> Parser<'input, 'l> {
 			Some(SyntaxKind::StructKw) => self.parse_struct(marker),
 			_ => {
 				// Error
-
+				self.error_recover("expected struct item", ITEM_RECOVERY_SET);
 			}
 		}
 	}

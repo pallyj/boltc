@@ -11,9 +11,9 @@ mod marker;
 
 use errors::{debugger::Debugger};
 
-use crate::{lexer::{SyntaxKind, Lexer, Token}, operators::OperatorFactory, ast::{Parse, SyntaxNode}, parse_error::ParseError};
+use crate::{lexer::{SyntaxKind, Lexer, Token}, operators::OperatorFactory, ast::{Parse, SyntaxNode}};
 
-use self::{event::Event, sink::Sink, marker::Marker};
+use self::{event::Event, sink::Sink, marker::{Marker, CompletedMarker}};
 
 struct Parser<'input, 'l> {
 	lexemes: &'l [Token<'input>],
@@ -116,25 +116,21 @@ impl<'input, 'l> Parser<'input, 'l> {
 		marker.complete(self, node);
 	}
 
-	pub fn error(&mut self, error: ParseError) {
-		let event = Event::Error(error);
+	pub fn error(&mut self, error: &str) {
+		let event = Event::Error(error.to_string());
 
 		self.events.push(event);
 
 		// Do error recovery
 	}
 
-	pub fn error_recover(&mut self, error: ParseError, recovery_set: &[SyntaxKind]) {
+	pub fn error_recover(&mut self, error: &str, recovery_set: &[SyntaxKind]) -> CompletedMarker {
 		self.error(error);
+		let err = self.start();
 		if !self.peek().map(|peeked_token| recovery_set.contains(&peeked_token)).unwrap_or(false) {
 			self.bump();
 		}
-	}
-
-	pub fn expect(&mut self, kind: SyntaxKind) {
-		if !self.eat(kind) {
-			self.error(ParseError::Expected(kind))
-		}
+		err.complete(self, SyntaxKind::Error)
 	}
 
 	pub fn start(&mut self) -> Marker {
@@ -150,6 +146,16 @@ impl<'input, 'l> Parser<'input, 'l> {
 		f(self);
 
 		node.complete(self, kind);
+	}
+
+	pub fn name(&mut self, recovery_set: &[SyntaxKind]) {
+		if self.check(SyntaxKind::Ident) {
+			let func_name = self.start();
+			self.eat(SyntaxKind::Ident);
+			func_name.complete(self, SyntaxKind::FuncName);
+		} else {
+			self.error_recover("expected name", recovery_set);
+		}
 	}
 
 	/*
@@ -227,15 +233,15 @@ impl<'input, 'l> Parser<'input, 'l> {
 	}
 }
 
-pub fn parse<'input>(input: &'input str, debugger: &'input mut Debugger) -> Parse {
+pub fn parse<'input>(input: &'input str, debugger: &'input mut Debugger, file: usize) -> Parse {
 	let lexemes: Vec<_> = Lexer::new(input).collect();
 
 	let parser = Parser::new(&lexemes);
 
 	let events = parser.parse_file();
-	let sink = Sink::new(events, &lexemes);
+	let sink = Sink::new(events, &lexemes, file);
 
 	Parse {
-		root: SyntaxNode::new_root(sink.finish())
+		root: SyntaxNode::new_root(sink.finish(debugger))
 	}
 }

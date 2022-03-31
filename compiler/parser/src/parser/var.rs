@@ -1,6 +1,4 @@
-use rowan::Checkpoint;
-
-use crate::lexer::SyntaxKind;
+use crate::{lexer::SyntaxKind, parser::file::ITEM_RECOVERY_SET};
 
 use super::{Parser, marker::Marker};
 
@@ -9,7 +7,7 @@ impl<'input, 'l> Parser<'input, 'l> {
 		debug_assert!(self.check(SyntaxKind::LetKw));
 		self.eat(SyntaxKind::LetKw);
 
-		self.expect(SyntaxKind::Ident);
+		self.name(ITEM_RECOVERY_SET);
 
 		let bind_type = self.start();
 		if self.eat(SyntaxKind::Colon) { self.parse_ty(); }
@@ -25,7 +23,7 @@ impl<'input, 'l> Parser<'input, 'l> {
 		debug_assert!(self.check(SyntaxKind::VarKw));
 		self.eat(SyntaxKind::VarKw);
 
-		self.expect(SyntaxKind::Ident);
+		self.name(ITEM_RECOVERY_SET);
 
 		let bind_type = self.start();
 		if self.eat(SyntaxKind::Colon) { self.parse_ty(); }

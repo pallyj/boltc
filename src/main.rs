@@ -6,7 +6,7 @@ use args::Args;
 use blir::Library;
 use clap::StructOpt;
 use codegen::config::{BuildConfig, BuildProfile, BuildOutput};
-use errors::debugger::Debugger;
+use errors::{debugger::Debugger, fileinterner::FileInterner};
 use lower_ast::AstLowerer;
 use lower_blir::BlirLowerer;
 use parser::parser::parse;
@@ -20,23 +20,25 @@ fn main() {
     project.open_file("std/print.bolt");
 
     project.open_file(&args.file);
-    project.compile();
 
-    // Link with the c standard library
-    Command::new("clang")
-        .args([ "bin/print.o", &format!("bin/lib{}.o", args.lib), "-e", &format!("_2L{}F4{}main", args.lib.len(), args.lib), "-o", &format!("bin/{}", args.lib) ])
-        .output()
-        .unwrap();
-    
-    Command::new(&format!("bin/{}", args.lib))
-        .spawn()
-        .unwrap();
+    if project.compile() {
+
+        // Link with the c standard library
+        Command::new("clang")
+            .args([ "bin/print.o", &format!("bin/lib{}.o", args.lib), "-e", &format!("_2L{}F4{}main", args.lib.len(), args.lib), "-o", &format!("bin/{}", args.lib) ])
+            .output()
+            .unwrap();
+        
+        Command::new(&format!("bin/{}", args.lib))
+            .spawn()
+            .unwrap();
+    }
 }
 
 pub struct Project {
     file_text: Vec<String>,
     library: Option<Library>,
-    debugger: Debugger,
+    interner: FileInterner,
 }
 
 impl Project {
@@ -44,24 +46,28 @@ impl Project {
         Project {
             file_text: vec![],
             library: Some(Library::new(name)),
-            debugger: Debugger::new(),
+            interner: FileInterner::new()
         }
     }
 
     pub fn open_file(&mut self, file: &str) {
-        let mut file = File::open(file).unwrap();
-
-        let mut code = String::new();
-        file.read_to_string(&mut code).unwrap();
-        let idx = self.file_text.len();
-        self.file_text.push(code);
-    
-        let parse = parse(&self.file_text[idx], &mut self.debugger);
-
-        AstLowerer::new(parse).lower_file(self.library.as_mut().unwrap());
+        self.interner.open_file(file);        
     }
 
-    pub fn compile(&mut self) {
+    pub fn compile(&mut self) -> bool {
+        let mut debugger = Debugger::new(&self.interner);
+
+
+        for file in self.interner.iter() {
+            let parse = parse(file.1.text(), &mut debugger, file.0);
+
+            if debugger.has_errors() { continue; }
+    
+            AstLowerer::new(parse).lower_file(self.library.as_mut().unwrap());
+        }
+
+        if debugger.has_errors() { return false; }
+
         blir_passes::type_resolve::run_pass(self.library.as_mut().unwrap());
         blir_passes::type_infer::run_pass(self.library.as_mut().unwrap());
         blir_passes::type_check::run_pass(self.library.as_mut().unwrap());
@@ -74,6 +80,8 @@ impl Project {
         let config = BuildConfig::new(BuildProfile::Debug, BuildOutput::Object, None);
         
         codegen::compile(library, config);
+
+        return !debugger.has_errors()
     }
 }
 

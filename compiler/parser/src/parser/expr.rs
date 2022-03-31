@@ -2,6 +2,15 @@ use crate::{lexer::SyntaxKind, /*operators::{OperatorPrecedence, OperatorFix}*/}
 
 use super::{Parser, marker::{CompletedMarker, Marker}};
 
+const EXPR_RECOVERY_SET: &[SyntaxKind] = &[
+	SyntaxKind::LetKw,
+	SyntaxKind::ReturnKw,
+	SyntaxKind::OpenBrace,
+	SyntaxKind::CloseBrace,
+	SyntaxKind::Semicolon,
+	SyntaxKind::OpenParen,
+	SyntaxKind::Period];
+
 impl<'input, 'l> Parser<'input, 'l> {
 	pub fn parse_expr(&mut self) {
 		self.parse_expr_raw(/*OperatorPrecedence::None*/)
@@ -14,13 +23,13 @@ impl<'input, 'l> Parser<'input, 'l> {
 		while cur != self.cursor {
 			cur = self.cursor;
 			if self.eat(SyntaxKind::Period) {
-				let marker = completed.precede(self);
-
-				if !self.eat(SyntaxKind::Ident) {
-					// Error
+				if self.check(SyntaxKind::Ident) {
+					let marker = completed.precede(self);
+					self.bump();
+					completed = marker.complete(self, SyntaxKind::MemberExpr);
+				} else {
+					self.error_recover("expected member name", EXPR_RECOVERY_SET);
 				}
-
-				completed = marker.complete(self, SyntaxKind::MemberExpr);
 			} else if self.check(SyntaxKind::OpenParen) {
 				let marker = completed.precede(self);
 
@@ -120,8 +129,7 @@ impl<'input, 'l> Parser<'input, 'l> {
 			self.parse_expr_if(marker)
 		} else {
 			// Try to do recovery
-			self.bump();
-			marker.complete(self, SyntaxKind::Error)
+			self.error_recover("expected expression", EXPR_RECOVERY_SET)
 		}
 	}
 
@@ -129,8 +137,6 @@ impl<'input, 'l> Parser<'input, 'l> {
 		self.node(SyntaxKind::Condition, |parser| parser.parse_expr());
 
 		self.node(SyntaxKind::Positive, |parser| parser.parse_codeblock());
-
-
 
 		if self.eat(SyntaxKind::ElseKw) {
 			self.node(SyntaxKind::Negative, |parser| {
@@ -143,7 +149,7 @@ impl<'input, 'l> Parser<'input, 'l> {
 				} else if parser.check(SyntaxKind::OpenBrace) {
 					parser.parse_codeblock();
 				} else {
-					// Error
+					parser.error_recover("expected code block or if statement", EXPR_RECOVERY_SET);
 				}
 			});
 		}
