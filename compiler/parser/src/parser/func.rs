@@ -1,4 +1,4 @@
-use crate::{lexer::SyntaxKind, parse_error::ParseError};
+use crate::{lexer::SyntaxKind, parser::file::INNER_ITEM_RECOVERY_SET};
 
 use super::{Parser, file::ITEM_RECOVERY_SET, marker::Marker};
 
@@ -9,7 +9,11 @@ impl<'input, 'l> Parser<'input, 'l> {
 
 		self.parse_paren_comma_seq(|parser| parser.parse_func_par());
 
-		self.parse_codeblock();
+		if self.check(SyntaxKind::OpenBrace) {
+			self.parse_codeblock();
+		} else {
+			self.error("expected code block");
+		}
 
 		marker.complete(self, SyntaxKind::InitDef);
 	}
@@ -17,11 +21,13 @@ impl<'input, 'l> Parser<'input, 'l> {
 		assert!(self.check(SyntaxKind::FuncKw));
 		self.eat(SyntaxKind::FuncKw);
 
-		self.node(SyntaxKind::FuncName, |parser| if !parser.eat(SyntaxKind::Ident) {
-			parser.error_recover(ParseError::Expected(SyntaxKind::Ident), ITEM_RECOVERY_SET);
-		});
+		self.name(INNER_ITEM_RECOVERY_SET);
 
-		self.parse_paren_comma_seq(|parser| parser.parse_func_par());
+		if self.check(SyntaxKind::OpenParen) {
+			self.parse_paren_comma_seq(|parser| parser.parse_func_par());
+		} else {
+			self.error("expected function arguments");
+		}
 
 		self.parse_ty_return();
 
@@ -35,8 +41,13 @@ impl<'input, 'l> Parser<'input, 'l> {
 	pub fn parse_func_par(&mut self) {
 		let marker = self.start();
 
-		self.expect(SyntaxKind::Ident);
-		self.expect(SyntaxKind::Colon);
+		if !self.eat(SyntaxKind::Ident) {
+			self.error_recover("expected function param", &[SyntaxKind::Comma, SyntaxKind::CloseParen]);
+		}
+
+		if !self.eat(SyntaxKind::Colon) {
+			self.error_recover("expected function param", &[SyntaxKind::Comma, SyntaxKind::CloseParen]);
+		}
 
 		self.parse_ty();
 

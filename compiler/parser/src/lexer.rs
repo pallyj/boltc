@@ -1,5 +1,3 @@
-use std::fmt::Display;
-
 use logos::Logos;
 
 #[derive(Logos, Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]

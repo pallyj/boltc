@@ -2,6 +2,16 @@ use crate::lexer::SyntaxKind;
 
 use super::Parser;
 
+const LET_RECOVERY_SET: &[SyntaxKind] = &[
+	SyntaxKind::LetKw,
+	SyntaxKind::Colon,
+	SyntaxKind::Equals,
+	SyntaxKind::Semicolon,
+
+	SyntaxKind::ReturnKw,
+	SyntaxKind::OpenParen,
+];
+
 impl<'input, 'l> Parser<'input, 'l> {
 	pub fn parse_smt(&mut self) {
 		let marker = self.start();
@@ -14,8 +24,7 @@ impl<'input, 'l> Parser<'input, 'l> {
 			marker.complete(self, SyntaxKind::ReturnSmt);
 		} else if self.eat(SyntaxKind::LetKw) {
 			if !self.eat(SyntaxKind::Ident) {
-				// Recover
-				self.bump();
+				self.error_recover("expected name", LET_RECOVERY_SET);
 			}
 
 			self.node(SyntaxKind::BindType, |parser| {

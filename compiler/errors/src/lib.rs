@@ -1,5 +1,6 @@
 pub mod error;
 pub mod debugger;
+pub mod fileinterner;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Span {

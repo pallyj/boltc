@@ -26,10 +26,10 @@ impl LetDef {
 
 	pub fn label(&self) -> String {
 		self.0
-			.children_with_tokens()
-			.find(|element| element.kind() == SyntaxKind::Ident)
-			.and_then(|element| element.into_token())
-			.map(|token| token.text().to_string())
+			.children()
+			.find(|child| child.kind() == SyntaxKind::FuncName)
+			.and_then(|func_name| func_name.first_token())
+			.map(|name| name.text().to_string())
 			.unwrap()
 	}
 
@@ -73,10 +73,10 @@ impl VariableDef {
 
 	pub fn label(&self) -> String {
 		self.0
-			.children_with_tokens()
-			.find(|element| element.kind() == SyntaxKind::Ident)
-			.and_then(|element| element.into_token())
-			.map(|token| token.text().to_string())
+			.children()
+			.find(|child| child.kind() == SyntaxKind::FuncName)
+			.and_then(|func_name| func_name.first_token())
+			.map(|name| name.text().to_string())
 			.unwrap()
 	}
 

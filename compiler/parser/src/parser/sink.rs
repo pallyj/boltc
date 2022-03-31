@@ -1,4 +1,5 @@
 use colored::Colorize;
+use errors::debugger::Debugger;
 use rowan::{GreenNodeBuilder, GreenNode, Language};
 
 use crate::{ast::BoltLanguage, lexer::{Token, SyntaxKind}};
@@ -9,21 +10,24 @@ pub (super) struct Sink<'input, 'l> {
 	builder: GreenNodeBuilder<'static>,
     lexemes: &'l [Token<'input>],
     cursor: usize,
-	events: Vec<Event<'input>>
+	events: Vec<Event<'input>>,
+    text_cursor: usize,
+    file: usize,
 }
 
 impl<'input, 'l> Sink<'input, 'l> {
-	pub(super) fn new(events: Vec<Event<'input>>, lexemes: &'l [Token<'input>]) -> Self {
+	pub(super) fn new(events: Vec<Event<'input>>, lexemes: &'l [Token<'input>], file: usize) -> Self {
         Self {
             builder: GreenNodeBuilder::new(),
             lexemes,
             cursor: 0,
             events,
+            text_cursor: 0,
+            file
         }
     }
 
-	pub(super) fn finish(mut self) -> GreenNode {
-
+	pub(super) fn finish(mut self, debugger: &mut Debugger) -> GreenNode {
         self.eat_trivia();
 
         for idx in 0..self.events.len() {
@@ -61,8 +65,9 @@ impl<'input, 'l> Sink<'input, 'l> {
                 Event::AddToken { kind, text } => self.token(kind, text),
                 Event::FinishNode => self.builder.finish_node(),
                 Event::Error(error) => {
-                    let description = error.to_string(self.peek());
-                    println!("{}{} {}", "  error".red().bold(), ":".bold(), description.bold());
+                    let description = format!("{error}, found {}", token_specific(self.peek()));
+                    let span = self.next_span();
+                    debugger.throw_parse(description, (self.file, span));
                 }
                 Event::Placeholder => {}
             }
@@ -73,9 +78,18 @@ impl<'input, 'l> Sink<'input, 'l> {
         self.builder.finish()
     }
 
+    fn next_span(&self) -> (usize, usize) {
+        let sz = self.lexemes.get(self.cursor)
+            .map(|lexeme| lexeme.source.len())
+            .unwrap_or(0);
+
+        (self.text_cursor, self.text_cursor + sz)
+    }
+
     fn token(&mut self, kind: SyntaxKind, text: &str) {
         self.builder.token(BoltLanguage::kind_to_raw(kind), text);
         self.cursor += 1;
+        self.text_cursor += text.len();
     }
 
     fn peek(&self) -> Option<Token> {
@@ -91,4 +105,28 @@ impl<'input, 'l> Sink<'input, 'l> {
             self.token(lexeme.kind, lexeme.source.into());
         }
     }
+}
+
+fn token_specific(token: Option<Token>) -> String {
+	let Some(token) = token else {
+		return "<eof>".to_string();
+	};
+
+	match &token.kind {
+		SyntaxKind::StructKw | SyntaxKind::ImportKw |
+		SyntaxKind::FuncKw | SyntaxKind::InitKw |
+		SyntaxKind::LetKw | SyntaxKind::VarKw |
+		SyntaxKind::IfKw | SyntaxKind::ElseKw |
+		SyntaxKind::ReturnKw |
+		SyntaxKind::StaticKw |
+		SyntaxKind::PublicKw | SyntaxKind::InternalKw |
+		SyntaxKind::FilePrivateKw | SyntaxKind::PrivateKw |
+		SyntaxKind::UnderscoreKw =>  format!("keyword `{}`", token.source),
+
+		SyntaxKind::Comment =>  format!("comment"),
+		SyntaxKind::Whitespace =>  format!("whitespace"),
+		SyntaxKind::Error =>  format!("error"),
+
+		_ =>  format!("`{}`", token.source),
+	}
 }

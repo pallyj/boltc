@@ -6,7 +6,7 @@ struct Int {
 	}
 }
 
-func main() {
+func {
 	let i: Int = 5
 
 	i.add(100)
