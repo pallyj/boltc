@@ -10,3 +10,5 @@ rowan = "0.15.4"
 logos = "0.12.0"
 logos-derive = "0.12.0"
 errors = { path = "../errors" }
+colored = "*"
+drop_bomb = "0.1.5"

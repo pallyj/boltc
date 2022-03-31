@@ -1,44 +1,42 @@
 use crate::lexer::SyntaxKind;
-use super::Parser;
+use super::{Parser, marker::{Marker, CompletedMarker}};
 
 impl<'input, 'l> Parser<'input, 'l> {
 	pub fn parse_ty(&mut self) {
-		let ty_start = self.checkpoint();
+		let ty = self.start();
 
-		if self.eat_and_start_node(SyntaxKind::Ident, SyntaxKind::NamedType) {
-			// Check paths
-			self.finish_node();
+		if self.eat(SyntaxKind::Ident) {
+			let completed = ty.complete(self, SyntaxKind::NamedType);
 
-			self.parse_ty_postfix(ty_start);
-		} else if self.eat_and_start_node(SyntaxKind::OpenParen, SyntaxKind::UnitType) {
-			self.parse_ty_unit()
-		} else if self.eat_and_start_node(SyntaxKind::FuncKw, SyntaxKind::FuncType) {
-			self.parse_ty_func()
-		} else if self.eat_and_start_node(SyntaxKind::UnderscoreKw, SyntaxKind::InferType) {
-			self.finish_node()
+			self.parse_ty_postfix(completed);
+		} else if self.eat(SyntaxKind::OpenParen) {
+			self.parse_ty_unit(ty)
+		} else if self.eat(SyntaxKind::FuncKw) {
+			self.parse_ty_func(ty)
+		} else if self.eat(SyntaxKind::UnderscoreKw) {
+			ty.complete(self, SyntaxKind::InferType);
 		} else {
-			self.start_node(SyntaxKind::Error);
-			self.finish_node();
-			// Recover
+			ty.complete(self, SyntaxKind::Error);
+			// Recover from an error
 		}
-
-		
 	}
 
-	pub fn parse_ty_unit(&mut self) {
+	pub fn parse_ty_unit(&mut self, marker: Marker) {
 		if self.eat(SyntaxKind::CloseParen) {
-			self.finish_node();
+			marker.complete(self, SyntaxKind::UnitType);
 		} else {
 			// Check for a CloseParen token ahead
 			// Continue parsing without a )
 			// Throw expected ) found ...
 
 			// For now, don't throw an error, just continue
-			self.finish_node()
+			//self.error(error);
+
+			marker.complete(self, SyntaxKind::Error);
 		}
 	}
 
-	pub fn parse_ty_func(&mut self) {
+	pub fn parse_ty_func(&mut self, marker: Marker) {
 		// Parse a type list
 		self.parse_paren_comma_seq(|parser| {
 			parser.parse_ty();
@@ -46,32 +44,28 @@ impl<'input, 'l> Parser<'input, 'l> {
 
 		self.parse_ty_return();
 
-		self.finish_node();
+		marker.complete(self, SyntaxKind::FuncType);
 	}
 
 	pub fn parse_ty_return(&mut self) {
-		self.start_node(SyntaxKind::FuncReturn);
+		let marker = self.start();
 
-		if self.eat(SyntaxKind::Colon) {
-			self.parse_ty()
-		}
+		if self.eat(SyntaxKind::Colon) { self.parse_ty() }
 
-		self.finish_node();
+		marker.complete(self, SyntaxKind::FuncReturn);
 	}
 
-	pub fn parse_ty_postfix(&mut self, checkpoint: usize) {
+	pub fn parse_ty_postfix(&mut self, parent: CompletedMarker) {
 		if self.eat(SyntaxKind::Period) {
-			self.start_node_at(SyntaxKind::MemberType, checkpoint);
+			let marker = parent.precede(self);
 
-			if self.eat(SyntaxKind::Ident) {
-				self.finish_node();
-			} else {
-				// Expected ident, recover
-				self.bump();
-				self.finish_node()
+			if !self.eat(SyntaxKind::Ident) {
+				// Error
 			}
 
-			self.parse_ty_postfix(checkpoint);
+			let completed_marker = marker.complete(self, SyntaxKind::MemberType);
+
+			self.parse_ty_postfix(completed_marker);
 		}
 	}
 }

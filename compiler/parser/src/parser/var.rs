@@ -2,74 +2,39 @@ use rowan::Checkpoint;
 
 use crate::lexer::SyntaxKind;
 
-use super::Parser;
+use super::{Parser, marker::Marker};
 
 impl<'input, 'l> Parser<'input, 'l> {
-	pub fn parse_var(&mut self, checkpoint: usize) -> bool {
-		if !self.eat_and_start_node_at(SyntaxKind::VarKw, SyntaxKind::VarDef, checkpoint) {
-			return false
-		}
+	pub fn parse_let(&mut self, marker: Marker) {
+		debug_assert!(self.check(SyntaxKind::LetKw));
+		self.eat(SyntaxKind::LetKw);
 
+		self.expect(SyntaxKind::Ident);
 
-		if !self.eat(SyntaxKind::Ident) {
-			// Recover
-			self.bump();
-		}
+		let bind_type = self.start();
+		if self.eat(SyntaxKind::Colon) { self.parse_ty(); }
+		bind_type.complete(self, SyntaxKind::BindType);
 
-		self.start_node(SyntaxKind::BindType);
+		let assign_value = self.start();
+		if self.eat(SyntaxKind::Equals) { self.parse_expr(); }
+		assign_value.complete(self, SyntaxKind::AssignValue);
 
-		if self.eat(SyntaxKind::Colon) {
-			self.parse_ty();
-		}
-
-		self.finish_node();
-
-
-		// Parse the default value
-		self.start_node(SyntaxKind::AssignValue);
-
-		if self.eat(SyntaxKind::Equals) {
-			self.parse_expr();
-		}
-
-		self.finish_node();
-
-		self.finish_node();
-
-		return true;
+		marker.complete(self, SyntaxKind::LetDef);
 	}
+	pub fn parse_var(&mut self, marker: Marker) {
+		debug_assert!(self.check(SyntaxKind::VarKw));
+		self.eat(SyntaxKind::VarKw);
 
-	pub fn parse_let(&mut self, checkpoint: usize) -> bool {
-		if !self.eat_and_start_node_at(SyntaxKind::LetKw, SyntaxKind::LetDef, checkpoint) {
-			return false
-		}
+		self.expect(SyntaxKind::Ident);
 
+		let bind_type = self.start();
+		if self.eat(SyntaxKind::Colon) { self.parse_ty(); }
+		bind_type.complete(self, SyntaxKind::BindType);
 
-		if !self.eat(SyntaxKind::Ident) {
-			// Recover
-			self.bump();
-		}
+		let assign_value = self.start();
+		if self.eat(SyntaxKind::Equals) { self.parse_expr(); }
+		assign_value.complete(self, SyntaxKind::AssignValue);
 
-		self.start_node(SyntaxKind::BindType);
-
-		if self.eat(SyntaxKind::Colon) {
-			self.parse_ty();
-		}
-
-		self.finish_node();
-
-
-		// Parse the default value
-		self.start_node(SyntaxKind::AssignValue);
-
-		if self.eat(SyntaxKind::Equals) {
-			self.parse_expr();
-		}
-
-		self.finish_node();
-
-		self.finish_node();
-
-		return true;
+		marker.complete(self, SyntaxKind::VarDef);
 	}
 }

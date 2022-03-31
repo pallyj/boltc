@@ -156,11 +156,8 @@ impl BlirLowerer {
 				self.builder().build_unary_intrinsic(intrinsic, args[0].clone())
 			}
 
-			ValueKind::FunctionParam(param_name) => {
-				let function_value = self.context
-					.lookup_var(param_name)
-					.cloned()
-					.unwrap();
+			_ => {
+				let function_value = self.lower_value(func);
 
 				match function_value.typ_ref() {
 					blirssa::typ::Type::Function { .. } => {},
@@ -173,8 +170,6 @@ impl BlirLowerer {
 
 				self.builder().build_call(function_value, args)
 			}
-
-			_ => panic!("Can't lower {:?}", func),
 		}
 	}
 

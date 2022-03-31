@@ -1,3 +1,4 @@
+use colored::Colorize;
 use rowan::{GreenNodeBuilder, GreenNode, Language};
 
 use crate::{ast::BoltLanguage, lexer::{Token, SyntaxKind}};
@@ -22,27 +23,48 @@ impl<'input, 'l> Sink<'input, 'l> {
     }
 
 	pub(super) fn finish(mut self) -> GreenNode {
-		let mut reordered_events = self.events.clone();
-
-        for (idx, event) in self.events.iter().enumerate() {
-            if let Event::StartNodeAt { kind, at } = event {
-                reordered_events.remove(idx);
-                reordered_events.insert(*at, Event::StartNode { kind: *kind });
-            }
-        }
 
         self.eat_trivia();
 
-        for event in reordered_events {
+        for idx in 0..self.events.len() {
+            let event = std::mem::replace(&mut self.events[idx], Event::Placeholder);
             match event {
-                Event::StartNode { kind } => {
-                    self.builder.start_node(BoltLanguage::kind_to_raw(kind))
+                Event::StartNode { kind, forward_parent } => {
+                    let mut kinds = vec![kind];
+
+                    let mut idx = idx;
+                    let mut forward_parent = forward_parent;
+
+                    // Walk through the forward parent of the forward parent, and the forward parent
+                    // of that, and of that, etc. until we reach a StartNode event without a forward
+                    // parent.
+                    while let Some(fp) = forward_parent {
+                        idx += fp;
+
+                        forward_parent = if let Event::StartNode {
+                            kind,
+                            forward_parent,
+                        } =
+                            std::mem::replace(&mut self.events[idx], Event::Placeholder)
+                        {
+                            kinds.push(kind);
+                            forward_parent
+                        } else {
+                            unreachable!()
+                        };
+                    }
+
+                    for kind in kinds.into_iter().rev() {
+                        self.builder.start_node(BoltLanguage::kind_to_raw(kind));
+                    }
                 }
-                Event::StartNodeAt { kind, .. } => self
-                    .builder
-                    .start_node(BoltLanguage::kind_to_raw(kind)),
                 Event::AddToken { kind, text } => self.token(kind, text),
                 Event::FinishNode => self.builder.finish_node(),
+                Event::Error(error) => {
+                    let description = error.to_string(self.peek());
+                    println!("{}{} {}", "  error".red().bold(), ":".bold(), description.bold());
+                }
+                Event::Placeholder => {}
             }
 
             self.eat_trivia();
@@ -54,6 +76,10 @@ impl<'input, 'l> Sink<'input, 'l> {
     fn token(&mut self, kind: SyntaxKind, text: &str) {
         self.builder.token(BoltLanguage::kind_to_raw(kind), text);
         self.cursor += 1;
+    }
+
+    fn peek(&self) -> Option<Token> {
+        self.lexemes.get(self.cursor).cloned()
     }
 
     fn eat_trivia(&mut self) {

@@ -1,31 +1,25 @@
-use crate::{lexer::SyntaxKind};
+use crate::{lexer::SyntaxKind, parse_error::ParseError};
 
-use super::Parser;
+use super::{Parser, file::ITEM_RECOVERY_SET, marker::Marker};
 
 impl<'input, 'l> Parser<'input, 'l> {
-	pub fn parse_init(&mut self, checkpoint: usize) -> bool {
-		if !self.eat_and_start_node_at(SyntaxKind::InitKw, SyntaxKind::InitDef, checkpoint) {
-			return false;
-		}
+	pub fn parse_init(&mut self, marker: Marker) {
+		assert!(self.check(SyntaxKind::InitKw));
+		self.eat(SyntaxKind::InitKw);
 
 		self.parse_paren_comma_seq(|parser| parser.parse_func_par());
 
 		self.parse_codeblock();
 
-		self.finish_node();
-
-		return true
+		marker.complete(self, SyntaxKind::InitDef);
 	}
-	pub fn parse_func(&mut self, checkpoint: usize) -> bool {
-		if !self.eat_and_start_node_at(SyntaxKind::FuncKw, SyntaxKind::FuncDef, checkpoint) {
-			return false;
-		}
+	pub fn parse_func(&mut self, marker: Marker) {
+		assert!(self.check(SyntaxKind::FuncKw));
+		self.eat(SyntaxKind::FuncKw);
 
-		if !self.eat_and_start_node(SyntaxKind::Ident, SyntaxKind::FuncName) {
-			// Recover
-			self.bump();
-		}
-		self.finish_node();
+		self.node(SyntaxKind::FuncName, |parser| if !parser.eat(SyntaxKind::Ident) {
+			parser.error_recover(ParseError::Expected(SyntaxKind::Ident), ITEM_RECOVERY_SET);
+		});
 
 		self.parse_paren_comma_seq(|parser| parser.parse_func_par());
 
@@ -35,26 +29,17 @@ impl<'input, 'l> Parser<'input, 'l> {
 			self.parse_codeblock();
 		}
 
-		self.finish_node();
-
-		return true
+		marker.complete(self, SyntaxKind::FuncDef);
 	}
 
 	pub fn parse_func_par(&mut self) {
-		self.start_node(SyntaxKind::FuncPar);
+		let marker = self.start();
 
-		if !self.eat(SyntaxKind::Ident) {
-			// Recover
-			self.bump();
-		}
-
-		if !self.eat(SyntaxKind::Colon) {
-			// Recover
-			self.bump();
-		}
+		self.expect(SyntaxKind::Ident);
+		self.expect(SyntaxKind::Colon);
 
 		self.parse_ty();
 
-		self.finish_node();
+		marker.complete(self, SyntaxKind::FuncPar);
 	}
 }

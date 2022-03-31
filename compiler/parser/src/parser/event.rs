@@ -1,10 +1,11 @@
 
-use crate::lexer::SyntaxKind;
+use crate::{lexer::SyntaxKind, parse_error::ParseError};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub (super) enum Event<'a> {
-	StartNode { kind: SyntaxKind },
-	StartNodeAt { kind: SyntaxKind, at: usize },
+	StartNode { kind: SyntaxKind, forward_parent: Option<usize>, },
 	AddToken { kind: SyntaxKind, text: &'a str },
 	FinishNode,
+	Error(ParseError),
+	Placeholder
 }

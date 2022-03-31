@@ -1,18 +1,17 @@
 use crate::lexer::SyntaxKind;
 
-use super::Parser;
+use super::{Parser, marker::Marker};
 
 impl<'input, 'l> Parser<'input, 'l> {
-	pub fn parse_struct(&mut self, checkpoint: usize) -> bool {
-		if !self.eat_and_start_node_at(SyntaxKind::StructKw, SyntaxKind::StructDef, checkpoint) {
-			return false;
-		}
+	pub fn parse_struct(&mut self, marker: Marker) {
+		debug_assert!(self.check(SyntaxKind::StructKw));
+		self.eat(SyntaxKind::StructKw);
 
-		if !self.eat_and_start_node(SyntaxKind::Ident, SyntaxKind::FuncName) {
-			// Recover
-			self.bump();
+		let func_name = self.start();
+		if !self.eat(SyntaxKind::Ident) {
+
 		}
-		self.finish_node();
+		func_name.complete(self, SyntaxKind::FuncName);
 
 		self.parse_delim(
 			SyntaxKind::StructBody,
@@ -20,30 +19,25 @@ impl<'input, 'l> Parser<'input, 'l> {
 			SyntaxKind::CloseBrace,
 			|parser| parser.parse_struct_item());
 
-		self.finish_node();
-
-		return true;
+		marker.complete(self, SyntaxKind::StructDef);
 	}
 
 	pub fn parse_struct_item(&mut self) {
-		let checkpoint = self.checkpoint();
+		let marker = self.start();
 
 		self.parse_visibility();
-
 		self.eat(SyntaxKind::StaticKw);
 
-		if self.parse_func(checkpoint) {
+		match self.peek() {
+			Some(SyntaxKind::FuncKw) => self.parse_func(marker),
+			Some(SyntaxKind::VarKw) => self.parse_var(marker),
+			Some(SyntaxKind::LetKw) => self.parse_let(marker),
+			Some(SyntaxKind::InitKw) => self.parse_init(marker),
+			Some(SyntaxKind::StructKw) => self.parse_struct(marker),
+			_ => {
+				// Error
 
-		} else if self.parse_var(checkpoint) {
-
-		} else if self.parse_let(checkpoint) {
-
-		} else if self.parse_init(checkpoint) {
-			
-		} else if self.parse_struct(checkpoint) {
-			
-		} else {
-			self.bump();
+			}
 		}
 	}
 }
