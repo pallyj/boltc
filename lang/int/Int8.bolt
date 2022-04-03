@@ -5,7 +5,7 @@ public struct Int8 /*: IntegerLiteralRepr */ {
 	public static let min: Int8 = 0xff
 	public static let max: Int8 = 0x7f
 
-	private var repr: i8
+	public var repr: i8
 
 	public func add(b: Self): Self {
 		Self( integer8Add(self.repr, b.repr) )
@@ -83,27 +83,27 @@ public struct Int8 /*: IntegerLiteralRepr */ {
 	}
 
 	public static func truncUInt16(i: UInt16): Self {
-		Int32 ( integer8Trunc16(i.repr) )
+		Self ( integer16Trunc8(i.repr) )
 	}
 
 	public static func truncUInt32(i: UInt32): Self {
-		Int32 ( integer8Trunc32(i.repr) )
+		Self ( integer32Trunc8(i.repr) )
 	}
 
 	public static func truncUInt64(i: UInt64): Self {
-		Self ( integer64Trunc32(i.repr) )
+		Self ( integer64Trunc8(i.repr) )
 	}
 
 	public static func truncInt16(i: Int16): Self {
-		Self ( integer8Trunc16(i.repr) )
+		Self ( integer16Trunc8(i.repr) )
 	}
 
 	public static func truncInt32(i: Int8): Self {
-		Self ( integer8Trunc32(i.repr) )
+		Self ( integer32Trunc8(i.repr) )
 	}
 
 	public static func truncInt64(i: Int64): Self {
-		Self ( integer8Trunc64(i.repr) )
+		Self ( integer64Trunc8(i.repr) )
 	}
 
 	// Convert from integers

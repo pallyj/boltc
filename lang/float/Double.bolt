@@ -1,7 +1,8 @@
 import intrinsics
 
+
 public struct Double /*: FloatLiteralRepr*/ {
-	internal var repr: f64
+	public var repr: f64
 
 	// Arithmatic
 	public func add(b: Double): Double {

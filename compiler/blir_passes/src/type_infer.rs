@@ -165,7 +165,7 @@ fn replace_ty_span(ty: &mut Type, table: &TypeTable, debugger: &mut Debugger, sp
 	}	
 }
 
-fn replace_ty(ty: &mut Type, table: &TypeTable, debugger: &mut Debugger) {
+fn replace_ty(ty: &mut Type, table: &TypeTable, _debugger: &mut Debugger) {
 	if let TypeKind::Infer { key } = ty.kind() {
 		if let Some(kind) = table.get(key) {
 			ty.set_kind(kind.clone());

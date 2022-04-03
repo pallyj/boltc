@@ -5,7 +5,7 @@ public struct UInt16 /*: IntegerLiteralRepresentable */ {
 	public static let min: Self = 0x0
 	public static let max: Self = 0xffff_ffff_ffff_ffff
 
-	private var repr: i16
+	public var repr: i16
 
 	public func add(b: Self): Self {
 		Self( integer16Add(self.repr, b.repr) )
@@ -83,11 +83,11 @@ public struct UInt16 /*: IntegerLiteralRepresentable */ {
 	}
 
 	public static func bitcastInt8(i: Int8): Self {
-		Self ( integer8Extend16(i.repr) )
+		Self ( integer8ExtZero16(i.repr) )
 	}
 
 	public static func extendUInt8(i: UInt8): Self {
-		Self ( integer8Extend16(i.repr) )
+		Self ( integer8ExtZero16(i.repr) )
 	}
 
 	public static func truncUInt64(i: UInt64): Self {

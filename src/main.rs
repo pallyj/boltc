@@ -18,6 +18,16 @@ fn main() {
 
     // Add standard library
     project.open_file("std/print.bolt");
+    let lang = [
+        "bool/Bool.bolt",
+        "float/Half.bolt", "float/Float.bolt", "float/Double.bolt",
+        "int/Int.bolt", "int/UInt.bolt",
+        "int/Int8.bolt", "int/Int16.bolt", "int/Int32.bolt", "int/Int64.bolt",
+        "int/UInt8.bolt", "int/UInt16.bolt", "int/UInt32.bolt", "int/UInt64.bolt"];
+        
+    for file in lang {
+        project.open_file(&format!("lang/{file}"));
+    }
 
     project.open_file(&args.file);
 

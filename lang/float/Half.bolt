@@ -1,7 +1,7 @@
 import intrinsics
 
 public struct Half /*: HalfLiteralRepr*/ {
-	internal var repr: f64
+	public var repr: f16
 
 	// Arithmatic
 	public func add(b: Half): Half {
@@ -61,7 +61,7 @@ public struct Half /*: HalfLiteralRepr*/ {
 	}
 
 	public static func truncFloat(float: Float): Half {
-		Half ( float32Trunc32(float.repr) )
+		Half ( float32Trunc16(float.repr) )
 	}
 
 	// Convert from integer

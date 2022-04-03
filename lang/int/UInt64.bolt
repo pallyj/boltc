@@ -5,7 +5,7 @@ public struct UInt64 /*: IntegerLiteralRepresentable */ {
 	public static let min: UInt64 = 0x0
 	public static let max: UInt64 = 0xffff_ffff_ffff_ffff
 
-	private var repr: i64
+	public var repr: i64
 
 	public func add(b: Self): Self {
 		Self( integer64Add(self.repr, b.repr) )
@@ -84,27 +84,27 @@ public struct UInt64 /*: IntegerLiteralRepresentable */ {
 
 	
 	public static func fromFloat(f: Float): Self {
-		Self ( integerFromFloat32(f.repr) )
+		Self ( float32ToInt(f.repr) )
 	}
 
 	public static func fromDouble(f: Double): Self {
-		Self ( integerFromFloat64(f.repr) )
+		Self ( float64ToInt(f.repr) )
 	}
 
 	public static func fromHalf(f: Half): Self {
-		Self ( integerFromFloat16(f.repr) )
+		Self ( float16ToInt(f.repr) )
 	}
 
 	public static func bitcastInt8(i: Int8): Self {
-		Self ( integer8Extend64(i.repr) )
+		Self ( integer8ExtZero64(i.repr) )
 	}
 
 	public static func bitcastInt16(i: Int16): Self {
-		Self ( integer16Extend64(i.repr) )
+		Self ( integer16ExtZero64(i.repr) )
 	}
 
 	public static func bitcastInt32(i: Int32): Self {
-		Self ( integer32Extend64(i.repr) )
+		Self ( integer32ExtZero64(i.repr) )
 	}
 
 	public static func fromUInt(i: UInt): Self {
@@ -112,15 +112,15 @@ public struct UInt64 /*: IntegerLiteralRepresentable */ {
 	}
 
 	public static func extendUInt8(i: UInt8): Self {
-		Self ( integer8Extend64(i.repr) )
+		Self ( integer8ExtZero64(i.repr) )
 	}
 
 	public static func extendUInt16(i: UInt16): Self {
-		Self ( integer16Extend64(i.repr) )
+		Self ( integer16ExtZero64(i.repr) )
 	}
 
 	public static func extendUInt32(i: UInt32): Self {
-		Self ( integer32Extend64(i) )
+		Self ( integer32ExtZero64(i) )
 	}
 
 	// Convert from integers

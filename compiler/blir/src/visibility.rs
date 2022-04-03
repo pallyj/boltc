@@ -13,7 +13,7 @@ impl Display for Visibility {
         match self {
 			Self::Public => write!(f, "public"),
 			Self::Internal => write!(f, "internal"),
-			Self::Fileprivate => write!(f, "fileprivate"),
+			Self::Fileprivate => write!(f, "public"),
 			Self::Private => write!(f, "private"),
 		}
     }

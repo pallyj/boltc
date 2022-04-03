@@ -5,7 +5,7 @@ public struct UInt8 /*: IntegerLiteralRepresentable */ {
 	public static let min: Self = 0x0
 	public static let max: Self = 0xff
 
-	internal var repr: i8
+	public var repr: i8
 
 	public func add(b: Self): Self {
 		Self( integer8Add(self.repr, b.repr) )
@@ -107,6 +107,6 @@ public struct UInt8 /*: IntegerLiteralRepresentable */ {
 	}
 
 	public static func truncInt64(i: Int64): Self {
-		Self ( integer64Trunc16(i) )
+		Self ( integer64Trunc8(i) )
 	}
 }

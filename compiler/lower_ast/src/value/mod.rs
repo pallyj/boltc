@@ -10,10 +10,12 @@ impl AstLowerer {
 		match expr {
 			AstExpr::NamedExpr(named) => ValueKind::Named(named.name()).spanned_infer(span),
 
-			AstExpr::MemberExpr(member_expr) => ValueKind::Member {
-				parent: Box::new(self.lower_expr(member_expr.parent())),
-				member: member_expr.child().unwrap()
-			}.spanned_infer(span),
+			AstExpr::MemberExpr(member_expr) => {
+				ValueKind::Member {
+					parent: Box::new(self.lower_expr(member_expr.parent())),
+					member: member_expr.child().unwrap()
+				}.spanned_infer(span)
+			}
 
 			AstExpr::LiteralExpr(literal) => {
 				let text = literal.text().replace("_", "");
