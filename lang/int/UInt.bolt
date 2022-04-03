@@ -132,4 +132,8 @@ public struct UInt /*: IntegerLiteralRepresentable */ {
 	public static func bitcastInt(i: Int): Self {
 		Self ( i.repr )
 	}
+
+	public func print() {
+		printUInt64(self.repr)
+	}
 }

@@ -73,4 +73,8 @@ public struct Double /*: FloatLiteralRepr*/ {
 	public static func fromInt(num: Int64): Double {
 		Double ( float64FromIntSig(num.repr) )
 	}
+
+	public func print() {
+		printDouble(self.repr)
+	}
 }

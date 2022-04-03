@@ -111,4 +111,8 @@ public struct Int32 /*: IntegerLiteralRepr */ {
 	public static func bitcastUInt32(i: UInt32): Self {
 		Self ( i.repr )
 	}
+
+	public func print() {
+		printInt32(self.repr)
+	}
 }

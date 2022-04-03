@@ -1,8 +1,5 @@
 import intrinsics
 
-public func printInt(i: i64)
-public func printUInt(i: i64)
-
 public func printInt8(i: i8) 
 public func printUInt8(i: i8)
 
@@ -17,3 +14,5 @@ public func printUInt64(i: i64)
 
 public func printDouble(n: f64)
 public func printFloat(n: f32)
+
+public func printBool(n: i1)

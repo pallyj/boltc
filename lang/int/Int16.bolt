@@ -111,4 +111,8 @@ public struct Int16 /*: IntegerLiteralRepr */ {
 	public static func bitcastUInt16(i: UInt16): Self {
 		Self ( i.repr )
 	}
+
+	public func print() {
+		printInt16(self.repr)
+	}
 }

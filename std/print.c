@@ -47,3 +47,7 @@ void printDouble(double n) {
 void printFloat(float n) {
 	printf("%f\n", n);
 }
+
+void printBool(unsigned char b) {
+	printf(b ? "true" : "false");
+}

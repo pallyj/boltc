@@ -87,6 +87,19 @@ impl BlirLowerer {
 	fn lower_float_literal(&mut self, n: f64, ty: &Type) -> LabelValue {
 		match ty.kind() {
 			TypeKind::Float { bits } => self.builder().build_float_literal(*bits as u32, n),
+			TypeKind::Struct(r#struct) => {
+				// TODO: Do this by insert value
+				if !r#struct.float_repr() {
+					panic!()
+				}
+
+				let borrowed_struct = r#struct.borrow();
+				let borrowed_var = borrowed_struct.instance_vars[0].borrow();
+
+				let literal = self.lower_float_literal(n, &borrowed_var.typ);
+
+				self.lower_init(ty, vec![literal])
+			}
 			_ => panic!(),
 		}
 	}
@@ -94,6 +107,19 @@ impl BlirLowerer {
 	fn lower_bool_literal(&mut self, b: bool, ty: &Type) -> LabelValue {
 		match ty.kind() {
 			TypeKind::Integer { bits: 1 } => self.builder().build_integer_literal(1, if b { 1 } else { 0 }),
+			TypeKind::Struct(r#struct) => {
+				// TODO: Do this by insert value
+				if !r#struct.bool_repr() {
+					panic!()
+				}
+
+				let borrowed_struct = r#struct.borrow();
+				let borrowed_var = borrowed_struct.instance_vars[0].borrow();
+
+				let literal = self.lower_bool_literal(b, &borrowed_var.typ);
+
+				self.lower_init(ty, vec![literal])
+			}
 			_ => panic!(),
 		}
 	}
