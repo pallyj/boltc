@@ -1,13 +1,41 @@
 use blir::scope::ScopeRef;
 use blir::typ::{TypeKind, Type};
+use blir::value::{Constant, ConstantRef};
 use mangle::Mangled;
 use parser::ast::containers::{StructDef, StructItem};
-use parser::ast::var::{VariableDef};
+use parser::ast::var::{VariableDef, LetDef};
 use blir::{typ::{Struct, StructRef}, value::{VarRef, Var}};
 
 use crate::AstLowerer;
 
 impl AstLowerer {
+	pub fn lower_struct_static_let(&self, var: LetDef) -> ConstantRef {
+		let visibility = self.lower_visibility(var.visibility());
+		let name = var.label();
+		let typ = var.typ()
+			.map(|typ| self.lower_type(typ))
+			.unwrap_or(Type::infer());
+		let Some(expr) = var.value() else {
+			// Error
+			panic!();
+		};
+		let value = self.lower_expr(expr);
+
+		Constant::new(visibility, name, typ, value)
+	}
+
+	pub fn lower_struct_let(&self, var: LetDef) -> VarRef {
+		let visibility = self.lower_visibility(var.visibility());
+		let name = var.label();
+		let typ = var.typ()
+			.map(|typ| self.lower_type(typ))
+			.unwrap_or(Type::infer());
+		let default_value = var.value()
+			.map(|value| self.lower_expr(value));
+
+		Var::new(visibility, name, typ, default_value, true)
+	}
+
 	pub fn lower_struct_var(&self, var: VariableDef) -> VarRef {
 		let visibility = self.lower_visibility(var.visibility());
 		let name = var.label();
@@ -17,7 +45,7 @@ impl AstLowerer {
 		let default_value = var.value()
 			.map(|value| self.lower_expr(value));
 
-		Var::new(visibility, name, typ, default_value)
+		Var::new(visibility, name, typ, default_value, false)
 	}
 
 	pub fn lower_struct(&self, def: StructDef, parent: &ScopeRef, parent_mangle: Mangled) -> StructRef {
@@ -48,8 +76,12 @@ impl AstLowerer {
 					r#struct.add_substruct(lowered_struct);
 				}
 
-				StructItem::LetDef(_let_def) => {
-
+				StructItem::LetDef(let_def) => {
+					if let_def.is_static() {
+						r#struct.add_constant(self.lower_struct_static_let(let_def));
+					} else {
+						r#struct.add_var(self.lower_struct_let(let_def));
+					}
 				}
 
 				StructItem::VariableDef(var_def) => {

@@ -1,9 +1,9 @@
 import intrinsics
 
 //@transparent
-public struct UInt64 /*: IntegerLiteralRepresentable */ {
-	public static let min: UInt64 = 0x0
-	public static let max: UInt64 = 0xffff_ffff_ffff_ffff
+public struct UInt /*: IntegerLiteralRepresentable */ {
+	public static let min: UInt = 0x0
+	public static let max: UInt = 0xffff_ffff_ffff_ffff
 
 	private var repr: i64
 
@@ -107,7 +107,7 @@ public struct UInt64 /*: IntegerLiteralRepresentable */ {
 		Self ( integer32Extend64(i.repr) )
 	}
 
-	public static func fromUInt(i: UInt): Self {
+	public static func fromUInt64(i: UInt64): Self {
 		Self ( i.repr )
 	}
 
@@ -125,11 +125,11 @@ public struct UInt64 /*: IntegerLiteralRepresentable */ {
 
 	// Convert from integers
 
-	public static func bitcastInt(i: Int): Self {
+	public static func bitcastInt64(i: Int64): Self {
 		Self ( i.repr )
 	}
 
-	public static func bitcastInt64(i: Int64): Self {
+	public static func bitcastInt(i: Int): Self {
 		Self ( i.repr )
 	}
 }

@@ -5,27 +5,30 @@ mod tests;
 mod variant;
 mod table;
 
+use errors::{debugger::Debugger, error::ErrorCode, Span};
 use table::GuessTable;
 pub use table::TypeTable;
 
 use std::{collections::HashMap};
 
-use blir::{code::{CodeBlock, Statement, StatementKind}, typ::{Type, TypeKind}, value::{Value, ValueKind, IfValue, IfBranch}, scope::ScopeRef, Symbol};
-use rusttyc::{VarlessTypeChecker, TcKey};
+use blir::{code::{CodeBlock, Statement, StatementKind}, typ::{Type, TypeKind}, value::{Value, ValueKind, IfValue, IfBranch}, scope::{ScopeRef, ScopeType}, Symbol};
+use rusttyc::{VarlessTypeChecker, TcKey, TcErr};
 use variant::TypeVariant;
 
-pub struct TypeInferCtx {
+pub struct TypeInferCtx<'a, 'b> {
 	checker: VarlessTypeChecker<TypeVariant>,
 	infer_keys: HashMap<u64, TcKey>,
 	guesses: GuessTable,
+	debugger: &'a mut Debugger<'b>
 }
 
-impl TypeInferCtx {
-	pub fn new() -> TypeInferCtx {
+impl<'a, 'b> TypeInferCtx<'a, 'b> {
+	pub fn new(debugger: &'a mut Debugger<'b>) -> Self {
 		TypeInferCtx {
 			checker: VarlessTypeChecker::new(),
 			infer_keys: HashMap::new(),
 			guesses: GuessTable::new(),
+			debugger
 		}
 	}
 
@@ -45,13 +48,23 @@ impl TypeInferCtx {
 		type_table
 	}
 
-	pub fn infer_codeblock(&mut self, block: &mut CodeBlock, ty: &Type, scope: &ScopeRef) {
+	pub fn infer_rel(&mut self, value: &mut Value, typ: &Type, scope: &ScopeRef) {
+		self.infer_value(value, scope);
+
+		self.constrain_value_two_way(&value, typ);
+	}
+
+	pub fn infer_codeblock(&mut self, block: &mut CodeBlock, ty: &Type, scope: &ScopeRef, span: &Option<Span>) {
 		// Add a constraint between ty and the block's code
 		let block_ty = block.typ();
 
-		self.constrain_two_way(&block_ty, ty);
+		// TODO: Set the span to the value's span
+		match self.constrain_two_way(&block_ty, ty) {
+			Ok(()) => {},
+			_ => self.debugger.throw_single(ErrorCode::MismatchedType, span)
+		}
 
-		let block_scope = ScopeRef::new(Some(scope), blir::scope::ScopeRelation::SameContainer, false, false);
+		let block_scope = ScopeRef::new(Some(scope), blir::scope::ScopeRelation::SameContainer, ScopeType::Code, false, false);
 
 		for smt in block.statements_mut() {
 			self.infer_smt(smt, &block_scope)
@@ -62,7 +75,7 @@ impl TypeInferCtx {
 		match &mut smt.kind {
 			StatementKind::Bind { name: _, typ, value } => {
 				if let Some(value) = value.as_mut() {
-					self.constrain_two_way(typ, &value.typ);
+					self.constrain_value_two_way(&value, typ);
 					self.infer_value(value, scope);
 				}
 			}
@@ -79,16 +92,35 @@ impl TypeInferCtx {
 				let function_return_type = scope.scope_type("return")
 					.expect("Compiler Error: Function return type is not defined");
 
-				self.constrain_one_way(&return_value.typ, &function_return_type);
+				self.constrain_value_one_way(&return_value, &function_return_type);
 			}
 		}
 	}
 
 	fn infer_value(&mut self, value: &mut Value, scope: &ScopeRef) {
 		match &mut value.kind {
-			ValueKind::BoolLiteral(_) => self.constrain_bool(&value.typ),
-			ValueKind::IntLiteral(_) => self.constrain_integer(&value.typ),
-			ValueKind::FloatLiteral(_) => self.constrain_float(&value.typ),
+			ValueKind::BoolLiteral(_) => match self.constrain_bool(&value.typ) {
+				Err(_) => {
+					self.debugger.throw_single(ErrorCode::TypeIsNotABool, &value.span);
+				}
+				_ => {}
+			}
+			ValueKind::IntLiteral(_) => {
+				match self.constrain_integer(&value.typ) {
+					Err(_) => {
+						self.debugger.throw_single(ErrorCode::TypeIsNotAnInteger, &value.span);
+					}
+					_ => {}
+				}
+			}
+			ValueKind::FloatLiteral(_) => {
+				match self.constrain_float(&value.typ) {
+					Err(_) => {
+						self.debugger.throw_single(ErrorCode::TypeIsNotAFloat, &value.span);
+					}
+					_ => {}
+				}
+			}
 
 			ValueKind::FuncCall { function, args } => {
 				self.infer_value(function.as_mut(), scope);
@@ -105,12 +137,14 @@ impl TypeInferCtx {
 
 					// Match function parameters against the args
 					for (arg, param_ty) in args.args.iter().zip(params.iter()) {
-						self.constrain_one_way(&arg.typ, param_ty);
+						self.constrain_value_one_way(&arg, param_ty);
 					}
 
-					self.constrain_one_way(&value.typ, return_type.as_ref())
+					let return_ty = return_type.clone();
+
+					self.constrain_value_one_way(&value, return_ty.as_ref())
 				} else if let TypeKind::Method { reciever: _, return_type, params } = function.as_ref().typ.kind() {
-					self.constrain_one_way(&value.typ, return_type.as_ref());
+					let return_ty = return_type.clone();
 
 					// Ensure params and args are the same length
 					if params.len() != args.args.len() {
@@ -119,10 +153,12 @@ impl TypeInferCtx {
 
 					// Match function parameters against the args
 					for (arg, param_ty) in args.args.iter().zip(params.iter()) {
-						self.constrain_one_way(&arg.typ, param_ty);
+						self.constrain_value_one_way(arg, param_ty);
 					}
+
+					self.constrain_value_one_way(&value, return_ty.as_ref());
 				} else if let TypeKind::Metatype(t) = function.as_ref().typ.kind() {
-					self.constrain_one_way(&value.typ, &t.as_ref().clone().anon());
+					let ty = t.clone().anon();
 
 					let initializer = t.clone().anon().init_type().anon();
 
@@ -137,11 +173,12 @@ impl TypeInferCtx {
 
 					// Match function parameters against the args
 					for (arg, param_ty) in args.args.iter().zip(params.iter()) {
-						self.constrain_one_way(&arg.typ, param_ty);
+						self.constrain_value_one_way(&arg, param_ty);
 					}
 
-					self.constrain_one_way(&function.typ, &initializer);
+					self.constrain_value_one_way(&function, &initializer);
 					function.set_type(initializer);
+					self.constrain_value_one_way(&value, &ty);
 				}
 			}
 
@@ -153,7 +190,7 @@ impl TypeInferCtx {
 						Symbol::Type(ty) => {
 							value.set_kind(ValueKind::Metatype(ty.clone()));
 	
-							self.constrain_one_way(&value.typ, &TypeKind::Metatype(Box::new(ty.clone())).anon());
+							self.constrain_value_one_way(&value, &TypeKind::Metatype(Box::new(ty.clone())).anon());
 	
 							value.typ.set_kind(TypeKind::Metatype(Box::new(ty)));
 						}
@@ -162,13 +199,13 @@ impl TypeInferCtx {
 							
 							let typ = resolved_value.typ;
 	
-							self.constrain_one_way(&value.typ, &typ);
+							self.constrain_value_one_way(&value, &typ);
 							value.set_type(typ);
 						}
 						Symbol::Function(function) => {
 							let typ = function.take_typ();
 	
-							self.constrain_one_way(&value.typ, &typ);
+							self.constrain_value_one_way(&value, &typ);
 							value.set_type(typ);
 	
 							value.set_kind(ValueKind::StaticFunc(function));
@@ -176,7 +213,7 @@ impl TypeInferCtx {
 						Symbol::ExternFunction(function) => {
 							let typ = function.take_typ();
 	
-							self.constrain_one_way(&value.typ, &typ);
+							self.constrain_value_one_way(&value, &typ);
 							value.set_type(typ);
 	
 							value.set_kind(ValueKind::ExternFunc(function));
@@ -187,7 +224,7 @@ impl TypeInferCtx {
 
 								let typ = var.borrow().typ.clone();
 		
-								self.constrain_one_way(&value.typ, &typ);
+								self.constrain_value_one_way(&value, &typ);
 								value.set_type(typ);
 		
 								let kind = ValueKind::InstanceVariable {
@@ -198,29 +235,27 @@ impl TypeInferCtx {
 								println!("Compiler error: found instance variable in a context without self");
 							}
 						}
-						n => {
-							println!("{n:?}");
-							// ERROR: Symbol isn't a value
+						_ => {
+							self.debugger.throw_single(ErrorCode::SymNotAValue { name: name.clone() }, &value.span);
 						}
 					}
 					return
 				}
 
 				if let Some(self_type) = scope.scope_type("self") {
-
 					if let Some(static_symbol) = self_type.lookup_static_item(&name) {
 						match static_symbol {
 							Symbol::StaticMethod(method) => {
 								let typ = method.take_typ();
 		
-								self.constrain_one_way(&value.typ, &typ);
+								self.constrain_value_one_way(&value, &typ);
 								value.set_type(typ);
 		
 								value.set_kind(ValueKind::StaticMethod(method));
 							}
 
 							_ => {
-								// Invalid symbol
+								self.debugger.throw_single(ErrorCode::SymNotAValue { name: name.clone() }, &value.span);
 							}
 						}
 					}
@@ -236,12 +271,12 @@ impl TypeInferCtx {
 					TypeKind::Infer { key } => self.guesses.get(key),
 					_ => Some(&parent.typ),
 				}) else {
-					println!("Error: couldn't infer type of {parent:?}");
+					self.debugger.throw_single(ErrorCode::AmbiguousTy, &parent.span);
 					return;
 				};
 
-				let Some(sym) = parent_type.lookup_instance_item(member.as_str()) else {
-					println!("Error: couldn't find instance member");
+				let Some(sym) = parent_type.lookup_instance_item(member.as_str(), scope) else {
+					self.debugger.throw_single(ErrorCode::MemberNotFound { name: member.clone() }, &value.span);
 					return
 				};
 
@@ -250,7 +285,7 @@ impl TypeInferCtx {
 						value.set_kind(ValueKind::Metatype(ty.clone()));
 						let typ = TypeKind::Metatype(Box::new(ty)).anon();
 
-						self.constrain_one_way(&value.typ, &typ);
+						self.constrain_value_one_way(&value, &typ);
 						value.set_type(typ);
 					}
 	
@@ -258,7 +293,7 @@ impl TypeInferCtx {
 						value.set_kind(res_val.kind);
 						let typ = res_val.typ.clone();
 
-						self.constrain_one_way(&value.typ, &typ);
+						self.constrain_value_one_way(&value, &typ);
 						value.set_type(typ);
 
 					}
@@ -266,7 +301,7 @@ impl TypeInferCtx {
 					Symbol::StaticMethod(method) => {
 						let typ = method.take_typ();
 
-						self.constrain_one_way(&value.typ, &typ);
+						self.constrain_value_one_way(&value, &typ);
 						value.set_type(typ);
 
 						value.set_kind(ValueKind::StaticMethod(method));
@@ -277,7 +312,7 @@ impl TypeInferCtx {
 
 						let typ = method.take_typ();
 
-						self.constrain_one_way(&value.typ, &typ);
+						self.constrain_value_one_way(&value, &typ);
 						value.set_type(typ);
 
 						let kind = ValueKind::InstanceMethod {
@@ -291,7 +326,7 @@ impl TypeInferCtx {
 
 						let typ = var.borrow().typ.clone();
 
-						self.constrain_one_way(&value.typ, &typ);
+						self.constrain_value_one_way(&value, &typ);
 						value.set_type(typ);
 
 						let kind = ValueKind::InstanceVariable {
@@ -299,9 +334,20 @@ impl TypeInferCtx {
 							var: var.clone() };
 						value.set_kind(kind);
 					}
+
+					Symbol::Constant(res_constant) => {
+						let res_val = res_constant.borrow().value.clone();
+
+						value.set_kind(res_val.kind);
+						let typ = res_val.typ.clone();
+
+						self.constrain_value_one_way(&value, &typ);
+						value.set_type(typ);
+
+					}
 	
-					s => {
-						println!("Error: Symbol is something else {s:?}");
+					_ => {
+						self.debugger.throw_single(ErrorCode::MemberNotAVal { name: member.clone() }, &value.span);
 					}
 				}
 			}
@@ -315,32 +361,42 @@ impl TypeInferCtx {
 	fn infer_if_value(&mut self, if_value: &mut IfValue, scope: &ScopeRef, typ: &Type) {
 		self.infer_value(if_value.condition.as_mut(), scope);
 
-		self.infer_codeblock(&mut if_value.positive, typ, scope);
+		let span = if_value.positive.span().cloned();
+
+		self.infer_codeblock(&mut if_value.positive, typ, scope, &span);
 
 		if let Some(else_block) = if_value.negative.as_mut() {
 			match else_block {
-				IfBranch::CodeBlock(code_block) => self.infer_codeblock(code_block, typ, scope),
+				IfBranch::CodeBlock(code_block) => {
+					let span = code_block.span().cloned();
+					self.infer_codeblock(code_block, typ, scope, &span)
+				}
 				IfBranch::Else(else_branch) => self.infer_if_value(else_branch, scope, typ),
 			}
 		}
 	}
 
-	fn constrain_two_way(&mut self, one: &Type, two: &Type) {
+	fn constrain_value_two_way(&mut self, val: &Value, typ: &Type) {
+		match self.constrain_two_way(&val.typ, typ) {
+			Ok(()) => {}
+			_ => self.debugger.throw_single(ErrorCode::MismatchedType, &val.span),
+		}
+	}
+
+	fn constrain_two_way(&mut self, one: &Type, two: &Type) -> Result<(), TcErr<TypeVariant>> {
 		//println!("{one:?} <=> {two:?}");
 		if let Some((key1, key2)) = self.get_infer_key(one).zip(self.get_infer_key(two)) {
 			self.checker
-				.impose(key1.equate_with(key2))
-				.unwrap();
+				.impose(key1.equate_with(key2))?;
 		} else if let Some(key1) = self.get_infer_key(one) {
 			if let Some(variant2) = self.get_variant(two) {
 				self.checker
-					.impose(key1.concretizes_explicit(variant2))
-					.unwrap();
+					.impose(key1.concretizes_explicit(variant2))?;
 			}
 		} else if let Some(key2) = self.get_infer_key(two) {
 			if let Some(variant1) = self.get_variant(one) {
-				let _ =self.checker
-					.impose(key2.concretizes_explicit(variant1));
+				self.checker
+					.impose(key2.concretizes_explicit(variant1))?;
 			}
 		}
 
@@ -387,19 +443,28 @@ impl TypeInferCtx {
 				self.guesses.insert(*key2, one.clone())
 			}
 		}
+
+		return Ok(())
 	}
 
-	fn constrain_one_way(&mut self, constrain: &Type, absolute: &Type) {
+	fn constrain_value_one_way(&mut self, value: &Value, absolute: &Type) {
+		match self.constrain_one_way(&value.typ, absolute) {
+			Err(_) => {
+				self.debugger.throw_single(ErrorCode::MismatchedType, &value.span);
+			}
+			_ => {}
+		}
+	}
+
+	fn constrain_one_way(&mut self, constrain: &Type, absolute: &Type) -> Result<(), TcErr<TypeVariant>> {
 		//println!("{constrain:?} <- {absolute:?}");
 		if let Some((c_key, a_key)) = self.get_infer_key(constrain).zip(self.get_infer_key(absolute)) {
 			self.checker
-				.impose(c_key.concretizes(a_key))
-				.unwrap();
+				.impose(c_key.concretizes(a_key))?
 		} else if let Some(c_key) = self.get_infer_key(constrain) {
 			if let Some(a_variant) = self.get_variant(absolute) {
 				self.checker
-					.impose(c_key.concretizes_explicit(a_variant))
-					.unwrap()
+					.impose(c_key.concretizes_explicit(a_variant))?
 			}
 		}
 
@@ -413,32 +478,37 @@ impl TypeInferCtx {
 				self.guesses.insert(*key, absolute.clone())
 			}
 		}
+
+		Ok(())
 	}
 
-	fn constrain_integer(&mut self, ty: &Type) {
+	fn constrain_integer(&mut self, ty: &Type) -> Result<(), TcErr<TypeVariant>> {
 		//println!("{ty:?} <- some Integer");
 		if let Some(key) = self.get_infer_key(ty) {
 			self.checker
 				.impose(key.concretizes_explicit(TypeVariant::SomeInteger))
-				.unwrap();
+		} else {
+			Ok(())
 		}
 	}
 
-	fn constrain_bool(&mut self, ty: &Type) {
+	fn constrain_bool(&mut self, ty: &Type) -> Result<(), TcErr<TypeVariant>> {
 		//println!("{ty:?} <- some Bool");
 		if let Some(key) = self.get_infer_key(ty) {
 			self.checker
 				.impose(key.concretizes_explicit(TypeVariant::SomeBoolean))
-				.unwrap();
+		} else {
+			Ok(())
 		}
 	}
 
-	fn constrain_float(&mut self, ty: &Type) {
+	fn constrain_float(&mut self, ty: &Type) -> Result<(), TcErr<TypeVariant>> {
 		//println!("{ty:?} <- some Float");
 		if let Some(key) = self.get_infer_key(ty) {
 			self.checker
 				.impose(key.concretizes_explicit(TypeVariant::SomeFloat))
-				.unwrap();
+		} else {
+			Ok(())
 		}
 	}
 

@@ -1,9 +1,9 @@
 import intrinsics
 
 //@transparent
-public struct Int64 /*: IntegerLiteralRepresentable */ {
-	public static let min: Int64 = 0xffff_ffff_ffff_ffff;
-	public static let max: Int64 = 0x7fff_ffff_ffff_ffff;
+public struct Int64 /*: IntegerLiteralRepr */ {
+	public static let min: Int64 = 0xffff_ffff_ffff_ffff
+	public static let max: Int64 = 0x7fff_ffff_ffff_ffff
 
 	private var repr: i64
 

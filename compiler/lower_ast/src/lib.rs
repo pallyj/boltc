@@ -1,3 +1,5 @@
+#![feature(let_else)]
+
 use blir::intrinsics::Intrinsics;
 use errors::Span;
 use parser::ast::{Parse, Root, file::FileItem};
@@ -18,7 +20,7 @@ pub struct AstLowerer {
 impl AstLowerer {
 	pub fn new(parse: Parse) -> AstLowerer {
 		AstLowerer {
-			file: 0,
+			file: parse.file as u32,
 			parse: Root::cast(parse.root).unwrap()
 		}
 	}

@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use mangle::{Mangled, MangleComponent};
 
 use crate::{
-	scope::{ScopeRelation, ScopeRef},
+	scope::{ScopeRelation, ScopeRef, ScopeType},
 	typ::{StructRef, TypeKind},
 	code::{FunctionRef, ExternFunctionRef},
 	Symbol,
@@ -26,7 +26,7 @@ impl Library {
 		Library {
 			name: name.to_string(),
 			mangled: Mangled::new(MangleComponent::Library(name.to_string())),
-			scope: ScopeRef::new(None, ScopeRelation::None, false, false),
+			scope: ScopeRef::new(None, ScopeRelation::None, ScopeType::Library, false, false),
 			functions: Vec::new(),
 			extern_functions: Vec::new(),
 			structs: Vec::new(),

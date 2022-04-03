@@ -2,136 +2,149 @@ use blir::{Library,
 	code::{FunctionRef, MethodRef, CodeBlock, Statement, StatementKind, ExternFunctionRef},
 	typ::{StructRef, Type, TypeKind},
 	scope::ScopeRef,
-	value::{VarRef, Value, ValueKind, IfBranch, IfValue},
+	value::{VarRef, Value, ValueKind, IfBranch, IfValue, ConstantRef},
 	Symbol};
+use errors::{debugger::Debugger, error::ErrorCode};
 
-pub fn run_pass(library: &mut Library) {
+pub fn run_pass(library: &mut Library, debugger: &mut Debugger) {
 	let scope = library
 		.scope();
 
 	for func in &library.extern_functions {
-		walk_extern_function(&func, &scope);
+		walk_extern_function(&func, &scope, debugger);
 	}
 
 	for r#struct in &library.structs {
-		walk_struct(r#struct, &scope);
+		walk_struct(r#struct, &scope, debugger);
 	}
 
 	for func in &library.functions {
-		walk_function(&func, &scope);
+		walk_function(&func, &scope, debugger);
 	}
 
 	for func in &library.functions {
-		walk_function_code(&func);
+		walk_function_code(&func, debugger);
 	}
 }
 
-fn walk_struct(r#struct: &StructRef, _scope: &ScopeRef) {
+fn walk_struct(r#struct: &StructRef, _scope: &ScopeRef, debugger: &mut Debugger) {
 	let r#struct = r#struct.borrow();
 	let scope = r#struct.scope();
 
 	for substruct in &r#struct.substructs {
-		walk_struct(&substruct, &scope);
+		walk_struct(&substruct, &scope, debugger);
+	}
+
+	for constant in &r#struct.constants {
+		walk_constant(&constant, &scope, debugger);
 	}
 
 	for variable in &r#struct.instance_vars {
-		walk_variable(&variable, &scope);		
+		walk_variable(&variable, &scope, debugger);		
 	}
 
 	for method in &r#struct.methods {
-		walk_method(&method, &scope);
+		walk_method(&method, &scope, debugger);
 	}
 
 	for method in &r#struct.methods {
-		walk_method_code(&method);
+		walk_method_code(&method, debugger);
 	}
 }
 
-fn walk_variable( var: &VarRef, scope: &ScopeRef ) {
-	walk_type(&mut (var.borrow_mut().typ), scope)
+fn walk_variable( var: &VarRef, scope: &ScopeRef, debugger: &mut Debugger ) {
+	walk_type(&mut (var.borrow_mut().typ), scope, debugger);
+	var.borrow_mut().default_value
+		.as_mut()
+		.map(|value| walk_value(value, scope, debugger));
 }
 
-fn walk_method( method: &MethodRef, scope: &ScopeRef ) {
+fn walk_constant( var: &ConstantRef, scope: &ScopeRef, debugger: &mut Debugger ) {
+	walk_type(&mut (var.borrow_mut().typ), scope, debugger);
+	walk_value( &mut var.borrow_mut().value, scope, debugger);
+}
+
+fn walk_method( method: &MethodRef, scope: &ScopeRef, debugger: &mut Debugger ) {
 	let mut method = method.borrow_mut();
 
-	walk_type(&mut method.return_type, scope);
+	walk_type(&mut method.return_type, scope, debugger);
 
 	method.params
 		.iter_mut()
-		.for_each(|param| walk_type(&mut param.typ, scope));
+		.for_each(|param| walk_type(&mut param.typ, scope, debugger));
 
 	method.add_params();
 }
 
-fn walk_method_code( method: &MethodRef) {
+fn walk_method_code( method: &MethodRef, debugger: &mut Debugger ) {
 	let mut method = method.borrow_mut();
 
 	let scope = method.scope().clone();
 
-	walk_code_block(&mut method.code, &scope);
+	walk_code_block(&mut method.code, &scope, debugger);
 }
 
-fn walk_function( function: &FunctionRef, scope: &ScopeRef ) {
+fn walk_function( function: &FunctionRef, scope: &ScopeRef, debugger: &mut Debugger ) {
 	let mut function = function.borrow_mut();
 
-	walk_type(&mut function.return_type, scope);
+	walk_type(&mut function.return_type, scope, debugger);
 
 	function.params
 		.iter_mut()
-		.for_each(|param| walk_type(&mut param.typ, scope));
+		.for_each(|param| walk_type(&mut param.typ, scope, debugger));
 
 	function.add_params();
 }
 
-fn walk_extern_function( function: &ExternFunctionRef, scope: &ScopeRef ) {
+fn walk_extern_function( function: &ExternFunctionRef, scope: &ScopeRef, debugger: &mut Debugger ) {
 	let mut function = function.borrow_mut();
 
-	walk_type(&mut function.return_type, scope);
+	walk_type(&mut function.return_type, scope, debugger);
 
 	function.params
 		.iter_mut()
-		.for_each(|param| walk_type(&mut param.typ, scope));
+		.for_each(|param| walk_type(&mut param.typ, scope, debugger));
 }
 
-fn walk_function_code( function: &FunctionRef ) {
+fn walk_function_code( function: &FunctionRef, debugger: &mut Debugger ) {
 	let mut function = function.borrow_mut();
 
 	let scope = function.scope().clone();
 
-	walk_code_block(&mut function.code, &scope);
+	walk_code_block(&mut function.code, &scope, debugger);
 }
 
-fn walk_code_block( code: &mut CodeBlock, scope: &ScopeRef ) {
+fn walk_code_block( code: &mut CodeBlock, scope: &ScopeRef, debugger: &mut Debugger ) {
 	for smt in code.statements_mut() {
-		walk_statement(smt, scope);
+		walk_statement(smt, scope, debugger);
 	}
 }
 
-fn walk_statement(smt: &mut Statement, scope: &ScopeRef) {
+fn walk_statement(smt: &mut Statement, scope: &ScopeRef, debugger: &mut Debugger ) {
 	match &mut smt.kind {
 		StatementKind::Bind { name, typ, value } => {
-			walk_type(typ, scope);
+			walk_type(typ, scope, debugger);
 
 			*name = scope.define_variable(&name, typ.clone());
 
-			value.as_mut().map(|value| walk_value(value, scope));
+			value.as_mut().map(|value| walk_value(value, scope, debugger));
 		}
 
 		StatementKind::Eval { value, escaped: _ } => {
-			walk_value(value, scope);
+			walk_value(value, scope, debugger);
 		}
 
 		StatementKind::Return { value } => {
-			value.as_mut().map(|value| walk_value(value, scope));
+			value.as_mut().map(|value| walk_value(value, scope, debugger));
 		}
 	}
 }
 
-fn walk_value(value: &mut Value, scope: &ScopeRef) {
+fn walk_value(value: &mut Value, scope: &ScopeRef, debugger: &mut Debugger ) {
 	match &mut value.kind {
 		ValueKind::Named(name) => {
 			let Some(sym) = scope.lookup_symbol(name).map(|sym| sym.resolve()) else {
-				println!("Error: can't find symbol {name}");
+				debugger.throw_single(ErrorCode::SymbolNotFound { name: name.clone() }, &value.span );
 				return
 			};
 
@@ -174,11 +187,18 @@ fn walk_value(value: &mut Value, scope: &ScopeRef) {
 					let myself = ValueKind::SelfVal.anon(self_type);
 					value.set_kind(ValueKind::InstanceMethod { reciever: Box::new(myself), method })
 				}
+
+				Symbol::Constant(constant) => {
+					let constant_value = constant.borrow().value.clone();
+
+					value.set_kind(constant_value.kind);
+					value.typ = constant_value.typ;
+				}
 			}
 		}
 
 		ValueKind::FuncCall { function, args } => {
-			walk_value(function.as_mut(), scope);
+			walk_value(function.as_mut(), scope, debugger);
 
 			if let ValueKind::Metatype(t) = &mut function.kind {
 				let t = std::mem::replace(t, TypeKind::Void);
@@ -188,7 +208,7 @@ fn walk_value(value: &mut Value, scope: &ScopeRef) {
 
 			args.args
 				.iter_mut()
-				.for_each(|arg| { walk_value(arg, scope) });
+				.for_each(|arg| { walk_value(arg, scope, debugger) });
 
 			if let TypeKind::Function { return_type, params: _, labels: _ } = function.typ.kind() {
 				let return_type = return_type.as_ref().clone();
@@ -202,40 +222,38 @@ fn walk_value(value: &mut Value, scope: &ScopeRef) {
 		}
 
 		ValueKind::Member { parent, member: _ } => {
-			walk_value(parent.as_mut(), scope)
+			walk_value(parent.as_mut(), scope, debugger)
 		}
 
-		ValueKind::If(if_value) => walk_if_value(if_value, scope),
+		ValueKind::If(if_value) => walk_if_value(if_value, scope, debugger),
 
 		_ => {}
 	}
 }
 
-fn walk_if_value(if_value: &mut IfValue, scope: &ScopeRef) {
-	walk_value(&mut if_value.condition, scope);
+fn walk_if_value(if_value: &mut IfValue, scope: &ScopeRef, debugger: &mut Debugger ) {
+	walk_value(&mut if_value.condition, scope, debugger);
 
-	walk_code_block(&mut if_value.positive, scope);
+	walk_code_block(&mut if_value.positive, scope, debugger);
 
 	if let Some(negative_block) = &mut if_value.negative {
 		match negative_block {
-			IfBranch::CodeBlock(codeblock) => walk_code_block(codeblock, scope),
-			IfBranch::Else(else_if_value) => walk_if_value(else_if_value, scope),
+			IfBranch::CodeBlock(codeblock) => walk_code_block(codeblock, scope, debugger),
+			IfBranch::Else(else_if_value) => walk_if_value(else_if_value, scope, debugger),
 		}
 	}
 }
 
-fn walk_type( typ: &mut Type, scope: &ScopeRef ) {
-	match typ.kind_mut() {
+fn walk_type( typ: &mut Type, scope: &ScopeRef, debugger: &mut Debugger ) {
+	match &mut typ.kind {
 		TypeKind::Named(symbol_name) => {
 			let Some(resolved_sym) = scope.lookup_symbol(symbol_name) else {
-				// Throw an error, type was not found
-				println!("Error: type {symbol_name} was not found");
+				debugger.throw_single(ErrorCode::TypeNotFound { name: symbol_name.clone() }, &typ.span);
 				return
 			};
 
 			let Symbol::Type(resolved_typ) = resolved_sym.resolve() else {
-				// Throw an error, symbol is not a type
-				println!("Error: type {symbol_name} is not a type");
+				debugger.throw_single(ErrorCode::SymNotAType { name: symbol_name.clone() }, &typ.span);
 				return
 			};
 
@@ -243,15 +261,15 @@ fn walk_type( typ: &mut Type, scope: &ScopeRef ) {
 		}
 
 		TypeKind::Member { parent, member } => {
-			walk_type(parent.as_mut(), scope);
+			walk_type(parent.as_mut(), scope, debugger);
 
 			let Some(sym) = parent.lookup_static_item(member.as_str()) else {
-				println!("Error: member not found");
+				debugger.throw_single(ErrorCode::MemberNotFound { name: member.clone() }, &typ.span);
 				return;
 			};
 
 			let Symbol::Type(tk) = sym else {
-				println!("Error: member not a type");
+				debugger.throw_single(ErrorCode::MemberNotATy { name: member.clone() }, &typ.span);
 				return;
 			};
 
@@ -259,11 +277,11 @@ fn walk_type( typ: &mut Type, scope: &ScopeRef ) {
 		}
 
 		TypeKind::Function { return_type, params, labels: _ } => {
-			walk_type(return_type.as_mut(), scope);
+			walk_type(return_type.as_mut(), scope, debugger);
 
 			params
 				.iter_mut()
-				.for_each(|param| walk_type(param, scope));
+				.for_each(|param| walk_type(param, scope, debugger));
 		}
 
 		_ => {}

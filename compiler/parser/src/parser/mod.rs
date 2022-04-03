@@ -59,12 +59,6 @@ impl<'input, 'l> Parser<'input, 'l> {
 		}
 	}
 
-	pub fn slice(&mut self) -> &str {
-		self.lexemes
-			.get(self.cursor)
-			.unwrap().source
-	}
-
 	fn parse_delim(
 		&mut self,
 		node: SyntaxKind,
@@ -242,6 +236,7 @@ pub fn parse<'input>(input: &'input str, debugger: &'input mut Debugger, file: u
 	let sink = Sink::new(events, &lexemes, file);
 
 	Parse {
+		file,
 		root: SyntaxNode::new_root(sink.finish(debugger))
 	}
 }

@@ -1,0 +1,112 @@
+import intrinsics
+
+//@transparent
+public struct UInt32 /*: IntegerLiteralRepresentable */ {
+	public static let min: UInt32 = 0x0
+	public static let max: UInt32 = 0xffff_ffff_ffff_ffff
+
+	private var repr: i32
+
+	public func add(b: Self): Self {
+		Self( integer32Add(self.repr, b.repr) )
+	}
+
+	public func sub(b: Self): Self {
+		Self( integer32Sub(self.repr, b.repr) )
+	}
+
+	public func mul(b: Self): Self {
+		Self ( integer32Mul(self.repr, b.repr) )
+	}
+
+	public func div(b: Self): Self {
+		Self ( integer32Div(self.repr, b.repr) )
+	}
+
+	public func mod(b: Self): Self {
+		Self ( integer32Rem(self.repr, b.repr) )
+	}
+
+
+	public func or(b: Self): Self {
+		Self ( integer32Or(self.repr, b.repr) )
+	}
+
+	public func xor(b: Self): Self {
+		Self ( integer32Xor(self.repr, b.repr) )
+	}
+
+	public func and(b: Self): Self {
+		Self ( integer32And(self.repr, b.repr) )
+	}
+
+	public func shiftLeft(b: Self): Self {
+		Self ( integer32Shl(self.repr, b.repr) )
+	}
+
+	public func shiftRight(b: Self): Self {
+		Self ( integer32Shr(self.repr, b.repr) )
+	}
+
+
+	public func eq(b: Self): Bool {
+		Bool ( integer32CmpEq(self.repr, b.repr) )
+	}
+
+	public func neq(b: Self): Bool {
+		Bool ( integer32CmpNeq(self.repr, b.repr) )
+	}
+
+	public func lt(b: Self): Bool {
+		Bool ( integer32CmpLt(self.repr, b.repr) )
+	}
+
+	public func gt(b: Self): Bool {
+		Bool ( integer32CmpGt(self.repr, b.repr) )
+	}
+
+	public func lte(b: Self): Bool {
+		Bool ( integer32CmpLte(self.repr, b.repr) )
+	}
+
+	public func gte(b: Self): Bool {
+		Bool ( integer32CmpGte(self.repr, b.repr) )
+	}
+
+	
+	public func negate(): Self {
+		Self ( integer32Negate(self.repr) )
+	}
+
+	public func invert(): Self {
+		Self ( integer32Invert(self.repr) )
+	}
+
+	public static func bitcastInt8(i: Int8): Self {
+		UInt32 ( integer8Extend32(i.repr) )
+	}
+
+	public static func bitcastInt16(i: Int16): Self {
+		UInt32 ( integer16Extend32(i.repr) )
+	}
+
+	public static func bitcastInt32(i: Int32): Self {
+		Int32 ( i.repr )
+	}
+
+	public static func extendUInt8(i: UInt8): Self {
+		UInt32 ( integer8Extend32(i.repr) )
+	}
+
+	public static func extendUInt16(i: UInt16): Self {
+		UInt32 ( integer16Extend32(i.repr) )
+	}
+
+	public static func truncUInt64(i: UInt64): Self {
+		UInt32 ( integer64Trunc32(i) )
+	}
+
+	public static func truncInt64(i: Int64): Self {
+		UInt32 ( integer64Trunc32(i) )
+	}
+}

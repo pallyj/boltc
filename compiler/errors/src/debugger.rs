@@ -33,9 +33,34 @@ impl<'a> Debugger<'a> {
 	}
 
 	pub fn throw(&mut self, code: ErrorCode, spans: Vec<Span>) {
-		println!("{}", code.error_code().red());
+		let description = code.description();
+		println!("  {}", format!("[{}] {}", code.error_code().red(), description).bold() );
+
+		for span in spans.iter() {
+			let (start, end): (u32, u32) = unsafe { std::mem::transmute(span.range) };
+
+			let line_info = self.interner.get_line_info(span.file as usize, start as usize);
+
+			println!("    {} {}:{}:{}", "-->".bold().blue(), line_info.filename, line_info.line, line_info.col + 1);
+
+			println!("     {} ", "|".bold().blue());
+			println!("{:>4} {} {}", line_info.line.to_string().bold().blue(), "|".bold().blue(), line_info.text.replace("\t", "    "));
+
+			let ntabs = (&line_info.text[0..line_info.col]).rmatches("\t").count();
+
+			let width = line_info.col + (3 * ntabs);
+
+			let sep = (0..(end - start)).map(|_| '^').collect::<String>().red().bold();
+			println!("     {} {space:width$}{sep}", "|".bold().blue(), space = "");
+
+			println!("     {} ", "|".bold().blue());
+		}
 
 		self.errors.push(Error::new(code, spans));
+	}
+
+	pub fn throw_single(&mut self, code: ErrorCode, span: &Option<Span>) {
+		self.throw(code, span.clone().into_iter().collect());
 	}
 
 	pub fn has_errors(&self) -> bool {

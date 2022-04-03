@@ -1,6 +1,6 @@
 mod args;
 
-use std::{process::Command, fs::File, io::Read};
+use std::{process::Command};
 
 use args::Args;
 use blir::Library;
@@ -36,7 +36,6 @@ fn main() {
 }
 
 pub struct Project {
-    file_text: Vec<String>,
     library: Option<Library>,
     interner: FileInterner,
 }
@@ -44,7 +43,6 @@ pub struct Project {
 impl Project {
     pub fn new(name: &str) -> Project {
         Project {
-            file_text: vec![],
             library: Some(Library::new(name)),
             interner: FileInterner::new()
         }
@@ -68,9 +66,12 @@ impl Project {
 
         if debugger.has_errors() { return false; }
 
-        blir_passes::type_resolve::run_pass(self.library.as_mut().unwrap());
-        blir_passes::type_infer::run_pass(self.library.as_mut().unwrap());
+        blir_passes::type_resolve::run_pass(self.library.as_mut().unwrap(), &mut debugger);
+        if debugger.has_errors() { return false; }
+        blir_passes::type_infer::run_pass(self.library.as_mut().unwrap(), &mut debugger);
+        if debugger.has_errors() { return false; }
         blir_passes::type_check::run_pass(self.library.as_mut().unwrap());
+        if debugger.has_errors() { return false; }
 
         let mut lowerer = BlirLowerer::new(self.library.take().unwrap());
         lowerer.lower();

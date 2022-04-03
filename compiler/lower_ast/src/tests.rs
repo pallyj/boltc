@@ -1,6 +1,7 @@
 #[test]
 fn test_code() {
-	let mut debugger = Debugger::new();
+	let interner = FileInterner::new();
+	let mut debugger = Debugger::new(&interner);
 
 	let code = r#"
 import intrinsics
@@ -32,7 +33,7 @@ func gcd(a: Int64, b: Int64): Int64 {
 
 	let mut lib = Library::new("");
 
-	AstLowerer::new(parse(&code, &mut debugger))
+	AstLowerer::new(parse(&code, &mut debugger, 0))
 		.lower_file(&mut lib);
 
 	println!("{lib:?}");
@@ -42,7 +43,7 @@ func gcd(a: Int64, b: Int64): Int64 {
 // Imports
 
 use blir::Library;
-use errors::debugger::Debugger;
+use errors::{debugger::Debugger, fileinterner::FileInterner};
 use parser::parser::parse;
 
 use crate::AstLowerer;

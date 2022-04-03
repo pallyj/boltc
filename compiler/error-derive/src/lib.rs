@@ -7,21 +7,19 @@ extern crate proc_macro;
 pub fn error(item: TokenStream) -> TokenStream {
     let item: syn::ItemEnum = syn::parse(item).unwrap();
 
-    let mut variants = vec![];
-    let mut indices = vec![];
-
-    for variant in item.variants.iter().enumerate() {
-        variants.push(variant.1.ident.clone());
-        indices.push(variant.0);
-    }
-
     let item_name = item.ident.clone();
+
+    let error_code_branches = item.variants.iter().enumerate().map(|variant| {
+        let variant_name = &variant.1.ident;
+        let indice = variant.0;
+        quote! { #item_name::#variant_name { .. } => format!("E{:03}", #indice) }
+    });
 
     let tokens = quote! {
         impl #item_name {
             pub fn error_code(&self) -> String {
                 match self {
-                    #(<#item_name>::#variants => format!("E{}", #indices) ),*
+                    #(#error_code_branches),*
                 }
             }
         }
