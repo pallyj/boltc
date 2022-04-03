@@ -135,6 +135,6 @@ public struct Int /*: IntegerLiteralRepr */ {
 	}
 
 	public func print() {
-		printInt(self.repr)
+		printInt64(self.repr)
 	}
 }

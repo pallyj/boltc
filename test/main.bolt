@@ -27,6 +27,10 @@ func main() {
 }
 
 func loopBody(i: Int) {
+	let a: Bool = false
+
+	a.print();
+
 	factorial(i.mod(20)).print()
 }
 

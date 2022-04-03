@@ -51,26 +51,26 @@ cargo run -- test/main.bolt --lib=test
 
 ### Bolt 0.9
 
-- Generics
+- Classes
 
 ### Bolt 0.8
 
-- Classes
-- Protocols
+- Generics
 
 ### Bolt 0.7
+
+- Protocols
+
+### Bolt 0.6
 
 - Mutable variables
 - Loops
 - Guard
 
-### Bolt 0.6
+### Bolt 0.5
 
 - Patterns
 - Match
-
-### Bolt 0.5
-
 - Enums
 
 ### Bolt 0.4
@@ -80,14 +80,20 @@ cargo run -- test/main.bolt --lib=test
 - Globals
 - Initializers
 
-### Bolt 0.3.1
+### Bolt 0.3.2
+
+- Attributes
+- Use static methods as values
+- Handle voids and ifs in returns
+
+### Bolt 0.3.1 [Current Version]
 
 - Error Catching
 - Visibilities
 - Comments
 - First-Class functions
 
-### Bolt 0.3 [Current Version]
+### Bolt 0.3
 
 - Rewrite compiler
 - Type checking

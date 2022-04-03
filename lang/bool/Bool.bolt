@@ -19,4 +19,8 @@ public struct Bool /*: BooleanLiteralRepr */ {
 	public func flipped(): Self {
 		Self( integer1Invert(self.repr) )
 	}
+
+	public func print() {
+		printBool(self.repr)
+	}
 }

@@ -73,4 +73,8 @@ public struct Float /*: FloatLiteralRepr*/ {
 	public static func fromInt(num: Int64): Float {
 		Float ( float32FromIntSig(num.repr) )
 	}
+
+	public func print() {
+		printFloat(self.repr)
+	}
 }
