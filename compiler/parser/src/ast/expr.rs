@@ -24,7 +24,7 @@ use std::fmt::Debug;
 
 use crate::lexer::SyntaxKind;
 
-use super::{smt::CodeBlock};
+use super::{smt::CodeBlock, find_token};
 
 ast!(struct NamedExpr(NamedExpr));
 ast!(struct LiteralExpr(Literal));
@@ -154,7 +154,7 @@ impl MemberExpr {
 	}
 
 	pub fn child(&self) -> Option<String> {
-		self.0.last_token()
+		find_token(&self.0, SyntaxKind::Ident)
 			.map(|token| token.text().to_string())
 	}
 }

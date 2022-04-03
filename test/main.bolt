@@ -1,44 +1,3 @@
-import intrinsics
-
-/* testing line comments */
-public struct Int {
-	private var repr: i64
-
-	static let max: Int = 0x7fff_ffff_ffff_ffff
-
-	public func add(b: Int): Int {
-		Int(integer64Add(self.repr, b.repr))
-	}
-
-	public func sub(b: Int): Int {
-		Int(integer64Sub(self.repr, b.repr))
-	}
-
-	public func mul(b: Int): Int {
-		Int(integer64Mul(self.repr, b.repr))
-	}
-
-	public func mod(b: Int): Int {
-		Int(integer64RemSig(self.repr, b.repr))
-	}
-
-	public func lt(b: Int): i1 {
-		integer64CmpLt(self.repr, b.repr)
-	}
-
-	public func neq(b: Int): i1 {
-		integer64CmpNeq(self.repr, b.repr)
-	}
-
-	public func eq(b: Int): i1 {
-		integer64CmpEq(self.repr, b.repr)
-	}
-
-	public func print() {
-		printInt(repr)
-	}
-}
-
 func gcd(a: Int, b: Int): Int {
 	if a.lt(b) {
 		gcd(b, a)
@@ -64,14 +23,11 @@ func main() {
 	gcd(60, 40).print()
 	gcd(7, 11).print()*/
 
-
 	for (10, 20, loopBody)
 }
 
 func loopBody(i: Int) {
-	let a: Int = 5;
 	factorial(i.mod(20)).print()
-	loop(10)
 }
 
 func for(low: Int, high: Int, f: func (Int)) {
@@ -79,11 +35,4 @@ func for(low: Int, high: Int, f: func (Int)) {
 		f(low);
 		for(low.add(1), high, f)
 	}
-}
-
-func loop(range: Range)
-
-struct Range {
-	var lo: Int
-	var hi: Int
 }

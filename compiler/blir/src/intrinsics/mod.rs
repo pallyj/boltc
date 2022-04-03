@@ -153,13 +153,13 @@ impl Intrinsics {
         // Truncation
         let mut b = bits / 2;
 
-        while b >= 8 {
+        while b >= 16 {
             let o = TypeKind::Float { bits: b };
 
 			let u = match b {
 				16 => UnaryIntrinsicFn::FloatTrunc16,
 				32 => UnaryIntrinsicFn::FloatTrunc32,
-				_ => return
+				_ => { return }
 			};
 
             self.add_unary_func(format!("float{bits}Trunc{b}"), u, &t, &o);

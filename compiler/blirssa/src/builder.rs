@@ -90,7 +90,7 @@ impl Builder {
 		};
 
 		if pointee.as_ref() != value.typ_ref() {
-			panic!();
+			panic!("{pointee} <=> {value}");
 		}
 
 		let instruction = Instruction::AssignPtr { pointer, value };

@@ -6,7 +6,7 @@ public struct Int /*: IntegerLiteralRepr */ {
 	public static let min: Int = 0xffff_ffff_ffff_ffff
 	public static let max: Int = 0x7fff_ffff_ffff_ffff
 
-	internal var repr: i64
+	public var repr: i64
 
 	public func add(b: Self): Self {
 		Self( integer64Add(self.repr, b.repr) )
@@ -132,5 +132,9 @@ public struct Int /*: IntegerLiteralRepr */ {
 
 	public static func bitcastUInt(i: UInt): Self {
 		Int ( i.repr )
+	}
+
+	public func print() {
+		printInt(self.repr)
 	}
 }
