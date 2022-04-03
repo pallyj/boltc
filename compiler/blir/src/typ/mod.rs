@@ -5,7 +5,7 @@ use std::{ops::{Deref, DerefMut}, fmt::{Debug}, sync::atomic::{AtomicU64, Orderi
 use errors::Span;
 pub use struct_::*;
 
-use crate::Symbol;
+use crate::{Symbol, scope::ScopeRef};
 
 static NEXT_INFER_KEY: AtomicU64 = AtomicU64::new(1);
 
@@ -62,8 +62,8 @@ impl TypeKind {
 
 #[derive(Clone)]
 pub struct Type {
-	kind: TypeKind,
-	span: Option<Span>,
+	pub kind: TypeKind,
+	pub span: Option<Span>,
 }
 
 impl Type {
@@ -102,10 +102,10 @@ impl Type {
 		}
 	}
 
-	pub fn lookup_instance_item(&self, named: &str) -> Option<Symbol> {
+	pub fn lookup_instance_item(&self, named: &str, scope: &ScopeRef) -> Option<Symbol> {
 		match &self.kind {
 			TypeKind::Metatype(ty) => ty.clone().anon().lookup_static_item(named),
-			TypeKind::Struct(r#struct) => r#struct.lookup_instance_item(named),
+			TypeKind::Struct(r#struct) => r#struct.lookup_instance_item(named, scope),
 			_ => None
 		}
 	}

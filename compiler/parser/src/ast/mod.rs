@@ -9,6 +9,7 @@ pub type SyntaxToken = rowan::SyntaxToken<BoltLanguage>;
 pub type SyntaxElement = rowan::SyntaxElement<BoltLanguage>;
 
 pub struct Parse {
+	pub file: usize,
 	pub root: SyntaxNode,
 }
 

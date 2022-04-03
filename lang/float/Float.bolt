@@ -1,0 +1,76 @@
+import intrinsics
+
+// @defaultFloatLiteral
+public struct Float /*: FloatLiteralRepr*/ {
+	internal var repr: f64
+
+	// Arithmatic
+	public func add(b: Float): Float {
+		Float ( float32Add(self.repr, b.repr) )
+	}
+
+	public func sub(b: Float): Float {
+		Float ( float32Sub(self.repr, b.repr) )
+	}
+
+	public func mul(b: Float): Float {
+		Float ( float32Mul(self.repr, b.repr) )
+	}
+
+	public func div(b: Float): Float {
+		Float ( float32Div(self.repr, b.repr) )
+	}
+
+	public func rem(b: Float): Float {
+		Float ( float32Rem(self.repr, b.repr) )
+	}
+
+	// Comparison
+	public func eq(b: Float): Bool {
+		Bool ( float32CmpEq(self.repr, b.repr) )
+	}
+
+	public func neq(b: Float): Bool {
+		Bool ( float32CmpNeq(self.repr, b.repr) )
+	}
+
+	public func lt(b: Float): Bool {
+		Bool ( float32CmpLt(self.repr, b.repr) )
+	}
+
+	public func gt(b: Float): Bool {
+		Bool ( float32CmpGt(self.repr, b.repr) )
+	}
+
+	public func lte(b: Float): Bool {
+		Bool ( float32CmpLte(self.repr, b.repr) )
+	}
+
+	public func gte(b: Float): Bool {
+		Bool ( float32CmpGte(self.repr, b.repr) )
+	}
+
+	// Negate
+	public func negate(): Self {
+		Self ( float32Negate(self.repr) )
+	}
+
+
+	// Convert from floats
+	public static func truncDouble(float: Double): Float {
+		Float ( float64Trunc32(float.repr) )
+	}
+
+	public static func extendHalf(float: Half): Float {
+		Float ( float16Ext64(float.repr) )
+	}
+
+	// Convert from integer
+	public static func fromUInt(num: UInt64): Float {
+		Float ( float32FromInt(num.repr) )
+	}
+
+	public static func fromInt(num: Int64): Float {
+		Float ( float32FromIntSig(num.repr) )
+	}
+}

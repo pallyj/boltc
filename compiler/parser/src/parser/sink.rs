@@ -1,4 +1,3 @@
-use colored::Colorize;
 use errors::debugger::Debugger;
 use rowan::{GreenNodeBuilder, GreenNode, Language};
 

@@ -1,7 +1,7 @@
 use crate::{
 	code::{FunctionRef, MethodRef, ExternFunctionRef},
 	scope::{ScopeRelation},
-	value::{VarRef, Value},
+	value::{VarRef, Value, ConstantRef},
 	typ::{TypeKind},
 	Visibility
 };
@@ -9,6 +9,8 @@ use crate::{
 #[derive(Debug, Clone)]
 pub enum Symbol {
 	Value(Value),
+
+	Constant(ConstantRef),
 
 	Function(FunctionRef),
 	StaticMethod(MethodRef),

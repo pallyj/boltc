@@ -12,6 +12,8 @@ pub struct VarInner {
 	pub typ: Type,
 
 	pub default_value: Option<Value>,
+
+	pub is_constant: bool
 }
 
 pub struct Var {
@@ -19,12 +21,13 @@ pub struct Var {
 }
 
 impl Var {
-	pub fn new(visibility: Visibility, name: String, typ: Type, default_value: Option<Value>) -> VarRef {
+	pub fn new(visibility: Visibility, name: String, typ: Type, default_value: Option<Value>, is_constant: bool) -> VarRef {
 		let var_inner = VarInner {
 			visibility,
 			name,
 			typ,
-			default_value
+			default_value,
+			is_constant
 		};
 
 		VarRef { var: Arc::new(Var { var: RefCell::new(var_inner) }) }

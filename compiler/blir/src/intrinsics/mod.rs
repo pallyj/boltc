@@ -1,5 +1,5 @@
 use crate::{
-	scope::{ScopeRef, ScopeRelation},
+	scope::{ScopeRef, ScopeRelation, ScopeType},
 	typ::TypeKind,
 	Visibility,
 	Symbol, value::ValueKind};
@@ -88,7 +88,7 @@ pub struct Intrinsics {
 impl Intrinsics {
     pub fn new() -> Intrinsics {
         Intrinsics {
-			scope: ScopeRef::new(None, ScopeRelation::None, false, false)
+			scope: ScopeRef::new(None, ScopeRelation::None, ScopeType::Library, false, false)
         }
     }
 

@@ -2,7 +2,7 @@ use std::{cell::{RefCell, Ref, RefMut}, sync::Arc, ops::Deref, fmt::Debug};
 
 use mangle::{Mangled, MangleComponent};
 
-use crate::{Visibility, Symbol, code::MethodRef, SymbolWrapper, value::VarRef, scope::{ScopeRef, ScopeRelation}};
+use crate::{Visibility, Symbol, code::MethodRef, SymbolWrapper, value::{VarRef, ConstantRef}, scope::{ScopeRef, ScopeRelation, ScopeType}};
 
 use super::{TypeKind, Type};
 
@@ -23,6 +23,7 @@ pub struct StructInner {
 	pub substructs: Vec<StructRef>,
 	pub methods: Vec<MethodRef>,
 	pub instance_vars: Vec<VarRef>,
+	pub constants: Vec<ConstantRef>,
 
 	parent_mangled: Mangled,
 }
@@ -45,11 +46,12 @@ impl Struct {
 			visibility,
 			link_name: name.clone(),
 			name: name,
-			scope: ScopeRef::new(Some(parent), ScopeRelation::SameFile, false, false),
+			scope: ScopeRef::new(Some(parent), ScopeRelation::SameFile, ScopeType::Container, false, false),
 			substructs: Vec::new(),
 			methods: Vec::new(),
 			instance_vars: Vec::new(),
-			parent_mangled
+			parent_mangled,
+			constants: Vec::new(),
 		};
 
 		let struct_ref = StructRef {
@@ -110,6 +112,22 @@ impl Struct {
 		self.borrow().scope.add_instance_symbol(name, visibility, symbol)
 	}
 
+	pub fn add_constant(&self, var: ConstantRef) -> Option<SymbolWrapper> {
+		// Add the function to the list of functions
+		self.inner.borrow_mut().constants.push(var.clone());
+
+		// Add the functions symbol, returning another symbol if it exists
+		let cloned = var.clone();
+		let var_ref = cloned.borrow();
+
+		let visibility = var_ref.visibility;
+		let name = var_ref.name.clone();
+
+		let symbol = Symbol::Constant(var);
+
+		self.borrow().scope.add_symbol(name, visibility, symbol)
+	}
+
 	pub fn add_type(&self, name: String, visibility: Visibility, typ: TypeKind) -> Option<SymbolWrapper> {
 		let sym = Symbol::Type(typ);
 
@@ -145,9 +163,9 @@ impl Struct {
 			.map(|sym| sym.resolve())
 	}
 
-	pub fn lookup_instance_item(&self, name: &str) -> Option<Symbol> {
-		// TODO: Find the actual rel
-		let rel = ScopeRelation::SameContainer;
+	pub fn lookup_instance_item(&self, name: &str, scope: &ScopeRef) -> Option<Symbol> {
+		// TODO: Maybe flip this?
+		let rel = self.inner.borrow().scope.relation_to(scope);
 
 		unsafe { &*self.inner.as_ptr() }
 			.scope()

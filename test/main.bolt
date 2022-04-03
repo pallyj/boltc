@@ -2,7 +2,9 @@ import intrinsics
 
 /* testing line comments */
 public struct Int {
-	var repr: i64
+	private var repr: i64
+
+	static let max: Int = 0x7fff_ffff_ffff_ffff
 
 	public func add(b: Int): Int {
 		Int(integer64Add(self.repr, b.repr))
@@ -62,11 +64,14 @@ func main() {
 	gcd(60, 40).print()
 	gcd(7, 11).print()*/
 
-	for (15, 20, loopBody)
+
+	for (10, 20, loopBody)
 }
 
 func loopBody(i: Int) {
-	factorial(i).print()
+	let a: Int = 5;
+	factorial(i.mod(20)).print()
+	loop(10)
 }
 
 func for(low: Int, high: Int, f: func (Int)) {
@@ -74,4 +79,11 @@ func for(low: Int, high: Int, f: func (Int)) {
 		f(low);
 		for(low.add(1), high, f)
 	}
+}
+
+func loop(range: Range)
+
+struct Range {
+	var lo: Int
+	var hi: Int
 }

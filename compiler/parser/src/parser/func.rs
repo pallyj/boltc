@@ -1,6 +1,6 @@
 use crate::{lexer::SyntaxKind, parser::file::INNER_ITEM_RECOVERY_SET};
 
-use super::{Parser, file::ITEM_RECOVERY_SET, marker::Marker};
+use super::{Parser, marker::Marker};
 
 impl<'input, 'l> Parser<'input, 'l> {
 	pub fn parse_init(&mut self, marker: Marker) {

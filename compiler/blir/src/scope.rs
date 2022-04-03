@@ -12,6 +12,14 @@ pub enum ScopeRelation {
 
 }
 
+#[derive(Copy, Clone, PartialEq, Eq)]
+pub enum ScopeType {
+	Code,
+	Container,
+	File,
+	Library
+}
+
 impl ScopeRelation {
 	pub fn can_access(self, visibility: Visibility) -> bool {
 		match visibility {
@@ -29,7 +37,7 @@ pub struct ScopeRef {
 }
 
 impl ScopeRef {
-	pub fn new(parent: Option<&ScopeRef>, relation: ScopeRelation, lookup_parent_instance: bool, is_function: bool) -> ScopeRef {
+	pub fn new(parent: Option<&ScopeRef>, relation: ScopeRelation, ty: ScopeType, lookup_parent_instance: bool, is_function: bool) -> ScopeRef {
 		let scope = Scope {
 			parent: parent.map(|parent| Arc::downgrade(&parent.inner)),
 			symbols: HashMap::new(),
@@ -38,6 +46,7 @@ impl ScopeRef {
 			imports: Vec::new(),
 			lookup_parent_instance,
 			relation,
+			ty,
 			counter: 1,
 			is_function,
 		};
@@ -84,6 +93,56 @@ impl ScopeRef {
 			.borrow()
 			.scope_type(name)
 	}
+
+	pub fn typ(&self) -> ScopeType {
+		self.inner
+			.borrow()
+			.ty
+	}
+
+	pub fn parent(&self) -> Option<ScopeRef> {
+		self.inner
+			.borrow()
+			.parent()
+			.map(|inner| ScopeRef { inner })
+	}
+
+	pub fn relation_to(&self, other_scope: &ScopeRef) -> ScopeRelation {
+		let mut self_iter = ScopeIter::new(self);
+		let mut other_iter = ScopeIter::new(other_scope);
+
+		// Check if other scope is a child of this scope's container
+		let self_container = self_iter.next(ScopeType::Container);
+		while let Some(other_container) = other_iter.next(ScopeType::Container) {
+			if self_container
+				.as_ref()
+				.map(|self_container| self_container == &other_container)
+				.unwrap_or(false) { return ScopeRelation::SameContainer }
+		}
+
+		// Check if this scope is a child of other_scope
+		while let Some(self_container) = self_iter.next(ScopeType::Container) {
+			if &self_container == other_scope { return ScopeRelation::SameContainer }
+		}
+
+		// Check if both scopes are in the same file
+		let self_file = self_iter.next(ScopeType::File);
+		let other_file = other_iter.next(ScopeType::File);
+
+		if self_file.zip(other_file)
+			.map(|(self_file, other_file)| self_file == other_file)
+			.unwrap_or(false) { return ScopeRelation::SameFile };
+
+		// Check if both scopes are in the same library
+		let self_library = self_iter.next(ScopeType::Library);
+		let other_library = other_iter.next(ScopeType::Library);
+
+		if self_library.zip(other_library)
+			.map(|(self_library, other_library)| self_library == other_library)
+			.unwrap_or(false) { return ScopeRelation::SameLibrary };
+
+		return ScopeRelation::None
+	}
 }
 
 struct Scope {
@@ -95,6 +154,7 @@ struct Scope {
 	lookup_parent_instance: bool,
 	relation: ScopeRelation,
 	counter: u64,
+	ty: ScopeType,
 	is_function: bool
 }
 
@@ -213,7 +273,43 @@ impl Scope {
 		if let Some(ty) = self.scope_types.get(name) {
 			return Some(ty.clone())
 		} else {
-			return self.parent().unwrap().borrow().scope_type(name)
+			return self.parent().and_then(|parent| parent.borrow().scope_type(name))
 		}
+	}
+}
+
+impl PartialEq for ScopeRef {
+    fn eq(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.inner, &other.inner)
+    }
+}
+
+impl Eq for ScopeRef {
+    fn assert_receiver_is_total_eq(&self) {}
+}
+
+pub struct ScopeIter {
+	scope: Option<ScopeRef>
+}
+
+impl ScopeIter {
+	pub fn new(scope: &ScopeRef) -> Self {
+		Self {
+			scope: Some(scope.clone())
+		}
+	}
+
+	pub fn next(&mut self, ty: ScopeType) -> Option<ScopeRef> {
+		while let Some(scope) = self.scope.as_ref() {
+			if scope.typ() == ty {
+				let scope = self.scope.take().unwrap();
+				self.scope = scope.parent();
+				return Some(scope)
+			} else {
+				self.scope = scope.parent();
+			}
+		}
+
+		return None
 	}
 }

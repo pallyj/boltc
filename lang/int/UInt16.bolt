@@ -1,0 +1,108 @@
+import intrinsics
+
+//@transparent
+public struct UInt16 /*: IntegerLiteralRepresentable */ {
+	public static let min: Self = 0x0
+	public static let max: Self = 0xffff_ffff_ffff_ffff
+
+	private var repr: i16
+
+	public func add(b: Self): Self {
+		Self( integer16Add(self.repr, b.repr) )
+	}
+
+	public func sub(b: Self): Self {
+		Self( integer16Sub(self.repr, b.repr) )
+	}
+
+	public func mul(b: Self): Self {
+		Self ( integer16Mul(self.repr, b.repr) )
+	}
+
+	public func div(b: Self): Self {
+		Self ( integer16Div(self.repr, b.repr) )
+	}
+
+	public func mod(b: Self): Self {
+		Self ( integer16Rem(self.repr, b.repr) )
+	}
+
+
+	public func or(b: Self): Self {
+		Self ( integer16Or(self.repr, b.repr) )
+	}
+
+	public func xor(b: Self): Self {
+		Self ( integer16Xor(self.repr, b.repr) )
+	}
+
+	public func and(b: Self): Self {
+		Self ( integer16And(self.repr, b.repr) )
+	}
+
+	public func shiftLeft(b: Self): Self {
+		Self ( integer16Shl(self.repr, b.repr) )
+	}
+
+	public func shiftRight(b: Self): Self {
+		Self ( integer16Shr(self.repr, b.repr) )
+	}
+
+
+	public func eq(b: Self): Bool {
+		Bool ( integer16CmpEq(self.repr, b.repr) )
+	}
+
+	public func neq(b: Self): Bool {
+		Bool ( integer16CmpNeq(self.repr, b.repr) )
+	}
+
+	public func lt(b: Self): Bool {
+		Bool ( integer16CmpLt(self.repr, b.repr) )
+	}
+
+	public func gt(b: Self): Bool {
+		Bool ( integer16CmpGt(self.repr, b.repr) )
+	}
+
+	public func lte(b: Self): Bool {
+		Bool ( integer16CmpLte(self.repr, b.repr) )
+	}
+
+	public func gte(b: Self): Bool {
+		Bool ( integer16CmpGte(self.repr, b.repr) )
+	}
+
+	
+	public func negate(): Self {
+		Self ( integer16Negate(self.repr) )
+	}
+
+	public func invert(): Self {
+		Self ( integer16Invert(self.repr) )
+	}
+
+	public static func bitcastInt8(i: Int8): Self {
+		Self ( integer8Extend16(i.repr) )
+	}
+
+	public static func extendUInt8(i: UInt8): Self {
+		Self ( integer8Extend16(i.repr) )
+	}
+
+	public static func truncUInt64(i: UInt64): Self {
+		Self ( integer64Trunc16(i) )
+	}
+
+	public static func truncInt64(i: Int64): Self {
+		Self ( integer64Trunc16(i) )
+	}
+
+	public static func truncUInt32(i: UInt32): Self {
+		Self ( integer64Trunc16(i) )
+	}
+
+	public static func truncInt32(i: Int32): Self {
+		Self ( integer32Trunc16(i) )
+	}
+}

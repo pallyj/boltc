@@ -3,7 +3,7 @@ use std::{sync::Arc, cell::{RefCell, Ref, RefMut}, ops::Deref, fmt::Debug};
 use errors::Span;
 use mangle::{Mangled, MangleComponent};
 
-use crate::{Visibility, typ::{Type, TypeKind}, scope::{ScopeRef, ScopeRelation}, value::ValueKind, Symbol};
+use crate::{Visibility, typ::{Type, TypeKind}, scope::{ScopeRef, ScopeRelation, ScopeType}, value::ValueKind, Symbol};
 
 use super::{CodeBlock, FuncParam};
 
@@ -78,7 +78,7 @@ impl Method {
 			return_type,
 			code,
 			span,
-			scope: ScopeRef::new(Some(parent), ScopeRelation::SameContainer, !is_static, true),
+			scope: ScopeRef::new(Some(parent), ScopeRelation::SameContainer, ScopeType::Code, !is_static, true),
 			self_type,
 			parent_mangled
 		};

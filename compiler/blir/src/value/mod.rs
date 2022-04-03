@@ -1,7 +1,9 @@
 mod var;
+mod constant;
 
 use errors::Span;
 pub use var::*;
+pub use constant::*;
 
 use std::ops::{DerefMut, Deref};
 use std::fmt::Debug;

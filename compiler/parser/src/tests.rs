@@ -1,11 +1,12 @@
-use errors::debugger::Debugger;
+use errors::{debugger::Debugger, fileinterner::FileInterner};
 
 use crate::{parser::parse, ast::Root};
 
 
 #[test]
 fn test_code() {
-	let mut debugger = Debugger::new();
+	let interner = FileInterner::new();
+	let mut debugger = Debugger::new(&interner);
 
 	let input = r#"
 	import intrinsics
@@ -127,7 +128,7 @@ func gcd(a: Int64, b: Int64): Int64 {
 }
 	"#;
 
-	let block = parse(input, &mut debugger);
+	let block = parse(input, &mut debugger, 0);
 
 	println!("{:?}", block);
 

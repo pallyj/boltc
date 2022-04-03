@@ -1,4 +1,4 @@
-use std::{collections::BTreeSet, io::Read, sync::Arc};
+use std::{collections::BTreeSet, io::Read};
 
 pub struct FileInterner {
 	files: Vec<File>
@@ -55,13 +55,17 @@ impl File {
 	}
 
 	pub fn get_line_info<'a>(&'a self, n: usize) -> LineInfo {
-		let last_break = *self.line_breaks.range(..n)
+		let last_break = self.line_breaks.range(..=n)
 			.next_back()
-			.unwrap();
+			.cloned()
+			.unwrap_or(0);
 		
-		let next_break = *self.line_breaks.range(n..)
+		let next_break = self.line_breaks.range(n..)
 			.next()
-			.unwrap() - 1;
+			.cloned()
+			.unwrap_or_else(|| self.text.len() );
+
+		let next_break = if next_break == 0 { 0 } else { next_break - 1 };
 
 		let line = self.line_breaks.range(..n).count();
 

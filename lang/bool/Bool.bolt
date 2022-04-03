@@ -1,0 +1,22 @@
+import intrinsics
+
+//@defaultBooleanRepr
+public struct Bool /*: BooleanLiteralRepr */ {
+	private var repr: i1
+
+	public func and(b: Self): Self {
+		Self( integer1And(self.repr, b.repr) )
+	}
+
+	public func or(b: Self): Self {
+		Self( integer1Or(self.repr, b.repr) )
+	}
+
+	public func xor(b: Self): Self {
+		Self( integer1Xor(self.repr, b.repr) )
+	}
+
+	public func flipped(): Self {
+		Self( integer1Invert(self.repr) )
+	}
+}

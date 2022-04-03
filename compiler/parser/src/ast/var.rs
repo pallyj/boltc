@@ -16,6 +16,13 @@ ast!(struct VariableDef(VarDef));
 ast!(struct LetDef(LetDef));
 
 impl LetDef {
+	pub fn is_static(&self) -> bool {
+		self.0
+			.children_with_tokens()
+			.find(|child| child.kind() == SyntaxKind::StaticKw)
+			.is_some()
+	}
+	
 	pub fn visibility(&self) -> Option<SyntaxKind> {
 		self.0
 			.children()
