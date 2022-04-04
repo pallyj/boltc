@@ -2,7 +2,34 @@
 
 <img src="https://github.com/pallyj/boltcc/blob/main/assets/logo.svg?raw=true" width="256" height="256"/>
 
-Bolt is a powerful coding language designed for expressiveness and speed. Bolt combines the ease-of-use of functional programming with the speed of C to make the ultimate language, suitable for any use-case.
+Bolt is a powerful coding language designed for expressiveness and speed. Bolt combines the ease-of-use of functional programming with the speed of C to make the ultimate language, suitable for any use-case. Bolt is in the early stages of development, and the current version contains
+
+- integer and float math
+- immutable variables
+- first-class functions
+
+The Bolt Language focuses on
+
+- Safety
+- Expressiveness
+- Accessibility
+- Safety
+
+
+## Safety
+
+Bolt is designed with safety in mind. All types are determined at compile time, and implicit conversion is frowned upon. Bolt has no concept of null pointers, the single most dangerous aspect of programming. Bolt uses automatic reference counting to manage memory safely, preventing leaks and dangling pointers.
+## Expressiveness
+
+Bolt syntax is designed to concisely show what the program does, without excess verbosity. Bolt guesses the developers intent, and annotations can be added to specify it when the compiler is wrong.
+
+## Accessibility
+
+Bolt code is easy to understand for both beginners and those coming over from another language.
+
+## Speed
+
+The Bolt language is compiled ahead of time, using a LLVM backend to output optimized code for any backend. The lack of an inefficient garbage collector prevents lengthy pauses and cuts down on memory usage.
 
 ## Using
 
@@ -15,57 +42,6 @@ cargo run -- test/main.bolt --lib=test
 ```
 
 ## Development
-
-### Bolt 1.0
-
-- Fix bugs
-- Release-optimized code
-- Finalized version 1.0 of lang and intrinsics
-
-### Bolt 0.14
-
-- Iterators
-- For loop
-
-### Bolt 0.13
-
-- Dataflow operators
-- Function currying
-- Declarative function syntax
-
-### Bolt 0.12
-
-- C interop
-- Better frontend
-
-### Bolt 0.11
-
-- Syntactic sugar for options/results
-- Catch/Try
-- Strings
-
-### Bolt 0.10
-
-- Lang library
-- Project manager
-
-### Bolt 0.9
-
-- Classes
-
-### Bolt 0.8
-
-- Generics
-
-### Bolt 0.7
-
-- Protocols
-
-### Bolt 0.6
-
-- Mutable variables
-- Loops
-- Guard
 
 ### Bolt 0.5
 

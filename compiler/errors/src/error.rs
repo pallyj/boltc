@@ -16,7 +16,7 @@ pub enum ErrorCode {
 	TypeIsNotAFloat,
 	TypeIsNotABool,
 
-	MismatchedType,
+	MismatchedType { expected: String },
 
 	AmbiguousTy,
 
@@ -25,6 +25,8 @@ pub enum ErrorCode {
 
 	ExtraParams,
 	MissingParams,
+
+	IsNotAFunc
 }
 
 impl ErrorCode {
@@ -38,7 +40,7 @@ impl ErrorCode {
 			ErrorCode::MemberNotATy { name } => format!("Member {} is not a type", name),
 			ErrorCode::MemberNotAVal { name } => format!("Member {} is not a value", name),
 			ErrorCode::AmbiguousTy => format!("Couldn't infer a type for"),
-			ErrorCode::MismatchedType => format!("Mismatched type, expected '' found this"),
+			ErrorCode::MismatchedType { expected } => format!("Mismatched type, expected '{expected}' found this"),
 			ErrorCode::TypeIsNotAnInteger => format!("Mismatched type, expected '' found this"),
 			ErrorCode::TypeIsNotAFloat => format!("Mismatched type, expected '' found this"),
 			ErrorCode::TypeIsNotABool => format!("Mismatched type, expected '' found this"),
@@ -46,6 +48,7 @@ impl ErrorCode {
 			ErrorCode::ExtraParams => format!("Found extra parameters"),
 			ErrorCode::MissingParams => format!("Missing argument for parameter"),
 			ErrorCode::MismatchedIfBranchTypes => format!("If branches have mismatched types"),
+			ErrorCode::IsNotAFunc => format!("Value is not a function"),
 		}
 	}
 }

@@ -61,7 +61,10 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
 		// TODO: Set the span to the value's span
 		match self.constrain_two_way(&block_ty, ty) {
 			Ok(()) => {},
-			_ => self.debugger.throw_single(ErrorCode::MismatchedType, span)
+			_ => {
+				let expected = format!("{block_ty:?}");
+				self.debugger.throw_single(ErrorCode::MismatchedType { expected }, span)
+			}
 		}
 
 		let block_scope = ScopeRef::new(Some(scope), blir::scope::ScopeRelation::SameContainer, ScopeType::Code, false, false);
@@ -379,7 +382,10 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
 	fn constrain_value_two_way(&mut self, val: &Value, typ: &Type) {
 		match self.constrain_two_way(&val.typ, typ) {
 			Ok(()) => {}
-			_ => self.debugger.throw_single(ErrorCode::MismatchedType, &val.span),
+			_ => {
+				let expected = format!("{typ:?}");
+				self.debugger.throw_single(ErrorCode::MismatchedType { expected }, &val.span)
+			}
 		}
 	}
 
@@ -450,7 +456,8 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
 	fn constrain_value_one_way(&mut self, value: &Value, absolute: &Type) {
 		match self.constrain_one_way(&value.typ, absolute) {
 			Err(_) => {
-				self.debugger.throw_single(ErrorCode::MismatchedType, &value.span);
+				let expected = format!("{absolute:?}");
+				self.debugger.throw_single(ErrorCode::MismatchedType { expected }, &value.span);
 			}
 			_ => {}
 		}
