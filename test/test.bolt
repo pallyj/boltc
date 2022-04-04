@@ -1,13 +1,23 @@
+import intrinsics
+
 struct Int {
-	var repr: i64
-
-	public func add(n: Int) {
-
-	}
+	internal var repr: i64
 }
 
-func {
-	let i: Int = 5
+func main() {
+	let i: Int = 0xffff_fffe;
 
-	i.add(100)
+	printInt32(i.repr);
+	
+	let b: i1 = true;
+
+	let x: i32 = if b {
+		let a: i64 = 1;
+
+		a
+	} else {
+		let b: i16 = 0;
+
+		b
+	}
 }

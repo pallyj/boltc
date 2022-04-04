@@ -12,7 +12,7 @@ pub enum ScopeRelation {
 
 }
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ScopeType {
 	Code,
 	Container,
@@ -120,12 +120,17 @@ impl ScopeRef {
 				.unwrap_or(false) { return ScopeRelation::SameContainer }
 		}
 
+		let mut self_iter = ScopeIter::new(self);
+
 		// Check if this scope is a child of other_scope
 		while let Some(self_container) = self_iter.next(ScopeType::Container) {
 			if &self_container == other_scope { return ScopeRelation::SameContainer }
 		}
 
 		// Check if both scopes are in the same file
+		let mut self_iter = ScopeIter::new(self);
+		let mut other_iter = ScopeIter::new(other_scope);
+
 		let self_file = self_iter.next(ScopeType::File);
 		let other_file = other_iter.next(ScopeType::File);
 
@@ -133,12 +138,15 @@ impl ScopeRef {
 			.map(|(self_file, other_file)| self_file == other_file)
 			.unwrap_or(false) { return ScopeRelation::SameFile };
 
+
 		// Check if both scopes are in the same library
 		let self_library = self_iter.next(ScopeType::Library);
 		let other_library = other_iter.next(ScopeType::Library);
 
 		if self_library.zip(other_library)
-			.map(|(self_library, other_library)| self_library == other_library)
+			.map(|(self_library, other_library)| {
+				self_library == other_library
+			})
 			.unwrap_or(false) { return ScopeRelation::SameLibrary };
 
 		return ScopeRelation::None
@@ -181,7 +189,7 @@ impl Scope {
 		}
 
 		if let Some(sym) = self.parent()
-			.map(|parent| {
+			.and_then(|parent| {
 				if self.lookup_parent_instance {
 					if let Some(sym) = parent.borrow().lookup_instance_symbol(name) {
 						return sym.filter(self.relation)
@@ -193,7 +201,7 @@ impl Scope {
 				}
 				None
 			}) {
-				return sym
+				return Some(sym)
 			}
 
 
@@ -201,8 +209,9 @@ impl Scope {
 
 		self.imports
 			.iter()
-			.find_map(|scope| scope.lookup_symbol(name)
+			.find_map(|scope| { scope.lookup_symbol(name) 
 				.and_then(|sym| sym.filter(self.relation))
+			}
 			)
 	}
 
@@ -301,6 +310,7 @@ impl ScopeIter {
 
 	pub fn next(&mut self, ty: ScopeType) -> Option<ScopeRef> {
 		while let Some(scope) = self.scope.as_ref() {
+			
 			if scope.typ() == ty {
 				let scope = self.scope.take().unwrap();
 				self.scope = scope.parent();

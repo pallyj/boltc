@@ -1,8 +1,8 @@
-use std::{sync::Arc, cell::{RefCell, Ref, RefMut}, fmt::Debug, ops::Deref};
+use std::{sync::{Arc, Weak}, cell::{RefCell, Ref, RefMut}, fmt::Debug, ops::Deref};
 
 use errors::Span;
 
-use crate::{Visibility, typ::{Type, TypeKind}};
+use crate::{Visibility, typ::{Type, TypeKind}, scope::ScopeRef};
 
 use super::FuncParam;
 
@@ -15,6 +15,7 @@ pub struct ExternFunctionInner {
 	pub params: Vec<FuncParam>,
 	pub return_type: Type,
 	pub span: Span,
+	pub parent: ScopeRef,
 }
 
 impl ExternFunctionInner {
@@ -30,14 +31,15 @@ pub struct ExternFunction {
 }
 
 impl ExternFunction {
-	pub fn new(visibility: Visibility, name: String, params: Vec<FuncParam>, return_type: Type, span: Span) -> ExternFunctionRef {
+	pub fn new(visibility: Visibility, name: String, params: Vec<FuncParam>, return_type: Type, span: Span, parent: &ScopeRef) -> ExternFunctionRef {
 		let func = ExternFunctionInner {
 			visibility,
 			link_name: name.clone(),
 			name,
 			params,
 			return_type,
-			span
+			span,
+			parent: parent.clone()
 		};
 		
 

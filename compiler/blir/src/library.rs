@@ -19,6 +19,8 @@ pub struct Library {
 	pub functions: Vec<FunctionRef>,
 	pub extern_functions: Vec<ExternFunctionRef>,
 	pub structs: Vec<StructRef>,
+
+	files: Vec<ScopeRef>,
 }
 
 impl Library {
@@ -30,7 +32,16 @@ impl Library {
 			functions: Vec::new(),
 			extern_functions: Vec::new(),
 			structs: Vec::new(),
+			files: vec![],
 		}
+	}
+
+	pub fn new_file(&mut self) -> ScopeRef {
+		let scope = ScopeRef::new(Some(&self.scope), ScopeRelation::SameLibrary, ScopeType::File, false, false);
+
+		self.files.push(scope.clone());
+
+		scope
 	}
 
 	pub fn name(&self) -> &String {

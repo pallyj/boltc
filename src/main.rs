@@ -18,7 +18,7 @@ fn main() {
 
     // Add standard library
     project.open_file("std/print.bolt");
-    let lang = [
+    /*let lang = [
         "bool/Bool.bolt",
         "float/Half.bolt", "float/Float.bolt", "float/Double.bolt",
         "int/Int.bolt", "int/UInt.bolt",
@@ -27,7 +27,7 @@ fn main() {
         
     for file in lang {
         project.open_file(&format!("lang/{file}"));
-    }
+    }*/
 
     project.open_file(&args.file);
 
@@ -80,7 +80,7 @@ impl Project {
         if debugger.has_errors() { return false; }
         blir_passes::type_infer::run_pass(self.library.as_mut().unwrap(), &mut debugger);
         if debugger.has_errors() { return false; }
-        blir_passes::type_check::run_pass(self.library.as_mut().unwrap());
+        blir_passes::type_check::run_pass(self.library.as_mut().unwrap(), &mut debugger);
         if debugger.has_errors() { return false; }
 
         let mut lowerer = BlirLowerer::new(self.library.take().unwrap());

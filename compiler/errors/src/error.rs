@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 use crate::Span;
 
 #[derive(error_derive::Error)]
@@ -17,6 +19,12 @@ pub enum ErrorCode {
 	MismatchedType,
 
 	AmbiguousTy,
+
+	ExpectedFound(String, String),
+	MismatchedIfBranchTypes,
+
+	ExtraParams,
+	MissingParams,
 }
 
 impl ErrorCode {
@@ -34,6 +42,10 @@ impl ErrorCode {
 			ErrorCode::TypeIsNotAnInteger => format!("Mismatched type, expected '' found this"),
 			ErrorCode::TypeIsNotAFloat => format!("Mismatched type, expected '' found this"),
 			ErrorCode::TypeIsNotABool => format!("Mismatched type, expected '' found this"),
+			ErrorCode::ExpectedFound(expected, found) => format!("Expected {expected}, found {found}"),
+			ErrorCode::ExtraParams => format!("Found extra parameters"),
+			ErrorCode::MissingParams => format!("Missing argument for parameter"),
+			ErrorCode::MismatchedIfBranchTypes => format!("If branches have mismatched types"),
 		}
 	}
 }

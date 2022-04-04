@@ -23,7 +23,7 @@ impl AstLowerer {
 		Function::new(visibility, name, params, return_type, code, span, parent, parent_mangled)
 	}
 
-	pub fn lower_extern_func(&self, func: FuncDef) -> ExternFunctionRef {
+	pub fn lower_extern_func(&self, func: FuncDef, parent: &ScopeRef) -> ExternFunctionRef {
 		let range = func.range();
 		let span = self.span(range);
 
@@ -37,7 +37,7 @@ impl AstLowerer {
 			.map(|rt| self.lower_type(rt))
 			.unwrap_or(TypeKind::Void.anon());
 		
-		ExternFunction::new(visibility, name, params, return_type, span)
+		ExternFunction::new(visibility, name, params, return_type, span, parent)
 	}
 
 	pub fn lower_method(&self, func: FuncDef, reciever: Type, parent: &ScopeRef, parent_mangled: Mangled) -> MethodRef {

@@ -65,9 +65,11 @@ impl File {
 			.cloned()
 			.unwrap_or_else(|| self.text.len() );
 
-		let next_break = if next_break == 0 { 0 } else { next_break - 1 };
+		//let next_break = if next_break == 0 { 0 } else { next_break - 1 };
 
 		let line = self.line_breaks.range(..n).count();
+
+		//if next_break 
 
 		let text = &self.text[last_break..next_break];
 

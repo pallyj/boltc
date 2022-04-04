@@ -23,7 +23,7 @@ impl AstLowerer {
 				match literal.literal_kind() {
 					LiteralKind::True => ValueKind::BoolLiteral(true).spanned_infer(span),
 					LiteralKind::False => ValueKind::BoolLiteral(false).spanned_infer(span),
-					// TODO: Add parsing
+
 					LiteralKind::DecInteger => ValueKind::IntLiteral(u64::from_str_radix(&text, 10).unwrap()).spanned_infer(span),
 					LiteralKind::HexInteger => ValueKind::IntLiteral(u64::from_str_radix(&text[2..], 16).unwrap()).spanned_infer(span),
 					LiteralKind::OctInteger => ValueKind::IntLiteral(u64::from_str_radix(&text[2..], 8).unwrap()).spanned_infer(span),
