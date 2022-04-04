@@ -58,9 +58,14 @@ fn check_value(value: &Value, _return_type: &Type, debugger: &mut Debugger) {
 	match &value.kind {
 		ValueKind::FuncCall { function, args } => {
 			// Match function args
-			let TypeKind::Function { return_type: _, params, labels: _ } = function.typ.kind() else {
-				println!("Error: Can't call a non-function");
-				return;
+
+			let params = match function.typ.kind() {
+				TypeKind::Function { params, .. } => params,
+				TypeKind::Method { params, .. } => params,
+				_ => {
+					debugger.throw_single(ErrorCode::IsNotAFunc, &function.span);
+					return;
+				}
 			};
 
 			if args.args.len() > params.len() {
