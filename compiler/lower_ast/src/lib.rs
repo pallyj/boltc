@@ -1,6 +1,6 @@
 #![feature(let_else)]
 
-use blir::intrinsics::Intrinsics;
+use blir::{intrinsics::Intrinsics, scope::{ScopeRef, ScopeRelation, ScopeType}};
 use errors::Span;
 use parser::ast::{Parse, Root, file::FileItem};
 use rowan::TextRange;
@@ -30,10 +30,11 @@ impl AstLowerer {
 	}
 
 	pub fn lower_file(self, library: &mut blir::Library) {
-		let parent = library.scope().clone();
 		let intrinsics = Intrinsics::new();
 
 		intrinsics.populate();
+
+		let parent = library.new_file();
 
 		for file_item in self.parse
 			.items()
@@ -56,7 +57,7 @@ impl AstLowerer {
 
 						library.add_function(lowered_function);
 					} else {
-						let lowered_function = self.lower_extern_func(func_def);
+						let lowered_function = self.lower_extern_func(func_def, &parent);
 
 						library.add_extern_function(lowered_function);
 					}

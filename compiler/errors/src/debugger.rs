@@ -44,7 +44,7 @@ impl<'a> Debugger<'a> {
 			println!("    {} {}:{}:{}", "-->".bold().blue(), line_info.filename, line_info.line, line_info.col + 1);
 
 			println!("     {} ", "|".bold().blue());
-			println!("{:>4} {} {}", line_info.line.to_string().bold().blue(), "|".bold().blue(), line_info.text.replace("\t", "    "));
+			println!("{:>4} {} {}", line_info.line.to_string().bold().blue(), "|".bold().blue(), line_info.text.replace("\t", "    ").trim_end());
 
 			let ntabs = (&line_info.text[0..line_info.col]).rmatches("\t").count();
 

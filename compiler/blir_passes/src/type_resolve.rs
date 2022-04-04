@@ -67,11 +67,13 @@ fn walk_constant( var: &ConstantRef, scope: &ScopeRef, debugger: &mut Debugger )
 fn walk_method( method: &MethodRef, scope: &ScopeRef, debugger: &mut Debugger ) {
 	let mut method = method.borrow_mut();
 
-	walk_type(&mut method.return_type, scope, debugger);
+	let scope = method.scope().clone();
+
+	walk_type(&mut method.return_type, &scope, debugger);
 
 	method.params
 		.iter_mut()
-		.for_each(|param| walk_type(&mut param.typ, scope, debugger));
+		.for_each(|param| walk_type(&mut param.typ, &scope, debugger));
 
 	method.add_params();
 }
@@ -87,11 +89,13 @@ fn walk_method_code( method: &MethodRef, debugger: &mut Debugger ) {
 fn walk_function( function: &FunctionRef, scope: &ScopeRef, debugger: &mut Debugger ) {
 	let mut function = function.borrow_mut();
 
-	walk_type(&mut function.return_type, scope, debugger);
+	let scope = function.scope().clone();
+
+	walk_type(&mut function.return_type, &scope, debugger);
 
 	function.params
 		.iter_mut()
-		.for_each(|param| walk_type(&mut param.typ, scope, debugger));
+		.for_each(|param| walk_type(&mut param.typ, &scope, debugger));
 
 	function.add_params();
 }
@@ -99,11 +103,13 @@ fn walk_function( function: &FunctionRef, scope: &ScopeRef, debugger: &mut Debug
 fn walk_extern_function( function: &ExternFunctionRef, scope: &ScopeRef, debugger: &mut Debugger ) {
 	let mut function = function.borrow_mut();
 
-	walk_type(&mut function.return_type, scope, debugger);
+	let scope = function.parent.clone();
+
+	walk_type(&mut function.return_type, &scope, debugger);
 
 	function.params
 		.iter_mut()
-		.for_each(|param| walk_type(&mut param.typ, scope, debugger));
+		.for_each(|param| walk_type(&mut param.typ, &scope, debugger));
 }
 
 fn walk_function_code( function: &FunctionRef, debugger: &mut Debugger ) {
