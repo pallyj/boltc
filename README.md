@@ -2,7 +2,7 @@
 
 <img src="https://github.com/pallyj/boltcc/blob/main/assets/logo.svg?raw=true" width="256" height="256"/>
 
-Bolt is a powerful coding language designed for expressiveness and speed. Bolt combines the ease-of-use of functional programming with the speed of C to make the ultimate language, suitable for any use-case. Bolt is in the early stages of development, and the current version contains
+Bolt is a powerful coding language designed for expressiveness and speed. Bolt combines the ease-of-use of functional programming with the speed of C to make the ultimate language, suitable for any use-case. Bolt takes influence from Swift, Rust, and OCaml. Bolt is in the early stages of development, and the current version contains
 
 - integer and float math
 - immutable variables
@@ -25,7 +25,7 @@ Bolt syntax is designed to concisely show what the program does, without excess 
 
 ## Accessibility
 
-Bolt code is easy to understand for both beginners and those coming over from another language.
+Bolt code is easy to understand for both beginners and those coming over from another language. The compiler has built-in package management, and can compile C code.
 
 ## Speed
 

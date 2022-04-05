@@ -49,9 +49,9 @@ impl EvalSmt {
 
 	pub fn is_escaped(&self) -> bool {
 		self.0
-			.last_token()
-			.map(|tok| tok.kind() == SyntaxKind::Semicolon)
-			.unwrap_or(false)
+			.children_with_tokens()
+			.find(|tok| tok.kind() == SyntaxKind::Semicolon)
+			.is_some()
 	}
 }
 

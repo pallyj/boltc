@@ -116,7 +116,7 @@ impl<'input, 'l> Parser<'input, 'l> {
 				self.parse_expr();
 
 				if !self.eat(SyntaxKind::CloseParen) {
-					// Recover from errors
+					// Error:
 					self.bump();
 				}
 				marker.complete(self, SyntaxKind::ParenthesizedExpr)

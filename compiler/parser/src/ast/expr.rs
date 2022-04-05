@@ -32,6 +32,7 @@ ast!(struct ParenthesizedExpr(ParenthesizedExpr));
 ast!(struct IfExpr(IfExpr));
 ast!(struct MemberExpr(MemberExpr));
 ast!(struct FuncCallExpr(FuncCallExpr));
+ast!(struct UnitExpr(UnitExpr));
 
 ast!(enum Expr {
 	NamedExpr,
@@ -39,7 +40,8 @@ ast!(enum Expr {
 	ParenthesizedExpr,
 	IfExpr,
 	MemberExpr,
-	FuncCallExpr
+	FuncCallExpr,
+	UnitExpr
 });
 
 impl Debug for Expr {
@@ -51,6 +53,7 @@ impl Debug for Expr {
             Self::IfExpr(arg0) => write!(f, "{arg0:?}"),
             Self::MemberExpr(arg0) => write!(f, "{arg0:?}"),
             Self::FuncCallExpr(arg0) => write!(f, "{arg0:?}"),
+			Self::UnitExpr(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "Error"),
         }
     }
@@ -236,5 +239,11 @@ impl Debug for IfExpr {
 				self.condition(),
 				self.positive())
 		}
+    }
+}
+
+impl Debug for UnitExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "()")
     }
 }

@@ -49,6 +49,8 @@ impl BlirLowerer {
 
 			ValueKind::StaticFunc(func) => self.lower_static_func(func),
 
+			ValueKind::Unit => LabelValue::void(),
+
 			_ => panic!("{value:?}"),
 		}
 	}
@@ -204,15 +206,21 @@ impl BlirLowerer {
 			self.lower_if_value_inner(value, None);
 			LabelValue::void()
 		} else {
-			let ty = self.lower_type(ty);
+			let assign_val_ptr = match ty.kind() {
+				TypeKind::Void | TypeKind::Divergent => None,
+				_ => {
+					let ty = self.lower_type(ty);
+					Some(self.builder().build_stack_alloc_undef(ty))
+				}
+			}; 
 
-			let assign_val_ptr = self.builder().build_stack_alloc_undef(ty);
+			self.lower_if_value_inner(value, assign_val_ptr.clone());
 
-			self.lower_if_value_inner(value, Some(assign_val_ptr.clone()));
-
-			let assign_val = self.builder().build_deref(assign_val_ptr);
-
-			assign_val
+			if let Some(assign_val_ptr) = assign_val_ptr {
+				self.builder().build_deref(assign_val_ptr)
+			} else {
+				LabelValue::void()
+			}
 		}
 	}
 
