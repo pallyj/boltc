@@ -1,0 +1,38 @@
+import intrinsics
+
+func diverging() {
+	if true {
+		return 101
+	} else {
+		return 100
+	};
+}
+
+func divergingReturns(): Int {
+	if true {
+		return 101
+	} else {
+		return 100
+	}
+}
+
+func returnBool(): Bool {
+	102
+}
+
+func typeInference(): Int64 {
+	let a = 103
+	let b = 104
+	let c = 105
+	let d = 106
+
+	let e = d.add(c);
+
+	let f = example(a.add(10), b.repr, c, d);
+
+	f.add(e);
+}
+
+func example(a: Int8, b: i16, c: Int64, d: Int64): Int64 {
+	0
+}

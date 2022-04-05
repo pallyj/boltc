@@ -1,0 +1,43 @@
+func returnStatement() {
+	return printInt64(100);
+}
+
+func impliedReturn() {
+	printInt64(101)
+
+	return ()
+}
+
+func ifReturn() {
+	let a: Int = 102;
+	let b: Int = 100;
+
+	return if a.gt(b).repr {
+		a.print()
+	} else {
+		b.print()
+	}
+}
+
+func terminated() {
+	let a: Int = 103
+
+	a.print();
+
+	a.add(1);
+}
+
+/*
+Expected:
+
+100
+101
+102
+103
+*/
+func main() {
+	returnStatement();
+	impliedReturn();
+	ifReturn();
+	terminated();
+}

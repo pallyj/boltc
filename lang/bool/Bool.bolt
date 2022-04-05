@@ -2,7 +2,7 @@ import intrinsics
 
 //@defaultBooleanRepr
 public struct Bool /*: BooleanLiteralRepr */ {
-	private var repr: i1
+	internal var repr: i1
 
 	public func and(b: Self): Self {
 		Self( integer1And(self.repr, b.repr) )

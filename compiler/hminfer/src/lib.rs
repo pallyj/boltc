@@ -62,7 +62,7 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
 		match self.constrain_two_way(&block_ty, ty) {
 			Ok(()) => {},
 			_ => {
-				let expected = format!("{block_ty:?}");
+				let expected = format!("{ty:?}");
 				self.debugger.throw_single(ErrorCode::MismatchedType { expected }, span)
 			}
 		}
@@ -88,12 +88,14 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
 			}
 
 			StatementKind::Return { value } => {
-				let Some(return_value) = &value else {
+				let Some(return_value) = value.as_mut() else {
 					return
 				};
 
 				let function_return_type = scope.scope_type("return")
 					.expect("Compiler Error: Function return type is not defined");
+
+				self.infer_value(return_value, scope);
 
 				self.constrain_value_one_way(&return_value, &function_return_type);
 			}
