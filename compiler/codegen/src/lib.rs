@@ -82,6 +82,8 @@ pub fn build_pass_manager<'a>(is_release: bool) -> PassManager<Module<'a>> {
 
     pass_manager.add_function_inlining_pass();
     pass_manager.add_tail_call_elimination_pass();
+    pass_manager.add_loop_rotate_pass();
+    pass_manager.add_loop_unroll_pass();
 
     pass_manager
 }

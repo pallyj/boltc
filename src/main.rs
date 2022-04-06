@@ -44,9 +44,9 @@ fn main() {
             .output()
             .unwrap();
         
-        Command::new(&format!("bin/{}", args.lib))
+        /*Command::new(&format!("bin/{}", args.lib))
             .spawn()
-            .unwrap();
+            .unwrap();*/
     }
 }
 
