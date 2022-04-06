@@ -1,6 +1,6 @@
 import intrinsics
 
-//@transparent
+@transparent
 public struct UInt16 /*: IntegerLiteralRepresentable */ {
 	public static let min: Self = 0x0
 	public static let max: Self = 0xffff_ffff_ffff_ffff

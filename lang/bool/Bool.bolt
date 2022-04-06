@@ -1,5 +1,6 @@
 import intrinsics
 
+@transparent
 @defaultBooleanRepr
 public struct Bool /*: BooleanLiteralRepr */ {
 	internal var repr: i1
