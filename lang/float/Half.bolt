@@ -1,5 +1,6 @@
 import intrinsics
 
+@transparent
 public struct Half /*: HalfLiteralRepr*/ {
 	public var repr: f16
 

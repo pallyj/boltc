@@ -1,6 +1,6 @@
 import intrinsics
 
-
+@transparent
 public struct Double /*: FloatLiteralRepr*/ {
 	public var repr: f64
 

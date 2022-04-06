@@ -17,8 +17,8 @@ fn main() {
     let mut project = Project::new(&args.lib);
 
     // Add standard library
-    project.open_file("std/print.bolt");
     let lang = [
+        "std/print.bolt",
         "bool/Bool.bolt",
         "float/Half.bolt", "float/Float.bolt", "float/Double.bolt",
         "int/Int.bolt", "int/UInt.bolt",
@@ -44,9 +44,9 @@ fn main() {
             .output()
             .unwrap();
         
-        /*Command::new(&format!("bin/{}", args.lib))
+        Command::new(&format!("bin/{}", args.lib))
             .spawn()
-            .unwrap();*/
+            .unwrap();
     }
 }
 
