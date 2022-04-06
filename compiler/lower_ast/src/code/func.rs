@@ -19,8 +19,10 @@ impl AstLowerer {
 			.map(|rt| self.lower_type(rt))
 			.unwrap_or(TypeKind::Void.anon());
 		let code = self.lower_code_block(func.code().unwrap());
+
+		let attributes = self.lower_attributes(func.attributes());
 		
-		Function::new(visibility, name, params, return_type, code, span, parent, parent_mangled)
+		Function::new(attributes, visibility, name, params, return_type, code, span, parent, parent_mangled)
 	}
 
 	pub fn lower_extern_func(&self, func: FuncDef, parent: &ScopeRef) -> ExternFunctionRef {
@@ -36,8 +38,10 @@ impl AstLowerer {
 		let return_type = func.return_type()
 			.map(|rt| self.lower_type(rt))
 			.unwrap_or(TypeKind::Void.anon());
+
+		let attributes = self.lower_attributes(func.attributes());
 		
-		ExternFunction::new(visibility, name, params, return_type, span, parent)
+		ExternFunction::new(attributes, visibility, name, params, return_type, span, parent)
 	}
 
 	pub fn lower_method(&self, func: FuncDef, reciever: Type, parent: &ScopeRef, parent_mangled: Mangled) -> MethodRef {
@@ -55,8 +59,10 @@ impl AstLowerer {
 			.map(|rt| self.lower_type(rt))
 			.unwrap_or(TypeKind::Void.anon());
 		let code = self.lower_code_block(func.code().unwrap());
+
+		let attributes = self.lower_attributes(func.attributes());
 		
-		Method::new(reciever, is_static, visibility, name, params, return_type, code, span, parent, parent_mangled)
+		Method::new(attributes, reciever, is_static, visibility, name, params, return_type, code, span, parent, parent_mangled)
 	}
 
 	pub fn lower_visibility(&self, visibility: Option<SyntaxKind>) -> Visibility {

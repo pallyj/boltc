@@ -1,6 +1,6 @@
 use crate::AstLowerer;
 use parser::ast::expr::{Expr as AstExpr, LiteralKind, IfExpr, IfExprNegative};
-use blir::{value::{Value, ValueKind, FunctionArgs, IfValue, IfBranch}, typ::{Type, TypeKind}};
+use blir::{value::{Value, ValueKind, FunctionArgs, IfValue, IfBranch}, typ::{TypeKind}};
 
 impl AstLowerer {
 	pub (crate) fn lower_expr(&self, expr: AstExpr) -> Value {

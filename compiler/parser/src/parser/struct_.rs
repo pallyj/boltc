@@ -19,7 +19,16 @@ impl<'input, 'l> Parser<'input, 'l> {
 	}
 
 	pub fn parse_struct_item(&mut self) {
+		if self.eat(SyntaxKind::Semicolon) {
+			let marker = self.start();
+			self.eat(SyntaxKind::Semicolon);
+			marker.complete(self, SyntaxKind::NoOp);
+			return;
+		}
+
 		let marker = self.start();
+
+		self.parse_attributes();
 
 		self.parse_visibility();
 		self.eat(SyntaxKind::StaticKw);

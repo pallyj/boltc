@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 use crate::Span;
 
 #[derive(error_derive::Error)]
@@ -53,6 +51,7 @@ impl ErrorCode {
 	}
 }
 
+#[allow(dead_code)]
 pub struct Error {
 	code: ErrorCode,
 	spans: Vec<Span>,

@@ -10,12 +10,18 @@ use std::fmt::Debug;
 
 use crate::lexer::SyntaxKind;
 
-use super::{typ::Type, expr::Expr};
+use super::{typ::Type, expr::Expr, attribute::Attributes};
 
 ast!(struct VariableDef(VarDef));
 ast!(struct LetDef(LetDef));
 
 impl LetDef {
+	pub fn attributes(&self) -> Attributes {
+		self.0.children()
+			.find_map(|node| Attributes::cast(node))
+			.unwrap()
+	}
+
 	pub fn is_static(&self) -> bool {
 		self.0
 			.children_with_tokens()
@@ -70,6 +76,12 @@ impl Debug for LetDef {
 
 
 impl VariableDef {
+	pub fn attributes(&self) -> Attributes {
+		self.0.children()
+			.find_map(|node| Attributes::cast(node))
+			.unwrap()
+	}
+	
 	pub fn visibility(&self) -> Option<SyntaxKind> {
 		self.0
 			.children()

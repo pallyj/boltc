@@ -11,7 +11,7 @@ pub use table::TypeTable;
 
 use std::{collections::HashMap};
 
-use blir::{code::{CodeBlock, Statement, StatementKind}, typ::{Type, TypeKind}, value::{Value, ValueKind, IfValue, IfBranch}, scope::{ScopeRef, ScopeType}, Symbol};
+use blir::{code::{CodeBlock, Statement, StatementKind}, typ::{Type, TypeKind}, value::{Value, ValueKind, IfValue, IfBranch}, scope::{ScopeRef, ScopeType}, Symbol, BlirContext};
 use rusttyc::{VarlessTypeChecker, TcKey, TcErr};
 use variant::TypeVariant;
 
@@ -32,7 +32,7 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
 		}
 	}
 
-	pub fn finalize(self) -> TypeTable {
+	pub fn finalize(self, context: &BlirContext) -> TypeTable {
 		let mut type_table = TypeTable::new();
 
 		let Ok(p_type_table) = self.checker.type_check_preliminary() else {
@@ -41,7 +41,7 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
 
 		for (key, tc_key) in self.infer_keys {
 			if let Some(lookup) = p_type_table.get(&tc_key) {
-				type_table.insert_variant(key, lookup.variant.clone());
+				type_table.insert_variant(key, lookup.variant.clone(), context);
 			}
 		}
 

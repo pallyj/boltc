@@ -1,10 +1,12 @@
 use std::{cell::{Ref, RefCell, RefMut}, sync::Arc, ops::Deref, fmt::Debug};
 
-use crate::{Visibility, value::Value};
+use crate::{Visibility, value::Value, attributes::Attributes};
 
 use super::Type;
 
 pub struct ConstantInner {
+	pub attributes: Attributes,
+
 	pub visibility: Visibility,
 
 	pub name: String,
@@ -19,8 +21,9 @@ pub struct Constant {
 }
 
 impl Constant {
-	pub fn new(visibility: Visibility, name: String, typ: Type, value: Value) -> ConstantRef {
+	pub fn new(attributes: Attributes, visibility: Visibility, name: String, typ: Type, value: Value) -> ConstantRef {
 		let constant_inner = ConstantInner {
+			attributes,
 			visibility,
 			name,
 			typ,

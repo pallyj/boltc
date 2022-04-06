@@ -15,6 +15,11 @@ The Bolt Language focuses on
 - Accessibility
 - Safety
 
+# Benchmarks
+
+| Name      | Bolt 0.3.2 | C      | Rust   |
+|-----------|------------|--------|--------|
+| factorial | 7.7M/sec   | 9.2M/s |	8.396s | 
 
 ## Safety
 

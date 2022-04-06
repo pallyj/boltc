@@ -91,19 +91,19 @@ public struct UInt16 /*: IntegerLiteralRepresentable */ {
 	}
 
 	public static func truncUInt64(i: UInt64): Self {
-		Self ( integer64Trunc16(i) )
+		Self ( integer64Trunc16(i.repr) )
 	}
 
 	public static func truncInt64(i: Int64): Self {
-		Self ( integer64Trunc16(i) )
+		Self ( integer64Trunc16(i.repr) )
 	}
 
 	public static func truncUInt32(i: UInt32): Self {
-		Self ( integer64Trunc16(i) )
+		Self ( integer32Trunc16(i.repr) )
 	}
 
 	public static func truncInt32(i: Int32): Self {
-		Self ( integer32Trunc16(i) )
+		Self ( integer32Trunc16(i.repr) )
 	}
 
 	public func print() {

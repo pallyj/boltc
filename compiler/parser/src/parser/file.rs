@@ -10,6 +10,7 @@ pub const ITEM_RECOVERY_SET: &[SyntaxKind] = &[
 	SyntaxKind::StructKw,
 	SyntaxKind::LetKw,
 	SyntaxKind::VarKw,
+	SyntaxKind::At
 ];
 
 pub const INNER_ITEM_RECOVERY_SET: &[SyntaxKind] = &[
@@ -21,7 +22,8 @@ pub const INNER_ITEM_RECOVERY_SET: &[SyntaxKind] = &[
 	SyntaxKind::LetKw,
 	SyntaxKind::VarKw,
 	SyntaxKind::OpenBrace,
-	SyntaxKind::CloseBrace
+	SyntaxKind::CloseBrace,
+	SyntaxKind::At,
 ];
 
 impl<'input, 'l> Parser<'input, 'l> {
@@ -36,7 +38,16 @@ impl<'input, 'l> Parser<'input, 'l> {
 		marker.complete(self, SyntaxKind::Import);
 	}
 	pub fn parse_file_item(&mut self) {
+		if self.eat(SyntaxKind::Semicolon) {
+			let marker = self.start();
+			self.eat(SyntaxKind::Semicolon);
+			marker.complete(self, SyntaxKind::NoOp);
+			return;
+		}
+
 		let marker = self.start();
+
+		self.parse_attributes();
 
 		self.parse_visibility();
 

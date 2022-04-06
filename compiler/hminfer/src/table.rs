@@ -1,6 +1,6 @@
 use std::{collections::HashMap, fmt::Debug};
 
-use blir::typ::{TypeKind, Type};
+use blir::{typ::{TypeKind, Type}, BlirContext};
 
 use crate::variant::TypeVariant;
 
@@ -15,13 +15,35 @@ impl TypeTable {
 		}
 	}
 
-	pub fn insert_variant(&mut self, key: u64, variant: TypeVariant) {
+	pub fn insert_variant(&mut self, key: u64, variant: TypeVariant, context: &BlirContext) {
 		
 		let ty = match variant {
 			TypeVariant::Diverges => TypeKind::Divergent,
 			TypeVariant::Void => {
 				TypeKind::Void
 			},
+
+			TypeVariant::SomeBoolean => {
+				if let Some(default_bool_repr) = &context.default_bool_repr {
+					TypeKind::Struct(default_bool_repr.clone())
+				} else {
+					return;
+				}
+			}
+			TypeVariant::SomeInteger => {
+				if let Some(default_int_repr) = &context.default_integer_repr {
+					TypeKind::Struct(default_int_repr.clone())
+				} else {
+					return;
+				}
+			}
+			TypeVariant::SomeFloat => {
+				if let Some(default_float_repr) = &context.default_float_repr {
+					TypeKind::Struct(default_float_repr.clone())
+				} else {
+					return;
+				}
+			}
 
 			TypeVariant::IntrinsicInteger { bits } => TypeKind::Integer { bits },
 			TypeVariant::IntrinsicFloat { bits } => TypeKind::Float { bits },

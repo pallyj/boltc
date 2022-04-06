@@ -1,6 +1,6 @@
 import intrinsics
 
-// @defaultFloatLiteral
+@defaultFloatLiteral
 public struct Float /*: FloatLiteralRepr*/ {
 	public var repr: f32
 

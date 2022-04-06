@@ -1,28 +1,26 @@
-use std::{sync::{Arc, Weak}, cell::{RefCell, Ref, RefMut}, fmt::Debug, ops::Deref};
+use std::{sync::{Arc}, cell::{RefCell, Ref, RefMut}, fmt::Debug, ops::Deref};
 
 use errors::Span;
 
-use crate::{Visibility, typ::{Type, TypeKind}, scope::ScopeRef};
+use crate::{Visibility, typ::{Type, TypeKind}, scope::ScopeRef, attributes::Attributes};
 
-use super::FuncParam;
+use super::{FuncParam, FunctionInfo};
 
 
 #[derive(Clone)]
 pub struct ExternFunctionInner {
+	pub attributes: Attributes,
 	pub visibility: Visibility,
-	pub name: String,
-	pub link_name: String,
-	pub params: Vec<FuncParam>,
-	pub return_type: Type,
+	pub info: FunctionInfo,
 	pub span: Span,
 	pub parent: ScopeRef,
 }
 
 impl ExternFunctionInner {
 	pub fn typ(&self) -> Type {
-		let params = self.params.iter().map(|param| param.typ.clone()).collect::<Vec<_>>();
+		let params = self.info.params().iter().map(|param| param.typ.clone()).collect::<Vec<_>>();
 
-		TypeKind::Function { return_type: Box::new(self.return_type.clone()), params, labels: vec![] }.anon()
+		TypeKind::Function { return_type: Box::new(self.info.return_type().clone()), params, labels: vec![] }.anon()
 	}
 }
 
@@ -31,13 +29,11 @@ pub struct ExternFunction {
 }
 
 impl ExternFunction {
-	pub fn new(visibility: Visibility, name: String, params: Vec<FuncParam>, return_type: Type, span: Span, parent: &ScopeRef) -> ExternFunctionRef {
+	pub fn new(attributes: Attributes, visibility: Visibility, name: String, params: Vec<FuncParam>, return_type: Type, span: Span, parent: &ScopeRef) -> ExternFunctionRef {
 		let func = ExternFunctionInner {
+			attributes,
 			visibility,
-			link_name: name.clone(),
-			name,
-			params,
-			return_type,
+			info: FunctionInfo::new(name, params, return_type, false),
 			span,
 			parent: parent.clone()
 		};
@@ -82,11 +78,11 @@ impl Debug for ExternFunctionRef {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		let func = self.borrow();
 
-		let params = func.params.iter()
+		let params = func.info.params().iter()
 			.map(|param| format!("{param:?}"))
 			.collect::<Vec<_>>()
 			.join(", ");
 
-        write!(f, "{} func {}({}): {:?}", func.visibility, func.name, params, func.return_type)
+        write!(f, "{} func {}({}): {:?}", func.visibility, func.info.name(), params, func.info.return_type())
     }
 }

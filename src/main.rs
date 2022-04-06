@@ -3,7 +3,7 @@ mod args;
 use std::{process::Command};
 
 use args::Args;
-use blir::Library;
+use blir::{Library, BlirContext};
 use clap::StructOpt;
 use codegen::config::{BuildConfig, BuildProfile, BuildOutput};
 use errors::{debugger::Debugger, fileinterner::FileInterner};
@@ -31,11 +31,16 @@ fn main() {
 
     project.open_file(&args.file);
 
-    if project.compile() {
+    let compiled = project.compile();
 
+    if !compiled.0 {
+        return;
+    }
+
+    if let Some(entry_point) = compiled.1 {
         // Link with the c standard library
         Command::new("clang")
-            .args([ "bin/print.o", &format!("bin/lib{}.o", args.lib), "-e", &format!("_2L{}F4{}main", args.lib.len(), args.lib), "-o", &format!("bin/{}", args.lib) ])
+            .args([ "bin/print.o", &format!("bin/lib{}.o", args.lib), "-e", &format!("_{}", entry_point), "-o", &format!("bin/{}", args.lib) ])
             .output()
             .unwrap();
         
@@ -62,7 +67,7 @@ impl Project {
         self.interner.open_file(file);        
     }
 
-    pub fn compile(&mut self) -> bool {
+    pub fn compile(&mut self) -> (bool, Option<String>) {
         let mut debugger = Debugger::new(&self.interner);
 
 
@@ -74,25 +79,29 @@ impl Project {
             AstLowerer::new(parse).lower_file(self.library.as_mut().unwrap());
         }
 
-        if debugger.has_errors() { return false; }
+        if debugger.has_errors() { return (false, None); }
 
-        blir_passes::type_resolve::run_pass(self.library.as_mut().unwrap(), &mut debugger);
-        if debugger.has_errors() { return false; }
-        blir_passes::type_infer::run_pass(self.library.as_mut().unwrap(), &mut debugger);
-        if debugger.has_errors() { return false; }
+        let mut context = BlirContext::new();
+
+        let attribute_factory = blir::attributes::default_attributes();
+
+        blir_passes::type_resolve::run_pass(self.library.as_mut().unwrap(), &attribute_factory, &mut context, &mut debugger);
+        if debugger.has_errors() { return (false, None); }
+        blir_passes::type_infer::run_pass(self.library.as_mut().unwrap(), &context, &mut debugger);
+        if debugger.has_errors() { return (false, None);}
         blir_passes::type_check::run_pass(self.library.as_mut().unwrap(), &mut debugger);
-        if debugger.has_errors() { return false; }
+        if debugger.has_errors() { return (false, None); }
 
         let mut lowerer = BlirLowerer::new(self.library.take().unwrap());
         lowerer.lower();
     
         let library = lowerer.finish();
 
-        let config = BuildConfig::new(BuildProfile::Debug, BuildOutput::Object, None);
+        let config = BuildConfig::new(BuildProfile::Release, BuildOutput::Object, None);
         
         codegen::compile(library, config);
 
-        return !debugger.has_errors()
+        return (!debugger.has_errors(), context.entry_point)
     }
 }
 

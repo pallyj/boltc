@@ -21,7 +21,9 @@ impl AstLowerer {
 		};
 		let value = self.lower_expr(expr);
 
-		Constant::new(visibility, name, typ, value)
+		let attributes = self.lower_attributes(var.attributes());
+
+		Constant::new(attributes, visibility, name, typ, value)
 	}
 
 	pub fn lower_struct_let(&self, var: LetDef) -> VarRef {
@@ -33,7 +35,9 @@ impl AstLowerer {
 		let default_value = var.value()
 			.map(|value| self.lower_expr(value));
 
-		Var::new(visibility, name, typ, default_value, true)
+		let attributes = self.lower_attributes(var.attributes());
+
+		Var::new(attributes, visibility, name, typ, default_value, true)
 	}
 
 	pub fn lower_struct_var(&self, var: VariableDef) -> VarRef {
@@ -45,14 +49,18 @@ impl AstLowerer {
 		let default_value = var.value()
 			.map(|value| self.lower_expr(value));
 
-		Var::new(visibility, name, typ, default_value, false)
+		let attributes = self.lower_attributes(var.attributes());
+
+		Var::new(attributes, visibility, name, typ, default_value, false)
 	}
 
 	pub fn lower_struct(&self, def: StructDef, parent: &ScopeRef, parent_mangle: Mangled) -> StructRef {
 		let visibility = self.lower_visibility(def.visibility());
 		let name = def.name();
 
-		let r#struct = Struct::new(visibility, name, parent, parent_mangle);
+		let attributes = self.lower_attributes(def.attributes());
+
+		let r#struct = Struct::new(attributes, visibility, name, parent, parent_mangle);
 		let scope = r#struct.borrow().scope().clone();
 
 		let self_ty = TypeKind::Struct(r#struct.clone()).anon();
@@ -89,6 +97,8 @@ impl AstLowerer {
 
 					r#struct.add_var(var);
 				}
+
+				StructItem::NoOp(_) => {}
 
 				StructItem::Error => panic!(),
 			}

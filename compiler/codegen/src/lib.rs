@@ -2,7 +2,7 @@ use std::path::Path;
 
 use blirssa::Library;
 use config::{BuildConfig, BuildOutput, BuildProfile};
-use inkwell::{context::Context, targets::{Target, InitializationConfig, TargetTriple, RelocMode, CodeModel, FileType, TargetMachine}, OptimizationLevel};
+use inkwell::{context::Context, targets::{Target, InitializationConfig, TargetTriple, RelocMode, CodeModel, FileType, TargetMachine}, OptimizationLevel, passes::{PassManagerBuilder, PassManager}, module::Module};
 use lower_blirssa::lower_blirssa_library;
 
 pub mod config;
@@ -13,6 +13,10 @@ pub fn compile(library: Library, config: BuildConfig) {
     let output_file = format!("bin/lib{}", library.name());
 
     let module = lower_blirssa_library(library, &context).unwrap();
+
+    let pass_manager = build_pass_manager(config.profile == BuildProfile::Release);
+
+    pass_manager.run_on(&module);
 
     if config.output == BuildOutput::LLVM {
         let _ = module
@@ -56,4 +60,28 @@ pub fn compile(library: Library, config: BuildConfig) {
     };
 
     let _ = target_machine.write_to_file(&module, file_type, Path::new(&file_name));
+}
+
+pub fn build_pass_manager<'a>(is_release: bool) -> PassManager<Module<'a>> {
+    let builder = PassManagerBuilder::create();
+
+    let optimization_level = if is_release {
+        OptimizationLevel::Aggressive
+    } else {
+        OptimizationLevel::Less
+    };
+
+    builder.set_optimization_level(optimization_level);
+
+    let pass_manager: PassManager<Module> = PassManager::create(());
+
+    pass_manager.add_constant_propagation_pass();
+    pass_manager.add_constant_merge_pass();
+
+    builder.populate_module_pass_manager(&pass_manager);
+
+    pass_manager.add_function_inlining_pass();
+    pass_manager.add_tail_call_elimination_pass();
+
+    pass_manager
 }

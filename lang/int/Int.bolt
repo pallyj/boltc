@@ -1,7 +1,7 @@
 import intrinsics
 
-//@transparent
-//@defaultIntegerLiteral
+@transparent
+@defaultIntegerRepr
 public struct Int /*: IntegerLiteralRepr */ {
 	public static let min: Int = 0xffff_ffff_ffff_ffff
 	public static let max: Int = 0x7fff_ffff_ffff_ffff
@@ -97,15 +97,15 @@ public struct Int /*: IntegerLiteralRepr */ {
 	}
 
 	public static func extendInt8(i: Int8): Self {
-		Int ( integer8ExtSig64(i) )
+		Int ( integer8ExtSig64(i.repr) )
 	}
 
 	public static func extendInt16(i: Int16): Self {
-		Int ( integer16ExtSig64(i) )
+		Int ( integer16ExtSig64(i.repr) )
 	}
 
 	public static func extendInt32(i: Int32): Self {
-		Int ( integer32ExtSig64(i) )
+		Int ( integer32ExtSig64(i.repr) )
 	}
 
 	public static func fromInt64(i: Int64): Self {
@@ -113,15 +113,15 @@ public struct Int /*: IntegerLiteralRepr */ {
 	}
 
 	public static func extendUInt8(i: UInt8): Self {
-		Int ( integer8ExtZero64(i) )
+		Int ( integer8ExtZero64(i.repr) )
 	}
 
 	public static func extendUInt16(i: UInt16): Self {
-		Int ( integer16ExtZero64(i) )
+		Int ( integer16ExtZero64(i.repr) )
 	}
 
 	public static func extendUInt32(i: UInt32): Self {
-		Int ( integer32ExtZero64(i) )
+		Int ( integer32ExtZero64(i.repr) )
 	}
 
 	// Convert from integers

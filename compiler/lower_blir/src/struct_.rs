@@ -8,7 +8,7 @@ impl BlirLowerer {
 		let ssa_lib = self.ssa_library_mut();
 
 		let is_packed = false;
-		let is_transparent = r#struct.borrow().instance_vars.len() == 1;
+		let is_transparent = r#struct.borrow().is_transparent;
 
 		let link_name = r#struct.borrow().mangled().mangle();
 
@@ -55,15 +55,12 @@ impl BlirLowerer {
 	fn lower_method_signature(&mut self, method: &MethodRef) {
 		let function_type = self.lower_type(&method.take_typ());
 
-		let link_name = method.borrow().mangled().mangle();
-		method.borrow_mut().link_name = link_name;
-
-		self.ssa_library_mut().add_function(&method.borrow().link_name, function_type);
+		self.ssa_library_mut().add_function(&method.borrow().info.link_name(), function_type);
 	}
 
 	pub (super) fn lower_method(&mut self, func: &MethodRef) {
 		let method = self.ssa_library()
-			.get_function(&func.borrow().link_name)
+			.get_function(&func.borrow().info.link_name())
 			.cloned()
 			.unwrap();
 
@@ -72,7 +69,7 @@ impl BlirLowerer {
 			self.context.define_var("self", method.arg(0));
 		}
 		let offset = if func.is_static() { 0 } else { 1 };
-		for (i, p) in func.borrow().params.iter().enumerate() {
+		for (i, p) in func.borrow().info.params().iter().enumerate() {
 			let arg_value = method.arg(i + offset);
 			self.context.define_var(&p.bind_name, arg_value);
 		}
