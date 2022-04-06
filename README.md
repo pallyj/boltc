@@ -15,12 +15,6 @@ The Bolt Language focuses on
 - Accessibility
 - Safety
 
-# Benchmarks
-
-| Name      | Bolt 0.3.2 | C      | Rust   |
-|-----------|------------|--------|--------|
-| factorial | 7.7M/sec   | 9.2M/s |	8.396s | 
-
 ## Safety
 
 Bolt is designed with safety in mind. All types are determined at compile time, and implicit conversion is frowned upon. Bolt has no concept of null pointers, the single most dangerous aspect of programming. Bolt uses automatic reference counting to manage memory safely, preventing leaks and dangling pointers.
@@ -35,6 +29,15 @@ Bolt code is easy to understand for both beginners and those coming over from an
 ## Speed
 
 The Bolt language is compiled ahead of time, using a LLVM backend to output optimized code for any backend. The lack of an inefficient garbage collector prevents lengthy pauses and cuts down on memory usage.
+
+## Benchmarks
+
+| Name      | Bolt 0.3.2 | C      | Rust   | Javascript |
+|-----------|------------|--------|--------|------------|
+| factorial | 0.140s     | 0.130s | 0.460s | 3.09s		|
+| speedup   | 1x		 | 0.93x  | 3.3x   | 22x		|
+
+Even in its early stages, Bolt is blazing fast. Bolt runs the factorials example 22 times faster than nodejs (!), 3.3 faster than rust, and only 7% slower than C.  
 
 ## Using
 
@@ -61,13 +64,14 @@ cargo run -- test/main.bolt --lib=test
 - Globals
 - Initializers
 
-### Bolt 0.3.2
+### Bolt 0.3.2 [Current Version]
 
 - Attributes
 - Use static methods as values
 - Handle voids and ifs in returns
+- Quality of life improvements
 
-### Bolt 0.3.1 [Current Version]
+### Bolt 0.3.1
 
 - Error Catching
 - Visibilities

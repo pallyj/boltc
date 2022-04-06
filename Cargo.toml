@@ -37,5 +37,9 @@ members = [
 	"compiler/codegen"
 ]
 
+exclude = [
+	"examples/factorial/rust"
+]
+
 [profile.release]
 debug = true
