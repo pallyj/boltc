@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use crate::lexer::SyntaxKind;
 
-use super::{func::FuncDef, var::{VariableDef, LetDef}};
+use super::{func::FuncDef, var::{VariableDef, LetDef}, attribute::Attributes, file::NoOp};
 
 /*
 
@@ -25,7 +25,8 @@ ast!(enum StructItem {
 	StructDef,
 	FuncDef,
 	VariableDef,
-	LetDef
+	LetDef,
+	NoOp
 });
 
 impl Debug for StructItem {
@@ -35,12 +36,19 @@ impl Debug for StructItem {
             Self::FuncDef(arg0) => write!(f, "{arg0:?}"),
 			Self::VariableDef(arg0) => write!(f, "{arg0:?}"),
 			Self::LetDef(arg0) => write!(f, "{arg0:?}"),
+			Self::NoOp(_) => write!(f, ";"),
             Self::Error => write!(f, "Error"),
         }
     }
 }
 
 impl StructDef {
+	pub fn attributes(&self) -> Attributes {
+		self.0.children()
+			.find_map(|node| Attributes::cast(node))
+			.unwrap()
+	}
+
 	pub fn visibility(&self) -> Option<SyntaxKind> {
 		self.0
 			.children()

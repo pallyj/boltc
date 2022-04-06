@@ -51,3 +51,5 @@ void printFloat(float n) {
 void printBool(unsigned char b) {
 	printf(b ? "true" : "false");
 }
+
+void doNothing(long n) {}

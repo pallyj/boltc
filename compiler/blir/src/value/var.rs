@@ -1,10 +1,12 @@
 use std::{cell::{Ref, RefCell, RefMut}, sync::Arc, ops::Deref, fmt::Debug};
 
-use crate::{Visibility, value::Value};
+use crate::{Visibility, value::Value, attributes::Attributes};
 
 use super::Type;
 
 pub struct VarInner {
+	pub attributes: Attributes,
+
 	pub visibility: Visibility,
 
 	pub name: String,
@@ -21,8 +23,9 @@ pub struct Var {
 }
 
 impl Var {
-	pub fn new(visibility: Visibility, name: String, typ: Type, default_value: Option<Value>, is_constant: bool) -> VarRef {
+	pub fn new(attributes: Attributes, visibility: Visibility, name: String, typ: Type, default_value: Option<Value>, is_constant: bool) -> VarRef {
 		let var_inner = VarInner {
+			attributes,
 			visibility,
 			name,
 			typ,

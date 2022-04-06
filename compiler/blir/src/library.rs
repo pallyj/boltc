@@ -56,7 +56,7 @@ impl Library {
 		let (visibility, name) = {
 			let func_ref = func.borrow();
 
-			(func_ref.visibility, func_ref.name.clone())
+			(func_ref.visibility, func_ref.info.name().clone())
 		};
 
 		let symbol = Symbol::Function(func);
@@ -72,7 +72,7 @@ impl Library {
 		let (visibility, name) = {
 			let func_ref = func.borrow();
 
-			(func_ref.visibility, func_ref.name.clone())
+			(func_ref.visibility, func_ref.info.name().clone())
 		};
 
 		let symbol = Symbol::ExternFunction(func);

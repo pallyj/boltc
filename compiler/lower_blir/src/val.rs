@@ -1,12 +1,13 @@
 use std::panic;
 
-use blir::{value::{Value, ValueKind, IfValue, IfBranch}, typ::{Type, TypeKind}, intrinsics::{BinaryIntrinsicFn, UnaryIntrinsicFn}, code::FunctionRef};
+use blir::{value::{Value, ValueKind, IfValue, IfBranch}, typ::{Type, TypeKind}, intrinsics::{BinaryIntrinsicFn, UnaryIntrinsicFn}};
 use blirssa::value::{LabelValue, BinaryIntrinsicFn as SsaBinaryIntrinsicFn, UnaryIntrinsicFn as SsaUnaryIntrinsicFn};
 
 use crate::BlirLowerer;
 
 impl BlirLowerer {
 	pub (super) fn lower_value(&mut self, value: &Value) -> LabelValue {
+		//println!("{:?}", &value);
 		match &value.kind {
 			ValueKind::IntLiteral(n) => self.lower_int_literal(*n, &value.typ),
 			ValueKind::FloatLiteral(n) => self.lower_float_literal(*n, &value.typ),
@@ -47,7 +48,9 @@ impl BlirLowerer {
 				self.lower_field_access(reciever.as_ref(), &var.borrow().name)
 			}
 
-			ValueKind::StaticFunc(func) => self.lower_static_func(func),
+			ValueKind::StaticFunc(func) => self.lower_static_func(&func.borrow().info.link_name()),
+
+			ValueKind::StaticMethod(method) => self.lower_static_func(&method.borrow().info.link_name()),
 
 			ValueKind::Unit => LabelValue::void(),
 
@@ -55,9 +58,9 @@ impl BlirLowerer {
 		}
 	}
 
-	fn lower_static_func(&mut self, func: &FunctionRef) -> LabelValue {
+	fn lower_static_func(&mut self, name: &str) -> LabelValue {
 		let static_func = self.ssa_library()
-			.get_function(&func.borrow().link_name)
+			.get_function(name)
 			.cloned()
 			.unwrap();
 
@@ -82,7 +85,7 @@ impl BlirLowerer {
 
 				self.lower_init(ty, vec![literal])
 			}
-			other => panic!("{other:?}"),
+			_ => panic!("")
 		}
 	}
 	
@@ -130,7 +133,7 @@ impl BlirLowerer {
 		match &func.kind {
 			ValueKind::ExternFunc(extern_func) => {
 				let extern_func = self.ssa_library()
-					.get_extern_function(&extern_func.borrow().name)
+					.get_extern_function(&extern_func.borrow().info.name())
 					.cloned()
 					.unwrap();
 
@@ -140,7 +143,7 @@ impl BlirLowerer {
 
 			ValueKind::StaticFunc(function) => {
 				let static_func = self.ssa_library()
-					.get_function(&function.borrow().link_name)
+					.get_function(&function.borrow().info.link_name())
 					.cloned()
 					.unwrap();
 
@@ -150,7 +153,7 @@ impl BlirLowerer {
 
 			ValueKind::InstanceMethod { reciever, method } => {
 				let func = self.ssa_library()
-					.get_function(&method.borrow().link_name)
+					.get_function(&method.borrow().info.link_name())
 					.cloned()
 					.unwrap();
 
@@ -162,7 +165,7 @@ impl BlirLowerer {
 
 			ValueKind::StaticMethod(function) => {
 				let static_func = self.ssa_library()
-					.get_function(&function.borrow().link_name)
+					.get_function(&function.borrow().info.link_name())
 					.cloned()
 					.unwrap();
 

@@ -179,6 +179,9 @@ pub enum SyntaxKind {
 
     CommaSeparatedList,
 
+    Attribute,
+    Attributes,
+
 
     _Invalid
 }

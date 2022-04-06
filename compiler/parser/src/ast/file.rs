@@ -21,6 +21,7 @@ use super::{containers::StructDef, func::FuncDef, find_token};
 use core::fmt::Debug;
 
 ast!(struct ImportDef(Import));
+ast!(struct NoOp(NoOp));
 
 impl ImportDef {
 	pub fn import_library(&self) -> String {
@@ -39,7 +40,8 @@ impl Debug for ImportDef {
 ast!(enum FileItem {
 	StructDef,
 	FuncDef,
-	ImportDef
+	ImportDef,
+	NoOp
 });
 
 impl Debug for FileItem {
@@ -48,6 +50,7 @@ impl Debug for FileItem {
             Self::StructDef(arg0) => write!(f, "{arg0:?}"),
             Self::FuncDef(arg0) => write!(f, "{arg0:?}"),
 			Self::ImportDef(arg0) => write!(f, "{arg0:?}"),
+			Self::NoOp(_) => write!(f, ";"),
             Self::Error => write!(f, "Error"),
         }
     }

@@ -1,6 +1,6 @@
 #![feature(let_else)]
 
-use blir::{intrinsics::Intrinsics, scope::{ScopeRef, ScopeRelation, ScopeType}};
+use blir::{intrinsics::Intrinsics};
 use errors::Span;
 use parser::ast::{Parse, Root, file::FileItem};
 use rowan::TextRange;
@@ -11,6 +11,7 @@ mod code;
 
 #[cfg(test)]
 mod tests;
+mod attributes;
 
 pub struct AstLowerer {
 	file: u32,
@@ -67,6 +68,10 @@ impl AstLowerer {
 					let lowered_struct = self.lower_struct(struct_def, &parent, library.mangled().clone());
 
 					library.add_struct(lowered_struct);
+				}
+
+				FileItem::NoOp(_) => {
+					
 				}
 
 				FileItem::Error => panic!(),

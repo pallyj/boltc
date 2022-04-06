@@ -122,6 +122,7 @@ pub mod smt;
 pub mod var;
 pub mod func;
 pub mod containers;
+pub mod attribute;
 
 fn find_token(node: &SyntaxNode, kind: SyntaxKind) -> Option<SyntaxToken> {
 	node.children_with_tokens()

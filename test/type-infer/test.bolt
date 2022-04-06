@@ -1,11 +1,11 @@
 import intrinsics
 
-func diverging() {
+func diverging(): Int {
 	if true {
 		return 101
 	} else {
 		return 100
-	};
+	}
 }
 
 func divergingReturns(): Int {

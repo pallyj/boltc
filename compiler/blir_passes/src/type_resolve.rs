@@ -3,23 +3,34 @@ use blir::{Library,
 	typ::{StructRef, Type, TypeKind},
 	scope::ScopeRef,
 	value::{VarRef, Value, ValueKind, IfBranch, IfValue, ConstantRef},
-	Symbol};
+	Symbol, BlirContext, attributes::AttributeFactory};
 use errors::{debugger::Debugger, error::ErrorCode};
 
-pub fn run_pass(library: &mut Library, debugger: &mut Debugger) {
+pub fn run_pass(library: &mut Library, factory: &AttributeFactory, context: &mut BlirContext, debugger: &mut Debugger) {
 	let scope = library
 		.scope();
 
 	for func in &library.extern_functions {
-		walk_extern_function(&func, &scope, debugger);
+		walk_extern_function(&func, debugger);
+		let mut borrow = func.borrow_mut();
+		let attributes = borrow.attributes.clone();
+		factory.apply_func_attributes(&attributes, &mut borrow.info, context, debugger)
 	}
 
 	for r#struct in &library.structs {
-		walk_struct(r#struct, &scope, debugger);
+		walk_struct(r#struct, &scope, factory, context, debugger);
+		
 	}
 
 	for func in &library.functions {
-		walk_function(&func, &scope, debugger);
+		walk_function(&func, debugger);
+		let mut borrow = func.borrow_mut();
+		let link_name = borrow.mangled().mangle();
+
+		borrow.info.set_link_name(link_name.clone());
+		let attributes = borrow.attributes.clone();
+		factory.apply_func_attributes(&attributes, &mut borrow.info, context, debugger)
+
 	}
 
 	for func in &library.functions {
@@ -27,12 +38,14 @@ pub fn run_pass(library: &mut Library, debugger: &mut Debugger) {
 	}
 }
 
-fn walk_struct(r#struct: &StructRef, _scope: &ScopeRef, debugger: &mut Debugger) {
+fn walk_struct(r#struct: &StructRef, _scope: &ScopeRef, factory: &AttributeFactory, context: &mut BlirContext, debugger: &mut Debugger) {
+	factory.apply_struct_attributes(r#struct, context, debugger);
+
 	let r#struct = r#struct.borrow();
 	let scope = r#struct.scope();
 
 	for substruct in &r#struct.substructs {
-		walk_struct(&substruct, &scope, debugger);
+		walk_struct(&substruct, &scope, factory, context, debugger);
 	}
 
 	for constant in &r#struct.constants {
@@ -44,7 +57,14 @@ fn walk_struct(r#struct: &StructRef, _scope: &ScopeRef, debugger: &mut Debugger)
 	}
 
 	for method in &r#struct.methods {
-		walk_method(&method, &scope, debugger);
+		walk_method(&method, debugger);
+
+		let mut borrow = method.borrow_mut();
+		let link_name = borrow.mangled().mangle();
+
+		borrow.info.set_link_name(link_name.clone());
+		let attributes = borrow.attributes.clone();
+		factory.apply_func_attributes(&attributes, &mut borrow.info, context, debugger)
 	}
 
 	for method in &r#struct.methods {
@@ -64,14 +84,14 @@ fn walk_constant( var: &ConstantRef, scope: &ScopeRef, debugger: &mut Debugger )
 	walk_value( &mut var.borrow_mut().value, scope, debugger);
 }
 
-fn walk_method( method: &MethodRef, scope: &ScopeRef, debugger: &mut Debugger ) {
+fn walk_method( method: &MethodRef, debugger: &mut Debugger ) {
 	let mut method = method.borrow_mut();
 
 	let scope = method.scope().clone();
 
-	walk_type(&mut method.return_type, &scope, debugger);
+	walk_type(method.info.return_type_mut(), &scope, debugger);
 
-	method.params
+	method.info.params_mut()
 		.iter_mut()
 		.for_each(|param| walk_type(&mut param.typ, &scope, debugger));
 
@@ -86,28 +106,30 @@ fn walk_method_code( method: &MethodRef, debugger: &mut Debugger ) {
 	walk_code_block(&mut method.code, &scope, debugger);
 }
 
-fn walk_function( function: &FunctionRef, scope: &ScopeRef, debugger: &mut Debugger ) {
+fn walk_function( function: &FunctionRef, debugger: &mut Debugger ) {
 	let mut function = function.borrow_mut();
 
 	let scope = function.scope().clone();
 
-	walk_type(&mut function.return_type, &scope, debugger);
+	walk_type(function.info.return_type_mut(), &scope, debugger);
 
-	function.params
+	function.info.params_mut()
 		.iter_mut()
 		.for_each(|param| walk_type(&mut param.typ, &scope, debugger));
 
 	function.add_params();
+
+	
 }
 
-fn walk_extern_function( function: &ExternFunctionRef, scope: &ScopeRef, debugger: &mut Debugger ) {
+fn walk_extern_function( function: &ExternFunctionRef, debugger: &mut Debugger ) {
 	let mut function = function.borrow_mut();
 
 	let scope = function.parent.clone();
 
-	walk_type(&mut function.return_type, &scope, debugger);
+	walk_type(function.info.return_type_mut(), &scope, debugger);
 
-	function.params
+	function.info.params_mut()
 		.iter_mut()
 		.for_each(|param| walk_type(&mut param.typ, &scope, debugger));
 }

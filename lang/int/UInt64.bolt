@@ -120,7 +120,7 @@ public struct UInt64 /*: IntegerLiteralRepresentable */ {
 	}
 
 	public static func extendUInt32(i: UInt32): Self {
-		Self ( integer32ExtZero64(i) )
+		Self ( integer32ExtZero64(i.repr) )
 	}
 
 	// Convert from integers

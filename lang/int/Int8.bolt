@@ -98,7 +98,7 @@ public struct Int8 /*: IntegerLiteralRepr */ {
 		Self ( integer16Trunc8(i.repr) )
 	}
 
-	public static func truncInt32(i: Int8): Self {
+	public static func truncInt32(i: Int32): Self {
 		Self ( integer32Trunc8(i.repr) )
 	}
 

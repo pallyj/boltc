@@ -32,6 +32,8 @@ impl Variant for TypeVariant {
 		let variant = match (lhs.variant, rhs.variant) {
 			(Self::Top, x) | (x, Self::Top) => Ok(x),
 
+			(Self::Diverges, x) | (x, Self::Diverges) => Ok(x),
+
 			(Self::SomeInteger, Self::IntrinsicInteger { bits }) | (Self::IntrinsicInteger { bits }, Self::SomeInteger) => Ok(Self::IntrinsicInteger { bits }),
 			(Self::SomeFloat, Self::IntrinsicFloat { bits }) | (Self::IntrinsicFloat { bits }, Self::SomeFloat) => Ok(Self::IntrinsicFloat { bits }),
 			(Self::SomeBoolean, Self::IntrinsicBool) | (Self::IntrinsicBool, Self::SomeBoolean) => Ok(Self::IntrinsicBool),

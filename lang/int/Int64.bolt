@@ -96,15 +96,15 @@ public struct Int64 /*: IntegerLiteralRepr */ {
 	}
 
 	public static func extendInt8(i: Int8): Self {
-		Int64 ( integer8ExtSig64(i) )
+		Int64 ( integer8ExtSig64(i.repr) )
 	}
 
 	public static func extendInt16(i: Int16): Self {
-		Int64 ( integer16ExtSig64(i) )
+		Int64 ( integer16ExtSig64(i.repr) )
 	}
 
 	public static func extendInt32(i: Int32): Self {
-		Int64 ( integer32ExtSig64(i) )
+		Int64 ( integer32ExtSig64(i.repr) )
 	}
 
 	public static func fromInt(i: Int): Self {
@@ -112,15 +112,15 @@ public struct Int64 /*: IntegerLiteralRepr */ {
 	}
 
 	public static func extendUInt8(i: UInt8): Self {
-		Int64 ( integer8ExtZero64(i) )
+		Int64 ( integer8ExtZero64(i.repr) )
 	}
 
 	public static func extendUInt16(i: UInt16): Self {
-		Int64 ( integer16ExtZero64(i) )
+		Int64 ( integer16ExtZero64(i.repr) )
 	}
 
 	public static func extendUInt32(i: UInt32): Self {
-		Int64 ( integer32ExtZero64(i) )
+		Int64 ( integer32ExtZero64(i.repr) )
 	}
 
 	// Convert from integers

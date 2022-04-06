@@ -2,7 +2,7 @@ use std::{cell::{RefCell, Ref, RefMut}, sync::Arc, ops::Deref, fmt::Debug};
 
 use mangle::{Mangled, MangleComponent};
 
-use crate::{Visibility, Symbol, code::MethodRef, SymbolWrapper, value::{VarRef, ConstantRef}, scope::{ScopeRef, ScopeRelation, ScopeType}};
+use crate::{Visibility, Symbol, code::MethodRef, SymbolWrapper, value::{VarRef, ConstantRef}, scope::{ScopeRef, ScopeRelation, ScopeType}, attributes::Attributes};
 
 use super::{TypeKind, Type};
 
@@ -12,6 +12,7 @@ pub struct Struct {
 
 #[allow(dead_code)]
 pub struct StructInner {
+	pub attributes: Attributes,
 	pub visibility: Visibility,
 
 	pub name: String,
@@ -24,6 +25,8 @@ pub struct StructInner {
 	pub methods: Vec<MethodRef>,
 	pub instance_vars: Vec<VarRef>,
 	pub constants: Vec<ConstantRef>,
+
+	pub is_transparent: bool,
 
 	parent_mangled: Mangled,
 }
@@ -41,8 +44,9 @@ impl StructInner {
 }
 
 impl Struct {
-	pub fn new(visibility: Visibility, name: String, parent: &ScopeRef, parent_mangled: Mangled) -> StructRef {
+	pub fn new(attributes: Attributes, visibility: Visibility, name: String, parent: &ScopeRef, parent_mangled: Mangled) -> StructRef {
 		let r#struct = StructInner {
+			attributes,
 			visibility,
 			link_name: name.clone(),
 			name: name,
@@ -52,6 +56,7 @@ impl Struct {
 			instance_vars: Vec::new(),
 			parent_mangled,
 			constants: Vec::new(),
+			is_transparent: false,
 		};
 
 		let struct_ref = StructRef {
