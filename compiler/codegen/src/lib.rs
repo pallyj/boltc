@@ -2,7 +2,11 @@ use std::path::Path;
 
 use blirssa::Library;
 use config::{BuildConfig, BuildOutput, BuildProfile};
-use inkwell::{context::Context, targets::{Target, InitializationConfig, TargetTriple, RelocMode, CodeModel, FileType, TargetMachine}, OptimizationLevel, passes::{PassManagerBuilder, PassManager}, module::Module};
+use inkwell::{context::Context,
+              module::Module,
+              passes::{PassManager, PassManagerBuilder},
+              targets::{CodeModel, FileType, InitializationConfig, RelocMode, Target, TargetMachine, TargetTriple},
+              OptimizationLevel};
 use lower_blirssa::lower_blirssa_library;
 
 pub mod config;
@@ -19,8 +23,7 @@ pub fn compile(library: Library, config: BuildConfig) {
     pass_manager.run_on(&module);
 
     if config.output == BuildOutput::LLVM {
-        let _ = module
-            .print_to_file(format!("{output_file}.ll"));
+        let _ = module.print_to_file(format!("{output_file}.ll"));
         return;
     }
 
@@ -38,14 +41,13 @@ pub fn compile(library: Library, config: BuildConfig) {
 
     let target = Target::from_triple(&target_triple).unwrap();
 
-    let target_machine = target
-        .create_target_machine(&target_triple,
-            TargetMachine::get_host_cpu_name().to_str().unwrap(),
-            "+avx2",
-            optimization_level,
-            RelocMode::Static,
-            CodeModel::Default)
-        .unwrap();
+    let target_machine = target.create_target_machine(&target_triple,
+                                                      TargetMachine::get_host_cpu_name().to_str().unwrap(),
+                                                      "+avx2",
+                                                      optimization_level,
+                                                      RelocMode::Static,
+                                                      CodeModel::Default)
+                               .unwrap();
 
     let file_type = match config.output {
         BuildOutput::ASM => FileType::Assembly,
@@ -56,7 +58,7 @@ pub fn compile(library: Library, config: BuildConfig) {
     let file_name = match config.output {
         BuildOutput::ASM => format!("{output_file}.s"),
         BuildOutput::Object => format!("{output_file}.o"),
-        _ => panic!()
+        _ => panic!(),
     };
 
     let _ = target_machine.write_to_file(&module, file_type, Path::new(&file_name));

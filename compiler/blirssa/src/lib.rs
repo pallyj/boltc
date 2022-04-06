@@ -1,14 +1,13 @@
 #![feature(let_else)]
 
-pub mod typ;
-pub mod code;
-pub mod value;
 mod builder;
+pub mod code;
 mod library;
+pub mod typ;
+pub mod value;
 
 pub use builder::Builder;
 pub use library::Library;
-
 
 #[cfg(test)]
 mod tests;

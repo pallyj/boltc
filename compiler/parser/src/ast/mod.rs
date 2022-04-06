@@ -1,22 +1,19 @@
 use std::fmt::Debug;
 
-use crate::{lexer::SyntaxKind};
-
-use self::{file::FileItem};
+use self::file::FileItem;
+use crate::lexer::SyntaxKind;
 
 pub type SyntaxNode = rowan::SyntaxNode<BoltLanguage>;
 pub type SyntaxToken = rowan::SyntaxToken<BoltLanguage>;
 pub type SyntaxElement = rowan::SyntaxElement<BoltLanguage>;
 
 pub struct Parse {
-	pub file: usize,
-	pub root: SyntaxNode,
+    pub file: usize,
+    pub root: SyntaxNode,
 }
 
 impl Debug for Parse {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "{:#?}", self.root)
-    }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{:#?}", self.root) }
 }
 
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
@@ -26,16 +23,12 @@ impl rowan::Language for BoltLanguage {
     type Kind = SyntaxKind;
 
     fn kind_from_raw(raw: rowan::SyntaxKind) -> Self::Kind {
-		assert!(raw.0 < (SyntaxKind::_Invalid as u16));
+        assert!(raw.0 < (SyntaxKind::_Invalid as u16));
 
-		unsafe {
-			std::mem::transmute(raw.0)
-		}
+        unsafe { std::mem::transmute(raw.0) }
     }
 
-    fn kind_to_raw(kind: Self::Kind) -> rowan::SyntaxKind {
-        rowan::SyntaxKind(kind as u16)
-    }
+    fn kind_to_raw(kind: Self::Kind) -> rowan::SyntaxKind { rowan::SyntaxKind(kind as u16) }
 }
 
 macro_rules! ast {
@@ -94,38 +87,37 @@ macro_rules! ast {
 ast!(struct Root(Root));
 
 impl Root {
-	pub fn items(&self) -> Vec<FileItem> {
-		self.0
-			.children()
-			.map(|child| FileItem::cast(child))
-			.collect()
-	}
+    pub fn items(&self) -> Vec<FileItem> {
+        self.0
+            .children()
+            .map(|child| FileItem::cast(child))
+            .collect()
+    }
 }
 
 impl Debug for Root {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let code = self.items()
-			.iter()
-			.map(|item| format!("{item:?}"))
-			.collect::<Vec<_>>()
-			.join("\n");
+                       .iter()
+                       .map(|item| format!("{item:?}"))
+                       .collect::<Vec<_>>()
+                       .join("\n");
 
-		write!(f, "{code}")
+        write!(f, "{code}")
     }
 }
 
-
-pub mod file;
-pub mod typ;
-pub mod expr;
-pub mod smt;
-pub mod var;
-pub mod func;
-pub mod containers;
 pub mod attribute;
+pub mod containers;
+pub mod expr;
+pub mod file;
+pub mod func;
+pub mod smt;
+pub mod typ;
+pub mod var;
 
 fn find_token(node: &SyntaxNode, kind: SyntaxKind) -> Option<SyntaxToken> {
-	node.children_with_tokens()
-		.find(|child| child.kind() == kind)
-		.and_then(|matching_child| matching_child.into_token())
+    node.children_with_tokens()
+        .find(|child| child.kind() == kind)
+        .and_then(|matching_child| matching_child.into_token())
 }

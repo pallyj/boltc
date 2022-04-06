@@ -1,23 +1,27 @@
 #![feature(let_else)]
 
-use blirssa::{Library, typ::Type};
+use blirssa::{typ::Type, Library};
 use func::lower_function;
-use inkwell::{context::Context, module::{Module, Linkage}, builder::Builder};
+use inkwell::{builder::Builder,
+              context::Context,
+              module::{Linkage, Module}};
 use struct_::lower_struct;
 use typ::lower_function_type;
 
-pub (crate) mod typ;
-pub (crate) mod func;
-pub (crate) mod value;
-pub (crate) mod struct_;
+pub(crate) mod func;
+pub(crate) mod struct_;
+pub(crate) mod typ;
+pub(crate) mod value;
 
 pub fn lower_blirssa_library(library: Library, context: &Context) -> Result<Module, String> {
     let module = context.create_module(library.name());
     let builder = context.create_builder();
 
-    let module_context = ModuleContext { context: &context, module: &module, builder: &builder };
+    let module_context = ModuleContext { context: &context,
+                                         module:  &module,
+                                         builder: &builder, };
 
-    //let error_context = ErrorContext::new();
+    // let error_context = ErrorContext::new();
 
     // Create a definition for each struct
     for r#struct in library.structs() {
@@ -66,7 +70,7 @@ pub fn lower_blirssa_library(library: Library, context: &Context) -> Result<Modu
 }
 
 pub struct ModuleContext<'a, 'ctx> {
-	pub (crate) context: &'ctx Context,
-	pub (crate) module: &'a Module<'ctx>,
-	pub (crate) builder: &'a Builder<'ctx>,
+    pub(crate) context: &'ctx Context,
+    pub(crate) module:  &'a Module<'ctx>,
+    pub(crate) builder: &'a Builder<'ctx>,
 }

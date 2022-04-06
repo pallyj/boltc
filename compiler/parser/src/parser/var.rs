@@ -1,38 +1,46 @@
+use super::{marker::Marker, Parser};
 use crate::{lexer::SyntaxKind, parser::file::ITEM_RECOVERY_SET};
 
-use super::{Parser, marker::Marker};
-
 impl<'input, 'l> Parser<'input, 'l> {
-	pub fn parse_let(&mut self, marker: Marker) {
-		debug_assert!(self.check(SyntaxKind::LetKw));
-		self.eat(SyntaxKind::LetKw);
+    pub fn parse_let(&mut self, marker: Marker) {
+        debug_assert!(self.check(SyntaxKind::LetKw));
+        self.eat(SyntaxKind::LetKw);
 
-		self.name(ITEM_RECOVERY_SET);
+        self.name(ITEM_RECOVERY_SET);
 
-		let bind_type = self.start();
-		if self.eat(SyntaxKind::Colon) { self.parse_ty(); }
-		bind_type.complete(self, SyntaxKind::BindType);
+        let bind_type = self.start();
+        if self.eat(SyntaxKind::Colon) {
+            self.parse_ty();
+        }
+        bind_type.complete(self, SyntaxKind::BindType);
 
-		let assign_value = self.start();
-		if self.eat(SyntaxKind::Equals) { self.parse_expr(); }
-		assign_value.complete(self, SyntaxKind::AssignValue);
+        let assign_value = self.start();
+        if self.eat(SyntaxKind::Equals) {
+            self.parse_expr();
+        }
+        assign_value.complete(self, SyntaxKind::AssignValue);
 
-		marker.complete(self, SyntaxKind::LetDef);
-	}
-	pub fn parse_var(&mut self, marker: Marker) {
-		debug_assert!(self.check(SyntaxKind::VarKw));
-		self.eat(SyntaxKind::VarKw);
+        marker.complete(self, SyntaxKind::LetDef);
+    }
 
-		self.name(ITEM_RECOVERY_SET);
+    pub fn parse_var(&mut self, marker: Marker) {
+        debug_assert!(self.check(SyntaxKind::VarKw));
+        self.eat(SyntaxKind::VarKw);
 
-		let bind_type = self.start();
-		if self.eat(SyntaxKind::Colon) { self.parse_ty(); }
-		bind_type.complete(self, SyntaxKind::BindType);
+        self.name(ITEM_RECOVERY_SET);
 
-		let assign_value = self.start();
-		if self.eat(SyntaxKind::Equals) { self.parse_expr(); }
-		assign_value.complete(self, SyntaxKind::AssignValue);
+        let bind_type = self.start();
+        if self.eat(SyntaxKind::Colon) {
+            self.parse_ty();
+        }
+        bind_type.complete(self, SyntaxKind::BindType);
 
-		marker.complete(self, SyntaxKind::VarDef);
-	}
+        let assign_value = self.start();
+        if self.eat(SyntaxKind::Equals) {
+            self.parse_expr();
+        }
+        assign_value.complete(self, SyntaxKind::AssignValue);
+
+        marker.complete(self, SyntaxKind::VarDef);
+    }
 }

@@ -1,31 +1,29 @@
-/*
-
-Statements 0.3
-
-Eval: **expr** (`;`)?
-Return: `return` (**expr**)?
-Bind: `let` *ident* (`:` **type**) `=` **expr**
-NoOp: `;`
-
-*/
+// Statements 0.3
+//
+// Eval: **expr** (`;`)?
+// Return: `return` (**expr**)?
+// Bind: `let` *ident* (`:` **type**) `=` **expr**
+// NoOp: `;`
+//
 
 use std::fmt::Debug;
 
-use crate::lexer::SyntaxKind;
-
 use super::{expr::Expr, typ::Type};
+use crate::lexer::SyntaxKind;
 
 ast!(struct EvalSmt(EvalSmt));
 ast!(struct ReturnSmt(ReturnSmt));
 ast!(struct LetSmt(LetSmt));
 ast!(struct NoOp(NoOp));
 
-ast!(enum Smt {
-	EvalSmt,
-	ReturnSmt,
-	LetSmt,
-	NoOp
-});
+ast!(
+    enum Smt {
+        EvalSmt,
+        ReturnSmt,
+        LetSmt,
+        NoOp,
+    }
+);
 
 impl Debug for Smt {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -40,105 +38,100 @@ impl Debug for Smt {
 }
 
 impl EvalSmt {
-	pub fn value(&self) -> Expr {
-		self.0
-			.first_child()
-			.map(Expr::cast)
-			.unwrap()
-	}
+    pub fn value(&self) -> Expr { self.0.first_child().map(Expr::cast).unwrap() }
 
-	pub fn is_escaped(&self) -> bool {
-		self.0
-			.children_with_tokens()
-			.find(|tok| tok.kind() == SyntaxKind::Semicolon)
-			.is_some()
-	}
+    pub fn is_escaped(&self) -> bool {
+        self.0
+            .children_with_tokens()
+            .find(|tok| tok.kind() == SyntaxKind::Semicolon)
+            .is_some()
+    }
 }
 
 impl Debug for EvalSmt {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.is_escaped() {
-			write!(f, "{:?};", self.value())
-		} else {
-			write!(f, "{:?}", self.value())
-		}
+            write!(f, "{:?};", self.value())
+        } else {
+            write!(f, "{:?}", self.value())
+        }
     }
 }
 
 impl ReturnSmt {
-	pub fn return_value(&self) -> Option<Expr> {
-		self.0
-			.first_child()
-			.map(Expr::cast)
-	}
+    pub fn return_value(&self) -> Option<Expr> { self.0.first_child().map(Expr::cast) }
 }
 
 impl Debug for ReturnSmt {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		if let Some(return_value) = self.return_value() {
-			write!(f, "return {return_value:?}")
-		} else {
-			write!(f, "return")
-		}
+        if let Some(return_value) = self.return_value() {
+            write!(f, "return {return_value:?}")
+        } else {
+            write!(f, "return")
+        }
     }
 }
 
 impl LetSmt {
-	pub fn label(&self) -> String {
-		self.0
-			.children_with_tokens()
-			.find(|element| element.kind() == SyntaxKind::Ident)
-			.and_then(|element| element.into_token())
-			.map(|token| token.text().to_string())
-			.unwrap()
-	}
+    pub fn label(&self) -> String {
+        self.0
+            .children_with_tokens()
+            .find(|element| element.kind() == SyntaxKind::Ident)
+            .and_then(|element| element.into_token())
+            .map(|token| token.text().to_string())
+            .unwrap()
+    }
 
-	pub fn typ(&self) -> Option<Type> {
-		self.0
-			.children()
-			.find(|element| element.kind() == SyntaxKind::BindType)
-			.and_then(|element| element.first_child())
-			.map(|element| Type::cast(element))
-	}
+    pub fn typ(&self) -> Option<Type> {
+        self.0
+            .children()
+            .find(|element| element.kind() == SyntaxKind::BindType)
+            .and_then(|element| element.first_child())
+            .map(|element| Type::cast(element))
+    }
 
-	pub fn value(&self) -> Option<Expr> {
-		self.0
-			.children()
-			.find(|element| element.kind() == SyntaxKind::AssignValue)
-			.and_then(|element| element.first_child())
-			.map(|element| Expr::cast(element))
-	}
+    pub fn value(&self) -> Option<Expr> {
+        self.0
+            .children()
+            .find(|element| element.kind() == SyntaxKind::AssignValue)
+            .and_then(|element| element.first_child())
+            .map(|element| Expr::cast(element))
+    }
 }
 
 impl Debug for LetSmt {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		let label = self.label();
-        let typ = self.typ().map(|typ| format!(": {typ:?}")).unwrap_or("".to_string());
-		let value = self.value().map(|value| format!(" = {value:?}")).unwrap_or("".to_string());
+        let label = self.label();
+        let typ = self.typ()
+                      .map(|typ| format!(": {typ:?}"))
+                      .unwrap_or("".to_string());
+        let value = self.value()
+                        .map(|value| format!(" = {value:?}"))
+                        .unwrap_or("".to_string());
 
-		write!(f, "let {label}{typ}{value}")
+        write!(f, "let {label}{typ}{value}")
     }
 }
 
 ast!(struct CodeBlock(CodeBlock));
 
 impl CodeBlock {
-	pub fn statements(&self) -> Vec<Smt> {
-		self.0
-			.children()
-			.map(|smt| Smt::cast(smt.clone()))
-			.collect()
-	}
+    pub fn statements(&self) -> Vec<Smt> {
+        self.0
+            .children()
+            .map(|smt| Smt::cast(smt.clone()))
+            .collect()
+    }
 }
 
 impl Debug for CodeBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let statements = self.statements()
-			.iter()
-			.map(|smt| format!("\t{smt:?}").replace("\n", "\n\t"))
-			.collect::<Vec<_>>()
-			.join("\n");
+                             .iter()
+                             .map(|smt| format!("\t{smt:?}").replace("\n", "\n\t"))
+                             .collect::<Vec<_>>()
+                             .join("\n");
 
-		write!(f, "{{\n{statements}\n}}")
+        write!(f, "{{\n{statements}\n}}")
     }
 }

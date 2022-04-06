@@ -1,7 +1,7 @@
-mod value;
 mod instruction;
 mod intrinsics;
+mod value;
 
-pub use value::*;
 pub use instruction::*;
 pub use intrinsics::*;
+pub use value::*;

@@ -48,7 +48,6 @@ pub enum SyntaxKind {
     #[regex("_", priority = 3)]
     UnderscoreKw,
 
-
     #[regex("[a-zA-Z_$][a-zA-Z_$0-9]*", priority = 2)]
     Ident,
 
@@ -75,7 +74,6 @@ pub enum SyntaxKind {
 
     #[regex("[0-9][0-9_]*\\.[0-9_]*")]
     LiteralDecFloat,
-
 
     #[token("(")]
     OpenParen,
@@ -113,7 +111,6 @@ pub enum SyntaxKind {
     #[token("=")]
     Equals,
 
-
     #[token("@")]
     At,
 
@@ -123,7 +120,6 @@ pub enum SyntaxKind {
 
     #[regex(r"[ \n\r\f\t]")]
     Whitespace,
-
 
     #[error]
     Error,
@@ -175,23 +171,21 @@ pub enum SyntaxKind {
     Visibility,
 
     Import,
-    
 
     CommaSeparatedList,
 
     Attribute,
     Attributes,
 
-
-    _Invalid
+    _Invalid,
 }
 
 impl SyntaxKind {
-    pub (crate) fn is_trivia(self) -> bool {
+    pub(crate) fn is_trivia(self) -> bool {
         match self {
             SyntaxKind::Comment => true,
             SyntaxKind::Whitespace => true,
-            _ => false
+            _ => false,
         }
     }
 }
@@ -201,11 +195,7 @@ pub struct Lexer<'a> {
 }
 
 impl<'a> Lexer<'a> {
-    pub fn new(code: &'a str) -> Self {
-        Lexer {
-            lexer: SyntaxKind::lexer(code)
-        }
-    }
+    pub fn new(code: &'a str) -> Self { Lexer { lexer: SyntaxKind::lexer(code), } }
 }
 
 impl<'a> Iterator for Lexer<'a> {
@@ -215,15 +205,12 @@ impl<'a> Iterator for Lexer<'a> {
         let kind = self.lexer.next()?;
         let source = self.lexer.slice();
 
-        Some(Token {
-            kind,
-            source
-        })
+        Some(Token { kind, source })
     }
 }
 
 #[derive(Clone)]
 pub struct Token<'a> {
-    pub kind: SyntaxKind,
-    pub source: &'a str
+    pub kind:   SyntaxKind,
+    pub source: &'a str,
 }

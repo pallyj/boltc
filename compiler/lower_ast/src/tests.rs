@@ -1,9 +1,9 @@
 #[test]
 fn test_code() {
-	let interner = FileInterner::new();
-	let mut debugger = Debugger::new(&interner);
+    let interner = FileInterner::new();
+    let mut debugger = Debugger::new(&interner);
 
-	let code = r#"
+    let code = r#"
 import intrinsics
 
 struct Int64 {
@@ -31,12 +31,11 @@ func gcd(a: Int64, b: Int64): Int64 {
 }
 	"#;
 
-	let mut lib = Library::new("");
+    let mut lib = Library::new("");
 
-	AstLowerer::new(parse(&code, &mut debugger, 0))
-		.lower_file(&mut lib);
+    AstLowerer::new(parse(&code, &mut debugger, 0)).lower_file(&mut lib);
 
-	println!("{lib:?}");
+    println!("{lib:?}");
 }
 
 // Static

@@ -2,8 +2,8 @@
 
 pub mod ast;
 pub mod lexer;
-pub mod parser;
 pub mod operators;
+pub mod parser;
 
 #[cfg(test)]
 mod tests;
