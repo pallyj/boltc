@@ -51,7 +51,7 @@ impl TypeTable {
         self.types.insert(key, ty);
     }
 
-    pub fn get(&self, key: &u64) -> Option<&TypeKind> { self.types.get(&key) }
+    pub fn get(&self, key: &u64) -> Option<&TypeKind> { self.types.get(key) }
 }
 
 impl Debug for TypeTable {
@@ -73,5 +73,5 @@ impl GuessTable {
 
     pub fn insert(&mut self, key: u64, ty: Type) { self.types.insert(key, ty); }
 
-    pub fn get(&self, key: &u64) -> Option<&Type> { self.types.get(&key) }
+    pub fn get(&self, key: &u64) -> Option<&Type> { self.types.get(key) }
 }

@@ -33,7 +33,7 @@ pub enum OperatorPrecedence {
 }
 
 impl OperatorPrecedence {
-    pub fn shifts(&self, after: OperatorPrecedence) -> bool { return (*self as u32) > (after as u32) }
+    pub fn shifts(&self, after: OperatorPrecedence) -> bool { (*self as u32) > (after as u32) }
 }
 
 impl Operator {

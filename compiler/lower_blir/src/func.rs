@@ -8,7 +8,7 @@ impl BlirLowerer {
         let function_type = self.lower_type(&func.take_typ());
 
         self.ssa_library_mut()
-            .add_function(&func.borrow().info.link_name(), function_type);
+            .add_function(func.borrow().info.link_name(), function_type);
     }
 
     pub(super) fn lower_extern_func_signature(&mut self, func: ExternFunctionRef) {
@@ -22,7 +22,7 @@ impl BlirLowerer {
 
     pub(super) fn lower_func(&mut self, func: FunctionRef) {
         let function = self.ssa_library()
-                           .get_function(&func.borrow().info.link_name())
+                           .get_function(func.borrow().info.link_name())
                            .cloned()
                            .unwrap();
 

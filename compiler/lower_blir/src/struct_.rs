@@ -59,12 +59,12 @@ impl BlirLowerer {
         let function_type = self.lower_type(&method.take_typ());
 
         self.ssa_library_mut()
-            .add_function(&method.borrow().info.link_name(), function_type);
+            .add_function(method.borrow().info.link_name(), function_type);
     }
 
     pub(super) fn lower_method(&mut self, func: &MethodRef) {
         let method = self.ssa_library()
-                         .get_function(&func.borrow().info.link_name())
+                         .get_function(func.borrow().info.link_name())
                          .cloned()
                          .unwrap();
 

@@ -26,7 +26,7 @@ ast!(
         FuncDef,
         VariableDef,
         LetDef,
-        NoOp,
+        NoOp
     }
 );
 
@@ -47,7 +47,7 @@ impl StructDef {
     pub fn attributes(&self) -> Attributes {
         self.0
             .children()
-            .find_map(|node| Attributes::cast(node))
+            .find_map(Attributes::cast)
             .unwrap()
     }
 
@@ -72,7 +72,7 @@ impl StructDef {
         self.0
             .children()
             .find(|child| child.kind() == SyntaxKind::StructBody)
-            .and_then(|block_node| StructBody::cast(block_node))
+            .and_then(StructBody::cast)
             .unwrap()
     }
 }
@@ -95,7 +95,7 @@ impl StructBody {
     pub fn items(&self) -> Vec<StructItem> {
         self.0
             .children()
-            .map(|struct_item| StructItem::cast(struct_item))
+            .map(StructItem::cast)
             .collect()
     }
 }

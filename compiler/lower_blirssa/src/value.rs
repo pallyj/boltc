@@ -20,14 +20,14 @@ pub fn lower_value<'a, 'ctx>(value: &Value, context: &ModuleContext<'a, 'ctx>, f
                                                                                             .as_basic_value_enum()),
 
         Value::BinaryIntrinsic { name, left, right, .. } => {
-            let lhs = fn_ctx.get_local(&left).basic();
-            let rhs = fn_ctx.get_local(&right).basic();
+            let lhs = fn_ctx.get_local(left).basic();
+            let rhs = fn_ctx.get_local(right).basic();
 
             LLVMValue::Basic(build_binary_intrinsic(*name, lhs, rhs, context.builder))
         }
 
         Value::UnaryIntrinsic { name, arg, .. } => {
-            let value = fn_ctx.get_local(&arg).basic();
+            let value = fn_ctx.get_local(arg).basic();
 
             LLVMValue::Basic(build_unary_intrinsic(*name, value, context.context, context.builder))
         }
@@ -53,7 +53,7 @@ pub fn lower_value<'a, 'ctx>(value: &Value, context: &ModuleContext<'a, 'ctx>, f
         }
 
         Value::Deref { pointer, .. } => {
-            let pointer = fn_ctx.get_local(&pointer).basic();
+            let pointer = fn_ctx.get_local(pointer).basic();
 
             LLVMValue::Basic(context.builder
                                     .build_load(pointer.into_pointer_value(), "load")
@@ -77,7 +77,7 @@ pub fn lower_value<'a, 'ctx>(value: &Value, context: &ModuleContext<'a, 'ctx>, f
         }
 
         Value::BuildFunctionPointer { function, .. } => {
-            let function = fn_ctx.get_local(&function);
+            let function = fn_ctx.get_local(function);
 
             let function = match function {
                 LLVMValue::Function(function) => function,
@@ -92,13 +92,13 @@ pub fn lower_value<'a, 'ctx>(value: &Value, context: &ModuleContext<'a, 'ctx>, f
         }
 
         Value::Call { function, args, .. } => {
-            let function = fn_ctx.get_local(&function);
+            let function = fn_ctx.get_local(function);
 
             match function {
                 LLVMValue::Function(function) => {
                     // Maybe make a pointer to the function if it's an arg
                     let args = args.iter()
-                                   .filter_map(|arg| fn_ctx.get_local(&arg).try_basic())
+                                   .filter_map(|arg| fn_ctx.get_local(arg).try_basic())
                                    .map(|basic| basic.into())
                                    .collect::<Vec<_>>();
 
@@ -120,7 +120,7 @@ pub fn lower_value<'a, 'ctx>(value: &Value, context: &ModuleContext<'a, 'ctx>, f
 
                     // Maybe make a pointer to the function if it's an arg
                     let args = args.iter()
-                                   .filter_map(|arg| fn_ctx.get_local(&arg).try_basic())
+                                   .filter_map(|arg| fn_ctx.get_local(arg).try_basic())
                                    .map(|basic| basic.into())
                                    .collect::<Vec<_>>();
 

@@ -224,7 +224,7 @@ impl Intrinsics {
         let b = TypeKind::Integer { bits: 1 };
 
         self.scope
-            .add_symbol(format!("i1"), Visibility::Public, Symbol::Type(b.clone()));
+            .add_symbol("i1".to_string(), Visibility::Public, Symbol::Type(b.clone()));
 
         self.add_binary_func("integer1And".to_string(),
                              BinaryIntrinsicFn::IntegerAnd,

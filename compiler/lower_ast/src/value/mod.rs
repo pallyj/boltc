@@ -22,7 +22,7 @@ impl AstLowerer {
                     LiteralKind::True => ValueKind::BoolLiteral(true).spanned_infer(span),
                     LiteralKind::False => ValueKind::BoolLiteral(false).spanned_infer(span),
 
-                    LiteralKind::DecInteger => ValueKind::IntLiteral(u64::from_str_radix(&text, 10).unwrap()).spanned_infer(span),
+                    LiteralKind::DecInteger => ValueKind::IntLiteral(str::parse(&text).unwrap()).spanned_infer(span),
                     LiteralKind::HexInteger => ValueKind::IntLiteral(u64::from_str_radix(&text[2..], 16).unwrap()).spanned_infer(span),
                     LiteralKind::OctInteger => ValueKind::IntLiteral(u64::from_str_radix(&text[2..], 8).unwrap()).spanned_infer(span),
                     LiteralKind::BinInteger => ValueKind::IntLiteral(u64::from_str_radix(&text[2..], 2).unwrap()).spanned_infer(span),

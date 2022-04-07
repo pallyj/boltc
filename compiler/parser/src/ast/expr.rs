@@ -38,7 +38,7 @@ ast!(
         IfExpr,
         MemberExpr,
         FuncCallExpr,
-        UnitExpr,
+        UnitExpr
     }
 );
 
@@ -60,7 +60,7 @@ impl Debug for Expr {
 ast!(
     enum IfExprNegative {
         IfExpr,
-        CodeBlock,
+        CodeBlock
     }
 );
 
@@ -131,7 +131,7 @@ impl ParenthesizedExpr {
     pub fn expr(&self) -> Expr {
         self.0
             .first_child()
-            .map(|expr| Expr::cast(expr.clone()))
+            .map(Expr::cast)
             .unwrap_or(Expr::Error)
     }
 }
@@ -141,7 +141,7 @@ impl Debug for ParenthesizedExpr {
 }
 
 impl MemberExpr {
-    pub fn parent(&self) -> Expr { Expr::cast(self.0.first_child().unwrap().clone()) }
+    pub fn parent(&self) -> Expr { Expr::cast(self.0.first_child().unwrap()) }
 
     pub fn child(&self) -> Option<String> { find_token(&self.0, SyntaxKind::Ident).map(|token| token.text().to_string()) }
 }
@@ -151,7 +151,7 @@ impl Debug for MemberExpr {
         write!(f,
                "{:?}.{}",
                self.parent(),
-               self.child().unwrap_or("".to_string()))
+               self.child().unwrap_or_else(|| "".to_string()))
     }
 }
 
@@ -161,7 +161,7 @@ impl IfExpr {
             .children()
             .find(|syn| syn.kind() == SyntaxKind::Condition)
             .and_then(|condition| condition.first_child())
-            .map(|condition| Expr::cast(condition.clone()))
+            .map(Expr::cast)
             .unwrap()
     }
 
@@ -170,7 +170,7 @@ impl IfExpr {
             .children()
             .find(|syn| syn.kind() == SyntaxKind::Positive)
             .and_then(|positive| positive.first_child())
-            .and_then(|condition| CodeBlock::cast(condition.clone()))
+            .and_then(CodeBlock::cast)
             .unwrap()
     }
 
@@ -179,7 +179,7 @@ impl IfExpr {
             .children()
             .find(|syn| syn.kind() == SyntaxKind::Negative)
             .and_then(|positive| positive.first_child())
-            .map(|condition| IfExprNegative::cast(condition.clone()))
+            .map(IfExprNegative::cast)
     }
 }
 
@@ -187,7 +187,7 @@ impl FuncCallExpr {
     pub fn function(&self) -> Expr {
         self.0
             .first_child()
-            .map(|function| Expr::cast(function))
+            .map(Expr::cast)
             .unwrap()
     }
 
@@ -197,7 +197,7 @@ impl FuncCallExpr {
             .find(|node| node.kind() == SyntaxKind::CommaSeparatedList)
             .unwrap()
             .children()
-            .map(|child| Expr::cast(child.clone()))
+            .map(Expr::cast)
             .collect()
     }
 }

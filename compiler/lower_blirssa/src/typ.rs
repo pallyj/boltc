@@ -6,11 +6,11 @@ use crate::ModuleContext;
 
 pub fn lower_basic_typ<'a, 'ctx>(t: &Type, context: &ModuleContext<'a, 'ctx>) -> Option<BasicTypeEnum<'ctx>> {
     Some(match t {
-        Type::Integer { bits } => lower_integer_type(*bits, &context)?.as_basic_type_enum(),
+        Type::Integer { bits } => lower_integer_type(*bits, context)?.as_basic_type_enum(),
 
-        Type::Float { bits } => lower_float_type(*bits, &context)?.as_basic_type_enum(),
+        Type::Float { bits } => lower_float_type(*bits, context)?.as_basic_type_enum(),
 
-        Type::Function { return_type, pars } => lower_function_type(&*return_type, pars, &context)?.ptr_type(AddressSpace::Global)
+        Type::Function { return_type, pars } => lower_function_type(&*return_type, pars, context)?.ptr_type(AddressSpace::Global)
                                                                                                    .as_basic_type_enum(),
 
         Type::Pointer { pointee } => lower_pointer_typ(&*pointee, context)?.as_basic_type_enum(),
@@ -35,11 +35,11 @@ pub fn lower_pointer_typ<'a, 'ctx>(t: &Type, context: &ModuleContext<'a, 'ctx>) 
     Some(match t {
         Type::Void => context.context.i8_type().ptr_type(AddressSpace::Global),
 
-        Type::Integer { bits } => lower_integer_type(*bits, &context)?.ptr_type(AddressSpace::Global),
+        Type::Integer { bits } => lower_integer_type(*bits, context)?.ptr_type(AddressSpace::Global),
 
-        Type::Float { bits } => lower_float_type(*bits, &context)?.ptr_type(AddressSpace::Global),
+        Type::Float { bits } => lower_float_type(*bits, context)?.ptr_type(AddressSpace::Global),
 
-        Type::Function { return_type, pars } => lower_function_type(&*return_type, &pars, &context)?.ptr_type(AddressSpace::Global),
+        Type::Function { return_type, pars } => lower_function_type(&*return_type, pars, context)?.ptr_type(AddressSpace::Global),
 
         Type::Struct { container } => lower_struct_typ(container, context)?.ptr_type(AddressSpace::Global),
 
@@ -67,7 +67,7 @@ pub fn lower_float_type<'a, 'ctx>(bits: u32, context: &ModuleContext<'a, 'ctx>) 
     })
 }
 
-pub fn lower_function_type<'a, 'ctx>(return_type: &Type, pars: &Vec<Type>, context: &ModuleContext<'a, 'ctx>) -> Option<FunctionType<'ctx>> {
+pub fn lower_function_type<'a, 'ctx>(return_type: &Type, pars: &[Type], context: &ModuleContext<'a, 'ctx>) -> Option<FunctionType<'ctx>> {
     let param_types = pars.iter()
                           .filter_map(|par| lower_basic_typ(par, context))
                           .map(|par| par.into())

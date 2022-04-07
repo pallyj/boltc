@@ -67,13 +67,7 @@ impl Statement {
     pub fn diverges(&self) -> bool {
         match self.deref() {
             StatementKind::Return { .. } => true,
-            StatementKind::Eval { value, .. } => {
-                if let TypeKind::Divergent = value.typ.deref() {
-                    true
-                } else {
-                    false
-                }
-            }
+            StatementKind::Eval { value, .. } => matches!(value.typ.deref(), TypeKind::Divergent),
             _ => false,
         }
     }

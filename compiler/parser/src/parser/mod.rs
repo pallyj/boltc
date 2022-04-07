@@ -203,9 +203,10 @@ impl<'input, 'l> Parser<'input, 'l> {
     pub fn parse_visibility(&mut self) {
         let marker = self.start();
 
-        if self.eat(SyntaxKind::PublicKw) || self.eat(SyntaxKind::InternalKw) || self.eat(SyntaxKind::FilePrivateKw) || self.eat(SyntaxKind::PrivateKw) {
-        } else {
-        }
+        if self.eat(SyntaxKind::PublicKw)
+            || self.eat(SyntaxKind::InternalKw)
+            || self.eat(SyntaxKind::FilePrivateKw)
+            || self.eat(SyntaxKind::PrivateKw) { }
 
         marker.complete(self, SyntaxKind::Visibility);
     }

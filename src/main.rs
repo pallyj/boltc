@@ -119,7 +119,7 @@ impl Project {
 
         codegen::compile(library, config);
 
-        return (!debugger.has_errors(), context.entry_point);
+        (!debugger.has_errors(), context.entry_point)
     }
 }
 

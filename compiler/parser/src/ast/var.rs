@@ -15,15 +15,14 @@ impl LetDef {
     pub fn attributes(&self) -> Attributes {
         self.0
             .children()
-            .find_map(|node| Attributes::cast(node))
+            .find_map(Attributes::cast)
             .unwrap()
     }
 
     pub fn is_static(&self) -> bool {
         self.0
             .children_with_tokens()
-            .find(|child| child.kind() == SyntaxKind::StaticKw)
-            .is_some()
+            .any(|child| child.kind() == SyntaxKind::StaticKw)
     }
 
     pub fn visibility(&self) -> Option<SyntaxKind> {
@@ -48,7 +47,7 @@ impl LetDef {
             .children()
             .find(|element| element.kind() == SyntaxKind::BindType)
             .and_then(|element| element.first_child())
-            .map(|element| Type::cast(element))
+            .map(Type::cast)
     }
 
     pub fn value(&self) -> Option<Expr> {
@@ -56,7 +55,7 @@ impl LetDef {
             .children()
             .find(|element| element.kind() == SyntaxKind::AssignValue)
             .and_then(|element| element.first_child())
-            .map(|element| Expr::cast(element))
+            .map(Expr::cast)
     }
 }
 
@@ -70,10 +69,10 @@ impl Debug for LetDef {
         let label = self.label();
         let typ = self.typ()
                       .map(|typ| format!(": {typ:?}"))
-                      .unwrap_or("".to_string());
+                      .unwrap_or_else(|| "".to_string());
         let value = self.value()
                         .map(|value| format!(" = {value:?}"))
-                        .unwrap_or("".to_string());
+                        .unwrap_or_else(|| "".to_string());
 
         write!(f, "{visibility}let {label}{typ}{value}")
     }
@@ -83,7 +82,7 @@ impl VariableDef {
     pub fn attributes(&self) -> Attributes {
         self.0
             .children()
-            .find_map(|node| Attributes::cast(node))
+            .find_map(Attributes::cast)
             .unwrap()
     }
 
@@ -109,7 +108,7 @@ impl VariableDef {
             .children()
             .find(|element| element.kind() == SyntaxKind::BindType)
             .and_then(|element| element.first_child())
-            .map(|element| Type::cast(element))
+            .map(Type::cast)
     }
 
     pub fn value(&self) -> Option<Expr> {
@@ -117,7 +116,7 @@ impl VariableDef {
             .children()
             .find(|element| element.kind() == SyntaxKind::AssignValue)
             .and_then(|element| element.first_child())
-            .map(|element| Expr::cast(element))
+            .map(Expr::cast)
     }
 }
 
@@ -131,10 +130,10 @@ impl Debug for VariableDef {
         let label = self.label();
         let typ = self.typ()
                       .map(|typ| format!(": {typ:?}"))
-                      .unwrap_or("".to_string());
+                      .unwrap_or_else(|| "".to_string());
         let value = self.value()
                         .map(|value| format!(" = {value:?}"))
-                        .unwrap_or("".to_string());
+                        .unwrap_or_else(|| "".to_string());
 
         write!(f, "{visibility}let {label}{typ}{value}")
     }

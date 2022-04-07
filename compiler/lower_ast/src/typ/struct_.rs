@@ -13,7 +13,7 @@ impl AstLowerer {
         let name = var.label();
         let typ = var.typ()
                      .map(|typ| self.lower_type(typ))
-                     .unwrap_or(Type::infer());
+                     .unwrap_or_else(Type::infer);
         let Some(expr) = var.value() else {
 			// Error
 			panic!();
@@ -30,7 +30,7 @@ impl AstLowerer {
         let name = var.label();
         let typ = var.typ()
                      .map(|typ| self.lower_type(typ))
-                     .unwrap_or(Type::infer());
+                     .unwrap_or_else(Type::infer);
         let default_value = var.value().map(|value| self.lower_expr(value));
 
         let attributes = self.lower_attributes(var.attributes());
@@ -43,7 +43,7 @@ impl AstLowerer {
         let name = var.label();
         let typ = var.typ()
                      .map(|typ| self.lower_type(typ))
-                     .unwrap_or(Type::infer());
+                     .unwrap_or_else(Type::infer);
         let default_value = var.value().map(|value| self.lower_expr(value));
 
         let attributes = self.lower_attributes(var.attributes());
@@ -62,7 +62,7 @@ impl AstLowerer {
 
         let self_ty = TypeKind::Struct(r#struct.clone()).anon();
 
-        let struct_mangled = r#struct.borrow().mangled().clone();
+        let struct_mangled = r#struct.borrow().mangled();
 
         for struct_item in def.body().items().into_iter() {
             match struct_item {

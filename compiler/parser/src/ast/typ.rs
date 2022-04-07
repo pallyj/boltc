@@ -22,7 +22,7 @@ ast!(
         NamedType,
         MemberType,
         UnitType,
-        FuncType,
+        FuncType
     }
 );
 
@@ -52,7 +52,7 @@ impl Debug for NamedType {
 }
 
 impl MemberType {
-    pub fn parent(&self) -> Type { Type::cast(self.0.first_child().unwrap().clone()) }
+    pub fn parent(&self) -> Type { Type::cast(self.0.first_child().unwrap()) }
 
     pub fn child(&self) -> Option<String> { self.0.last_token().map(|token| token.text().to_string()) }
 }
@@ -62,7 +62,7 @@ impl Debug for MemberType {
         write!(f,
                "{:?}.{}",
                self.parent(),
-               self.child().unwrap_or("".to_string()))
+               self.child().unwrap_or_else(|| "".to_string()))
     }
 }
 
@@ -72,7 +72,7 @@ impl FuncType {
             .children()
             .find(|syn| syn.kind() == SyntaxKind::FuncReturn)
             .and_then(|syn| syn.children().last())
-            .map(|type_node| Type::cast(type_node.clone()))
+            .map(Type::cast)
     }
 
     pub fn params(&self) -> Vec<Type> {
@@ -81,10 +81,10 @@ impl FuncType {
             .find(|syn| syn.kind() == SyntaxKind::CommaSeparatedList)
             .map(|syn| {
                 syn.children()
-                   .map(|param| Type::cast(param.clone()))
+                   .map(Type::cast)
                    .collect()
             })
-            .unwrap_or(vec![])
+            .unwrap_or_else(Vec::new)
     }
 }
 

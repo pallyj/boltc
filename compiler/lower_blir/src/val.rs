@@ -31,9 +31,9 @@ impl BlirLowerer {
 
             ValueKind::InstanceVariable { reciever, var } => self.lower_field_access(reciever.as_ref(), &var.borrow().name),
 
-            ValueKind::StaticFunc(func) => self.lower_static_func(&func.borrow().info.link_name()),
+            ValueKind::StaticFunc(func) => self.lower_static_func(func.borrow().info.link_name()),
 
-            ValueKind::StaticMethod(method) => self.lower_static_func(&method.borrow().info.link_name()),
+            ValueKind::StaticMethod(method) => self.lower_static_func(method.borrow().info.link_name()),
 
             ValueKind::Unit => LabelValue::void(),
 
@@ -114,7 +114,7 @@ impl BlirLowerer {
         match &func.kind {
             ValueKind::ExternFunc(extern_func) => {
                 let extern_func = self.ssa_library()
-                                      .get_extern_function(&extern_func.borrow().info.name())
+                                      .get_extern_function(extern_func.borrow().info.name())
                                       .cloned()
                                       .unwrap();
 
@@ -124,7 +124,7 @@ impl BlirLowerer {
 
             ValueKind::StaticFunc(function) => {
                 let static_func = self.ssa_library()
-                                      .get_function(&function.borrow().info.link_name())
+                                      .get_function(function.borrow().info.link_name())
                                       .cloned()
                                       .unwrap();
 
@@ -134,19 +134,19 @@ impl BlirLowerer {
 
             ValueKind::InstanceMethod { reciever, method } => {
                 let func = self.ssa_library()
-                               .get_function(&method.borrow().info.link_name())
+                               .get_function(method.borrow().info.link_name())
                                .cloned()
                                .unwrap();
 
                 let function = self.builder().build_function(&func);
-                let reciever = self.lower_value(&reciever);
+                let reciever = self.lower_value(reciever);
                 args.insert(0, reciever);
                 self.builder().build_call(function, args)
             }
 
             ValueKind::StaticMethod(function) => {
                 let static_func = self.ssa_library()
-                                      .get_function(&function.borrow().info.link_name())
+                                      .get_function(function.borrow().info.link_name())
                                       .cloned()
                                       .unwrap();
 
@@ -283,7 +283,7 @@ impl BlirLowerer {
 
                 for (field, value) in field_names.iter().zip(args) {
                     let field_ptr = self.builder()
-                                        .build_access_struct_field(container_literal.clone(), &field);
+                                        .build_access_struct_field(container_literal.clone(), field);
                     self.builder().build_assign_ptr(field_ptr, value);
                 }
 

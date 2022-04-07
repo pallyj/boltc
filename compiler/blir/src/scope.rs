@@ -123,7 +123,7 @@ impl ScopeRef {
             return ScopeRelation::SameLibrary;
         };
 
-        return ScopeRelation::None;
+        ScopeRelation::None
     }
 }
 
@@ -241,10 +241,10 @@ impl Scope {
 
     fn scope_type(&self, name: &str) -> Option<Type> {
         if let Some(ty) = self.scope_types.get(name) {
-            return Some(ty.clone());
+            Some(ty.clone())
         } else {
-            return self.parent()
-                       .and_then(|parent| parent.borrow().scope_type(name));
+            self.parent()
+                .and_then(|parent| parent.borrow().scope_type(name))
         }
     }
 }
@@ -275,6 +275,6 @@ impl ScopeIter {
             }
         }
 
-        return None;
+        None
     }
 }

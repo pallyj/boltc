@@ -44,7 +44,7 @@ impl CodeBlock {
             return smt.typ();
         }
 
-        return TypeKind::Void.anon();
+        TypeKind::Void.anon()
     }
 }
 

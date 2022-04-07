@@ -52,7 +52,7 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
     pub fn infer_rel(&mut self, value: &mut Value, typ: &Type, scope: &ScopeRef) {
         self.infer_value(value, scope);
 
-        self.constrain_value_two_way(&value, typ);
+        self.constrain_value_two_way(value, typ);
     }
 
     pub fn infer_codeblock(&mut self, block: &mut CodeBlock, ty: &Type, scope: &ScopeRef, span: &Option<Span>) {
@@ -84,7 +84,7 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
         match &mut smt.kind {
             StatementKind::Bind { name: _, typ, value } => {
                 if let Some(value) = value.as_mut() {
-                    self.constrain_value_two_way(&value, typ);
+                    self.constrain_value_two_way(value, typ);
                     self.infer_value(value, scope);
                 }
             }
@@ -103,33 +103,24 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
 
                 self.infer_value(return_value, scope);
 
-                self.constrain_value_one_way(&return_value, &function_return_type);
+                self.constrain_value_one_way(return_value, &function_return_type);
             }
         }
     }
 
     fn infer_value(&mut self, value: &mut Value, scope: &ScopeRef) {
         match &mut value.kind {
-            ValueKind::BoolLiteral(_) => match self.constrain_bool(&value.typ) {
-                Err(_) => {
-                    self.debugger
-                        .throw_single(ErrorCode::TypeIsNotABool, &value.span);
-                }
-                _ => {}
+            ValueKind::BoolLiteral(_) => if let Err(_) = self.constrain_bool(&value.typ) {
+                self.debugger
+                    .throw_single(ErrorCode::TypeIsNotABool, &value.span);
             },
-            ValueKind::IntLiteral(_) => match self.constrain_integer(&value.typ) {
-                Err(_) => {
-                    self.debugger
-                        .throw_single(ErrorCode::TypeIsNotAnInteger, &value.span);
-                }
-                _ => {}
+            ValueKind::IntLiteral(_) => if let Err(_) = self.constrain_integer(&value.typ) {
+                self.debugger
+                    .throw_single(ErrorCode::TypeIsNotAnInteger, &value.span);
             },
-            ValueKind::FloatLiteral(_) => match self.constrain_float(&value.typ) {
-                Err(_) => {
-                    self.debugger
-                        .throw_single(ErrorCode::TypeIsNotAFloat, &value.span);
-                }
-                _ => {}
+            ValueKind::FloatLiteral(_) => if let Err(_) = self.constrain_float(&value.typ) {
+                self.debugger
+                    .throw_single(ErrorCode::TypeIsNotAFloat, &value.span);
             },
 
             ValueKind::FuncCall { function, args } => {
@@ -150,12 +141,12 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
 
                     // Match function parameters against the args
                     for (arg, param_ty) in args.args.iter().zip(params.iter()) {
-                        self.constrain_value_one_way(&arg, param_ty);
+                        self.constrain_value_one_way(arg, param_ty);
                     }
 
                     let return_ty = return_type.clone();
 
-                    self.constrain_value_one_way(&value, return_ty.as_ref())
+                    self.constrain_value_one_way(value, return_ty.as_ref())
                 } else if let TypeKind::Method { reciever: _,
                                                  return_type,
                                                  params, } = function.as_ref().typ.kind()
@@ -172,7 +163,7 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
                         self.constrain_value_one_way(arg, param_ty);
                     }
 
-                    self.constrain_value_one_way(&value, return_ty.as_ref());
+                    self.constrain_value_one_way(value, return_ty.as_ref());
                 } else if let TypeKind::Metatype(t) = function.as_ref().typ.kind() {
                     let ty = t.clone().anon();
 
@@ -189,12 +180,12 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
 
                     // Match function parameters against the args
                     for (arg, param_ty) in args.args.iter().zip(params.iter()) {
-                        self.constrain_value_one_way(&arg, param_ty);
+                        self.constrain_value_one_way(arg, param_ty);
                     }
 
-                    self.constrain_value_one_way(&function, &initializer);
+                    self.constrain_value_one_way(function, &initializer);
                     function.set_type(initializer);
-                    self.constrain_value_one_way(&value, &ty);
+                    self.constrain_value_one_way(value, &ty);
                 }
             }
 
@@ -206,7 +197,7 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
                         Symbol::Type(ty) => {
                             value.set_kind(ValueKind::Metatype(ty.clone()));
 
-                            self.constrain_value_one_way(&value, &TypeKind::Metatype(Box::new(ty.clone())).anon());
+                            self.constrain_value_one_way(value, &TypeKind::Metatype(Box::new(ty.clone())).anon());
 
                             value.typ.set_kind(TypeKind::Metatype(Box::new(ty)));
                         }
@@ -215,13 +206,13 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
 
                             let typ = resolved_value.typ;
 
-                            self.constrain_value_one_way(&value, &typ);
+                            self.constrain_value_one_way(value, &typ);
                             value.set_type(typ);
                         }
                         Symbol::Function(function) => {
                             let typ = function.take_typ();
 
-                            self.constrain_value_one_way(&value, &typ);
+                            self.constrain_value_one_way(value, &typ);
                             value.set_type(typ);
 
                             value.set_kind(ValueKind::StaticFunc(function));
@@ -229,22 +220,22 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
                         Symbol::ExternFunction(function) => {
                             let typ = function.take_typ();
 
-                            self.constrain_value_one_way(&value, &typ);
+                            self.constrain_value_one_way(value, &typ);
                             value.set_type(typ);
 
                             value.set_kind(ValueKind::ExternFunc(function));
                         }
                         Symbol::InstanceVariable(var) => {
                             if let Some(self_type) = scope.scope_type("self") {
-                                let myself = ValueKind::SelfVal.anon(self_type.clone());
+                                let myself = ValueKind::SelfVal.anon(self_type);
 
                                 let typ = var.borrow().typ.clone();
 
-                                self.constrain_value_one_way(&value, &typ);
+                                self.constrain_value_one_way(value, &typ);
                                 value.set_type(typ);
 
                                 let kind = ValueKind::InstanceVariable { reciever: Box::new(myself),
-                                                                         var:      var.clone(), };
+                                                                         var, };
                                 value.set_kind(kind);
                             } else {
                                 println!("Compiler error: found instance variable in a context without self");
@@ -264,7 +255,7 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
                             Symbol::StaticMethod(method) => {
                                 let typ = method.take_typ();
 
-                                self.constrain_value_one_way(&value, &typ);
+                                self.constrain_value_one_way(value, &typ);
                                 value.set_type(typ);
 
                                 value.set_kind(ValueKind::StaticMethod(method));
@@ -302,22 +293,21 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
                         value.set_kind(ValueKind::Metatype(ty.clone()));
                         let typ = TypeKind::Metatype(Box::new(ty)).anon();
 
-                        self.constrain_value_one_way(&value, &typ);
+                        self.constrain_value_one_way(value, &typ);
                         value.set_type(typ);
                     }
 
                     Symbol::Value(res_val) => {
                         value.set_kind(res_val.kind);
-                        let typ = res_val.typ.clone();
 
-                        self.constrain_value_one_way(&value, &typ);
-                        value.set_type(typ);
+                        self.constrain_value_one_way(value, &res_val.typ);
+                        value.set_type(res_val.typ);
                     }
 
                     Symbol::StaticMethod(method) => {
                         let typ = method.take_typ();
 
-                        self.constrain_value_one_way(&value, &typ);
+                        self.constrain_value_one_way(value, &typ);
                         value.set_type(typ);
 
                         value.set_kind(ValueKind::StaticMethod(method));
@@ -328,7 +318,7 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
 
                         let typ = method.take_typ();
 
-                        self.constrain_value_one_way(&value, &typ);
+                        self.constrain_value_one_way(value, &typ);
                         value.set_type(typ);
 
                         let kind = ValueKind::InstanceMethod { reciever: Box::new(parent),
@@ -341,11 +331,11 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
 
                         let typ = var.borrow().typ.clone();
 
-                        self.constrain_value_one_way(&value, &typ);
+                        self.constrain_value_one_way(value, &typ);
                         value.set_type(typ);
 
                         let kind = ValueKind::InstanceVariable { reciever: Box::new(parent),
-                                                                 var:      var.clone(), };
+                                                                 var };
                         value.set_kind(kind);
                     }
 
@@ -355,7 +345,7 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
                         value.set_kind(res_val.kind);
                         let typ = res_val.typ.clone();
 
-                        self.constrain_value_one_way(&value, &typ);
+                        self.constrain_value_one_way(value, &typ);
                         value.set_type(typ);
                     }
 
@@ -442,35 +432,36 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
             }
         } else if let TypeKind::Infer { key: key1 } = one.kind() {
             if let TypeKind::Infer { key: abs_key } = two.kind() {
-                self.guesses
-                    .get(&abs_key)
+                if let Some(absolute) = self.guesses
+                    .get(abs_key)
                     .cloned()
-                    .map(|absolute| self.guesses.insert(*key1, absolute));
+                {
+                    self.guesses.insert(*key1, absolute)
+                }
             } else {
                 self.guesses.insert(*key1, two.clone())
             }
         } else if let TypeKind::Infer { key: key2 } = two.kind() {
             if let TypeKind::Infer { key: abs_key } = one.kind() {
-                self.guesses
+                if let Some(absolute) = self.guesses
                     .get(abs_key)
                     .cloned()
-                    .map(|absolute| self.guesses.insert(*key2, absolute));
+                {
+                    self.guesses.insert(*key2, absolute)
+                };
             } else {
                 self.guesses.insert(*key2, one.clone())
             }
         }
 
-        return Ok(());
+        Ok(())
     }
 
     fn constrain_value_one_way(&mut self, value: &Value, absolute: &Type) {
-        match self.constrain_one_way(&value.typ, absolute) {
-            Err(_) => {
-                let expected = format!("{absolute:?}");
+        if let Err(_) = self.constrain_one_way(&value.typ, absolute) {
+            let expected = format!("{absolute:?}");
                 self.debugger
                     .throw_single(ErrorCode::MismatchedType { expected }, &value.span);
-            }
-            _ => {}
         }
     }
 
@@ -489,10 +480,12 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
         // Now add it to the guess table
         if let TypeKind::Infer { key } = constrain.kind() {
             if let TypeKind::Infer { key: abs_key } = absolute.kind() {
-                self.guesses
+                if let Some(absolute) = self.guesses
                     .get(abs_key)
                     .cloned()
-                    .map(|absolute| self.guesses.insert(*key, absolute));
+                {
+                    self.guesses.insert(*key, absolute)
+                }
             } else {
                 self.guesses.insert(*key, absolute.clone())
             }
@@ -536,8 +529,8 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
 			return None;
 		};
 
-        if let Some(tc_key) = self.infer_keys.get(&key) {
-            return Some(*tc_key);
+        if let Some(tc_key) = self.infer_keys.get(key) {
+            Some(*tc_key)
         } else {
             let tc_key = self.checker.new_term_key();
 

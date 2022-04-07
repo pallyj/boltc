@@ -93,7 +93,7 @@ impl<'input, 'l> Sink<'input, 'l> {
                 break;
             }
 
-            self.token(lexeme.kind, lexeme.source.into());
+            self.token(lexeme.kind, lexeme.source);
         }
     }
 }
@@ -120,9 +120,9 @@ fn token_specific(token: Option<Token>) -> String {
         | SyntaxKind::PrivateKw
         | SyntaxKind::UnderscoreKw => format!("keyword `{}`", token.source),
 
-        SyntaxKind::Comment => format!("comment"),
-        SyntaxKind::Whitespace => format!("whitespace"),
-        SyntaxKind::Error => format!("error"),
+        SyntaxKind::Comment => "comment".to_string(),
+        SyntaxKind::Whitespace => "whitespace".to_string(),
+        SyntaxKind::Error => "error".to_string(),
 
         _ => format!("`{}`", token.source),
     }

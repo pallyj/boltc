@@ -21,7 +21,7 @@ ast!(
         EvalSmt,
         ReturnSmt,
         LetSmt,
-        NoOp,
+        NoOp
     }
 );
 
@@ -43,8 +43,7 @@ impl EvalSmt {
     pub fn is_escaped(&self) -> bool {
         self.0
             .children_with_tokens()
-            .find(|tok| tok.kind() == SyntaxKind::Semicolon)
-            .is_some()
+            .any(|tok| tok.kind() == SyntaxKind::Semicolon)
     }
 }
 
@@ -87,7 +86,7 @@ impl LetSmt {
             .children()
             .find(|element| element.kind() == SyntaxKind::BindType)
             .and_then(|element| element.first_child())
-            .map(|element| Type::cast(element))
+            .map(Type::cast)
     }
 
     pub fn value(&self) -> Option<Expr> {
@@ -95,7 +94,7 @@ impl LetSmt {
             .children()
             .find(|element| element.kind() == SyntaxKind::AssignValue)
             .and_then(|element| element.first_child())
-            .map(|element| Expr::cast(element))
+            .map(Expr::cast)
     }
 }
 
@@ -104,10 +103,10 @@ impl Debug for LetSmt {
         let label = self.label();
         let typ = self.typ()
                       .map(|typ| format!(": {typ:?}"))
-                      .unwrap_or("".to_string());
+                      .unwrap_or_else(|| "".to_string());
         let value = self.value()
                         .map(|value| format!(" = {value:?}"))
-                        .unwrap_or("".to_string());
+                        .unwrap_or_else(|| "".to_string());
 
         write!(f, "let {label}{typ}{value}")
     }
@@ -119,7 +118,7 @@ impl CodeBlock {
     pub fn statements(&self) -> Vec<Smt> {
         self.0
             .children()
-            .map(|smt| Smt::cast(smt.clone()))
+            .map(Smt::cast)
             .collect()
     }
 }

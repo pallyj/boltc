@@ -81,7 +81,7 @@ fn infer_method(method: &MethodRef, context: &BlirContext, debugger: &mut Debugg
 
     let scope = method.scope().clone();
 
-    let span = method.span.clone();
+    let span = method.span;
 
     infer_ctx.infer_codeblock(&mut method.code, &ty, &scope, &Some(span));
 
@@ -98,7 +98,7 @@ fn infer_func(func: &FunctionRef, context: &BlirContext, debugger: &mut Debugger
 
     let scope = func.scope().clone();
 
-    let span = func.span.clone();
+    let span = func.span;
 
     infer_ctx.infer_codeblock(&mut func.code, &ty, &scope, &Some(span));
 
@@ -117,13 +117,15 @@ fn replace_smt(smt: &mut Statement, table: &TypeTable, debugger: &mut Debugger) 
     match &mut smt.kind {
         StatementKind::Eval { value, escaped: _ } => replace_value(value, table, debugger),
         StatementKind::Return { value } => {
-            value.as_mut()
-                 .map(|value| replace_value(value, table, debugger));
+            if let Some(value) = value {
+                replace_value(value, table, debugger)
+            }
         }
         StatementKind::Bind { name: _, typ, value } => {
             replace_ty(typ, table, debugger);
-            value.as_mut()
-                 .map(|value| replace_value(value, table, debugger));
+            if let Some(value) = value {
+                replace_value(value, table, debugger)
+            }
         }
     }
 }

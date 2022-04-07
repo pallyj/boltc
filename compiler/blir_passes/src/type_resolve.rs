@@ -10,18 +10,18 @@ pub fn run_pass(library: &mut Library, factory: &AttributeFactory, context: &mut
     let scope = library.scope();
 
     for func in &library.extern_functions {
-        walk_extern_function(&func, debugger);
+        walk_extern_function(func, debugger);
         let mut borrow = func.borrow_mut();
         let attributes = borrow.attributes.clone();
         factory.apply_func_attributes(&attributes, &mut borrow.info, context, debugger)
     }
 
     for r#struct in &library.structs {
-        walk_struct(r#struct, &scope, factory, context, debugger);
+        walk_struct(r#struct, scope, factory, context, debugger);
     }
 
     for func in &library.functions {
-        walk_function(&func, debugger);
+        walk_function(func, debugger);
         let mut borrow = func.borrow_mut();
         let link_name = borrow.mangled().mangle();
 
@@ -31,7 +31,7 @@ pub fn run_pass(library: &mut Library, factory: &AttributeFactory, context: &mut
     }
 
     for func in &library.functions {
-        walk_function_code(&func, debugger);
+        walk_function_code(func, debugger);
     }
 }
 
@@ -42,19 +42,19 @@ fn walk_struct(r#struct: &StructRef, _scope: &ScopeRef, factory: &AttributeFacto
     let scope = r#struct.scope();
 
     for substruct in &r#struct.substructs {
-        walk_struct(&substruct, &scope, factory, context, debugger);
+        walk_struct(substruct, scope, factory, context, debugger);
     }
 
     for constant in &r#struct.constants {
-        walk_constant(&constant, &scope, debugger);
+        walk_constant(constant, scope, debugger);
     }
 
     for variable in &r#struct.instance_vars {
-        walk_variable(&variable, &scope, debugger);
+        walk_variable(variable, scope, debugger);
     }
 
     for method in &r#struct.methods {
-        walk_method(&method, debugger);
+        walk_method(method, debugger);
 
         let mut borrow = method.borrow_mut();
         let link_name = borrow.mangled().mangle();
@@ -65,16 +65,15 @@ fn walk_struct(r#struct: &StructRef, _scope: &ScopeRef, factory: &AttributeFacto
     }
 
     for method in &r#struct.methods {
-        walk_method_code(&method, debugger);
+        walk_method_code(method, debugger);
     }
 }
 
 fn walk_variable(var: &VarRef, scope: &ScopeRef, debugger: &mut Debugger) {
     walk_type(&mut (var.borrow_mut().typ), scope, debugger);
-    var.borrow_mut()
-       .default_value
-       .as_mut()
-       .map(|value| walk_value(value, scope, debugger));
+    if let Some(value) = &mut var.borrow_mut().default_value {
+        walk_value(value, scope, debugger)
+    }
 }
 
 fn walk_constant(var: &ConstantRef, scope: &ScopeRef, debugger: &mut Debugger) {
@@ -152,10 +151,11 @@ fn walk_statement(smt: &mut Statement, scope: &ScopeRef, debugger: &mut Debugger
         StatementKind::Bind { name, typ, value } => {
             walk_type(typ, scope, debugger);
 
-            *name = scope.define_variable(&name, typ.clone());
+            *name = scope.define_variable(name, typ.clone());
 
-            value.as_mut()
-                 .map(|value| walk_value(value, scope, debugger));
+            if let Some(value) = value {
+                walk_value(value, scope, debugger)
+            }
         }
 
         StatementKind::Eval { value, escaped: _ } => {
@@ -163,8 +163,9 @@ fn walk_statement(smt: &mut Statement, scope: &ScopeRef, debugger: &mut Debugger
         }
 
         StatementKind::Return { value } => {
-            value.as_mut()
-                 .map(|value| walk_value(value, scope, debugger));
+            if let Some(value) = value {
+                walk_value(value, scope, debugger);
+            }
         }
     }
 }

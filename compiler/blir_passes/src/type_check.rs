@@ -53,7 +53,7 @@ fn check_smt(smt: &Statement, return_type: &Type, debugger: &mut Debugger) {
         }
         StatementKind::Bind { name: _, typ, value } => {
             if let Some(value) = value.as_ref() {
-                check_value(&value, return_type, debugger);
+                check_value(value, return_type, debugger);
 
                 if !is_assignable_from(typ, &value.typ) {
                     let expected_ty = format!("{:?}", typ);
@@ -65,7 +65,7 @@ fn check_smt(smt: &Statement, return_type: &Type, debugger: &mut Debugger) {
         }
         StatementKind::Return { value } => {
             if let Some(value) = value.as_ref() {
-                check_value(&value, return_type, debugger);
+                check_value(value, return_type, debugger);
 
                 if !is_assignable_from(return_type, &value.typ) {
                     let expected_ty = format!("{:?}", return_type);
@@ -101,7 +101,7 @@ fn check_value(value: &Value, return_type: &Type, debugger: &mut Debugger) {
             if args.args.len() > params.len() {
                 // Extra args
                 let extra_spans = args.args[params.len()..args.args.len()].iter()
-                                                                          .filter_map(|arg| arg.span.clone())
+                                                                          .filter_map(|arg| arg.span)
                                                                           .collect();
 
                 debugger.throw(ErrorCode::ExtraParams, extra_spans);
@@ -152,7 +152,7 @@ fn check_if_value(if_value: &IfValue, mut spans: Vec<Span>, ty: &Type, debugger:
     if !is_assignable_from(ty, &if_value.positive.typ()) {
         // Should be an error
         if let Some(span) = if_value.positive.span() {
-            spans.push(span.clone());
+            spans.push(*span);
         }
     }
 
@@ -163,7 +163,7 @@ fn check_if_value(if_value: &IfValue, mut spans: Vec<Span>, ty: &Type, debugger:
             if !is_assignable_from(ty, &negative.typ()) {
                 // Should be an error
                 if let Some(span) = negative.span() {
-                    spans.push(span.clone());
+                    spans.push(*span);
                 }
             }
         }
@@ -171,7 +171,7 @@ fn check_if_value(if_value: &IfValue, mut spans: Vec<Span>, ty: &Type, debugger:
         None => {}
     }
 
-    if spans.len() > 0 {
+    if !spans.is_empty() {
         debugger.throw(ErrorCode::MismatchedIfBranchTypes, spans);
     }
 }
@@ -186,7 +186,8 @@ pub fn is_assignable_from(ty1: &Type, ty2: &Type) -> bool {
         return true;
     }
 
-    match (ty1.kind(), ty2.kind()) {
+    /*match (ty1.kind(), ty2.kind()) {
         _ => false,
-    }
+    }*/
+    false
 }

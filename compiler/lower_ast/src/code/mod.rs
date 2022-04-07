@@ -30,7 +30,7 @@ impl AstLowerer {
                      let name = smt.label();
                      let typ = smt.typ()
                                   .map(|typ| self.lower_type(typ))
-                                  .unwrap_or_else(|| Type::infer());
+                                  .unwrap_or_else(Type::infer);
                      let value = smt.value().map(|expr| self.lower_expr(expr));
 
                      StatementKind::Bind { name, typ, value }

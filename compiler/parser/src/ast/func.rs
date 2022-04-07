@@ -21,7 +21,7 @@ impl FuncDef {
     pub fn attributes(&self) -> Attributes {
         self.0
             .children()
-            .find_map(|node| Attributes::cast(node))
+            .find_map(Attributes::cast)
             .unwrap()
     }
 
@@ -36,8 +36,7 @@ impl FuncDef {
     pub fn is_static(&self) -> bool {
         self.0
             .children_with_tokens()
-            .find(|child| child.kind() == SyntaxKind::StaticKw)
-            .is_some()
+            .any(|child| child.kind() == SyntaxKind::StaticKw)
     }
 
     pub fn name(&self) -> String {
@@ -64,14 +63,14 @@ impl FuncDef {
             .children()
             .find(|child| child.kind() == SyntaxKind::FuncReturn)
             .and_then(|return_node| return_node.first_child())
-            .map(|return_ty| Type::cast(return_ty))
+            .map(Type::cast)
     }
 
     pub fn code(&self) -> Option<CodeBlock> {
         self.0
             .children()
             .find(|child| child.kind() == SyntaxKind::CodeBlock)
-            .and_then(|block_node| CodeBlock::cast(block_node))
+            .and_then(CodeBlock::cast)
     }
 }
 
@@ -110,7 +109,7 @@ impl FuncPar {
     pub fn typ(&self) -> Type {
         self.0
             .last_child()
-            .map(|last| Type::cast(last))
+            .map(Type::cast)
             .unwrap_or(Type::Error)
     }
 }

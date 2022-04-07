@@ -36,12 +36,8 @@ impl AstLowerer {
         for file_item in self.parse.items().into_iter() {
             match file_item {
                 FileItem::ImportDef(_import_def) => {
-                    // Do nothing for now
-                    match _import_def.import_library().as_str() {
-                        "intrinsics" => {
-                            parent.import(intrinsics.scope());
-                        }
-                        _ => {}
+                    if _import_def.import_library() == "intrinsics" {
+                        parent.import(intrinsics.scope());
                     }
                 }
 

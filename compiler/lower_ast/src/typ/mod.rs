@@ -20,7 +20,7 @@ impl AstLowerer {
             AstType::FuncType(func_type) => {
                 let return_type = func_type.return_type()
                                            .map(|ty| self.lower_type(ty))
-                                           .unwrap_or(TypeKind::Void.anon());
+                                           .unwrap_or_else(|| TypeKind::Void.anon());
 
                 let params = func_type.params()
                                       .into_iter()

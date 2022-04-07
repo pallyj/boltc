@@ -182,11 +182,7 @@ pub enum SyntaxKind {
 
 impl SyntaxKind {
     pub(crate) fn is_trivia(self) -> bool {
-        match self {
-            SyntaxKind::Comment => true,
-            SyntaxKind::Whitespace => true,
-            _ => false,
-        }
+        matches!(self, SyntaxKind::Comment | SyntaxKind::Whitespace)
     }
 }
 

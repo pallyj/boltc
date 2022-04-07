@@ -23,7 +23,7 @@ ast!(struct NoOp(NoOp));
 impl ImportDef {
     pub fn import_library(&self) -> String {
         find_token(&self.0, SyntaxKind::Ident).map(|token| token.text().to_string())
-                                              .unwrap_or("".to_string())
+                                              .unwrap_or_else(|| "".to_string())
     }
 }
 
@@ -36,7 +36,7 @@ ast!(
         StructDef,
         FuncDef,
         ImportDef,
-        NoOp,
+        NoOp
     }
 );
 

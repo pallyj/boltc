@@ -42,7 +42,7 @@ pub fn lower_function<'a, 'ctx>(func: &FunctionRef, context: &ModuleContext<'a, 
     for (basic_block, blir_block) in basic_blocks.into_iter().zip(func.blocks().iter()) {
         context.builder.position_at_end(basic_block);
 
-        lower_block(blir_block, &context, &function_context)?;
+        lower_block(blir_block, context, &function_context)?;
     }
 
     Ok(())
@@ -55,7 +55,7 @@ fn lower_block<'a, 'ctx>(blir_block: &BlockRef, context: &ModuleContext<'a, 'ctx
             Instruction::Assign { label, value } => {
                 let llvm_value = lower_value(value, context, fn_ctx)?;
 
-                fn_ctx.define_local(&label, llvm_value);
+                fn_ctx.define_local(label, llvm_value);
             }
 
             Instruction::AssignPtr { pointer, value } => {
@@ -123,11 +123,10 @@ impl<'ctx> FunctionContext<'ctx> {
     pub fn define_local(&self, label: &LabelValue, value: LLVMValue<'ctx>) { self.locals.borrow_mut().insert(label.label(), value); }
 
     pub fn get_local(&self, label: &LabelValue) -> LLVMValue<'ctx> {
-        self.locals
+        *self.locals
             .borrow()
             .get(&label.label())
             .expect("Undefined label")
-            .clone()
     }
 
     pub fn add_basic_block(&self, n: u64, block: BasicBlock<'ctx>) { self.basic_blocks.borrow_mut().insert(n, block); }

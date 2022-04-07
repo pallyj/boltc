@@ -22,7 +22,7 @@ impl AstLowerer {
                          .collect();
         let return_type = func.return_type()
                               .map(|rt| self.lower_type(rt))
-                              .unwrap_or(TypeKind::Void.anon());
+                              .unwrap_or_else(|| TypeKind::Void.anon());
         let code = self.lower_code_block(func.code().unwrap());
 
         let attributes = self.lower_attributes(func.attributes());
@@ -52,7 +52,7 @@ impl AstLowerer {
                          .collect();
         let return_type = func.return_type()
                               .map(|rt| self.lower_type(rt))
-                              .unwrap_or(TypeKind::Void.anon());
+                              .unwrap_or_else(|| TypeKind::Void.anon());
 
         let attributes = self.lower_attributes(func.attributes());
 
@@ -80,7 +80,7 @@ impl AstLowerer {
                          .collect();
         let return_type = func.return_type()
                               .map(|rt| self.lower_type(rt))
-                              .unwrap_or(TypeKind::Void.anon());
+                              .unwrap_or_else(|| TypeKind::Void.anon());
         let code = self.lower_code_block(func.code().unwrap());
 
         let attributes = self.lower_attributes(func.attributes());
