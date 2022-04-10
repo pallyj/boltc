@@ -61,7 +61,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
         // Resolve code in each struct
         for r#struct in &library.structs {
-
+            self.resolve_struct_code(r#struct);
         }
 
         // Run the pass on each function
@@ -75,8 +75,14 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 .set_link_name(mangled_name);
 
             // Apply function attributes
+            let mut func = func.borrow_mut();
+            let attributes = func.attributes.clone();
+            self.factory.apply_func_attributes(&attributes, &mut func.info, self.context, self.debugger)
+        }
 
-            // Go through the functions code?
+        for func in &library.functions {
+            // Go through the function's code
+            self.resolve_function_code(func);
         }
     }
 
@@ -103,24 +109,51 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
             self.resolve_struct_types(substruct);
         }
     
-        /*for constant in &r#struct.constants {
-            walk_constant(constant, scope, debugger);
+        for constant in &r#struct.constants {
+            self.resolve_constant(constant, scope);
         }
     
         for variable in &r#struct.instance_vars {
-            walk_variable(variable, scope, debugger);
+            self.resolve_variable(variable, scope);
         }
-    
+
         for method in &r#struct.methods {
-            walk_method(method, debugger);
+            // Resolve method types
+            self.resolve_method_types(method);
+
+            // Set link name
+            let mangled_name = method.borrow().mangle();
+            method.borrow_mut().info
+                  .set_link_name(mangled_name);
+
+            // Apply function attributes
+            let mut method = method.borrow_mut();
+            let attributes = method.attributes.clone();
+            self.factory.apply_func_attributes(&attributes, &mut method.info, self.context, self.debugger)
+        }
+    }
+
+    fn resolve_struct_code(&mut self, r#struct: &StructRef) {
+        let r#struct = r#struct.borrow();
     
-            let mut borrow = method.borrow_mut();
-            let link_name = borrow.mangle();
+        for substruct in &r#struct.substructs {
+            self.resolve_struct_code(substruct);
+        }
+
+        for method in &r#struct.methods {
+            self.resolve_method_code(method);
+        }
+    }
+
+    fn resolve_variable(&mut self, var: &VarRef, scope: &ScopeRef) {
+        self.resolve_type(&mut var.borrow_mut().typ, scope);
+
+        // Resolve value
+    }
     
-            borrow.info.set_link_name(link_name.clone());
-            let attributes = borrow.attributes.clone();
-            factory.apply_func_attributes(&attributes, &mut borrow.info, context, debugger)
-        }*/
+    fn resolve_constant(&mut self, var: &ConstantRef, scope: &ScopeRef) {
+        self.resolve_type(&mut var.borrow_mut().typ, scope);
+        // Resolve value
     }
 
     fn resolve_func_types(&mut self, function: &FunctionRef) {
@@ -137,6 +170,36 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
         // Add the functions parameters to its scope
         borrowed_func.add_params();
+    }
+
+    fn resolve_method_types(&mut self, method: &MethodRef) {
+        let mut borrowed_func = method.borrow_mut();
+        let parent_scope = borrowed_func.scope().clone();
+
+        // Resolve the return type
+        self.resolve_type(&mut borrowed_func.info.return_type_mut(), &parent_scope);
+
+        // Resolve each parameter's type
+        for param in borrowed_func.info.params_mut() {
+            self.resolve_type(&mut param.typ, &parent_scope);
+        }
+
+        // Add the functions parameters to its scope
+        borrowed_func.add_params();
+    }
+
+    fn resolve_function_code(&mut self, func: &FunctionRef) {
+        let mut borrowed_func = func.borrow_mut();
+        let func_scope = borrowed_func.scope().clone();
+
+        self.resolve_code_block(&mut borrowed_func.code, &func_scope)
+    }
+
+    fn resolve_method_code(&mut self, method: &MethodRef) {
+        let mut borrowed_method = method.borrow_mut();
+        let method_scope = borrowed_method.scope().clone();
+
+        self.resolve_code_block(&mut borrowed_method.code, &method_scope)
     }
 
     fn resolve_type(&mut self, typ: &mut Type, scope: &ScopeRef) {
@@ -191,6 +254,139 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
             _ => {
                 // Do nothing
+            }
+        }
+    }
+
+    fn resolve_code_block(&mut self, code: &mut CodeBlock, scope: &ScopeRef) {
+        for smt in code.statements_mut() {
+            self.resolve_statement(smt, scope);
+        }
+    }
+    
+    fn resolve_statement(&mut self, smt: &mut Statement, scope: &ScopeRef) {
+        match &mut smt.kind {
+            StatementKind::Bind { name, typ, value } => {
+                self.resolve_type(typ, scope);
+    
+                *name = scope.define_variable(name, typ.clone());
+    
+                if let Some(value) = value {
+                    self.resolve_value(value, scope)
+                }
+            }
+    
+            StatementKind::Eval { value, .. } => {
+                self.resolve_value(value, scope);
+            }
+    
+            StatementKind::Return { value } => {
+                if let Some(value) = value {
+                    self.resolve_value(value, scope);
+                }
+            }
+        }
+    }
+    
+    fn resolve_value(&mut self, value: &mut Value, scope: &ScopeRef) {
+        match &mut value.kind {
+            ValueKind::Named(name) => {
+                let Some(sym) = scope.lookup_symbol(name).map(|sym| sym.resolve()) else {
+                    self.debugger.throw_single(ErrorCode::SymbolNotFound { name: name.clone() }, &value.span );
+                    return
+                };
+    
+                match sym {
+                    Symbol::Type(ty) => {
+                        value.set_kind(ValueKind::Metatype(ty.clone()));
+                        value.typ.set_kind(TypeKind::Metatype(Box::new(ty)));
+                    }
+    
+                    Symbol::Value(res_val) => {
+                        value.set_kind(res_val.kind);
+                        value.typ = res_val.typ;
+                    }
+    
+                    Symbol::Function(function) => {
+                        value.set_type(function.take_typ());
+                        value.set_kind(ValueKind::StaticFunc(function));
+                    }
+    
+                    Symbol::ExternFunction(function) => {
+                        value.set_type(function.take_typ());
+                        value.set_kind(ValueKind::ExternFunc(function));
+                    }
+    
+                    Symbol::StaticMethod(function) => {
+                        value.set_type(function.take_typ());
+                        value.set_kind(ValueKind::StaticMethod(function));
+                    }
+    
+                    Symbol::InstanceVariable(instance) => {
+                        value.set_type(instance.borrow().typ.clone());
+                        let self_type = scope.scope_type("self")
+                                             .expect("Compiler Error: Expected self type when looking up instance variable");
+                        let myself = ValueKind::SelfVal.anon(self_type);
+                        value.set_kind(ValueKind::InstanceVariable { reciever: Box::new(myself),
+                                                                     var:      instance, })
+                    }
+    
+                    Symbol::InstanceMethod(method) => {
+                        value.set_type(method.take_typ());
+                        let self_type = scope.scope_type("self")
+                                             .expect("Compiler Error: Expected self type when looking up instance variable");
+                        let myself = ValueKind::SelfVal.anon(self_type);
+                        value.set_kind(ValueKind::InstanceMethod { reciever: Box::new(myself),
+                                                                   method })
+                    }
+    
+                    Symbol::Constant(constant) => {
+                        let constant_value = constant.borrow().value.clone();
+    
+                        value.set_kind(constant_value.kind);
+                        value.typ = constant_value.typ;
+                    }
+                }
+            }
+    
+            ValueKind::FuncCall { function, args } => {
+                self.resolve_value(function, scope);
+    
+                if let ValueKind::Metatype(t) = &mut function.kind {
+                    let t = std::mem::replace(t, TypeKind::Void);
+    
+                    function.set_kind(ValueKind::Init(t.anon()));
+                }
+
+                for arg in &mut args.args {
+                    self.resolve_value(arg, scope);
+                }
+    
+                if let TypeKind::Function { return_type, .. }
+                     | TypeKind::Method { return_type, .. } = function.typ.kind() {
+                    let return_type = return_type.as_ref().clone();
+    
+                    value.set_type(return_type);
+                }
+            }
+    
+            ValueKind::Member { parent, member: _ } => self.resolve_value(parent, scope),
+    
+            ValueKind::If(if_value) => self.resolve_if_value(if_value, scope),
+    
+            _ => {}
+        }
+    }
+    
+    fn resolve_if_value(&mut self, if_value: &mut IfValue, scope: &ScopeRef) {
+        self.resolve_value(&mut if_value.condition, scope);
+    
+        self.resolve_code_block(&mut if_value.positive, scope);
+    
+        if let Some(negative_block) = &mut if_value.negative {
+            match negative_block {
+                IfBranch::CodeBlock(codeblock) => self.resolve_code_block(codeblock, scope),
+                IfBranch::Else(else_if_value) => self.resolve_if_value(else_if_value, scope),
             }
         }
     }

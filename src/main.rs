@@ -94,10 +94,9 @@ impl Project {
 
         let attribute_factory = blir::attributes::default_attributes();
 
-        blir_passes::type_resolve::run_pass(self.library.as_mut().unwrap(),
-                                            &attribute_factory,
-                                            &mut context,
-                                            &mut debugger);
+        blir_passes::TypeResolvePass::new(&attribute_factory, &mut context, &mut debugger)
+            .run_pass(self.library.as_mut().unwrap());
+            
         if debugger.has_errors() {
             return (false, None);
         }
@@ -115,7 +114,7 @@ impl Project {
 
         let library = lowerer.finish();
 
-        let config = BuildConfig::new(BuildProfile::Release, BuildOutput::ASM, None);
+        let config = BuildConfig::new(BuildProfile::Release, BuildOutput::Object, None);
 
         codegen::compile(library, config);
 
