@@ -4,7 +4,7 @@ use std::{cell::{Ref, RefCell, RefMut},
           sync::Arc};
 
 use errors::Span;
-use mangle::{MangleComponent, Mangled};
+use mangle::{Path, MangledFunction};
 
 use super::{CodeBlock, FuncParam, FunctionInfo};
 use crate::{attributes::Attributes,
@@ -27,7 +27,7 @@ pub struct MethodInner {
     pub span:       Span,
     scope:          ScopeRef,
     self_type:      Type,
-    parent_mangled: Mangled,
+    path:         Path,
 }
 
 impl MethodInner {
@@ -76,10 +76,21 @@ impl MethodInner {
         }
     }
 
-    pub fn mangled(&self) -> Mangled {
-        self.parent_mangled
-            .clone()
-            .append(MangleComponent::Function(self.info.name().clone()))
+    pub fn path(&self) -> &Path {
+        &self.path
+    }
+
+    pub fn mangle(&self) -> String {
+        let (args, labels) = self.info.params()
+            .iter()
+            .map(|param| (param.typ.mangle(), param.label.as_ref().map(|param| param.as_str())))
+            .unzip();
+
+        MangledFunction {
+            path: &self.path,
+            args,
+            labels,
+        }.to_string()
     }
 }
 
@@ -94,11 +105,12 @@ impl Method {
                code: CodeBlock,
                span: Span,
                parent: &ScopeRef,
-               parent_mangled: Mangled)
+               parent_path: &Path)
                -> MethodRef {
         let func = MethodInner { attributes,
                                  visibility,
                                  is_static,
+                                 path: parent_path.clone().append(&name),
                                  info: FunctionInfo::new(name, params, return_type, true),
                                  code,
                                  span,
@@ -107,8 +119,7 @@ impl Method {
                                                       ScopeType::Code,
                                                       !is_static,
                                                       true),
-                                 self_type,
-                                 parent_mangled };
+                                 self_type, };
 
         MethodRef { func: Arc::new(Method { inner: RefCell::new(func), }), }
     }

@@ -115,7 +115,7 @@ impl Project {
 
         let library = lowerer.finish();
 
-        let config = BuildConfig::new(BuildProfile::Release, BuildOutput::Object, None);
+        let config = BuildConfig::new(BuildProfile::Release, BuildOutput::ASM, None);
 
         codegen::compile(library, config);
 

@@ -3,7 +3,7 @@ use std::{cell::{Ref, RefCell, RefMut},
           ops::Deref,
           sync::Arc};
 
-use mangle::{MangleComponent, Mangled};
+use mangle::{Path, MangledStruct};
 
 use super::{Type, TypeKind};
 use crate::{attributes::Attributes,
@@ -34,25 +34,26 @@ pub struct StructInner {
 
     pub is_transparent: bool,
 
-    parent_mangled: Mangled,
+    path: Path,
 }
 
 impl StructInner {
     pub fn scope(&self) -> &ScopeRef { &self.scope }
 
-    pub fn mangled(&self) -> Mangled {
-        self.parent_mangled
-            .clone()
-            .append(MangleComponent::Struct(self.name.clone()))
+    pub fn path(&self) -> &Path {
+        &self.path
+    }
+
+    pub fn mangle(&self) -> String {
+        MangledStruct(&self.path).to_string()
     }
 }
 
 impl Struct {
-    pub fn new(attributes: Attributes, visibility: Visibility, name: String, parent: &ScopeRef, parent_mangled: Mangled) -> StructRef {
+    pub fn new(attributes: Attributes, visibility: Visibility, name: String, parent: &ScopeRef, parent_path: Path) -> StructRef {
         let r#struct = StructInner { attributes,
                                      visibility,
                                      link_name: name.clone(),
-                                     name,
                                      scope: ScopeRef::new(Some(parent),
                                                           ScopeRelation::SameFile,
                                                           ScopeType::Container,
@@ -61,7 +62,8 @@ impl Struct {
                                      substructs: Vec::new(),
                                      methods: Vec::new(),
                                      instance_vars: Vec::new(),
-                                     parent_mangled,
+                                     path: parent_path.append(&name),
+                                     name,
                                      constants: Vec::new(),
                                      is_transparent: false };
 

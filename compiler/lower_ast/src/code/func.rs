@@ -2,13 +2,13 @@ use blir::{code::{ExternFunction, ExternFunctionRef, FuncParam, Function, Functi
            scope::ScopeRef,
            typ::{Type, TypeKind},
            Visibility};
-use mangle::Mangled;
+use mangle::{Path};
 use parser::{ast::func::FuncDef, lexer::SyntaxKind};
 
 use crate::AstLowerer;
 
 impl AstLowerer {
-    pub fn lower_func(&self, func: FuncDef, parent: &ScopeRef, parent_mangled: Mangled) -> FunctionRef {
+    pub fn lower_func(&self, func: FuncDef, parent: &ScopeRef, parent_mangled: &Path) -> FunctionRef {
         let range = func.range();
         let span = self.span(range);
 
@@ -16,9 +16,17 @@ impl AstLowerer {
         let name = func.name();
         let params = func.parameters()
                          .iter()
-                         .map(|param| FuncParam { label:     None,
-                                                  bind_name: param.label(),
-                                                  typ:       self.lower_type(param.typ()), })
+                         .map(|param| {
+                             let (label, bind_name) = if let Some(bind_name) = param.second_label() {
+                                 (Some(param.first_label()), bind_name)
+                             } else {
+                                (None, param.first_label())
+                             };
+
+                             FuncParam { label,
+                                         bind_name,
+                                         typ:       self.lower_type(param.typ()), }
+                         })
                          .collect();
         let return_type = func.return_type()
                               .map(|rt| self.lower_type(rt))
@@ -35,7 +43,7 @@ impl AstLowerer {
                       code,
                       span,
                       parent,
-                      parent_mangled)
+                      parent_mangled.clone())
     }
 
     pub fn lower_extern_func(&self, func: FuncDef, parent: &ScopeRef) -> ExternFunctionRef {
@@ -46,9 +54,17 @@ impl AstLowerer {
         let name = func.name();
         let params = func.parameters()
                          .iter()
-                         .map(|param| FuncParam { label:     None,
-                                                  bind_name: param.label(),
-                                                  typ:       self.lower_type(param.typ()), })
+                         .map(|param| {
+                            let (label, bind_name) = if let Some(bind_name) = param.second_label() {
+                                (Some(param.first_label()), bind_name)
+                            } else {
+                               (None, param.first_label())
+                            };
+
+                            FuncParam { label,
+                                        bind_name,
+                                        typ:       self.lower_type(param.typ()), }
+                         })
                          .collect();
         let return_type = func.return_type()
                               .map(|rt| self.lower_type(rt))
@@ -65,7 +81,7 @@ impl AstLowerer {
                             parent)
     }
 
-    pub fn lower_method(&self, func: FuncDef, reciever: Type, parent: &ScopeRef, parent_mangled: Mangled) -> MethodRef {
+    pub fn lower_method(&self, func: FuncDef, reciever: Type, parent: &ScopeRef, parent_mangled: &Path) -> MethodRef {
         let range = func.range();
         let span = self.span(range);
 
@@ -74,9 +90,17 @@ impl AstLowerer {
         let name = func.name();
         let params = func.parameters()
                          .iter()
-                         .map(|param| FuncParam { label:     None,
-                                                  bind_name: param.label(),
-                                                  typ:       self.lower_type(param.typ()), })
+                         .map(|param| {
+                            let (label, bind_name) = if let Some(bind_name) = param.second_label() {
+                                (Some(param.first_label()), bind_name)
+                            } else {
+                               (None, param.first_label())
+                            };
+
+                            FuncParam { label,
+                                        bind_name,
+                                        typ:       self.lower_type(param.typ()), }
+                         })
                          .collect();
         let return_type = func.return_type()
                               .map(|rt| self.lower_type(rt))

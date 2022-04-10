@@ -30,6 +30,8 @@ ast!(struct MemberExpr(MemberExpr));
 ast!(struct FuncCallExpr(FuncCallExpr));
 ast!(struct UnitExpr(UnitExpr));
 
+ast!(struct FuncArg(FuncArg));
+
 ast!(
     enum Expr {
         NamedExpr,
@@ -191,21 +193,33 @@ impl FuncCallExpr {
             .unwrap()
     }
 
-    pub fn args(&self) -> Vec<Expr> {
+    pub fn args(&self) -> impl Iterator<Item = FuncArg> {
         self.0
             .children()
             .find(|node| node.kind() == SyntaxKind::CommaSeparatedList)
             .unwrap()
             .children()
+            .filter_map(FuncArg::cast)
+    }
+}
+
+impl FuncArg {
+    pub fn label(&self) -> Option<String> {
+        find_token(&self.0, SyntaxKind::Ident)
+            .map(|arg_label| arg_label.text().to_string())
+    }
+
+    pub fn value(&self) -> Expr {
+        self.0
+            .last_child()
             .map(Expr::cast)
-            .collect()
+            .unwrap()
     }
 }
 
 impl Debug for FuncCallExpr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let args = self.args()
-                       .iter()
                        .map(|arg| format!("{arg:?}"))
                        .collect::<Vec<_>>()
                        .join(", ");
@@ -230,4 +244,13 @@ impl Debug for IfExpr {
 
 impl Debug for UnitExpr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "()") }
+}
+
+impl Debug for FuncArg {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(label) = self.label() {
+            write!(f, "{label}: ")?;
+        }
+        write!(f, "{:?}", self.value())
+    }
 }

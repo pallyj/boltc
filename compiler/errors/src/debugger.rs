@@ -32,17 +32,19 @@ impl<'a> Debugger<'a> {
         println!("{:>4} {} {}",
                  line_info.line.to_string().bold().blue(),
                  "|".bold().blue(),
-                 line_info.text);
+                 line_info.text.replace("\t", "    ").trim_end());
 
-        let sep = (0..(span.1 .1 - span.1 .0)).map(|_| '^')
-                                              .collect::<String>()
-                                              .red()
-                                              .bold();
+        let ntabs = (&line_info.text[0..line_info.col]).rmatches("\t").count();
 
-        println!("    {} {:width$}{sep}",
-                 "",
-                 "|".bold().blue(),
-                 width = line_info.col + 2);
+        let width = line_info.col + (3 * ntabs);
+
+        let sep = (0..(span.1.1 - span.1.0)).map(|_| '^')
+                                            .collect::<String>()
+                                            .red()
+                                            .bold();
+
+        println!("     {:width$}  {sep}",
+                 "|".bold().blue());
 
         println!("     {} ", "|".bold().blue());
 

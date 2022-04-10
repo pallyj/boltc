@@ -177,6 +177,8 @@ pub enum SyntaxKind {
     Attribute,
     Attributes,
 
+    FuncArg,
+
     _Invalid,
 }
 

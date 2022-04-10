@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use mangle::{MangleComponent, Mangled};
+use mangle::Path;
 
 use crate::{code::{ExternFunctionRef, FunctionRef},
             scope::{ScopeRef, ScopeRelation, ScopeType},
@@ -12,7 +12,7 @@ pub struct Library {
 
     scope: ScopeRef,
 
-    pub mangled: Mangled,
+    pub path: Path,
 
     pub functions:        Vec<FunctionRef>,
     pub extern_functions: Vec<ExternFunctionRef>,
@@ -24,7 +24,7 @@ pub struct Library {
 impl Library {
     pub fn new(name: &str) -> Library {
         Library { name:             name.to_string(),
-                  mangled:          Mangled::new(MangleComponent::Library(name.to_string())),
+                  path:             Path::new(name),
                   scope:            ScopeRef::new(None, ScopeRelation::None, ScopeType::Library, false, false),
                   functions:        Vec::new(),
                   extern_functions: Vec::new(),
@@ -92,7 +92,7 @@ impl Library {
 
     pub fn scope(&self) -> &ScopeRef { &self.scope }
 
-    pub fn mangled(&self) -> &Mangled { &self.mangled }
+    pub fn path(&self) -> &Path { &self.path }
 }
 
 impl Debug for Library {

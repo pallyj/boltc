@@ -10,7 +10,7 @@ impl BlirLowerer {
         let is_packed = false;
         let is_transparent = r#struct.borrow().is_transparent;
 
-        let link_name = r#struct.borrow().mangled().mangle();
+        let link_name = r#struct.borrow().mangle();
 
         r#struct.borrow_mut().link_name = link_name;
 

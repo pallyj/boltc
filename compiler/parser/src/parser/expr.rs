@@ -33,7 +33,7 @@ impl<'input, 'l> Parser<'input, 'l> {
 			} else if self.check(SyntaxKind::OpenParen) {
 				let marker = completed.precede(self);
 
-				self.parse_paren_comma_seq(|parser| parser.parse_expr());
+				self.parse_paren_comma_seq(Self::parse_func_arg);
 
 				completed = marker.complete(self, SyntaxKind::FuncCallExpr);
 			}
@@ -45,6 +45,21 @@ impl<'input, 'l> Parser<'input, 'l> {
 				break;
 			}
         }
+    }
+
+    pub fn parse_func_arg(&mut self) {
+        let marker = self.start();
+
+        if self.check(SyntaxKind::Ident) && self.check_ahead(1, SyntaxKind::Colon) {
+            // The func arg has a label
+
+            self.eat(SyntaxKind::Ident);
+            self.eat(SyntaxKind::Colon);
+        }
+
+        self.parse_expr();
+
+        marker.complete(self, SyntaxKind::FuncArg);
     }
 
     // pub fn parse_expr_postfix(
@@ -129,7 +144,8 @@ impl<'input, 'l> Parser<'input, 'l> {
 			self.parse_expr_if(marker)
 		} else {
 			// Try to do recovery
-			self.error_recover("expected expression", EXPR_RECOVERY_SET)
+			self.error_recover("expected expression", EXPR_RECOVERY_SET);
+            marker.complete(self, SyntaxKind::Error)
 		}
     }
 

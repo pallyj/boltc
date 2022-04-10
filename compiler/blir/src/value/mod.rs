@@ -115,6 +115,7 @@ impl Value {
 #[derive(Clone)]
 pub struct FunctionArgs {
     pub args: Vec<Value>,
+    pub labels: Vec<Option<String>>,
 }
 
 impl Debug for FunctionArgs {

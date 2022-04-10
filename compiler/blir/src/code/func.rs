@@ -4,7 +4,7 @@ use std::{cell::{Ref, RefCell, RefMut},
           sync::Arc};
 
 use errors::Span;
-use mangle::{MangleComponent, Mangled};
+use mangle::{Path, MangledFunction};
 
 use super::CodeBlock;
 use crate::{attributes::Attributes,
@@ -21,7 +21,7 @@ pub struct FunctionInner {
     pub code:       CodeBlock,
     pub span:       Span,
     scope:          ScopeRef,
-    parent_mangled: Mangled,
+    path:           Path,
 }
 
 impl FunctionInner {
@@ -51,10 +51,21 @@ impl FunctionInner {
 
     pub fn scope(&self) -> &ScopeRef { &self.scope }
 
-    pub fn mangled(&self) -> Mangled {
-        self.parent_mangled
-            .clone()
-            .append(MangleComponent::Function(self.info.name.clone()))
+    pub fn path(&self) -> &Path {
+        &self.path
+    }
+
+    pub fn mangle(&self) -> String {
+        let (args, labels) = self.info.params()
+            .iter()
+            .map(|param| (param.typ.mangle(), param.label.as_ref().map(|param| param.as_str())))
+            .unzip();
+
+        MangledFunction {
+            path: &self.path,
+            args,
+            labels,
+        }.to_string()
     }
 }
 
@@ -94,10 +105,11 @@ impl Function {
                code: CodeBlock,
                span: Span,
                parent: &ScopeRef,
-               parent_mangled: Mangled)
+               parent_path: Path)
                -> FunctionRef {
         let func = FunctionInner { attributes,
                                    visibility,
+                                   path: parent_path.append(&name),
                                    info: FunctionInfo::new(name, params, return_type, false),
                                    code,
                                    span,
@@ -105,8 +117,7 @@ impl Function {
                                                         ScopeRelation::SameFile,
                                                         ScopeType::Code,
                                                         false,
-                                                        true),
-                                   parent_mangled };
+                                                        true) };
 
         FunctionRef { func: Arc::new(Function { inner: RefCell::new(func), }), }
     }

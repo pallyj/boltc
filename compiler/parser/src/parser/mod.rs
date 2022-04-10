@@ -43,6 +43,12 @@ impl<'input, 'l> Parser<'input, 'l> {
             .unwrap_or(false)
     }
 
+    pub fn check_ahead(&mut self, n: usize, token: SyntaxKind) -> bool {
+        self.peek_ahead(n)
+            .map(|next_token| next_token == token)
+            .unwrap_or(false)
+    }
+
     pub fn eat(&mut self, token: SyntaxKind) -> bool {
         if !self.check(token) {
             return false;
@@ -188,6 +194,27 @@ impl<'input, 'l> Parser<'input, 'l> {
     fn peek(&mut self) -> Option<SyntaxKind> {
         self.eat_trivia();
         self.peek_raw()
+    }
+
+    fn peek_ahead(&mut self, n: usize) -> Option<SyntaxKind> {
+        let mut i = 0;
+        let mut raw_index = self.cursor;
+
+        while let Some(lexeme) = self.lexemes.get(raw_index) {
+            raw_index += 1;
+
+            if lexeme.kind.is_trivia() { continue; }
+
+            if i == n {
+                return Some(lexeme.kind); 
+            } else if i > n {
+                return None;
+            }
+
+            i += 1;
+        }
+
+        None
     }
 
     fn peek_raw(&self) -> Option<SyntaxKind> { self.lexemes.get(self.cursor).map(|token| token.kind) }

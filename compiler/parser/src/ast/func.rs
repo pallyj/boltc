@@ -11,7 +11,7 @@
 
 use std::fmt::Debug;
 
-use super::{attribute::Attributes, smt::CodeBlock, typ::Type};
+use super::{attribute::Attributes, smt::CodeBlock, typ::Type, find_token};
 use crate::lexer::SyntaxKind;
 
 ast!(struct FuncPar(FuncPar));
@@ -99,12 +99,22 @@ impl Debug for FuncDef {
 }
 
 impl FuncPar {
-    pub fn label(&self) -> String {
+    pub fn first_label(&self) -> String {
         self.0
             .first_token()
             .map(|t| t.text().to_string())
-            .unwrap_or_else(|| "".to_string())
+            .unwrap()
     }
+
+    pub fn second_label(&self) -> Option<String> {
+        self.0
+            .children()
+            .find(|child| child.kind() == SyntaxKind::FuncName)
+            .and_then(|name| find_token(&name, SyntaxKind::Ident))
+            .map(|bind_name_token| bind_name_token.text().to_string())
+    }
+
+
 
     pub fn typ(&self) -> Type {
         self.0
@@ -115,5 +125,12 @@ impl FuncPar {
 }
 
 impl Debug for FuncPar {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{}: {:?}", self.label(), self.typ()) }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(second_label) = self.second_label() {
+            write!(f, "{} {}: {:?}", self.first_label(), second_label, self.typ())
+        } else {
+            write!(f, "{}: {:?}", self.first_label(), self.typ())
+        }
+       
+    }
 }

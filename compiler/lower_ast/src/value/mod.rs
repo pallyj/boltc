@@ -42,13 +42,13 @@ impl AstLowerer {
             AstExpr::FuncCallExpr(call) => {
                 let func = self.lower_expr(call.function());
 
-                let args = call.args()
-                               .into_iter()
-                               .map(|arg| self.lower_expr(arg))
-                               .collect();
+                let (labels, args): (Vec<_>, Vec<_>) =
+                    call.args()
+                        .map(|arg| (arg.label(), self.lower_expr(arg.value())))
+                        .unzip();
 
                 ValueKind::FuncCall { function: Box::new(func),
-                                      args:     FunctionArgs { args }, }.spanned_infer(span)
+                                      args:     FunctionArgs { args, labels }, }.spanned_infer(span)
             }
 
             AstExpr::IfExpr(expr) => {

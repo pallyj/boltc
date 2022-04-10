@@ -46,9 +46,15 @@ impl<'input, 'l> Parser<'input, 'l> {
                                                             SyntaxKind::CloseParen]);
         }
 
+        if !self.check(SyntaxKind::Colon) {
+            self.name(&[SyntaxKind::Comma,
+                        SyntaxKind::CloseParen]);
+        }
+
         if !self.eat(SyntaxKind::Colon) {
+
             self.error_recover("expected function param", &[SyntaxKind::Comma,
-                                                            SyntaxKind::CloseParen]);
+                                                                SyntaxKind::CloseParen]);
         }
 
         self.parse_ty();

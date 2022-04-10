@@ -25,8 +25,26 @@ func main() {
 	gcd(7, 11).print()*/
 
 	for(0, 20, loopBody)
+
+	loop(while: countDownFrom5)
+	// loop { false }
 }
-;
+
+func countDownFrom5(): Bool {
+	decrement(5)
+}
+
+func decrement(n : Int): Bool {
+	if n.eq(0) {
+		false
+	} else {
+		n.print()
+
+		decrement(n.sub(1))
+	}
+
+
+}
 
 func loopBody(i: Int) {
 	factorial(i.mod(20)).print()
@@ -39,4 +57,8 @@ func for(low: Int, high: Int, f: func (Int)) {
 	}
 }
 
-func doNothing(i: Int)
+func loop(while body: func(): Bool) {
+	if body().repr {
+		loop(body)
+	}
+}

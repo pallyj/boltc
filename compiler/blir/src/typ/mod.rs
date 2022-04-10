@@ -5,6 +5,7 @@ use std::{fmt::Debug,
           sync::atomic::{AtomicU64, Ordering}};
 
 use errors::Span;
+use mangle::MangledType;
 pub use struct_::*;
 
 use crate::{scope::ScopeRef, Symbol};
@@ -123,6 +124,39 @@ impl Type {
             _ => TypeKind::Function { return_type: Box::new(self.clone()),
                                       params:      vec![self.clone()],
                                       labels:      vec![], },
+        }
+    }
+
+    pub fn mangle(&self) -> MangledType {
+        match self.kind() {
+            TypeKind::Named(_) => panic!(),
+            TypeKind::Member { .. } => panic!(),
+            TypeKind::Infer { .. } => panic!(),
+
+            TypeKind::Integer { bits: 1 } => MangledType::Integer1,
+            TypeKind::Integer { bits: 8 } => MangledType::Integer8,
+            TypeKind::Integer { bits: 16 } => MangledType::Integer16,
+            TypeKind::Integer { bits: 32 } => MangledType::Integer32,
+            TypeKind::Integer { bits: 64 } => MangledType::Integer64,
+
+            TypeKind::Float { bits: 16 } => MangledType::Float16,
+            TypeKind::Float { bits: 32 } => MangledType::Float32,
+            TypeKind::Float { bits: 64 } => MangledType::Float64,
+
+            
+            TypeKind::Function { return_type, params, labels: _ } => {
+                let params = params.iter()
+                    .map(|param| param.mangle())
+                    .collect();
+
+                MangledType::Function( params, Box::new(return_type.mangle()) )
+            }
+            TypeKind::Struct(r#struct) => MangledType::Struct(r#struct.borrow().path().clone()),
+
+            TypeKind::Void => MangledType::Void,
+            TypeKind::Divergent => MangledType::Diverges,
+
+            _ => panic!(),
         }
     }
 }

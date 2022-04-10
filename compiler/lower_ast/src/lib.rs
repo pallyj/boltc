@@ -43,7 +43,7 @@ impl AstLowerer {
 
                 FileItem::FuncDef(func_def) => {
                     if func_def.code().is_some() {
-                        let lowered_function = self.lower_func(func_def, &parent, library.mangled().clone());
+                        let lowered_function = self.lower_func(func_def, &parent, library.path());
 
                         library.add_function(lowered_function);
                     } else {
@@ -54,7 +54,7 @@ impl AstLowerer {
                 }
 
                 FileItem::StructDef(struct_def) => {
-                    let lowered_struct = self.lower_struct(struct_def, &parent, library.mangled().clone());
+                    let lowered_struct = self.lower_struct(struct_def, &parent, library.path());
 
                     library.add_struct(lowered_struct);
                 }
