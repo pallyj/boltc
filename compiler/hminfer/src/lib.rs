@@ -165,9 +165,9 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
 
                     self.constrain_value_one_way(value, return_ty.as_ref());
                 } else if let TypeKind::Metatype(t) = function.as_ref().typ.kind() {
-                    let ty = t.clone().anon();
+                    let ty = t.clone();
 
-                    let initializer = t.clone().anon().init_type().anon();
+                    let initializer = t.clone().init_type().anon();
 
                     let TypeKind::Function { return_type: _, params, labels: _ } = initializer.kind() else {
 						return;
@@ -197,9 +197,9 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
                         Symbol::Type(ty) => {
                             value.set_kind(ValueKind::Metatype(ty.clone()));
 
-                            self.constrain_value_one_way(value, &TypeKind::Metatype(Box::new(ty.clone())).anon());
+                            self.constrain_value_one_way(value, &TypeKind::Metatype(Box::new(ty.clone().anon())).anon());
 
-                            value.typ.set_kind(TypeKind::Metatype(Box::new(ty)));
+                            value.typ.set_kind(TypeKind::Metatype(Box::new(ty.anon())));
                         }
                         Symbol::Value(resolved_value) => {
                             value.set_kind(resolved_value.kind);
@@ -291,7 +291,7 @@ impl<'a, 'b> TypeInferCtx<'a, 'b> {
                 match sym {
                     Symbol::Type(ty) => {
                         value.set_kind(ValueKind::Metatype(ty.clone()));
-                        let typ = TypeKind::Metatype(Box::new(ty)).anon();
+                        let typ = TypeKind::Metatype(Box::new(ty.anon())).anon();
 
                         self.constrain_value_one_way(value, &typ);
                         value.set_type(typ);

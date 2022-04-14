@@ -1,5 +1,5 @@
 use super::{marker::Marker, Parser};
-use crate::{lexer::SyntaxKind, parser::file::INNER_ITEM_RECOVERY_SET};
+use crate::{lexer::SyntaxKind, parser::file::{INNER_ITEM_RECOVERY_SET, ITEM_RECOVERY_SET}};
 
 impl<'input, 'l> Parser<'input, 'l> {
     pub fn parse_init(&mut self, marker: Marker) {
@@ -36,6 +36,17 @@ impl<'input, 'l> Parser<'input, 'l> {
         }
 
         marker.complete(self, SyntaxKind::FuncDef);
+    }
+
+    pub fn parse_operator_func(&mut self, marker: Marker) {
+        assert!(self.check(SyntaxKind::OperatorKw));
+        self.eat(SyntaxKind::OperatorKw);
+
+        if self.check(SyntaxKind::FuncKw) {
+            self.parse_func(marker);
+        } else {
+            self.error_recover("", ITEM_RECOVERY_SET);
+        }
     }
 
     pub fn parse_func_par(&mut self) {

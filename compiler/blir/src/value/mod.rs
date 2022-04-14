@@ -10,7 +10,7 @@ pub use var::*;
 
 use crate::{code::{CodeBlock, ExternFunctionRef, FunctionRef, MethodRef},
             intrinsics::{BinaryIntrinsicFn, UnaryIntrinsicFn},
-            typ::{Type, TypeKind}};
+            typ::{Type, TypeKind}, Monomorphizer};
 
 #[derive(Clone)]
 pub enum ValueKind {
@@ -25,6 +25,8 @@ pub enum ValueKind {
         args:     FunctionArgs,
     },
     SelfVal,
+    Polymorphic(Monomorphizer),
+    Operator(String),
 
     // Literal Values
     IntLiteral(u64),
@@ -169,6 +171,8 @@ impl Debug for Value {
             ValueKind::Member { parent, member } => write!(f, "{parent:?}.{member}"),
             ValueKind::FuncCall { function, args } => write!(f, "{function:?}({args:?})"),
             ValueKind::SelfVal => write!(f, "self"),
+            ValueKind::Polymorphic(mono) => write!(f, "function ({} degrees)", mono.degrees()),
+            ValueKind::Operator(operator) => write!(f, "{operator}"),
             ValueKind::IntLiteral(i) => write!(f, "{i}"),
             ValueKind::FloatLiteral(fl) => write!(f, "{}", fl),
             ValueKind::BoolLiteral(b) => write!(f, "{b}"),
@@ -197,5 +201,12 @@ impl Debug for Value {
         }?;
 
         write!(f, " : {:?})", self.typ)
+    }
+}
+
+
+impl Default for Value {
+    fn default() -> Self {
+        ValueKind::Unit.infer()
     }
 }

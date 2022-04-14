@@ -5,7 +5,7 @@ use mangle::Path;
 use crate::{code::{ExternFunctionRef, FunctionRef},
             scope::{ScopeRef, ScopeRelation, ScopeType},
             typ::{StructRef, TypeKind},
-            Symbol, SymbolWrapper};
+            Symbol, SymbolWrapper, value::ConstantRef};
 
 pub struct Library {
     name: String,
@@ -17,6 +17,7 @@ pub struct Library {
     pub functions:        Vec<FunctionRef>,
     pub extern_functions: Vec<ExternFunctionRef>,
     pub structs:          Vec<StructRef>,
+    pub constants:        Vec<ConstantRef>,
 
     files: Vec<ScopeRef>,
 }
@@ -29,6 +30,7 @@ impl Library {
                   functions:        Vec::new(),
                   extern_functions: Vec::new(),
                   structs:          Vec::new(),
+                  constants:        Vec::new(),
                   files:            vec![], }
     }
 
@@ -46,36 +48,24 @@ impl Library {
 
     pub fn name(&self) -> &String { &self.name }
 
-    pub fn add_function(&mut self, func: FunctionRef) -> Option<SymbolWrapper> {
+    pub fn add_function(&mut self, func: FunctionRef) -> bool {
         // Add the function to the list of functions
         self.functions.push(func.clone());
 
         // Add the functions symbol, returning another symbol if it exists
-        let (visibility, name) = {
-            let func_ref = func.borrow();
+        let name = func.borrow().info.name().clone();
 
-            (func_ref.visibility, func_ref.info.name().clone())
-        };
-
-        let symbol = Symbol::Function(func);
-
-        self.scope.add_symbol(name, visibility, symbol)
+        self.scope.add_function(name, func)
     }
 
-    pub fn add_extern_function(&mut self, func: ExternFunctionRef) -> Option<SymbolWrapper> {
+    pub fn add_extern_function(&mut self, func: ExternFunctionRef) -> bool {
         // Add the function to the list of functions
         self.extern_functions.push(func.clone());
 
         // Add the functions symbol, returning another symbol if it exists
-        let (visibility, name) = {
-            let func_ref = func.borrow();
+        let name = func.borrow().info.name().clone();
 
-            (func_ref.visibility, func_ref.info.name().clone())
-        };
-
-        let symbol = Symbol::ExternFunction(func);
-
-        self.scope.add_symbol(name, visibility, symbol)
+        self.scope.add_extern_function(name, func)
     }
 
     pub fn add_struct(&mut self, r#struct: StructRef) -> Option<SymbolWrapper> {
@@ -87,6 +77,22 @@ impl Library {
         let name = r#struct.name();
 
         let symbol = Symbol::Type(TypeKind::Struct(r#struct));
+        self.scope.add_symbol(name, visibility, symbol)
+    }
+
+    pub fn add_constant(&mut self, var: ConstantRef) -> Option<SymbolWrapper> {
+        // Add the function to the list of functions
+        self.constants.push(var.clone());
+
+        // Add the functions symbol, returning another symbol if it exists
+        let cloned = var.clone();
+        let var_ref = cloned.borrow();
+
+        let visibility = var_ref.visibility;
+        let name = var_ref.name.clone();
+
+        let symbol = Symbol::Constant(var);
+
         self.scope.add_symbol(name, visibility, symbol)
     }
 

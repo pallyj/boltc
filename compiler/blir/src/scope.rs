@@ -2,7 +2,7 @@ use std::{cell::RefCell,
           collections::HashMap,
           sync::{Arc, Weak}};
 
-use crate::{typ::Type, value::ValueKind, Symbol, SymbolWrapper, Visibility};
+use crate::{typ::Type, value::ValueKind, Symbol, SymbolWrapper, Visibility, code::{FunctionRef, ExternFunctionRef, MethodRef}, Monomorphizer};
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ScopeRelation {
@@ -50,6 +50,18 @@ impl ScopeRef {
                             is_function };
 
         ScopeRef { inner: Arc::new(RefCell::new(scope)), }
+    }
+
+    pub fn add_function(&self, name: String, function: FunctionRef) -> bool { self.inner.borrow_mut().add_function(name, function) }
+
+    pub fn add_extern_function(&self, name: String, function: ExternFunctionRef) -> bool { self.inner.borrow_mut().add_extern_function(name, function) }
+
+    pub fn add_method(&self, name: String, function: MethodRef) -> bool {
+        if function.is_static() {
+            self.inner.borrow_mut().add_static_method(name, function)
+        } else {
+            self.inner.borrow_mut().add_instance_method(name, function)
+        }
     }
 
     pub fn add_symbol(&self, name: String, vis: Visibility, sym: Symbol) -> Option<SymbolWrapper> { self.inner.borrow_mut().add_symbol(name, vis, sym) }
@@ -145,6 +157,78 @@ impl Scope {
         let wrapper = SymbolWrapper::new(sym, vis);
 
         self.symbols.insert(name, wrapper)
+    }
+
+    fn add_function(&mut self, name: String, function: FunctionRef) -> bool {
+        if !self.symbols.contains_key(&name) {
+            let wrapper = SymbolWrapper::new(Symbol::Function(Monomorphizer::new()), Visibility::Public);
+            self.symbols.insert(name.clone(), wrapper);
+        }
+
+        let symbol = self.symbols.get_mut(&name).unwrap();
+
+        let Symbol::Function(monomorphizer) = symbol.symbol() else {
+            // Error
+            return true
+        };
+
+        monomorphizer.add_function(function);
+
+        return false;
+    }
+
+    fn add_extern_function(&mut self, name: String, function: ExternFunctionRef) -> bool {
+        if !self.symbols.contains_key(&name) {
+            let wrapper = SymbolWrapper::new(Symbol::Function(Monomorphizer::new()), Visibility::Public);
+            self.symbols.insert(name.clone(), wrapper);
+        }
+
+        let symbol = self.symbols.get_mut(&name).unwrap();
+
+        let Symbol::Function(monomorphizer) = symbol.symbol() else {
+            // Error
+            return true
+        };
+
+        monomorphizer.add_extern_function(function);
+
+        return false;
+    }
+
+    fn add_static_method(&mut self, name: String, function: MethodRef) -> bool {
+        if !self.symbols.contains_key(&name) {
+            let wrapper = SymbolWrapper::new(Symbol::Function(Monomorphizer::new()), Visibility::Public);
+            self.symbols.insert(name.clone(), wrapper);
+        }
+
+        let symbol = self.symbols.get_mut(&name).unwrap();
+
+        let Symbol::Function(monomorphizer) = symbol.symbol() else {
+            // Error
+            return true
+        };
+
+        monomorphizer.add_method(function);
+
+        return false;
+    }
+
+    fn add_instance_method(&mut self, name: String, function: MethodRef) -> bool {
+        if !self.instance_symbols.contains_key(&name) {
+            let wrapper = SymbolWrapper::new(Symbol::Function(Monomorphizer::new()), Visibility::Public);
+            self.instance_symbols.insert(name.clone(), wrapper);
+        }
+
+        let symbol = self.instance_symbols.get_mut(&name).unwrap();
+
+        let Symbol::Function(monomorphizer) = symbol.symbol() else {
+            // Error
+            return true
+        };
+
+        monomorphizer.add_method(function);
+
+        return false;
     }
 
     fn add_instance_symbol(&mut self, name: String, vis: Visibility, sym: Symbol) -> Option<SymbolWrapper> {

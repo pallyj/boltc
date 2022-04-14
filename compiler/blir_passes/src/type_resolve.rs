@@ -299,27 +299,16 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 match sym {
                     Symbol::Type(ty) => {
                         value.set_kind(ValueKind::Metatype(ty.clone()));
-                        value.typ.set_kind(TypeKind::Metatype(Box::new(ty)));
+                        value.typ.set_kind(TypeKind::Metatype(Box::new(ty.anon())));
                     }
     
                     Symbol::Value(res_val) => {
                         value.set_kind(res_val.kind);
-                        value.typ = res_val.typ;
+                        value.set_type(res_val.typ);
                     }
     
                     Symbol::Function(function) => {
-                        value.set_type(function.take_typ());
-                        value.set_kind(ValueKind::StaticFunc(function));
-                    }
-    
-                    Symbol::ExternFunction(function) => {
-                        value.set_type(function.take_typ());
-                        value.set_kind(ValueKind::ExternFunc(function));
-                    }
-    
-                    Symbol::StaticMethod(function) => {
-                        value.set_type(function.take_typ());
-                        value.set_kind(ValueKind::StaticMethod(function));
+                        value.set_kind(ValueKind::Polymorphic(function));
                     }
     
                     Symbol::InstanceVariable(instance) => {
@@ -331,21 +320,13 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                                                                      var:      instance, })
                     }
     
-                    Symbol::InstanceMethod(method) => {
-                        value.set_type(method.take_typ());
-                        let self_type = scope.scope_type("self")
-                                             .expect("Compiler Error: Expected self type when looking up instance variable");
-                        let myself = ValueKind::SelfVal.anon(self_type);
-                        value.set_kind(ValueKind::InstanceMethod { reciever: Box::new(myself),
-                                                                   method })
-                    }
-    
                     Symbol::Constant(constant) => {
                         let constant_value = constant.borrow().value.clone();
     
                         value.set_kind(constant_value.kind);
                         value.typ = constant_value.typ;
                     }
+
                 }
             }
     
@@ -353,13 +334,18 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 self.resolve_value(function, scope);
     
                 if let ValueKind::Metatype(t) = &mut function.kind {
-                    let t = std::mem::replace(t, TypeKind::Void);
-    
-                    function.set_kind(ValueKind::Init(t.anon()));
+                    let init_type = std::mem::replace(t, TypeKind::Void).anon();
+
+                    function.set_type(init_type.init_type().anon());
+                    function.set_kind(ValueKind::Init(init_type));
                 }
 
                 for arg in &mut args.args {
                     self.resolve_value(arg, scope);
+                }
+
+                if let ValueKind::Polymorphic(polymorphics) = &mut function.kind {
+                    polymorphics.filter_labels(&args.labels);
                 }
     
                 if let TypeKind::Function { return_type, .. }

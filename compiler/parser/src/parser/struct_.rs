@@ -33,6 +33,7 @@ impl<'input, 'l> Parser<'input, 'l> {
 
         match self.peek() {
             Some(SyntaxKind::FuncKw) => self.parse_func(marker),
+            Some(SyntaxKind::OperatorKw) => self.parse_operator_func(marker),
             Some(SyntaxKind::VarKw) => self.parse_var(marker),
             Some(SyntaxKind::LetKw) => self.parse_let(marker),
             Some(SyntaxKind::InitKw) => self.parse_init(marker),
@@ -40,6 +41,7 @@ impl<'input, 'l> Parser<'input, 'l> {
             _ => {
                 // Error
                 self.error_recover("expected struct item", ITEM_RECOVERY_SET);
+                marker.complete(self, SyntaxKind::Error);
             }
         }
     }

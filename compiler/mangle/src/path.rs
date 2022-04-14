@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-#[derive(Clone)]
+#[derive(Clone, Hash)]
 pub struct Path {
 	path_components: Vec<String>,
 }

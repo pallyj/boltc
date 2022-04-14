@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 errors = { path = "../errors" }
 blir = { path = "../blir" }
-hminfer = { path = "../hminfer" }
+tyinfer = { path = "../tyinfer" }

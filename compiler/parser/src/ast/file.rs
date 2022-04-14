@@ -14,7 +14,7 @@
 
 use core::fmt::Debug;
 
-use super::{containers::StructDef, find_token, func::FuncDef};
+use super::{containers::StructDef, find_token, func::FuncDef, var::LetDef};
 use crate::lexer::SyntaxKind;
 
 ast!(struct ImportDef(Import));
@@ -36,6 +36,7 @@ ast!(
         StructDef,
         FuncDef,
         ImportDef,
+        LetDef,
         NoOp
     }
 );
@@ -46,6 +47,7 @@ impl Debug for FileItem {
             Self::StructDef(arg0) => write!(f, "{arg0:?}"),
             Self::FuncDef(arg0) => write!(f, "{arg0:?}"),
             Self::ImportDef(arg0) => write!(f, "{arg0:?}"),
+            Self::LetDef(arg0) => write!(f, "{arg0:?}"),
             Self::NoOp(_) => write!(f, ";"),
             Self::Error => write!(f, "Error"),
         }

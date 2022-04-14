@@ -29,6 +29,9 @@ ast!(struct IfExpr(IfExpr));
 ast!(struct MemberExpr(MemberExpr));
 ast!(struct FuncCallExpr(FuncCallExpr));
 ast!(struct UnitExpr(UnitExpr));
+ast!(struct PrefixExpr(PrefixExpr));
+ast!(struct PostfixExpr(PostfixExpr));
+ast!(struct InfixExpr(InfixExpr));
 
 ast!(struct FuncArg(FuncArg));
 
@@ -40,7 +43,10 @@ ast!(
         IfExpr,
         MemberExpr,
         FuncCallExpr,
-        UnitExpr
+        UnitExpr,
+        PrefixExpr,
+        PostfixExpr,
+        InfixExpr
     }
 );
 
@@ -54,6 +60,9 @@ impl Debug for Expr {
             Self::MemberExpr(arg0) => write!(f, "{arg0:?}"),
             Self::FuncCallExpr(arg0) => write!(f, "{arg0:?}"),
             Self::UnitExpr(arg0) => write!(f, "{arg0:?}"),
+            Self::PrefixExpr(arg0) => write!(f, "{arg0:?}"),
+            Self::PostfixExpr(arg0) => write!(f, "{arg0:?}"),
+            Self::InfixExpr(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "Error"),
         }
     }
@@ -217,6 +226,54 @@ impl FuncArg {
     }
 }
 
+impl PrefixExpr {
+    pub fn operator(&self) -> String {
+        find_token(&self.0, SyntaxKind::Operator)
+            .map(|op| op.text().to_string())
+            .unwrap()
+    }
+
+    pub fn unit(&self) -> Expr {
+        self.0.first_child()
+            .map(Expr::cast)
+            .unwrap()
+    }
+}
+
+impl PostfixExpr {
+    pub fn operator(&self) -> String {
+        find_token(&self.0, SyntaxKind::Operator)
+            .map(|op| op.text().to_string())
+            .unwrap()
+    }
+
+    pub fn unit(&self) -> Expr {
+        self.0.first_child()
+            .map(Expr::cast)
+            .unwrap()
+    }
+}
+
+impl InfixExpr {
+    pub fn operator(&self) -> String {
+        find_token(&self.0, SyntaxKind::Operator)
+            .map(|op| op.text().to_string())
+            .unwrap()
+    }
+
+    pub fn left(&self) -> Expr {
+        self.0.first_child()
+            .map(Expr::cast)
+            .unwrap()
+    }
+
+    pub fn right(&self) -> Expr {
+        self.0.last_child()
+            .map(Expr::cast)
+            .unwrap()
+    }
+}
+
 impl Debug for FuncCallExpr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let args = self.args()
@@ -252,5 +309,23 @@ impl Debug for FuncArg {
             write!(f, "{label}: ")?;
         }
         write!(f, "{:?}", self.value())
+    }
+}
+
+impl Debug for PrefixExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({} {:?})", self.operator(), self.unit())
+    }
+}
+
+impl Debug for PostfixExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({:?} {})", self.unit(), self.operator())
+    }
+}
+
+impl Debug for InfixExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({:?} {} {:?})", self.left(), self.operator(), self.right())
     }
 }

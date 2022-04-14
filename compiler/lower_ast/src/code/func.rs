@@ -86,7 +86,8 @@ impl AstLowerer {
         let span = self.span(range);
 
         let visibility = self.lower_visibility(func.visibility());
-        let is_static = func.is_static();
+        let is_static = func.is_static() || func.is_operator();
+        let is_operator = func.is_operator();
         let name = func.name();
         let params = func.parameters()
                          .iter()
@@ -112,6 +113,7 @@ impl AstLowerer {
         Method::new(attributes,
                     reciever,
                     is_static,
+                    is_operator,
                     visibility,
                     name,
                     params,

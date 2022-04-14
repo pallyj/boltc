@@ -2,7 +2,7 @@ mod struct_;
 
 use std::{fmt::Debug,
           ops::{Deref, DerefMut},
-          sync::atomic::{AtomicU64, Ordering}};
+          sync::atomic::{AtomicU64, Ordering}, hash::Hash};
 
 use errors::Span;
 use mangle::MangledType;
@@ -12,7 +12,7 @@ use crate::{scope::ScopeRef, Symbol};
 
 static NEXT_INFER_KEY: AtomicU64 = AtomicU64::new(1);
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum TypeKind {
     // Virtual types
     /// A named type. This type is created by the parser.
@@ -53,7 +53,7 @@ pub enum TypeKind {
 
     // Second-class types
     Divergent,
-    Metatype(Box<TypeKind>),
+    Metatype(Box<Type>),
 
     Error,
 }
@@ -105,7 +105,7 @@ impl Type {
 
     pub fn lookup_instance_item(&self, named: &str, scope: &ScopeRef) -> Option<Symbol> {
         match &self.kind {
-            TypeKind::Metatype(ty) => ty.clone().anon().lookup_static_item(named),
+            TypeKind::Metatype(ty) => ty.clone().lookup_static_item(named),
             TypeKind::Struct(r#struct) => r#struct.lookup_instance_item(named, scope),
             _ => None,
         }
@@ -129,7 +129,7 @@ impl Type {
 
     pub fn mangle(&self) -> MangledType {
         match self.kind() {
-            TypeKind::Named(_) => panic!(),
+            TypeKind::Named(_) => MangledType::Void,
             TypeKind::Member { .. } => panic!(),
             TypeKind::Infer { .. } => panic!(),
 
@@ -158,6 +158,12 @@ impl Type {
 
             _ => panic!(),
         }
+    }
+}
+
+impl Hash for Type {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.kind.hash(state);
     }
 }
 
@@ -210,7 +216,7 @@ impl Debug for Type {
             TypeKind::Integer { bits } => write!(f, "i{bits}"),
             TypeKind::Float { bits } => write!(f, "f{bits}"),
             TypeKind::Divergent => write!(f, "!"),
-            TypeKind::Metatype(t) => write!(f, "<{:?}>", t.clone().anon()),
+            TypeKind::Metatype(t) => write!(f, "<{:?}>", t),
             TypeKind::Error => write!(f, "error"),
         }
     }

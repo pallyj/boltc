@@ -1,3 +1,5 @@
+#![feature(let_else)]
+
 pub mod attributes;
 pub mod code;
 pub mod intrinsics;

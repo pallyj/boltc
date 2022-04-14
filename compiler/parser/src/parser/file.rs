@@ -11,7 +11,8 @@ pub const ITEM_RECOVERY_SET: &[SyntaxKind] = &[SyntaxKind::StaticKw,
                                                SyntaxKind::StructKw,
                                                SyntaxKind::LetKw,
                                                SyntaxKind::VarKw,
-                                               SyntaxKind::At];
+                                               SyntaxKind::At,
+                                               SyntaxKind::OperatorKw];
 
 pub const INNER_ITEM_RECOVERY_SET: &[SyntaxKind] = &[SyntaxKind::StaticKw,
                                                      SyntaxKind::PublicKw,
@@ -25,7 +26,8 @@ pub const INNER_ITEM_RECOVERY_SET: &[SyntaxKind] = &[SyntaxKind::StaticKw,
                                                      SyntaxKind::VarKw,
                                                      SyntaxKind::OpenBrace,
                                                      SyntaxKind::CloseBrace,
-                                                     SyntaxKind::At];
+                                                     SyntaxKind::At,
+                                                     SyntaxKind::OperatorKw];
 
 impl<'input, 'l> Parser<'input, 'l> {
     pub fn parse_import(&mut self, marker: Marker) {
@@ -55,6 +57,7 @@ impl<'input, 'l> Parser<'input, 'l> {
 
         match self.peek() {
             Some(SyntaxKind::FuncKw) => self.parse_func(marker),
+            Some(SyntaxKind::LetKw) => self.parse_let(marker),
             Some(SyntaxKind::StructKw) => self.parse_struct(marker),
             Some(SyntaxKind::ImportKw) => self.parse_import(marker),
             _ => {
@@ -72,6 +75,7 @@ impl<'input, 'l> Parser<'input, 'l> {
         while (last_idx != self.cursor) && (self.cursor < self.lexemes.len()) {
             last_idx = self.cursor;
             self.parse_file_item();
+            self.eat_trivia();
         }
 
         marker.complete(&mut self, SyntaxKind::Root);

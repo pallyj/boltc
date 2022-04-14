@@ -16,11 +16,11 @@ use self::{event::Event,
            marker::{CompletedMarker, Marker},
            sink::Sink};
 use crate::{ast::{Parse, SyntaxNode},
-            lexer::{Lexer, SyntaxKind, Token}};
+            lexer::{Lexer, SyntaxKind, Token}, operators::OperatorFactory};
 
 struct Parser<'input, 'l> {
     lexemes: &'l [Token<'input>],
-    // operators: OperatorFactory,
+    operators: OperatorFactory,
     events:  Vec<Event<'input>>,
     cursor:  usize,
 }
@@ -29,13 +29,13 @@ impl<'input, 'l> Parser<'input, 'l> {
     pub fn new(lexemes: &'l [Token<'input>]) -> Self {
         Self { lexemes,
                events: Vec::new(),
-               // operators: OperatorFactory::new(),
+               operators: OperatorFactory::new(),
                cursor: 0 }
     }
 
-    // pub fn operator_factory(&mut self) -> &mut OperatorFactory {
-    // &mut self.operators
-    // }
+    pub fn operator_factory(&mut self) -> &mut OperatorFactory {
+        &mut self.operators
+    }
 
     pub fn check(&mut self, token: SyntaxKind) -> bool {
         self.peek()
@@ -77,6 +77,14 @@ impl<'input, 'l> Parser<'input, 'l> {
             while !self.eat(ket) {
                 f(self);
             }
+        }
+        marker.complete(self, node);
+    }
+
+    fn parse_delim_end(&mut self, node: SyntaxKind, ket: SyntaxKind, mut f: impl FnMut(&mut Self)) {
+        let marker = self.start();
+        while !self.eat(ket) {
+            f(self);
         }
         marker.complete(self, node);
     }
@@ -242,7 +250,10 @@ impl<'input, 'l> Parser<'input, 'l> {
 pub fn parse<'input>(input: &'input str, debugger: &'input mut Debugger, file: usize) -> Parse {
     let lexemes: Vec<_> = Lexer::new(input).collect();
 
-    let parser = Parser::new(&lexemes);
+    let mut parser = Parser::new(&lexemes);
+
+    parser.operator_factory()
+          .register_intrinsics();
 
     let events = parser.parse_file();
     let sink = Sink::new(events, &lexemes, file);

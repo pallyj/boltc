@@ -55,7 +55,9 @@ impl<'input, 'l> Sink<'input, 'l> {
                     }
                 }
                 Event::AddToken { kind, text } => self.token(kind, text),
-                Event::FinishNode => self.builder.finish_node(),
+                Event::FinishNode => {
+                    self.builder.finish_node()
+                }
                 Event::Error(error) => {
                     let description = format!("{error}, found {}", token_specific(self.peek()));
                     let span = self.next_span();

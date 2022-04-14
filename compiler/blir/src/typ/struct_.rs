@@ -1,7 +1,7 @@
 use std::{cell::{Ref, RefCell, RefMut},
           fmt::Debug,
           ops::Deref,
-          sync::Arc};
+          sync::Arc, hash::Hash};
 
 use mangle::{Path, MangledStruct};
 
@@ -89,26 +89,19 @@ impl Struct {
         self.borrow().scope.add_symbol(name, visibility, symbol)
     }
 
-    pub fn add_method(&self, method: MethodRef) -> Option<SymbolWrapper> {
+    pub fn add_method(&self, method: MethodRef) -> bool {
         // Add the function to the list of functions
         self.inner.borrow_mut().methods.push(method.clone());
 
         // Add the functions symbol, returning another symbol if it exists
-        let visibility = method.visibility();
-        let name = method.name();
-        let is_static = method.is_static();
-
-        if is_static {
-            let symbol = Symbol::StaticMethod(method);
-
-            self.borrow().scope.add_symbol(name, visibility, symbol)
+        let name = if method.is_operator() {
+            format!("op~{}", method.name())
         } else {
-            let symbol = Symbol::InstanceMethod(method);
+            method.name()
+        };
+            
 
-            self.borrow()
-                .scope
-                .add_instance_symbol(name, visibility, symbol)
-        }
+        self.borrow().scope.add_method(name, method)
     }
 
     pub fn add_var(&self, var: VarRef) -> Option<SymbolWrapper> {
@@ -203,7 +196,9 @@ impl StructRef {
         }
 
         match vars[0].borrow().typ.kind() {
-            TypeKind::Integer { bits } => *bits > 1,
+            TypeKind::Integer { bits } => {
+                *bits > 1
+            }
             _ => false,
         }
     }
@@ -236,6 +231,13 @@ impl StructRef {
             TypeKind::Integer { bits } => *bits == 1,
             _ => false,
         }
+    }
+}
+
+impl Hash for StructRef {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.r#struct.borrow().name.hash(state);
+        self.r#struct.borrow().path().hash(state);
     }
 }
 

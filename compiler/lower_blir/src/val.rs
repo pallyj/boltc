@@ -55,7 +55,7 @@ impl BlirLowerer {
             TypeKind::Struct(r#struct) => {
                 // TODO: Do this by insert value
                 if !r#struct.integer_repr() {
-                    panic!()
+                    panic!("{n} {}", r#struct.borrow().name)
                 }
 
                 let borrowed_struct = r#struct.borrow();
@@ -106,7 +106,7 @@ impl BlirLowerer {
 
                 self.lower_init(ty, vec![literal])
             }
-            _ => panic!(),
+            _ => panic!("{ty:?}"),
         }
     }
 

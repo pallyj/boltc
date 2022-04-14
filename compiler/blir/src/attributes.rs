@@ -151,7 +151,7 @@ impl StructAttribute for DefaultFloatReprAttribute {
 }
 
 impl StructAttribute for DefaultBoolReprAttribute {
-    fn name(&self) -> &'static str { "defaultBoolRepr" }
+    fn name(&self) -> &'static str { "defaultBooleanRepr" }
 
     fn apply(&self, struct_ref: &StructRef, context: &mut BlirContext, _debugger: &mut Debugger) {
         if !struct_ref.bool_repr() {

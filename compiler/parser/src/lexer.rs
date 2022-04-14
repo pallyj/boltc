@@ -12,6 +12,7 @@ pub enum SyntaxKind {
     // break, continue
     // get, set
     // mutating
+    // operator
     #[regex("struct")]
     StructKw,
     #[regex("import")]
@@ -47,11 +48,13 @@ pub enum SyntaxKind {
     PrivateKw,
     #[regex("_", priority = 3)]
     UnderscoreKw,
+    #[regex("operator", priority = 3)]
+    OperatorKw,
 
     #[regex("[a-zA-Z_$][a-zA-Z_$0-9]*", priority = 2)]
     Ident,
 
-    #[regex("[+|-|*|/|%|<|>|&|\\||^|=|!|?|\\.]+")]
+    #[regex("[+|\\-|*|/|%|<|>|&|\\||^|=|!|?|\\.]+")]
     Operator,
 
     #[regex("true")]
@@ -110,6 +113,8 @@ pub enum SyntaxKind {
 
     #[token("=")]
     Equals,
+    #[token("=>")]
+    BigArrow,
 
     #[token("@")]
     At,
@@ -178,6 +183,9 @@ pub enum SyntaxKind {
     Attributes,
 
     FuncArg,
+
+    Closure,
+    TrailingClosure,
 
     _Invalid,
 }

@@ -16,3 +16,7 @@ public func printDouble(n: f64)
 public func printFloat(n: f32)
 
 public func printBool(n: i1)
+
+public func print(b: Bool) {
+	printBool(b.repr)
+}

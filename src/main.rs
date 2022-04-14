@@ -19,7 +19,7 @@ fn main() {
     // Add standard library
     let lang = ["std/print.bolt",
                 "bool/Bool.bolt",
-                "float/Half.bolt",
+                /*"float/Half.bolt",
                 "float/Float.bolt",
                 "float/Double.bolt",
                 "int/Int.bolt",
@@ -31,7 +31,7 @@ fn main() {
                 "int/UInt8.bolt",
                 "int/UInt16.bolt",
                 "int/UInt32.bolt",
-                "int/UInt64.bolt"];
+                "int/UInt64.bolt"*/];
 
     for file in lang {
         project.open_file(&format!("lang/{file}"));
@@ -86,6 +86,7 @@ impl Project {
             AstLowerer::new(parse).lower_file(self.library.as_mut().unwrap());
         }
 
+
         if debugger.has_errors() {
             return (false, None);
         }
@@ -94,17 +95,31 @@ impl Project {
 
         let attribute_factory = blir::attributes::default_attributes();
 
-        blir_passes::TypeResolvePass::new(&attribute_factory, &mut context, &mut debugger)
+        blir_passes::TypeResolvePass::new(
+            &attribute_factory,
+            &mut context,
+            &mut debugger)
             .run_pass(self.library.as_mut().unwrap());
             
         if debugger.has_errors() {
             return (false, None);
         }
-        blir_passes::type_infer::run_pass(self.library.as_mut().unwrap(), &context, &mut debugger);
+
+        //println!("{:?}", self.library);
+
+        blir_passes::TypeInferPass::new(
+            &mut context,
+            &mut debugger)
+            .run_pass(self.library.as_mut().unwrap());
+        
+        //println!("{:?}", self.library.as_ref().unwrap());
+
         if debugger.has_errors() {
             return (false, None);
         }
+        
         blir_passes::type_check::run_pass(self.library.as_mut().unwrap(), &mut debugger);
+
         if debugger.has_errors() {
             return (false, None);
         }

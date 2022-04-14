@@ -1,0 +1,29 @@
+import intrinsics
+
+@defaultIntegerRepr
+struct Number {
+	var repr: i64
+
+	operator func add( left: Self, right: Self ): Self {
+		Self ( integer64Add(left.repr, right.repr) )
+	}
+
+	operator func negate( operand: Self ): Self {
+		Self ( integer64Negate(operand.repr) )
+	}
+
+	operator func equal( left: Self, right: Self ): Bool {
+		Bool ( integer64CmpEq(left.repr, right.repr) )
+	}
+}
+
+@entryPoint
+func main() {
+	let isEqual = 200 == 100;
+
+	print(!isEqual)
+}
+
+func print(i: Number) {
+	printInt64(i.repr)
+}

@@ -56,13 +56,20 @@ cargo run -- test/main.bolt --lib=test
 - Patterns
 - Match
 - Enums
+- Strings
+- Tuples
+- Bolt libraries
+- C interop
+- Compiler plugins
 
 ### Bolt 0.4
 
 - Operators
 - Polymorphism
+- Function parameter labels
 - Globals
 - Initializers
+- Closures
 
 ### Bolt 0.3.2 [Current Version]
 

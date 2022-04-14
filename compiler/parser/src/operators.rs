@@ -98,8 +98,8 @@ impl OperatorFactory {
         self.register_infix("and", "&&", OperatorPrecedence::And);
         self.register_infix("or", "||", OperatorPrecedence::Or);
 
-        self.register_infix("instanceEq", "===", OperatorPrecedence::Comparison);
-        self.register_infix("instanceNeq", "!==", OperatorPrecedence::Comparison);
+        //self.register_infix("instanceEq", "===", OperatorPrecedence::Comparison);
+        //self.register_infix("instanceNeq", "!==", OperatorPrecedence::Comparison);
         self.register_infix("equal", "==", OperatorPrecedence::Comparison);
         self.register_infix("notEqual", "!=", OperatorPrecedence::Comparison);
         self.register_infix("greaterThan", ">", OperatorPrecedence::Comparison);
@@ -109,8 +109,8 @@ impl OperatorFactory {
 
         // self.register_infix("coalesce", "??", OperatorPrecedence::Comparison);
         //
-        // self.register_infix("openRange", "..", OperatorPrecedence::Secondary);
-        // self.register_infix("closedRange", "..<", OperatorPrecedence::Secondary);
+        self.register_infix("openRange", "..=", OperatorPrecedence::Secondary);
+        self.register_infix("closedRange", "..<", OperatorPrecedence::Secondary);
         //
         // self.register_infix("addAssign", "+=", OperatorPrecedence::Assignment);
         // self.register_infix("subAssign", "-=", OperatorPrecedence::Assignment);
@@ -126,14 +126,16 @@ impl OperatorFactory {
         //
         // self.register_infix("assign", "=", OperatorPrecedence::Assignment);
         //
-        // self.register_postfix("upperRange", "..");
+        self.register_postfix("upperRange", "..");
         self.register_prefix("unit", "+");
         self.register_prefix("negate", "-");
 
         self.register_prefix("invert", "!");
 
-        // self.register_prefix("lowerRange", "..");
+        self.register_prefix("lowerRange", "..");
     }
+
+    pub fn get_prefix_op(&self, text: &str) -> Option<&Operator> { self.prefix_ops.get(text) }
 
     pub fn get_postfix_op(&self, text: &str) -> Option<&Operator> { self.postfix_ops.get(text) }
 }

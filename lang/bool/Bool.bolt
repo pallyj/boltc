@@ -5,23 +5,27 @@ import intrinsics
 public struct Bool /*: BooleanLiteralRepr */ {
 	internal var repr: i1
 
-	public func and(b: Self): Self {
-		Self( integer1And(self.repr, b.repr) )
+	operator func and(left: Self, right: Self): Self {
+		Self( integer1And(left.repr, right.repr) )
 	}
 
-	public func or(b: Self): Self {
-		Self( integer1Or(self.repr, b.repr) )
+	operator func or(left: Self, right: Self): Self {
+		Self( integer1Or(left.repr, right.repr) )
 	}
 
-	public func xor(b: Self): Self {
-		Self( integer1Xor(self.repr, b.repr) )
+	operator func xor(left: Self, right: Self): Self {
+		Self( integer1Xor(left.repr, right.repr) )
 	}
 
-	public func flipped(): Self {
-		Self( integer1Invert(self.repr) )
+	operator func invert(operand: Self): Self {
+		Self(integer1Invert(operand.repr))
 	}
 
-	public func print() {
-		printBool(self.repr)
+	operator func equal(left: Self, right: Self): Self {
+		Self(integer1CmpEq(left.repr, right.repr))
+	}
+
+	operator func notEqual(left: Self, right: Self): Self {
+		Self(integer1CmpNeq(left.repr, right.repr))
 	}
 }

@@ -22,6 +22,7 @@ pub struct MethodInner {
     pub attributes: Attributes,
     pub visibility: Visibility,
     pub is_static:  bool,
+    pub is_operator: bool,
     pub info:       FunctionInfo,
     pub code:       CodeBlock,
     pub span:       Span,
@@ -98,6 +99,7 @@ impl Method {
     pub fn new(attributes: Attributes,
                self_type: Type,
                is_static: bool,
+               is_operator: bool,
                visibility: Visibility,
                name: String,
                params: Vec<FuncParam>,
@@ -110,6 +112,7 @@ impl Method {
         let func = MethodInner { attributes,
                                  visibility,
                                  is_static,
+                                 is_operator,
                                  path: parent_path.clone().append(&name),
                                  info: FunctionInfo::new(name, params, return_type, true),
                                  code,
@@ -125,6 +128,8 @@ impl Method {
     }
 
     pub fn is_static(&self) -> bool { self.inner.borrow().is_static }
+
+    pub fn is_operator(&self) -> bool { self.inner.borrow().is_operator }
 
     pub fn name(&self) -> String { self.inner.borrow().info.name().clone() }
 

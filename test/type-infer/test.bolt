@@ -1,38 +1,45 @@
 import intrinsics
 
-func diverging(): Int {
+/*func diverging(): Int {
 	if true {
 		return 101
 	} else {
 		return 100
 	}
-}
+}*/
 
-func divergingReturns(): Int {
+/*func divergingReturns(): Int {
 	if true {
 		return 101
 	} else {
 		return 100
 	}
-}
+}*/
+
+/*func typeInference(): Int64 {
+	//let a = 103
+	//let b = 104
+	//let c = 105
+	//let d = 106
+
+	//let e: Int64 = d.add(c);
+
+	//let f = example(a, b, c, d);
+
+	//f.add(e)
+
+	0
+}*/
+
+/*func example(a: Int8, b: Int16, c: Int64, d: Int64): Int64 {
+	0
+}*/
+
+/*@entryPoint
+func main() {
+	typeInference();
+}*/
 
 func returnBool(): Bool {
 	102
-}
-
-func typeInference(): Int64 {
-	let a = 103
-	let b = 104
-	let c = 105
-	let d = 106
-
-	let e = d.add(c);
-
-	let f = example(a.add(10), b.repr, c, d);
-
-	f.add(e);
-}
-
-func example(a: Int8, b: i16, c: Int64, d: Int64): Int64 {
-	0
 }
