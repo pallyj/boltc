@@ -73,8 +73,4 @@ public struct Half /*: HalfLiteralRepr*/ {
 	public static func fromInt(num: Int64): Half {
 		Half ( float16FromIntSig(num.repr) )
 	}
-
-	public func print() {
-		printFloat( float16Ext32(self.repr) )
-	}
 }

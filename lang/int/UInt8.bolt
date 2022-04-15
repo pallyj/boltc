@@ -109,8 +109,4 @@ public struct UInt8 /*: IntegerLiteralRepresentable */ {
 	public static func truncInt64(i: Int64): Self {
 		Self ( integer64Trunc8(i.repr) )
 	}
-
-	public func print() {
-		printUInt8(self.repr)
-	}
 }

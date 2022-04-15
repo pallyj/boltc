@@ -63,6 +63,8 @@ impl Deref for ExternFunctionRef {
 
 impl ExternFunctionRef {
     pub fn take_typ(&self) -> Type { unsafe { &*self.func.inner.as_ptr() }.typ() }
+
+    pub fn info(&self) -> &FunctionInfo { &unsafe { &*self.func.inner.as_ptr() }.info }
 }
 
 impl ExternFunction {

@@ -105,8 +105,4 @@ public struct UInt16 /*: IntegerLiteralRepresentable */ {
 	public static func truncInt32(i: Int32): Self {
 		Self ( integer32Trunc16(i.repr) )
 	}
-
-	public func print() {
-		printUInt16(self.repr)
-	}
 }

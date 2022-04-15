@@ -61,12 +61,12 @@ impl SomeFunction {
         }
     }
 
-    pub fn info(&self) -> Ref<FunctionInfo> {
+    pub fn info(&self) -> &FunctionInfo {
         match self {
-            Self::Function(function) => Ref::map(function.borrow(), |func| &func.info),
-            Self::ExternFunction(function) => Ref::map(function.borrow(), |func| &func.info),
-            Self::InstanceMethod(method) => Ref::map(method.borrow(), |func| &func.info),
-            Self::StaticMethod(method) => Ref::map(method.borrow(), |func| &func.info),
+            Self::Function(function) => function.info(),
+            Self::ExternFunction(function) => function.info(),
+            Self::InstanceMethod(method) => method.info(),
+            Self::StaticMethod(method) => method.info(),
         }
     }
 }

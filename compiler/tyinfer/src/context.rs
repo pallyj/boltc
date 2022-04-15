@@ -269,6 +269,8 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 
 			TypeKind::Struct(r#struct) => TypeVariant::Struct(r#struct.clone()),
 
+			TypeKind::Function { ..  } => TypeVariant::Function,
+
 			TypeKind::Error => TypeVariant::Error,
 
 			_ => panic!()

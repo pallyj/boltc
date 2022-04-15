@@ -16,6 +16,7 @@ pub enum TypeVariant {
 	Struct(StructRef),
 
 	// TODO: Add function type
+	Function,
 
 	Void,
 	Diverges,

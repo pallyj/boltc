@@ -20,3 +20,53 @@ public func printBool(n: i1)
 public func print(b: Bool) {
 	printBool(b.repr)
 }
+
+public func print(f: Half) {
+	printFloat( float16Ext32(f.repr) )
+}
+
+public func print(f: Float) {
+	printFloat( f.repr )
+}
+
+public func print(f: Double) {
+	printDouble( f.repr )
+}
+
+public func print(i: Int) {
+	printInt64(i.repr)
+}
+
+public func print(i: Int64) {
+	printInt64(i.repr)
+}
+
+public func print(i: Int32) {
+	printInt32(i.repr)
+}
+public func print(i: Int16) {
+	printInt16(i.repr)
+}
+
+public func print(i: Int8) {
+	printInt8(i.repr)
+}
+
+public func print(i: UInt) {
+	printUInt64(i.repr)
+}
+
+public func print(i: UInt64) {
+	printUInt64(i.repr)
+}
+
+public func print(i: UInt32) {
+	printUInt32(i.repr)
+}
+public func print(i: UInt16) {
+	printUInt16(i.repr)
+}
+
+public func print(i: UInt8) {
+	printUInt8(i.repr)
+}

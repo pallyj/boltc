@@ -138,6 +138,8 @@ impl FunctionRef {
     pub fn take_typ(&self) -> Type { unsafe { &*self.func.inner.as_ptr() }.typ() }
 
     pub fn take_name(&self) -> &str { unsafe { &*self.func.inner.as_ptr() }.info.name() }
+
+    pub fn info(&self) -> &FunctionInfo { &unsafe { &*self.func.inner.as_ptr() }.info }
 }
 
 impl Function {
