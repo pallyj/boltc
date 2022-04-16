@@ -1,9 +1,9 @@
 use blir::{attributes::AttributeFactory,
            code::{CodeBlock, ExternFunctionRef, FunctionRef, MethodRef, Statement, StatementKind},
-           scope::ScopeRef,
+           scope::{ScopeRef, ScopeRelation, ScopeType},
            typ::{StructRef, Type, TypeKind},
            value::{ConstantRef, IfBranch, IfValue, Value, ValueKind, VarRef},
-           BlirContext, Library, Symbol};
+           BlirContext, Library, Symbol, Visibility};
 use errors::{debugger::Debugger, error::ErrorCode};
 
 /// 
@@ -359,6 +359,28 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
             ValueKind::Member { parent, member: _ } => self.resolve_value(parent, scope),
     
             ValueKind::If(if_value) => self.resolve_if_value(if_value, scope),
+
+            ValueKind::Closure(closure) => {
+                // TODO: Add closure parameters
+                let closure_scope = ScopeRef::new(
+                    Some(scope),
+                    ScopeRelation::Scope,
+                    ScopeType::Code,
+                    false,
+                    true
+                );
+
+                for param in &mut closure.params {
+                    self.resolve_type(&mut param.typ, scope);
+
+                    let param_value = ValueKind::FunctionParam(param.name.clone()).anon(param.typ.clone());
+
+                    closure_scope.add_symbol(param.name.clone(), Visibility::Local, Symbol::Value(param_value));
+                }
+
+                self.resolve_code_block(&mut closure.code, &closure_scope);
+                self.resolve_type(&mut value.typ, scope);
+            }
     
             _ => {}
         }

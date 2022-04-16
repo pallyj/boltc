@@ -52,6 +52,8 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 		value: &mut Value,
 		scope: &ScopeRef)
 	{
+		//println!("Replacing {value:?}");
+
 		self.replace_type(&mut value.typ, &value.span);
 
 		match &mut value.kind {
@@ -69,7 +71,26 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 				}
 			}
 
+			ValueKind::PolymorphicMethod { reciever, polymorphic } => {
+				let args = match value.typ.kind() {
+					TypeKind::Function { params, .. } => params,
+					TypeKind::Method { params, .. } => params,
+					_ => return,
+				};
+
+				polymorphic.filter_types(args);
+
+				if let Some(resolved_function) = polymorphic.resolve() {
+					let parent = std::mem::take(reciever.as_mut());
+					self.replace_member_function(value, parent, resolved_function);
+				}
+			}
+
 			ValueKind::FuncCall { function, args } => {
+				if let ValueKind::PolymorphicMethod { polymorphic, .. } = &mut function.kind {
+                    polymorphic.filter_labels(&args.labels);
+                }
+
 				let params = match function.typ.kind_mut() {
 					TypeKind::Function { params, .. } => params,
 					TypeKind::Method { params, .. } => params,
@@ -81,7 +102,9 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 
 					if matches!(param.kind(), TypeKind::Infer { .. }) {
 						param.set_kind(arg.typ.kind().clone());
-					} 
+					} else if matches!(arg.typ.kind(), TypeKind::Infer { .. }) {
+						arg.typ.set_kind(param.kind().clone());
+					}
 				}
 
 				self.replace_value(function, scope);
@@ -134,10 +157,18 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 
 				let parent = std::mem::replace(parent.as_mut(), ValueKind::Unit.anon(TypeKind::Void.anon()));
 
-				self.replace_member(value, parent, resolved_member);
+				self.replace_member(value, parent, resolved_member, scope);
+			}
+
+			ValueKind::InstanceVariable { reciever, .. } => {
+				self.replace_value(reciever, scope);
 			}
 
 			ValueKind::If(if_value) => self.replace_if_value(if_value, scope),
+
+			ValueKind::Closure(closure) => {
+				self.replace_codeblock(&mut closure.code, scope);
+			}
 
 			_ => { }
 		}
@@ -198,7 +229,8 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 		&mut self,
 		value: &mut Value,
 		parent: Value,
-		member: Symbol)
+		member: Symbol,
+		scope: &ScopeRef)
 	{
 		match member {
 			Symbol::Type(ty) => {
@@ -219,18 +251,12 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 				value.set_type(constant_value.typ);
 				value.set_kind(constant_value.kind);
 			}
-			Symbol::Function(mut monomorphizer) => {
-				let args = match value.typ.kind() {
-					TypeKind::Function { params, .. } => params,
-					TypeKind::Method { params, .. } => params,
-					_ => return,
-				};
+			Symbol::Function(monomorphizer) => {
+				value.set_kind(ValueKind::PolymorphicMethod {
+					reciever: Box::new(parent),
+					polymorphic: monomorphizer });
 
-				monomorphizer.filter_types(args);
-
-				if let Some(resolved_function) = monomorphizer.resolve() {
-					self.replace_member_function(value, parent, resolved_function);
-				}
+				self.replace_value(value, scope);
 			}
 
 		}

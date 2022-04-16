@@ -34,12 +34,23 @@ pub struct MethodInner {
 impl MethodInner {
     pub fn scope(&self) -> &ScopeRef { &self.scope }
 
-    pub fn add_params(&self) {
+    pub fn add_params(&mut self) {
         let sym = Symbol::Value(ValueKind::SelfVal.anon(self.self_type.clone()));
         if !self.is_static {
             self.scope
-                .add_symbol("self".to_string(), Visibility::Public, sym);
+                .add_symbol("self".to_string(), Visibility::Local, sym);
             self.scope.define_scope_type("self", self.self_type.clone());
+        }
+
+        if self.is_operator {
+            let self_param = FuncParam {
+                label: None,
+                bind_name: "self".to_string(),
+                typ: self.self_type.clone(),
+            };
+
+            self.info.params_mut()
+                .insert(0, self_param)
         }
 
         self.scope
@@ -49,7 +60,7 @@ impl MethodInner {
             let val = ValueKind::FunctionParam(p.bind_name.clone()).anon(p.typ.clone());
 
             self.scope
-                .add_symbol(p.bind_name.clone(), Visibility::Public, Symbol::Value(val));
+                .add_symbol(p.bind_name.clone(), Visibility::Local, Symbol::Value(val));
         }
     }
 

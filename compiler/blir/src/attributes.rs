@@ -81,6 +81,7 @@ pub fn default_attributes() -> AttributeFactory {
     let mut factory = AttributeFactory::new();
 
     factory.register_func_attribute(EntryPointAttribute {});
+    factory.register_func_attribute(ExportCAttribute {});
 
     factory.register_struct_attribute(TransparentAttribute {});
     factory.register_struct_attribute(DefaultIntegerReprAttribute {});
@@ -103,6 +104,7 @@ pub trait StructAttribute {
 }
 
 struct EntryPointAttribute;
+struct ExportCAttribute;
 
 struct TransparentAttribute;
 struct DefaultIntegerReprAttribute;
@@ -113,6 +115,14 @@ impl FuncAttribute for EntryPointAttribute {
     fn name(&self) -> &'static str { "entryPoint" }
 
     fn apply(&self, info: &mut FunctionInfo, context: &mut BlirContext, _debugger: &mut Debugger) { let _ = context.entry_point.insert(info.link_name().clone()); }
+}
+
+impl FuncAttribute for ExportCAttribute {
+    fn name(&self) -> &'static str { "exportC" }
+
+    fn apply(&self, info: &mut FunctionInfo, _context: &mut BlirContext, _debugger: &mut Debugger) {
+        info.set_link_name(info.name().clone())
+    }
 }
 
 impl StructAttribute for TransparentAttribute {

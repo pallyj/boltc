@@ -60,6 +60,8 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 
 		*/
 
+		//println!("Constraining {value:?}");
+
 		match &value.kind {
 			ValueKind::BoolLiteral(_) => self.constrain_bool(&value),
 			ValueKind::IntLiteral(_) => self.constrain_int(&value),
@@ -73,6 +75,8 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 					TypeKind::Method { params, .. } => {
 						if self.fully_constrained(&params) {
 							for (param, arg) in params.iter().zip(&args.args) {
+								self.constrain_value(arg, scope);
+
 								self.constrain_one_way( &arg.typ, param );
 							}
 						} else {
@@ -85,13 +89,34 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 						}
 					}
 
-					_ => panic!(),
+					_ => panic!("{function_type:?}"),
 				}
+			}
+
+			ValueKind::Member { parent, .. } => {
+				println!("Member {parent:?}");
+				self.constrain_value(&parent, scope);
+			}
+
+			ValueKind::InstanceVariable { reciever, .. } => {
+				self.constrain_value(&reciever, scope);
 			}
 
 			ValueKind::If(if_value) => self.constrain_if_value(if_value, &value.typ, scope),
 
-			_ => {}
+			ValueKind::Closure(closure) => {
+				// Constrain the closure's return type to the return type of its code
+				let closure_return_type = match value.typ.kind() {
+					TypeKind::Function { return_type, .. } => return_type,
+					_ => panic!(),
+				};
+
+				// Infer the code of the codeblock
+				// TODO: Make a new scope
+				self.infer_codeblock(&closure.code, closure_return_type, scope);
+			}
+
+			_ => { }
 		}
 	}
 
@@ -101,9 +126,10 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 		if_type: &Type,
 		scope: &ScopeRef)
 	{
+
 		self.constrain_value(&if_value.condition, scope);
 		self.constrain_bool(&if_value.condition);
-
+		
 		self.infer_codeblock(&if_value.positive, if_type, scope);
 
 		match &if_value.negative {
@@ -219,6 +245,18 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 		absolute: &Type
 	) {
 		//println!("{constrain:?} <- {absolute:?}");
+		
+		if let (TypeKind::Function { return_type: return_type_1, params: params_1, .. },
+			TypeKind::Function { return_type: return_type_2, params: params_2, .. }) = (constrain.kind(), absolute.kind())
+		{
+			self.constrain_one_way(return_type_1, return_type_2);
+
+			for (param1, param2) in params_1.iter().zip(params_2) {
+				self.constrain_one_way(param1, param2);
+			}
+			return
+		}
+
 		let Some(constrain_key) = self.infer_key(constrain) else {
 			return
 		};
@@ -248,7 +286,19 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 				let variant = self.variant(ty1);
 				self.checker.impose(key2.concretizes_explicit(variant))
 			}
-			(None, None) => return,
+			(None, None) => {
+				if let (TypeKind::Function { return_type: return_type_1, params: params_1, .. },
+						TypeKind::Function { return_type: return_type_2, params: params_2, .. }) = (ty1.kind(), ty2.kind())
+				{
+					self.constrain_two_way(return_type_1, return_type_2);
+
+					for (param1, param2) in params_1.iter().zip(params_2) {
+						self.constrain_two_way(param1, param2);
+					}
+				}
+
+				return
+			}
 		};
 
 		match constraint.err() {

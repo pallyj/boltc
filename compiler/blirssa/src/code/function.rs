@@ -89,7 +89,7 @@ impl Function {
 
 impl Display for Function {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "func {name}{type} {{", name = self.name, type = self.func_type)?;
+        writeln!(f, "func {name}{typ} {{", name = self.name, typ = self.func_type)?;
 
         for block in self.blocks.borrow().iter() {
             write!(f, "{block}")?;

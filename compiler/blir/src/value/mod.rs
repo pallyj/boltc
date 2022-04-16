@@ -1,5 +1,6 @@
 mod constant;
 mod var;
+mod closure;
 
 use std::{fmt::Debug,
           ops::{Deref, DerefMut}};
@@ -7,6 +8,7 @@ use std::{fmt::Debug,
 pub use constant::*;
 use errors::Span;
 pub use var::*;
+pub use closure::*;
 
 use crate::{code::{CodeBlock, ExternFunctionRef, FunctionRef, MethodRef},
             intrinsics::{BinaryIntrinsicFn, UnaryIntrinsicFn},
@@ -26,12 +28,17 @@ pub enum ValueKind {
     },
     SelfVal,
     Polymorphic(Monomorphizer),
+    PolymorphicMethod {
+        reciever:    Box<Value>,
+        polymorphic: Monomorphizer
+    },
     Operator(String),
 
     // Literal Values
     IntLiteral(u64),
     FloatLiteral(f64),
     BoolLiteral(bool),
+    Closure(Closure),
 
     // Variable Values
     Metatype(TypeKind),
@@ -172,10 +179,12 @@ impl Debug for Value {
             ValueKind::FuncCall { function, args } => write!(f, "{function:?}({args:?})"),
             ValueKind::SelfVal => write!(f, "self"),
             ValueKind::Polymorphic(mono) => write!(f, "function ({} degrees)", mono.degrees()),
+            ValueKind::PolymorphicMethod { reciever, polymorphic } => write!(f, "{:?}.method ({})", reciever, polymorphic.degrees()),
             ValueKind::Operator(operator) => write!(f, "{operator}"),
             ValueKind::IntLiteral(i) => write!(f, "{i}"),
             ValueKind::FloatLiteral(fl) => write!(f, "{}", fl),
             ValueKind::BoolLiteral(b) => write!(f, "{b}"),
+            ValueKind::Closure(c) => write!(f, "{{ {:?} }}", c.code),
             ValueKind::Metatype(t) => write!(f, "<{:?}>", t.clone().anon()),
             ValueKind::LocalVariable(name) => write!(f, "{name}"),
             ValueKind::FunctionParam(name) => write!(f, "{name}"),

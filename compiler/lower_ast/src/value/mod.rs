@@ -1,6 +1,7 @@
 use blir::{typ::{TypeKind, Type},
-           value::{FunctionArgs, IfBranch, IfValue, Value, ValueKind}};
-use parser::ast::expr::{Expr as AstExpr, IfExpr, IfExprNegative, LiteralKind};
+           value::{FunctionArgs, IfBranch, IfValue, Value, ValueKind, ClosureParam, Closure}};
+use errors::Span;
+use parser::ast::expr::{Expr as AstExpr, IfExpr, IfExprNegative, LiteralKind, ClosureExpr};
 
 use crate::AstLowerer;
 
@@ -107,6 +108,38 @@ impl AstLowerer {
                                       args:     FunctionArgs { args, labels }, }.spanned_infer(span)
             }
 
+            AstExpr::ClosureExpr(closure) => self.lower_closure_expr(closure, span),
+
+            AstExpr::TrailingClosureExpr(trailing_closure) => {
+                let mut function = self.lower_expr( trailing_closure.function() );
+                let closure = self.lower_closure_expr(trailing_closure.closure(), span);
+
+                if let ValueKind::FuncCall { args, function: func } = &mut function.kind {
+                    match func.typ.kind_mut() {
+                        TypeKind::Function { params, .. } => {
+                            params.push(Type::infer());
+                        },
+                        _ => panic!(),
+                    }
+                    args.args.push(closure);
+                    function
+                } else {
+                    let return_type = Box::new( Type::infer() );
+                    let params = vec![ Type::infer() ];
+                        
+                    let function_type = TypeKind::Function { return_type,
+                                                            params,
+                                                            labels: vec![] };
+                    function.typ.set_kind(function_type);
+
+                    ValueKind::FuncCall {
+                        function: Box::new(function),
+                        args: FunctionArgs {
+                            args: vec![ closure ],
+                            labels: vec![ ] }}.spanned_infer(span)
+                }
+            }
+
             AstExpr::IfExpr(expr) => {
                 let if_value = self.lower_if_expr(expr);
 
@@ -116,6 +149,58 @@ impl AstLowerer {
             AstExpr::UnitExpr(_) => ValueKind::Unit.spanned(TypeKind::Void.anon(), span),
 
             AstExpr::Error => panic!(),
+        }
+    }
+
+    fn lower_closure_expr(
+        &self,
+        closure: ClosureExpr,
+        span: Span) -> Value
+    {
+        if let Some(parameters) = closure.parameters() {
+            // Set the type to a function of the parameters
+            let blir_params: Vec<_> = parameters
+                .map(|closure_param| {
+                    let typ = closure_param
+                        .explicit_type()
+                        .map(|typ| self.lower_type(typ))
+                        .unwrap_or_else(|| Type::infer());
+
+                    ClosureParam {
+                        name: closure_param.bind_name(),
+                        typ,
+                    }
+                }).collect();
+
+            let function_parameter_types = blir_params
+                .iter()
+                .map(|param| param.typ.clone())
+                .collect();
+
+            let function_type = TypeKind::Function {
+                return_type: Box::new(Type::infer()),
+                params: function_parameter_types,
+                labels: vec![] }.anon();
+
+            let code = self.lower_code_block(closure.code_block());
+
+            let closure = Closure {
+                params: blir_params,
+                code,
+            };
+
+            ValueKind::Closure(closure)
+                .spanned(function_type, span)
+        } else {
+            let code = self.lower_code_block(closure.code_block());
+            
+            let closure = Closure {
+                params: vec![],
+                code
+            };
+
+            ValueKind::Closure(closure)
+                .spanned_infer(span)
         }
     }
 

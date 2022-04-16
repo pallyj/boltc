@@ -1,23 +1,16 @@
+let iterations = 20
+
 @entryPoint
 func main() {
-	for(0, 1_000_000, loopBody)
-}
-
-func factorial(n: Int): Int {
-	if n.lt(2).repr {
-		1
-	} else {
-		n.mul(factorial(n.sub(1)))
+	for (0..<iterations) { i =>
+        print(factorial(i))
 	}
 }
 
-func loopBody(i: Int) {
-	factorial(i.mod(20)).print()
-}
-
-func for(low: Int, high: Int, f: func (Int)) {
-	if low.neq(high).repr {
-		f(low);
-		for(low.add(1), high, f)
+func factorial(n: Int): Int {
+	if n < 2 {
+		1
+	} else {
+		n * factorial(n - 1)
 	}
 }

@@ -34,8 +34,14 @@ pub fn lower_function<'a, 'ctx>(func: &FunctionRef, context: &ModuleContext<'a, 
 		panic!("Error: Function created with non function type");
 	};
 
-    for i in 0..(pars.len() as u64) {
-        function_context.define_param(i, &llvm_func);
+    let mut param_n = 0;
+    for param in &pars {
+        if let Type::Void = param {
+            continue;
+        }
+
+        function_context.define_param(param_n, &llvm_func);
+        param_n += 1;
     }
 
     // Generate code for each block
@@ -59,8 +65,8 @@ fn lower_block<'a, 'ctx>(blir_block: &BlockRef, context: &ModuleContext<'a, 'ctx
             }
 
             Instruction::AssignPtr { pointer, value } => {
-                let pointer = fn_ctx.get_local(pointer).basic();
-                let value = fn_ctx.get_local(value).basic();
+                let pointer = fn_ctx.get_local(pointer).unwrap().basic();
+                let value = fn_ctx.get_local(value).unwrap().basic();
 
                 context.builder
                        .build_store(pointer.into_pointer_value(), value);
@@ -69,7 +75,7 @@ fn lower_block<'a, 'ctx>(blir_block: &BlockRef, context: &ModuleContext<'a, 'ctx
             Instruction::Branch { condition,
                                   positive,
                                   negative, } => {
-                let condition = fn_ctx.get_local(condition).basic().into_int_value();
+                let condition = fn_ctx.get_local(condition).unwrap().basic().into_int_value();
 
                 let then_block = fn_ctx.get_basic_block(positive.index());
                 let else_block = fn_ctx.get_basic_block(negative.index());
@@ -87,7 +93,7 @@ fn lower_block<'a, 'ctx>(blir_block: &BlockRef, context: &ModuleContext<'a, 'ctx
             Instruction::Return { value } => {
                 if let Some(value) = value {
                     // Get the value from the local context
-                    if let Some(llvm_value) = fn_ctx.get_local(value).try_basic() {
+                    if let Some(llvm_value) = fn_ctx.get_local(value).and_then(|basic| basic.try_basic()) {
                         context.builder.build_return(Some(&llvm_value));
                     } else {
                         context.builder.build_return(None);
@@ -115,18 +121,20 @@ impl<'ctx> FunctionContext<'ctx> {
     }
 
     pub fn define_param(&self, n: u64, function: &FunctionValue<'ctx>) {
-        let value = function.get_nth_param(n as u32).unwrap();
+        let Some(value) = function.get_nth_param(n as u32) else {
+            panic!("Expected param {n} in function {:?}", function.get_name());
+        };
 
         self.locals.borrow_mut().insert(n, LLVMValue::Basic(value));
     }
 
     pub fn define_local(&self, label: &LabelValue, value: LLVMValue<'ctx>) { self.locals.borrow_mut().insert(label.label(), value); }
 
-    pub fn get_local(&self, label: &LabelValue) -> LLVMValue<'ctx> {
-        *self.locals
+    pub fn get_local(&self, label: &LabelValue) -> Option<LLVMValue<'ctx>> {
+        self.locals
             .borrow()
             .get(&label.label())
-            .expect("Undefined label")
+            .cloned()
     }
 
     pub fn add_basic_block(&self, n: u64, block: BasicBlock<'ctx>) { self.basic_blocks.borrow_mut().insert(n, block); }

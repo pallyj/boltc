@@ -28,15 +28,15 @@ public struct UInt32 /*: IntegerLiteralRepresentable */ {
 	}
 
 
-	public func or(b: Self): Self {
+	public func bitOr(b: Self): Self {
 		Self ( integer32Or(self.repr, b.repr) )
 	}
 
-	public func xor(b: Self): Self {
+	public func bitXor(b: Self): Self {
 		Self ( integer32Xor(self.repr, b.repr) )
 	}
 
-	public func and(b: Self): Self {
+	public func bitAnd(b: Self): Self {
 		Self ( integer32And(self.repr, b.repr) )
 	}
 
@@ -49,27 +49,27 @@ public struct UInt32 /*: IntegerLiteralRepresentable */ {
 	}
 
 
-	public func eq(b: Self): Bool {
+	public operator func equalual(b: Self): Bool {
 		Bool ( integer32CmpEq(self.repr, b.repr) )
 	}
 
-	public func neq(b: Self): Bool {
+	public func notEqual(b: Self): Bool {
 		Bool ( integer32CmpNeq(self.repr, b.repr) )
 	}
 
-	public func lt(b: Self): Bool {
+	public func lessThan(b: Self): Bool {
 		Bool ( integer32CmpLt(self.repr, b.repr) )
 	}
 
-	public func gt(b: Self): Bool {
+	public func greaterThan(b: Self): Bool {
 		Bool ( integer32CmpGt(self.repr, b.repr) )
 	}
 
-	public func lte(b: Self): Bool {
+	public func lessThanEq(b: Self): Bool {
 		Bool ( integer32CmpLte(self.repr, b.repr) )
 	}
 
-	public func gte(b: Self): Bool {
+	public func greaterThanEq(b: Self): Bool {
 		Bool ( integer32CmpGte(self.repr, b.repr) )
 	}
 
@@ -80,6 +80,18 @@ public struct UInt32 /*: IntegerLiteralRepresentable */ {
 
 	public func invert(): Self {
 		Self ( integer32Invert(self.repr) )
+	}
+
+	public operator func unit(): Self {
+		self
+	}
+
+	public operator func openRange(upper: Self): UInt32Range {
+		UInt32Range(self, upper + 1)
+	}
+
+	public operator func closedRange(upper: Self): UInt32Range {
+		UInt32Range(self, upper)
 	}
 
 	public static func bitcastInt8(i: Int8): Self {
@@ -108,5 +120,17 @@ public struct UInt32 /*: IntegerLiteralRepresentable */ {
 
 	public static func truncInt64(i: Int64): Self {
 		UInt32 ( integer64Trunc32(i.repr) )
+	}
+}
+
+public struct UInt32Range {
+	fileprivate var low: UInt8
+	fileprivate var high: UInt8
+}
+
+public func for(range: UInt32Range, f: func (UInt32)) {
+	if range.low != range.high {
+		f(range.low);
+		for(range.low + 1..<range.high, f)
 	}
 }

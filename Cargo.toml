@@ -29,7 +29,6 @@ members = [
 	"compiler/lower_ast",
 	"compiler/blir",
 	"compiler/blir_passes",
-	"compiler/hminfer",
 	"compiler/mangle",
 	"compiler/lower_blir",
 	"compiler/blirssa",

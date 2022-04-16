@@ -5,81 +5,92 @@ public struct Int16 /*: IntegerLiteralRepr */ {
 	public static let min: Int16 = 0xffff
 	public static let max: Int16 = 0x7fff
 
-	public var repr: i16
+	internal var repr: i16
 
-	public func add(b: Self): Self {
+	public operator func add(b: Self): Self {
 		Self( integer16Add(self.repr, b.repr) )
 	}
 
-	public func sub(b: Self): Self {
+	public operator func sub(b: Self): Self {
 		Self( integer16Sub(self.repr, b.repr) )
 	}
 
-	public func mul(b: Self): Self {
+	public operator func mul(b: Self): Self {
 		Self ( integer16Mul(self.repr, b.repr) )
 	}
 
-	public func div(b: Self): Self {
+	public operator func div(b: Self): Self {
 		Self ( integer16DivSig(self.repr, b.repr) )
 	}
 
-	public func mod(b: Self): Self {
+	public operator func mod(b: Self): Self {
 		Self ( integer16RemSig(self.repr, b.repr) )
 	}
 
 
-	public func or(b: Self): Self {
+	public operator func or(b: Self): Self {
 		Self ( integer16Or(self.repr, b.repr) )
 	}
 
-	public func xor(b: Self): Self {
+	public operator func xor(b: Self): Self {
 		Self ( integer16Xor(self.repr, b.repr) )
 	}
 
-	public func and(b: Self): Self {
+	public operator func and(b: Self): Self {
 		Self ( integer16And(self.repr, b.repr) )
 	}
 
-	public func shiftLeft(b: Self): Self {
+	public operator func shiftLeft(b: Self): Self {
 		Self ( integer16Shl(self.repr, b.repr) )
 	}
 
-	public func shiftRight(b: Self): Self {
+	public operator func shiftRight(b: Self): Self {
 		Self ( integer16ShrSig(self.repr, b.repr) )
 	}
 
 
-	public func eq(b: Self): Bool {
+	public operator func equal(b: Self): Bool {
 		Bool ( integer16CmpEq(self.repr, b.repr) )
 	}
 
-	public func neq(b: Self): Bool {
+	public operator func notEqual(b: Self): Bool {
 		Bool ( integer16CmpNeq(self.repr, b.repr) )
 	}
 
-	public func lt(b: Self): Bool {
+	public operator func lessThan(b: Self): Bool {
 		Bool ( integer16CmpLtSig(self.repr, b.repr) )
 	}
 
-	public func gt(b: Self): Bool {
+	public operator func greaterThan(b: Self): Bool {
 		Bool ( integer16CmpGtSig(self.repr, b.repr) )
 	}
 
-	public func lte(b: Self): Bool {
+	public operator func lessThanEq(b: Self): Bool {
 		Bool ( integer16CmpLteSig(self.repr, b.repr) )
 	}
 
-	public func gte(b: Self): Bool {
+	public operator func greaterThanEq(b: Self): Bool {
 		Bool ( integer16CmpGteSig(self.repr, b.repr) )
 	}
 
+	public operator func unit(): Self {
+		self
+	}
 	
-	public func negate(): Self {
+	public operator func negate(): Self {
 		Self ( integer16Negate(self.repr) )
 	}
 
-	public func invert(): Self {
+	public operator func invert(): Self {
 		Self ( integer16Invert(self.repr) )
+	}
+
+	public operator func openRange(upper: Self): Int16Range {
+		Int16Range(self, upper + 1)
+	}
+
+	public operator func closedRange(upper: Self): Int16Range {
+		Int16Range(self, upper)
 	}
 
 	public static func extendUInt8(i: UInt8): Self {
@@ -110,5 +121,18 @@ public struct Int16 /*: IntegerLiteralRepr */ {
 
 	public static func bitcastUInt16(i: UInt16): Self {
 		Self ( i.repr )
+	}
+}
+
+
+public struct Int16Range {
+	fileprivate var low: Int16
+	fileprivate var high: Int16
+}
+
+public func for(range: Int16Range, closure: func (Int16)) {
+	if range.low != range.high {
+		closure(range.low);
+		for(range.low + 1..<range.high, closure)
 	}
 }

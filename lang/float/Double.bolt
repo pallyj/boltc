@@ -2,57 +2,61 @@ import intrinsics
 
 @transparent
 public struct Double /*: FloatLiteralRepr*/ {
-	public var repr: f64
+	internal var repr: f64
 
 	// Arithmatic
-	public func add(b: Double): Double {
+	public operator func add(b: Double): Double {
 		Double ( float64Add(self.repr, b.repr) )
 	}
 
-	public func sub(b: Double): Double {
+	public operator func sub(b: Double): Double {
 		Double ( float64Sub(self.repr, b.repr) )
 	}
 
-	public func mul(b: Double): Double {
+	public operator func mul(b: Double): Double {
 		Double ( float64Mul(self.repr, b.repr) )
 	}
 
-	public func div(b: Double): Double {
+	public operator func div(b: Double): Double {
 		Double ( float64Div(self.repr, b.repr) )
 	}
 
-	public func rem(b: Double): Double {
+	public operator func mod(b: Double): Double {
 		Double ( float64Rem(self.repr, b.repr) )
 	}
 
 	// Comparison
-	public func eq(b: Double): Bool {
+	public operator func equal(b: Double): Bool {
 		Bool ( float64CmpEq(self.repr, b.repr) )
 	}
 
-	public func neq(b: Double): Bool {
+	public operator func notEqual(b: Double): Bool {
 		Bool ( float64CmpNeq(self.repr, b.repr) )
 	}
 
-	public func lt(b: Double): Bool {
+	public operator func lessThan(b: Double): Bool {
 		Bool ( float64CmpLt(self.repr, b.repr) )
 	}
 
-	public func gt(b: Double): Bool {
+	public operator func greaterThan(b: Double): Bool {
 		Bool ( float64CmpGt(self.repr, b.repr) )
 	}
 
-	public func lte(b: Double): Bool {
+	public operator func lessThanEq(b: Double): Bool {
 		Bool ( float64CmpLte(self.repr, b.repr) )
 	}
 
-	public func gte(b: Double): Bool {
+	public operator func greaterThanEq(b: Double): Bool {
 		Bool ( float64CmpGte(self.repr, b.repr) )
 	}
 
 	// Negate
-	public func negate(): Self {
+	public operator func negate(): Self {
 		Self ( float64Negate(self.repr) )
+	}
+d
+	public operator func unit(): Self {
+		self
 	}
 
 

@@ -154,8 +154,34 @@ fn labels_match(sig: &FunctionInfo, labels: &Vec<Option<String>>) -> bool {
 fn types_match(sig: &FunctionInfo, types: &Vec<Type>) -> bool {
     sig.params().iter()
        .zip(types)
-       .all(|(sig, types)| &sig.typ == types || matches!(types.kind(), TypeKind::Infer { key: _ }) )
+       .all(|(sig, types)| is_assignable_from(&sig.typ, types) )
 }
+
+fn is_assignable_from(ty1: &Type, ty2: &Type) -> bool {
+    if ty2.kind() == &TypeKind::Divergent {
+        return true;
+    }
+
+    match (ty1.kind(), ty2.kind()) {
+        (TypeKind::Function { return_type: return_type1, params: params1, .. },
+         TypeKind::Function { return_type: return_type2, params: params2, .. }) => {
+             if !is_assignable_from(return_type1, return_type2) {
+                 return false
+             }
+
+             if params1.iter().zip(params2).any(|(ty1, ty2)| !is_assignable_from(ty1, ty2)) {
+                 return false
+             }
+
+             true
+         }
+        (_, TypeKind::Infer { .. }) => true,
+        (_, TypeKind::Divergent) => true,
+        (t1, t2) if t1 == t2 => true,
+        _ => false,
+    }
+}
+
 
 fn visibility_matches(func: &SomeFunction, relationship: ScopeRelation) -> bool {
     relationship.can_access(func.visibility())

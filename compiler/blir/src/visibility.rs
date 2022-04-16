@@ -6,6 +6,7 @@ pub enum Visibility {
     Internal,
     Fileprivate,
     Private,
+    Local,
 }
 
 impl Display for Visibility {
@@ -15,6 +16,7 @@ impl Display for Visibility {
             Self::Internal => write!(f, "internal"),
             Self::Fileprivate => write!(f, "public"),
             Self::Private => write!(f, "private"),
+            Self::Local => write!(f, "local"),
         }
     }
 }

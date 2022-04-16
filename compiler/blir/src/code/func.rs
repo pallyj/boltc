@@ -33,7 +33,7 @@ impl FunctionInner {
             let val = ValueKind::FunctionParam(p.bind_name.clone()).anon(p.typ.clone());
 
             self.scope
-                .add_symbol(p.bind_name.clone(), Visibility::Public, Symbol::Value(val));
+                .add_symbol(p.bind_name.clone(), Visibility::Local, Symbol::Value(val));
         }
     }
 

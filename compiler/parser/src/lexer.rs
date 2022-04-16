@@ -75,7 +75,7 @@ pub enum SyntaxKind {
     #[regex("0b[0|1_]+")]
     LiteralBinInt,
 
-    #[regex("[0-9][0-9_]*\\.[0-9_]*")]
+    #[regex("[0-9][0-9_]*\\.[0-9_]+")]
     LiteralDecFloat,
 
     #[token("(")]

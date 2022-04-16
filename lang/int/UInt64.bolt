@@ -28,15 +28,15 @@ public struct UInt64 /*: IntegerLiteralRepresentable */ {
 	}
 
 
-	public func or(b: Self): Self {
+	public func bitOr(b: Self): Self {
 		Self ( integer64Or(self.repr, b.repr) )
 	}
 
-	public func xor(b: Self): Self {
+	public func bitXor(b: Self): Self {
 		Self ( integer64Xor(self.repr, b.repr) )
 	}
 
-	public func and(b: Self): Self {
+	public func bitAnd(b: Self): Self {
 		Self ( integer64And(self.repr, b.repr) )
 	}
 
@@ -49,27 +49,27 @@ public struct UInt64 /*: IntegerLiteralRepresentable */ {
 	}
 
 
-	public func eq(b: Self): Bool {
+	public operator func equalual(b: Self): Bool {
 		Bool ( integer64CmpEq(self.repr, b.repr) )
 	}
 
-	public func neq(b: Self): Bool {
+	public func notEqual(b: Self): Bool {
 		Bool ( integer64CmpNeq(self.repr, b.repr) )
 	}
 
-	public func lt(b: Self): Bool {
+	public func lessThan(b: Self): Bool {
 		Bool ( integer64CmpLt(self.repr, b.repr) )
 	}
 
-	public func gt(b: Self): Bool {
+	public func greaterThan(b: Self): Bool {
 		Bool ( integer64CmpGt(self.repr, b.repr) )
 	}
 
-	public func lte(b: Self): Bool {
+	public func lessThanEq(b: Self): Bool {
 		Bool ( integer64CmpLte(self.repr, b.repr) )
 	}
 
-	public func gte(b: Self): Bool {
+	public func greaterThanEq(b: Self): Bool {
 		Bool ( integer64CmpGte(self.repr, b.repr) )
 	}
 
@@ -80,6 +80,19 @@ public struct UInt64 /*: IntegerLiteralRepresentable */ {
 
 	public func invert(): Self {
 		Self ( integer64Invert(self.repr) )
+	}
+
+
+	public operator func unit(): Self {
+		self
+	}
+
+	public operator func openRange(upper: Self): UInt64Range {
+		UInt64Range(self, upper + 1)
+	}
+
+	public operator func closedRange(upper: Self): UInt64Range {
+		UInt64Range(self, upper)
 	}
 
 	
@@ -131,5 +144,17 @@ public struct UInt64 /*: IntegerLiteralRepresentable */ {
 
 	public static func bitcastInt64(i: Int64): Self {
 		Self ( i.repr )
+	}
+}
+
+public struct UInt64Range {
+	fileprivate var low: UInt64
+	fileprivate var high: UInt64
+}
+
+public func for(range: UInt64Range, f: func (UInt64)) {
+	if range.low != range.high {
+		f(range.low);
+		for(range.low + 1..<range.high, f)
 	}
 }

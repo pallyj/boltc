@@ -1,5 +1,6 @@
 use blir::{code::{ExternFunctionRef, FunctionRef},
-           typ::TypeKind};
+           typ::TypeKind, value::Closure};
+use blirssa::value::LabelValue;
 
 use crate::BlirLowerer;
 
@@ -27,9 +28,16 @@ impl BlirLowerer {
                            .unwrap();
 
         self.context.enter_function(&function);
-        for (i, p) in func.borrow().info.params().iter().enumerate() {
-            let arg_value = function.arg(i);
-            self.context.define_var(&p.bind_name, arg_value);
+
+        let mut func_n = 0;
+        for param in func.borrow().info.params() {
+            if let TypeKind::Void = param.typ.kind() {
+                self.context.define_var(&param.bind_name, LabelValue::void());
+                continue;
+            }
+            let arg_value = function.arg(func_n);
+            self.context.define_var(&param.bind_name, arg_value);
+            func_n += 1;
         }
 
         let start_block = function.append_block("enter");
@@ -37,6 +45,34 @@ impl BlirLowerer {
 
         let yield_value = self.lower_code_block(&func.borrow().code);
         if func.borrow().code.typ().kind() != &TypeKind::Divergent {
+            self.builder().build_return(yield_value);
+        }
+    }
+
+    pub(super) fn lower_closure_code(&mut self, name: &str, closure: &Closure) {
+        let function = self.ssa_library()
+                           .get_function(name)
+                           .cloned()
+                           .unwrap();
+
+        self.context.enter_function(&function);
+
+        let mut func_n = 0;
+        for param in &closure.params {
+            if let TypeKind::Void = param.typ.kind() {
+                //self.context.define_var(&param.name, LabelValue::void());
+                //continue;
+            }
+            let arg_value = function.arg(func_n);
+            self.context.define_var(&param.name, arg_value);
+            func_n += 1;
+        }
+
+        let start_block = function.append_block("enter");
+        self.builder().position_at_end(&start_block);
+
+        let yield_value = self.lower_code_block(&closure.code);
+        if closure.code.typ().kind() != &TypeKind::Divergent {
             self.builder().build_return(yield_value);
         }
     }

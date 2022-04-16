@@ -6,7 +6,7 @@ mod val;
 
 use std::collections::HashMap;
 
-use blir::Library;
+use blir::{Library, value::Closure};
 use blirssa::{code::FunctionRef, value::LabelValue, Builder, Library as SsaLibrary};
 
 pub struct BlirLowerer {
@@ -14,6 +14,7 @@ pub struct BlirLowerer {
     builder: Builder,
     lib:     Library,
     context: FunctionLowerContext,
+    closures: Vec<(String, Closure)>,
 }
 
 impl BlirLowerer {
@@ -21,7 +22,8 @@ impl BlirLowerer {
         BlirLowerer { ssa_lib: SsaLibrary::new(lib.name()),
                       builder: Builder::new(),
                       lib,
-                      context: FunctionLowerContext::new() }
+                      context: FunctionLowerContext::new(),
+                      closures: Vec::new() }
     }
 
     fn builder(&mut self) -> &mut Builder { &mut self.builder }
@@ -59,6 +61,10 @@ impl BlirLowerer {
         // Lower function code
         for func in self.lib.functions.clone() {
             self.lower_func(func);
+        }
+
+        for (name, closure) in self.closures.clone() {
+            self.lower_closure_code(&name, &closure);
         }
     }
 

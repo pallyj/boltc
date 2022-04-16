@@ -19,7 +19,7 @@
 
 use std::fmt::Debug;
 
-use super::{find_token, smt::CodeBlock};
+use super::{find_token, smt::CodeBlock, typ::Type};
 use crate::lexer::SyntaxKind;
 
 ast!(struct NamedExpr(NamedExpr));
@@ -32,8 +32,11 @@ ast!(struct UnitExpr(UnitExpr));
 ast!(struct PrefixExpr(PrefixExpr));
 ast!(struct PostfixExpr(PostfixExpr));
 ast!(struct InfixExpr(InfixExpr));
+ast!(struct ClosureExpr(Closure));
+ast!(struct TrailingClosureExpr(TrailingClosure));
 
 ast!(struct FuncArg(FuncArg));
+ast!(struct ClosureParam(FuncPar));
 
 ast!(
     enum Expr {
@@ -46,7 +49,9 @@ ast!(
         UnitExpr,
         PrefixExpr,
         PostfixExpr,
-        InfixExpr
+        InfixExpr,
+        ClosureExpr,
+        TrailingClosureExpr
     }
 );
 
@@ -63,6 +68,8 @@ impl Debug for Expr {
             Self::PrefixExpr(arg0) => write!(f, "{arg0:?}"),
             Self::PostfixExpr(arg0) => write!(f, "{arg0:?}"),
             Self::InfixExpr(arg0) => write!(f, "{arg0:?}"),
+            Self::ClosureExpr(arg0) => write!(f, "{arg0:?}"),
+            Self::TrailingClosureExpr(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "Error"),
         }
     }
@@ -273,6 +280,82 @@ impl InfixExpr {
             .unwrap()
     }
 }
+
+impl ClosureParam {
+    pub fn bind_name(&self) -> String {
+        find_token(&self.0, SyntaxKind::Ident)
+            .unwrap()
+            .text()
+            .to_string()
+    }
+
+    pub fn explicit_type(&self) -> Option<Type> {
+        self.0.last_child()
+            .map(Type::cast)
+    }
+}
+
+impl Debug for ClosureParam {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(explicit_type) = self.explicit_type() {
+            write!(f, "{}: {:?}", self.bind_name(), explicit_type)
+        } else {
+            write!(f, "{}", self.bind_name())
+        }
+    }
+}
+
+impl ClosureExpr {
+    pub fn parameters(&self) -> Option<impl Iterator<Item=ClosureParam>> {
+        self.0.children()
+            .find(|node| node.kind() == SyntaxKind::CommaSeparatedList)
+            .map(|params| params
+                .children()
+                .filter_map(ClosureParam::cast))
+    }
+    pub fn code_block(&self) -> CodeBlock {
+        self.0.children()
+            .find_map(CodeBlock::cast)
+            .unwrap()
+    }
+}
+
+impl Debug for ClosureExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(parameters) = self.parameters() {
+            let parameters = parameters
+                .map(|d| format!("{d:?}"))
+                .collect::<Vec<_>>()
+                .join(", ");
+
+            write!(f, "{{ {parameters} => {:?} }}", self.code_block())
+        } else {
+            write!(f, "{:?}", self.code_block())
+        }
+    }
+}
+
+impl TrailingClosureExpr {
+    pub fn function(&self) -> Expr {
+        self.0.first_child()
+            .map(Expr::cast)
+            .unwrap()
+    }
+
+    pub fn closure(&self) -> ClosureExpr {
+        self.0.last_child()
+            .and_then(ClosureExpr::cast)
+            .unwrap()
+    }
+}
+
+impl Debug for TrailingClosureExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?} {:?}", self.function(), self.closure())
+    }
+}
+
+
 
 impl Debug for FuncCallExpr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

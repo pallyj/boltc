@@ -6,6 +6,7 @@ use crate::{typ::Type, value::ValueKind, Symbol, SymbolWrapper, Visibility, code
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ScopeRelation {
+    Scope,
     None,
     SameLibrary,
     SameFile,
@@ -25,8 +26,9 @@ impl ScopeRelation {
         match visibility {
             Visibility::Public => true,
             Visibility::Internal => self != ScopeRelation::None,
-            Visibility::Fileprivate => (self == ScopeRelation::SameFile || self == ScopeRelation::SameContainer),
-            Visibility::Private => self == ScopeRelation::SameContainer,
+            Visibility::Fileprivate => (self == ScopeRelation::SameFile || self == ScopeRelation::SameContainer || self == ScopeRelation::Scope),
+            Visibility::Private => (self == ScopeRelation::SameContainer || self == ScopeRelation::Scope),
+            Visibility::Local => self != ScopeRelation::Scope,
         }
     }
 }
@@ -316,7 +318,7 @@ impl Scope {
 
         let sym = Symbol::Value(ValueKind::LocalVariable(mangled_name.clone()).anon(typ));
 
-        self.add_symbol(name.to_string(), Visibility::Public, sym);
+        self.add_symbol(name.to_string(), Visibility::Local, sym);
 
         mangled_name
     }

@@ -2,7 +2,7 @@ use std::panic;
 
 use blir::{intrinsics::{BinaryIntrinsicFn, UnaryIntrinsicFn},
            typ::{Type, TypeKind},
-           value::{IfBranch, IfValue, Value, ValueKind}};
+           value::{IfBranch, IfValue, Value, ValueKind, Closure}};
 use blirssa::value::{BinaryIntrinsicFn as SsaBinaryIntrinsicFn, LabelValue, UnaryIntrinsicFn as SsaUnaryIntrinsicFn};
 
 use crate::BlirLowerer;
@@ -37,8 +37,30 @@ impl BlirLowerer {
 
             ValueKind::Unit => LabelValue::void(),
 
+            ValueKind::Closure(closure) => self.lower_closure(closure, &value.typ),
+
             _ => panic!("{value:?}"),
         }
+    }
+
+    fn lower_closure(&mut self, closure: &Closure, closure_type: &Type) -> LabelValue {
+        // Make a name based on:
+        //   The closures type
+        //   The enclosing function
+        //   A random number
+        //   The index of the closure
+        let closure_mangled_name = "some_closure";
+
+        let closure_type = self.lower_type(closure_type);
+
+        self.ssa_library_mut()
+            .add_function(closure_mangled_name, closure_type);
+
+        self.closures.push((closure_mangled_name.to_string(), closure.clone()));
+
+        let closure_function = self.ssa_library().get_function(closure_mangled_name).cloned().unwrap();
+        let function = self.builder().build_function(&closure_function);
+        self.builder().build_function_pointer(function)
     }
 
     fn lower_static_func(&mut self, name: &str) -> LabelValue {
