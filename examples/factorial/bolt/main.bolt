@@ -2,15 +2,12 @@ let iterations = 20
 
 @entryPoint
 func main() {
-	for (0..<iterations) { i =>
-        print(factorial(i))
+	for (0..<iterations) {
+        print(factorial(it))
 	}
 }
 
 func factorial(n: Int): Int {
-	if n < 2 {
-		1
-	} else {
-		n * factorial(n - 1)
-	}
+	if n < 2 { 1 }
+	else { n * factorial(n - 1) }
 }

@@ -7,44 +7,44 @@ public struct UInt8 /*: IntegerLiteralRepresentable */ {
 
 	public var repr: i8
 
-	public func add(b: Self): Self {
+	public operator func add(b: Self): Self {
 		Self( integer8Add(self.repr, b.repr) )
 	}
 
-	public func sub(b: Self): Self {
+	public operator func sub(b: Self): Self {
 		Self( integer8Sub(self.repr, b.repr) )
 	}
 
-	public func mul(b: Self): Self {
+	public operator func mul(b: Self): Self {
 		Self ( integer8Mul(self.repr, b.repr) )
 	}
 
-	public func div(b: Self): Self {
+	public operator func div(b: Self): Self {
 		Self ( integer8Div(self.repr, b.repr) )
 	}
 
-	public func mod(b: Self): Self {
+	public operator func mod(b: Self): Self {
 		Self ( integer8Rem(self.repr, b.repr) )
 	}
 
 
-	public func bitOr(b: Self): Self {
+	public operator func bitOr(b: Self): Self {
 		Self ( integer8Or(self.repr, b.repr) )
 	}
 
-	public func bitXor(b: Self): Self {
+	public operator func bitXor(b: Self): Self {
 		Self ( integer8Xor(self.repr, b.repr) )
 	}
 
-	public func bitAnd(b: Self): Self {
+	public operator func bitAnd(b: Self): Self {
 		Self ( integer8And(self.repr, b.repr) )
 	}
 
-	public func shiftLeft(b: Self): Self {
+	public operator func shiftLeft(b: Self): Self {
 		Self ( integer8Shl(self.repr, b.repr) )
 	}
 
-	public func shiftRight(b: Self): Self {
+	public operator func shiftRight(b: Self): Self {
 		Self ( integer8Shr(self.repr, b.repr) )
 	}
 
@@ -53,32 +53,32 @@ public struct UInt8 /*: IntegerLiteralRepresentable */ {
 		Bool ( integer8CmpEq(self.repr, b.repr) )
 	}
 
-	public func notEqual(b: Self): Bool {
+	public operator func notEqual(b: Self): Bool {
 		Bool ( integer8CmpNeq(self.repr, b.repr) )
 	}
 
-	public func lessThan(b: Self): Bool {
+	public operator func lessThan(b: Self): Bool {
 		Bool ( integer8CmpLt(self.repr, b.repr) )
 	}
 
-	public func greaterThan(b: Self): Bool {
+	public operator func greaterThan(b: Self): Bool {
 		Bool ( integer8CmpGt(self.repr, b.repr) )
 	}
 
-	public func lessThanEq(b: Self): Bool {
+	public operator func lessThanEq(b: Self): Bool {
 		Bool ( integer8CmpLte(self.repr, b.repr) )
 	}
 
-	public func greaterThanEq(b: Self): Bool {
+	public operator func greaterThanEq(b: Self): Bool {
 		Bool ( integer8CmpGte(self.repr, b.repr) )
 	}
 
 	
-	public func negate(): Self {
+	public operator func negate(): Self {
 		Self ( integer8Negate(self.repr) )
 	}
 
-	public func invert(): Self {
+	public operator func invert(): Self {
 		Self ( integer8Invert(self.repr) )
 	}
 

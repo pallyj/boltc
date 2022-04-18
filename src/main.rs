@@ -4,6 +4,7 @@ use std::process::Command;
 
 use args::Args;
 use blir::{BlirContext, Library};
+use blir_passes::ClosureResolvePass;
 use clap::StructOpt;
 use codegen::config::{BuildConfig, BuildOutput, BuildProfile};
 use errors::{debugger::Debugger, fileinterner::FileInterner};
@@ -111,7 +112,17 @@ impl Project {
             &mut context,
             &mut debugger)
             .run_pass(self.library.as_mut().unwrap());
-        
+
+        if debugger.has_errors() {
+            return (false, None);
+        }
+
+        blir_passes::ClosureResolvePass::new(
+            &attribute_factory,
+            &mut context,
+            &mut debugger)
+            .run_pass(self.library.as_mut().unwrap());
+
         //println!("{:?}", self.library.as_ref().unwrap());
 
         if debugger.has_errors() {

@@ -7,44 +7,44 @@ public struct UInt64 /*: IntegerLiteralRepresentable */ {
 
 	public var repr: i64
 
-	public func add(b: Self): Self {
+	public operator func add(b: Self): Self {
 		Self( integer64Add(self.repr, b.repr) )
 	}
 
-	public func sub(b: Self): Self {
+	public operator func sub(b: Self): Self {
 		Self( integer64Sub(self.repr, b.repr) )
 	}
 
-	public func mul(b: Self): Self {
+	public operator func mul(b: Self): Self {
 		Self ( integer64Mul(self.repr, b.repr) )
 	}
 
-	public func div(b: Self): Self {
+	public operator func div(b: Self): Self {
 		Self ( integer64Div(self.repr, b.repr) )
 	}
 
-	public func mod(b: Self): Self {
+	public operator func mod(b: Self): Self {
 		Self ( integer64Rem(self.repr, b.repr) )
 	}
 
 
-	public func bitOr(b: Self): Self {
+	public operator func bitOr(b: Self): Self {
 		Self ( integer64Or(self.repr, b.repr) )
 	}
 
-	public func bitXor(b: Self): Self {
+	public operator func bitXor(b: Self): Self {
 		Self ( integer64Xor(self.repr, b.repr) )
 	}
 
-	public func bitAnd(b: Self): Self {
+	public operator func bitAnd(b: Self): Self {
 		Self ( integer64And(self.repr, b.repr) )
 	}
 
-	public func shiftLeft(b: Self): Self {
+	public operator func shiftLeft(b: Self): Self {
 		Self ( integer64Shl(self.repr, b.repr) )
 	}
 
-	public func shiftRight(b: Self): Self {
+	public operator func shiftRight(b: Self): Self {
 		Self ( integer64Shr(self.repr, b.repr) )
 	}
 
@@ -53,32 +53,32 @@ public struct UInt64 /*: IntegerLiteralRepresentable */ {
 		Bool ( integer64CmpEq(self.repr, b.repr) )
 	}
 
-	public func notEqual(b: Self): Bool {
+	public operator func notEqual(b: Self): Bool {
 		Bool ( integer64CmpNeq(self.repr, b.repr) )
 	}
 
-	public func lessThan(b: Self): Bool {
+	public operator func lessThan(b: Self): Bool {
 		Bool ( integer64CmpLt(self.repr, b.repr) )
 	}
 
-	public func greaterThan(b: Self): Bool {
+	public operator func greaterThan(b: Self): Bool {
 		Bool ( integer64CmpGt(self.repr, b.repr) )
 	}
 
-	public func lessThanEq(b: Self): Bool {
+	public operator func lessThanEq(b: Self): Bool {
 		Bool ( integer64CmpLte(self.repr, b.repr) )
 	}
 
-	public func greaterThanEq(b: Self): Bool {
+	public operator func greaterThanEq(b: Self): Bool {
 		Bool ( integer64CmpGte(self.repr, b.repr) )
 	}
 
 	
-	public func negate(): Self {
+	public operator func negate(): Self {
 		Self ( integer64Negate(self.repr) )
 	}
 
-	public func invert(): Self {
+	public operator func invert(): Self {
 		Self ( integer64Invert(self.repr) )
 	}
 

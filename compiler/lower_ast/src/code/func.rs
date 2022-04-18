@@ -133,7 +133,7 @@ impl AstLowerer {
 
             None => Visibility::Internal,
 
-            _ => panic!(),
+            Some(other) => panic!("{other:?}"),
         }
     }
 }

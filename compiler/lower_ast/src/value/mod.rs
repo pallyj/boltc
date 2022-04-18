@@ -199,8 +199,10 @@ impl AstLowerer {
                 code
             };
 
+            let closure_type = Type::infer();
+
             ValueKind::Closure(closure)
-                .spanned_infer(span)
+                .spanned(closure_type, span)
         }
     }
 

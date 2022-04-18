@@ -54,7 +54,7 @@ public struct Double /*: FloatLiteralRepr*/ {
 	public operator func negate(): Self {
 		Self ( float64Negate(self.repr) )
 	}
-d
+
 	public operator func unit(): Self {
 		self
 	}

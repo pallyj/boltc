@@ -10,6 +10,7 @@ pub struct TypeReplaceContext<'a, 'b> {
 	pub (crate) constraint_table: 	PreliminaryTypeTable<TypeVariant>,
 	pub (crate) context:			&'a BlirContext,
 	pub (crate) infer_keys: 		&'a HashMap<u64, TcKey>,
+	pub (crate) p_maps: 			&'a mut HashMap<u64, Vec<Type>>,
 	pub (crate) debugger: 			&'a mut Debugger<'b>,
 	pub (crate) is_final_run:		bool
 }

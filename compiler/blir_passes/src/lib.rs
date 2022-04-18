@@ -4,6 +4,8 @@
 pub mod type_check;
 pub mod type_infer;
 pub mod type_resolve;
+pub mod closure_resolve;
 
 pub use type_resolve::TypeResolvePass;
 pub use type_infer::TypeInferPass;
+pub use closure_resolve::ClosureResolvePass;

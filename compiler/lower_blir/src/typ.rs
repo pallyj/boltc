@@ -29,7 +29,7 @@ impl BlirLowerer {
                                                                                                            .map(|par| self.lower_type(par))
                                                                                                            .collect(), },
 
-            _ => panic!(),
+            _ => panic!("{typ:?}"),
         }
     }
 }

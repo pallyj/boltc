@@ -7,44 +7,44 @@ public struct UInt32 /*: IntegerLiteralRepresentable */ {
 
 	public var repr: i32
 
-	public func add(b: Self): Self {
+	public operator func add(b: Self): Self {
 		Self( integer32Add(self.repr, b.repr) )
 	}
 
-	public func sub(b: Self): Self {
+	public operator func sub(b: Self): Self {
 		Self( integer32Sub(self.repr, b.repr) )
 	}
 
-	public func mul(b: Self): Self {
+	public operator func mul(b: Self): Self {
 		Self ( integer32Mul(self.repr, b.repr) )
 	}
 
-	public func div(b: Self): Self {
+	public operator func div(b: Self): Self {
 		Self ( integer32Div(self.repr, b.repr) )
 	}
 
-	public func mod(b: Self): Self {
+	public operator func mod(b: Self): Self {
 		Self ( integer32Rem(self.repr, b.repr) )
 	}
 
 
-	public func bitOr(b: Self): Self {
+	public operator func bitOr(b: Self): Self {
 		Self ( integer32Or(self.repr, b.repr) )
 	}
 
-	public func bitXor(b: Self): Self {
+	public operator func bitXor(b: Self): Self {
 		Self ( integer32Xor(self.repr, b.repr) )
 	}
 
-	public func bitAnd(b: Self): Self {
+	public operator func bitAnd(b: Self): Self {
 		Self ( integer32And(self.repr, b.repr) )
 	}
 
-	public func shiftLeft(b: Self): Self {
+	public operator func shiftLeft(b: Self): Self {
 		Self ( integer32Shl(self.repr, b.repr) )
 	}
 
-	public func shiftRight(b: Self): Self {
+	public operator func shiftRight(b: Self): Self {
 		Self ( integer32Shr(self.repr, b.repr) )
 	}
 
@@ -53,32 +53,32 @@ public struct UInt32 /*: IntegerLiteralRepresentable */ {
 		Bool ( integer32CmpEq(self.repr, b.repr) )
 	}
 
-	public func notEqual(b: Self): Bool {
+	public operator func notEqual(b: Self): Bool {
 		Bool ( integer32CmpNeq(self.repr, b.repr) )
 	}
 
-	public func lessThan(b: Self): Bool {
+	public operator func lessThan(b: Self): Bool {
 		Bool ( integer32CmpLt(self.repr, b.repr) )
 	}
 
-	public func greaterThan(b: Self): Bool {
+	public operator func greaterThan(b: Self): Bool {
 		Bool ( integer32CmpGt(self.repr, b.repr) )
 	}
 
-	public func lessThanEq(b: Self): Bool {
+	public operator func lessThanEq(b: Self): Bool {
 		Bool ( integer32CmpLte(self.repr, b.repr) )
 	}
 
-	public func greaterThanEq(b: Self): Bool {
+	public operator func greaterThanEq(b: Self): Bool {
 		Bool ( integer32CmpGte(self.repr, b.repr) )
 	}
 
 	
-	public func negate(): Self {
+	public operator func negate(): Self {
 		Self ( integer32Negate(self.repr) )
 	}
 
-	public func invert(): Self {
+	public operator func invert(): Self {
 		Self ( integer32Invert(self.repr) )
 	}
 
@@ -124,8 +124,8 @@ public struct UInt32 /*: IntegerLiteralRepresentable */ {
 }
 
 public struct UInt32Range {
-	fileprivate var low: UInt8
-	fileprivate var high: UInt8
+	fileprivate var low: UInt32
+	fileprivate var high: UInt32
 }
 
 public func for(range: UInt32Range, f: func (UInt32)) {

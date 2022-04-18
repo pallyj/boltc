@@ -45,22 +45,25 @@ impl BlirLowerer {
 
     fn lower_closure(&mut self, closure: &Closure, closure_type: &Type) -> LabelValue {
         // Make a name based on:
-        //   The closures type
-        //   The enclosing function
-        //   A random number
-        //   The index of the closure
-        let closure_mangled_name = "some_closure";
+        //   [ ]The closures type
+        //   [ ] The enclosing function
+        //   [x] A random number
+        //   [ ] The index of the closure
+        let closure_number: u32 = rand::random();
+        let closure_mangled_name = format!("C{closure_number:8x}");
 
         let closure_type = self.lower_type(closure_type);
 
         self.ssa_library_mut()
-            .add_function(closure_mangled_name, closure_type);
+            .add_function(&closure_mangled_name, closure_type);
 
-        self.closures.push((closure_mangled_name.to_string(), closure.clone()));
-
-        let closure_function = self.ssa_library().get_function(closure_mangled_name).cloned().unwrap();
+        let closure_function = self.ssa_library().get_function(&closure_mangled_name).cloned().unwrap();
         let function = self.builder().build_function(&closure_function);
-        self.builder().build_function_pointer(function)
+        let function_pointer = self.builder().build_function_pointer(function);
+
+        self.closures.push((closure_mangled_name, closure.clone()));
+
+        function_pointer
     }
 
     fn lower_static_func(&mut self, name: &str) -> LabelValue {

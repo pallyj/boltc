@@ -1,5 +1,5 @@
-use blir::typ::StructRef;
-use rusttyc::{Variant, Partial};
+use blir::typ::{StructRef, TypeKind};
+use rusttyc::{Variant, Partial, Constructable};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TypeVariant {
@@ -8,6 +8,7 @@ pub enum TypeVariant {
 	SomeInteger,
 	SomeFloat,
 	SomeBool,
+	SomeFunction,
 
 	LlvmInt { bits: u32 },
 	LlvmFloat { bits: u32 },
@@ -91,5 +92,13 @@ impl Variant for TypeVariant {
 
 	fn arity(&self) -> rusttyc::Arity {
         rusttyc::Arity::Fixed(0)
+    }
+}
+
+impl Constructable for TypeVariant {
+    type Type = TypeKind;
+
+    fn construct(&self, children: &[Self::Type]) -> Result<Self::Type, <Self as rusttyc::ContextSensitiveVariant>::Err> {
+        todo!()
     }
 }

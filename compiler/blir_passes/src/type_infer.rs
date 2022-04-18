@@ -1,4 +1,4 @@
-use blir::{Library, BlirContext, code::{FunctionRef, MethodRef}, typ::StructRef};
+use blir::{Library, BlirContext, code::{FunctionRef, MethodRef}, typ::{StructRef, Type, TypeKind}, value::Closure, scope::ScopeRef};
 use errors::debugger::Debugger;
 use tyinfer::context::TypeInferContext;
 
@@ -70,7 +70,7 @@ impl<'a, 'l> TypeInferPass<'a, 'l> {
 		let function_type = borrowed_function.info.return_type().clone();
 		let function_block = &mut borrowed_function.code;
 
-		for _ in 0..3 {
+		for _ in 0..2 {
 			infer_context
 				.replace()
 				.replace_codeblock(function_block, &function_scope);
@@ -82,5 +82,48 @@ impl<'a, 'l> TypeInferPass<'a, 'l> {
 		infer_context
 			.finish()
 			.replace_codeblock(function_block, &function_scope);
+
+		infer_context
+			.infer_codeblock(function_block, &function_type, &function_scope);
+
+		infer_context
+			.finish()
+			.replace_codeblock(function_block, &function_scope);
+	}
+
+	pub fn infer_closure(
+		&mut self,
+		func: &mut Closure,
+		closure_type: &mut Type,
+		scope: &ScopeRef)
+	{
+		let mut infer_context = TypeInferContext::new(self.debugger, self.context);
+
+		let function_type = match closure_type.kind() {
+			TypeKind::Function { return_type, .. } => return_type,
+			_ => return
+		};
+
+		let function_block = &mut func.code;
+
+		for _ in 0..2 {
+			infer_context
+				.replace()
+				.replace_codeblock(function_block, &scope);
+				
+			infer_context
+				.infer_codeblock(function_block, &function_type, &scope);
+		}
+
+		infer_context
+			.finish()
+			.replace_codeblock(function_block, &scope);
+
+		infer_context
+			.infer_codeblock(function_block, &function_type, &scope);
+
+		infer_context
+			.finish()
+			.replace_codeblock(function_block, &scope);
 	}
 }

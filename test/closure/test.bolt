@@ -1,23 +1,28 @@
+@entryPoint
 func main() {
 	// Anonymous closure
-	{
-		$0 * $1
+	/*let closure = {
+		$0 + $1
+	}*/
+
+	for(0..<10) {
+		print(it)
 	}
 
 	// Closure with untyped params
-	{ a, b =>
-		a * b
-	}
+	/*{ a, b =>
+		a b
+	}*/
 
 	// Closure with typed params
-	{ a: Int, b: Int =>
-		a * b
-	}
+	/*{ a: Int, b: Int =>
+		a  b
+	}*/
 
-	for { i => i.print() }
-	for(0..1) { i => i.print() }
+	/*for { i => i.print() }
+	for(0..=1) { i => i.print() }
 
-	if foo {
+	if true {
 
-	}
+	}*/
 }

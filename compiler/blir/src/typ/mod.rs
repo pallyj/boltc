@@ -36,6 +36,12 @@ pub enum TypeKind {
         params:      Vec<Type>,
         labels:      Vec<Option<String>>,
     },
+
+    SomeInteger,
+    SomeFloat,
+    SomeBool,
+    SomeFunction,
+
     Method {
         reciever:    Box<Type>,
         return_type: Box<Type>,
@@ -218,6 +224,10 @@ impl Debug for Type {
             TypeKind::Divergent => write!(f, "!"),
             TypeKind::Metatype(t) => write!(f, "<{:?}>", t),
             TypeKind::Error => write!(f, "error"),
+            TypeKind::SomeInteger => write!(f, "some Integer"),
+            TypeKind::SomeFloat => write!(f, "some Float"),
+            TypeKind::SomeBool => write!(f, "some Bool"),
+            TypeKind::SomeFunction => write!(f, "some func"),
         }
     }
 }

@@ -25,12 +25,12 @@ impl<'input, 'l> Sink<'input, 'l> {
     }
 
     pub(super) fn finish(mut self, debugger: &mut Debugger) -> GreenNode {
-        self.eat_trivia();
-
         for idx in 0..self.events.len() {
+            //self.eat_trivia();
             let event = std::mem::replace(&mut self.events[idx], Event::Placeholder);
             match event {
                 Event::StartNode { kind, forward_parent } => {
+                    self.eat_trivia();
                     let mut kinds = vec![kind];
 
                     let mut idx = idx;
@@ -54,19 +54,22 @@ impl<'input, 'l> Sink<'input, 'l> {
                         self.builder.start_node(BoltLanguage::kind_to_raw(kind));
                     }
                 }
-                Event::AddToken { kind, text } => self.token(kind, text),
+                Event::AddToken { kind, text } => {
+                    self.eat_trivia();
+                    self.token(kind, text)
+                },
                 Event::FinishNode => {
-                    self.builder.finish_node()
+                    self.builder.finish_node();
+                    self.eat_trivia();
                 }
                 Event::Error(error) => {
+                    self.eat_trivia();
                     let description = format!("{error}, found {}", token_specific(self.peek()));
                     let span = self.next_span();
                     debugger.throw_parse(description, (self.file, span));
                 }
                 Event::Placeholder => {}
             }
-
-            self.eat_trivia();
         }
 
         self.builder.finish()

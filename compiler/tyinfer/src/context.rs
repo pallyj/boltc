@@ -9,6 +9,7 @@ use crate::{variant::TypeVariant, replace::TypeReplaceContext};
 pub struct TypeInferContext<'a, 'b> {
 	checker: 	VarlessTypeChecker<TypeVariant>,
 	infer_keys: HashMap<u64, TcKey>,
+	p_maps: 	HashMap<u64, Vec<Type>>,
 	debugger: 	&'a mut Debugger<'b>,
 	context:	&'a BlirContext,
 }
@@ -17,6 +18,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 	pub fn new(debugger: &'a mut Debugger<'b>, context: &'a BlirContext) -> Self {
 		Self { checker:    VarlessTypeChecker::new(),
 			   infer_keys: HashMap::new(),
+			   p_maps: 	   HashMap::new(),
 			   debugger,
 			   context }
 	}
@@ -29,6 +31,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 		TypeReplaceContext {
 			constraint_table,
 			infer_keys: &self.infer_keys,
+			p_maps: &mut self.p_maps,
 			context: self.context,
 			debugger: self.debugger,
 			is_final_run: false
@@ -43,6 +46,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 		TypeReplaceContext {
 			constraint_table,
 			infer_keys: &self.infer_keys,
+			p_maps: &mut self.p_maps,
 			context: self.context,
 			debugger: self.debugger,
 			is_final_run: true
@@ -94,7 +98,6 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 			}
 
 			ValueKind::Member { parent, .. } => {
-				println!("Member {parent:?}");
 				self.constrain_value(&parent, scope);
 			}
 
@@ -104,16 +107,9 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 
 			ValueKind::If(if_value) => self.constrain_if_value(if_value, &value.typ, scope),
 
-			ValueKind::Closure(closure) => {
+			ValueKind::Closure(_) => {
 				// Constrain the closure's return type to the return type of its code
-				let closure_return_type = match value.typ.kind() {
-					TypeKind::Function { return_type, .. } => return_type,
-					_ => panic!(),
-				};
-
-				// Infer the code of the codeblock
-				// TODO: Make a new scope
-				self.infer_codeblock(&closure.code, closure_return_type, scope);
+				self.constrain_func(value);
 			}
 
 			_ => { }
@@ -198,6 +194,8 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 				self.checker
 					.impose(infer_key.concretizes_explicit(TypeVariant::SomeBool));
 
+			
+
 			// Match constraint for errors
 		}
 	}
@@ -239,22 +237,36 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 		}
 	}
 
+	fn constrain_func(&mut self, value: &Value) {
+		//println!("{value:?} <- some Float");
+		if let Some(infer_key) = self.infer_key(&value.typ) {
+			let constraint =
+				self.checker
+					.impose(infer_key.concretizes_explicit(TypeVariant::SomeFunction));
+
+			// Match constraint for errors
+		}
+	}
+
 	fn constrain_one_way(
 		&mut self,
 		constrain: &Type,
 		absolute: &Type
 	) {
 		//println!("{constrain:?} <- {absolute:?}");
-		
-		if let (TypeKind::Function { return_type: return_type_1, params: params_1, .. },
-			TypeKind::Function { return_type: return_type_2, params: params_2, .. }) = (constrain.kind(), absolute.kind())
-		{
-			self.constrain_one_way(return_type_1, return_type_2);
 
-			for (param1, param2) in params_1.iter().zip(params_2) {
-				self.constrain_one_way(param1, param2);
+		match (constrain.kind(), absolute.kind()) {
+			(TypeKind::Function { return_type: return_type_1, params: params_1, .. },
+			TypeKind::Function { return_type: return_type_2, params: params_2, .. }) => {
+				self.constrain_one_way(&return_type_1, &return_type_2);
+
+				for (param1, param2) in params_1.iter().zip(params_2) {
+					self.constrain_one_way(param1, param2);
+				}
+				return
 			}
-			return
+
+			 _ => {}
 		}
 
 		let Some(constrain_key) = self.infer_key(constrain) else {
@@ -319,7 +331,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 
 			TypeKind::Struct(r#struct) => TypeVariant::Struct(r#struct.clone()),
 
-			TypeKind::Function { ..  } => TypeVariant::Function,
+			TypeKind::Function { .. } => TypeVariant::Function,
 
 			TypeKind::Error => TypeVariant::Error,
 

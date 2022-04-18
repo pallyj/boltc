@@ -2,7 +2,7 @@ use blir::{attributes::AttributeFactory,
            code::{CodeBlock, ExternFunctionRef, FunctionRef, MethodRef, Statement, StatementKind},
            scope::{ScopeRef, ScopeRelation, ScopeType},
            typ::{StructRef, Type, TypeKind},
-           value::{ConstantRef, IfBranch, IfValue, Value, ValueKind, VarRef},
+           value::{ConstantRef, IfBranch, IfValue, Value, ValueKind, VarRef, Closure, ClosureParam},
            BlirContext, Library, Symbol, Visibility};
 use errors::{debugger::Debugger, error::ErrorCode};
 
@@ -361,28 +361,76 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
             ValueKind::If(if_value) => self.resolve_if_value(if_value, scope),
 
             ValueKind::Closure(closure) => {
-                // TODO: Add closure parameters
-                let closure_scope = ScopeRef::new(
-                    Some(scope),
-                    ScopeRelation::Scope,
-                    ScopeType::Code,
-                    false,
-                    true
-                );
+                if closure.params.is_empty() {
+                    return;
+                }
 
                 for param in &mut closure.params {
                     self.resolve_type(&mut param.typ, scope);
-
-                    let param_value = ValueKind::FunctionParam(param.name.clone()).anon(param.typ.clone());
-
-                    closure_scope.add_symbol(param.name.clone(), Visibility::Local, Symbol::Value(param_value));
                 }
 
-                self.resolve_code_block(&mut closure.code, &closure_scope);
                 self.resolve_type(&mut value.typ, scope);
             }
     
             _ => {}
+        }
+    }
+
+    pub fn resolve_closure(
+        &mut self,
+        closure: &mut Closure,
+        closure_type: &mut Type,
+        scope: &ScopeRef)
+    {
+        let closure_scope = ScopeRef::new(
+            Some(scope),
+            ScopeRelation::Scope,
+            ScopeType::Code,
+            false,
+            true
+        );
+
+        self.add_closure_params(closure, closure_type);
+
+        for param in &mut closure.params {
+            let param_value = ValueKind::FunctionParam(param.name.clone()).anon(param.typ.clone());
+
+            closure_scope.add_symbol(param.name.clone(), Visibility::Local, Symbol::Value(param_value));
+        }
+
+        self.resolve_code_block(&mut closure.code, &closure_scope);
+    }
+
+    fn add_closure_params(
+        &mut self,
+        closure: &mut Closure,
+        closure_type: &mut Type)
+    {
+        if !closure.params.is_empty() {
+            return
+        }
+
+        let TypeKind::Function { params, .. } = closure_type.kind() else {
+            // Error
+            return;
+        };
+
+        if params.len() == 1 {
+            let it_type = params.first().unwrap().clone();
+
+            closure.params.push(ClosureParam {
+                name: "it".to_string(),
+                typ: it_type
+            });
+
+            return;
+        }
+
+        for (i, param) in params.iter().enumerate() {
+            closure.params.push(ClosureParam {
+                name: format!("${i}"),
+                typ: param.clone()
+            });
         }
     }
     
