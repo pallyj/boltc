@@ -21,8 +21,9 @@ impl AstLowerer {
         let value = self.lower_expr(expr);
 
         let attributes = self.lower_attributes(var.attributes());
+        let span = self.span(var.range());
 
-        Constant::new(attributes, visibility, name, typ, value)
+        Constant::new(attributes, visibility, name, typ, value, span)
     }
 
     pub fn lower_struct_let(&self, var: LetDef) -> VarRef {
@@ -34,8 +35,9 @@ impl AstLowerer {
         let default_value = var.value().map(|value| self.lower_expr(value));
 
         let attributes = self.lower_attributes(var.attributes());
+        let span = self.span(var.range());
 
-        Var::new(attributes, visibility, name, typ, default_value, true)
+        Var::new(attributes, visibility, name, typ, default_value, true, span)
     }
 
     pub fn lower_struct_var(&self, var: VariableDef) -> VarRef {
@@ -47,8 +49,9 @@ impl AstLowerer {
         let default_value = var.value().map(|value| self.lower_expr(value));
 
         let attributes = self.lower_attributes(var.attributes());
+        let span = self.span(var.range());
 
-        Var::new(attributes, visibility, name, typ, default_value, false)
+        Var::new(attributes, visibility, name, typ, default_value, false, span)
     }
 
     pub fn lower_struct(&self, def: StructDef, parent: &ScopeRef, parent_mangle: &Path) -> StructRef {

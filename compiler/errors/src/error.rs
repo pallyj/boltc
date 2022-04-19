@@ -24,6 +24,8 @@ pub enum ErrorCode {
     ExtraParams,
     MissingParams,
 
+    FunctionSigNotFound,
+
     IsNotAFunc,
 }
 
@@ -47,6 +49,7 @@ impl ErrorCode {
             ErrorCode::MissingParams => format!("Missing argument for parameter"),
             ErrorCode::MismatchedIfBranchTypes => format!("If branches have mismatched types"),
             ErrorCode::IsNotAFunc => format!("Value is not a function"),
+            ErrorCode::FunctionSigNotFound => format!("No function matching this signature was found"),
         }
     }
 }

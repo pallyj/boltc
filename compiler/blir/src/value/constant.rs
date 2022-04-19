@@ -3,6 +3,8 @@ use std::{cell::{Ref, RefCell, RefMut},
           ops::Deref,
           sync::Arc};
 
+use errors::Span;
+
 use super::Type;
 use crate::{attributes::Attributes, value::Value, Visibility};
 
@@ -16,6 +18,8 @@ pub struct ConstantInner {
     pub typ: Type,
 
     pub value: Value,
+
+    pub span: Span
 }
 
 pub struct Constant {
@@ -23,12 +27,13 @@ pub struct Constant {
 }
 
 impl Constant {
-    pub fn new(attributes: Attributes, visibility: Visibility, name: String, typ: Type, value: Value) -> ConstantRef {
+    pub fn new(attributes: Attributes, visibility: Visibility, name: String, typ: Type, value: Value, span: Span) -> ConstantRef {
         let constant_inner = ConstantInner { attributes,
                                              visibility,
                                              name,
                                              typ,
-                                             value };
+                                             value,
+                                             span };
 
         ConstantRef { constant: Arc::new(Constant { constant: RefCell::new(constant_inner), }), }
     }

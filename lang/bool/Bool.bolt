@@ -6,26 +6,26 @@ public struct Bool /*: BooleanLiteralRepr */ {
 	internal var repr: i1
 
 	public operator func and(right: Self): Self {
-		Self( integer1And(self.repr, right.repr) )
+		Self(repr: integer1And(self.repr, right.repr) )
 	}
 
 	public operator func or(right: Self): Self {
-		Self( integer1Or(self.repr, right.repr) )
+		Self(repr: integer1Or(self.repr, right.repr) )
 	}
 
 	public operator func xor(right: Self): Self {
-		Self( integer1Xor(self.repr, right.repr) )
+		Self(repr: integer1Xor(self.repr, right.repr) )
 	}
 
 	public operator func invert(): Self {
-		Self(integer1Invert(self.repr))
+		Self(repr:integer1Invert(self.repr))
 	}
 
 	public operator func equal(right: Self): Self {
-		Self(integer1CmpEq(self.repr, right.repr))
+		Self(repr:integer1CmpEq(self.repr, right.repr))
 	}
 
 	public operator func notEqual(right: Self): Self {
-		Self(integer1CmpNeq(self.repr, right.repr))
+		Self(repr:integer1CmpNeq(self.repr, right.repr))
 	}
 }

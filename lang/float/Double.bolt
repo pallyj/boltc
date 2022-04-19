@@ -6,53 +6,53 @@ public struct Double /*: FloatLiteralRepr*/ {
 
 	// Arithmatic
 	public operator func add(b: Double): Double {
-		Double ( float64Add(self.repr, b.repr) )
+		Double (repr: float64Add(self.repr, b.repr) )
 	}
 
 	public operator func sub(b: Double): Double {
-		Double ( float64Sub(self.repr, b.repr) )
+		Double (repr: float64Sub(self.repr, b.repr) )
 	}
 
 	public operator func mul(b: Double): Double {
-		Double ( float64Mul(self.repr, b.repr) )
+		Double (repr: float64Mul(self.repr, b.repr) )
 	}
 
 	public operator func div(b: Double): Double {
-		Double ( float64Div(self.repr, b.repr) )
+		Double (repr: float64Div(self.repr, b.repr) )
 	}
 
 	public operator func mod(b: Double): Double {
-		Double ( float64Rem(self.repr, b.repr) )
+		Double (repr: float64Rem(self.repr, b.repr) )
 	}
 
 	// Comparison
 	public operator func equal(b: Double): Bool {
-		Bool ( float64CmpEq(self.repr, b.repr) )
+		Bool (repr: float64CmpEq(self.repr, b.repr) )
 	}
 
 	public operator func notEqual(b: Double): Bool {
-		Bool ( float64CmpNeq(self.repr, b.repr) )
+		Bool (repr: float64CmpNeq(self.repr, b.repr) )
 	}
 
 	public operator func lessThan(b: Double): Bool {
-		Bool ( float64CmpLt(self.repr, b.repr) )
+		Bool (repr: float64CmpLt(self.repr, b.repr) )
 	}
 
 	public operator func greaterThan(b: Double): Bool {
-		Bool ( float64CmpGt(self.repr, b.repr) )
+		Bool (repr: float64CmpGt(self.repr, b.repr) )
 	}
 
 	public operator func lessThanEq(b: Double): Bool {
-		Bool ( float64CmpLte(self.repr, b.repr) )
+		Bool (repr: float64CmpLte(self.repr, b.repr) )
 	}
 
 	public operator func greaterThanEq(b: Double): Bool {
-		Bool ( float64CmpGte(self.repr, b.repr) )
+		Bool (repr: float64CmpGte(self.repr, b.repr) )
 	}
 
 	// Negate
 	public operator func negate(): Self {
-		Self ( float64Negate(self.repr) )
+		Self (repr: float64Negate(self.repr) )
 	}
 
 	public operator func unit(): Self {
@@ -61,20 +61,20 @@ public struct Double /*: FloatLiteralRepr*/ {
 
 
 	// Convert from floats
-	public static func extendFloat(float: Float): Double {
-		Double ( float32Ext64(float.repr) )
+	public init(float: Float) {
+		Double (repr: float32Ext64(float.repr) )
 	}
 
-	public static func extendHalf(float: Half): Double {
-		Double ( float16Ext64(float.repr) )
+	public init(float: Half) {
+		Double (repr: float16Ext64(float.repr) )
 	}
 
 	// Convert from integer
-	public static func fromUInt(num: UInt64): Double {
-		Double ( float64FromInt(num.repr) )
+	public init(num: UInt64) {
+		Double (repr: float64FromInt(num.repr) )
 	}
 
-	public static func fromInt(num: Int64): Double {
-		Double ( float64FromIntSig(num.repr) )
+	public init(num: Int64) {
+		Double (repr: float64FromIntSig(num.repr) )
 	}
 }

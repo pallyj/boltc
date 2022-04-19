@@ -6,6 +6,8 @@ use blir::{attributes::AttributeFactory,
            BlirContext, Library, Symbol, Visibility};
 use errors::{debugger::Debugger, error::ErrorCode};
 
+use crate::init_default::add_default_initializer;
+
 /// 
 /// Resolves types in recently lowered BLIR code
 /// 
@@ -51,12 +53,16 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
             self.resolve_extern_func_types(extern_func);
 
             // Apply function attributes
-
         }
 
         // Resolve types in each struct
         for r#struct in &library.structs {
             self.resolve_struct_types(r#struct);
+        }
+
+        for r#struct in &library.structs {
+            // Create a default initializer
+            add_default_initializer(&r#struct);
         }
 
         // Resolve code in each struct
@@ -299,7 +305,9 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 match sym {
                     Symbol::Type(ty) => {
                         value.set_kind(ValueKind::Metatype(ty.clone()));
-                        value.typ.set_kind(TypeKind::Metatype(Box::new(ty.anon())));
+                        if let TypeKind::Infer { .. } = value.typ.kind() {
+                            value.typ.set_kind(TypeKind::Metatype(Box::new(ty.anon())));
+                        }
                     }
     
                     Symbol::Value(res_val) => {
@@ -336,8 +344,20 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 if let ValueKind::Metatype(t) = &mut function.kind {
                     let init_type = std::mem::replace(t, TypeKind::Void).anon();
 
-                    function.set_type(init_type.init_type().anon());
-                    function.set_kind(ValueKind::Init(init_type));
+                    let initializer = init_type.lookup_static_item("init");
+
+                    match initializer {
+                        Some(Symbol::Function(monomorphizer)) => {
+                            function.set_kind(ValueKind::Polymorphic(monomorphizer));
+                        }
+
+                        _ => {
+                            panic!("{init_type:?}");
+                        }
+                    }
+
+                    //function.set_type(init_type.init_type().anon());
+                    //function.set_kind(ValueKind::Init(init_type));
                 }
 
                 for arg in &mut args.args {

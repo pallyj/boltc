@@ -8,78 +8,78 @@ public struct UInt32 /*: IntegerLiteralRepresentable */ {
 	public var repr: i32
 
 	public operator func add(b: Self): Self {
-		Self( integer32Add(self.repr, b.repr) )
+		Self(repr: integer32Add(self.repr, b.repr) )
 	}
 
 	public operator func sub(b: Self): Self {
-		Self( integer32Sub(self.repr, b.repr) )
+		Self(repr: integer32Sub(self.repr, b.repr) )
 	}
 
 	public operator func mul(b: Self): Self {
-		Self ( integer32Mul(self.repr, b.repr) )
+		Self (repr: integer32Mul(self.repr, b.repr) )
 	}
 
 	public operator func div(b: Self): Self {
-		Self ( integer32Div(self.repr, b.repr) )
+		Self (repr: integer32Div(self.repr, b.repr) )
 	}
 
 	public operator func mod(b: Self): Self {
-		Self ( integer32Rem(self.repr, b.repr) )
+		Self (repr: integer32Rem(self.repr, b.repr) )
 	}
 
 
 	public operator func bitOr(b: Self): Self {
-		Self ( integer32Or(self.repr, b.repr) )
+		Self (repr: integer32Or(self.repr, b.repr) )
 	}
 
 	public operator func bitXor(b: Self): Self {
-		Self ( integer32Xor(self.repr, b.repr) )
+		Self (repr: integer32Xor(self.repr, b.repr) )
 	}
 
 	public operator func bitAnd(b: Self): Self {
-		Self ( integer32And(self.repr, b.repr) )
+		Self (repr: integer32And(self.repr, b.repr) )
 	}
 
 	public operator func shiftLeft(b: Self): Self {
-		Self ( integer32Shl(self.repr, b.repr) )
+		Self (repr: integer32Shl(self.repr, b.repr) )
 	}
 
 	public operator func shiftRight(b: Self): Self {
-		Self ( integer32Shr(self.repr, b.repr) )
+		Self (repr: integer32Shr(self.repr, b.repr) )
 	}
 
 
 	public operator func equalual(b: Self): Bool {
-		Bool ( integer32CmpEq(self.repr, b.repr) )
+		Bool (repr: integer32CmpEq(self.repr, b.repr) )
 	}
 
 	public operator func notEqual(b: Self): Bool {
-		Bool ( integer32CmpNeq(self.repr, b.repr) )
+		Bool (repr: integer32CmpNeq(self.repr, b.repr) )
 	}
 
 	public operator func lessThan(b: Self): Bool {
-		Bool ( integer32CmpLt(self.repr, b.repr) )
+		Bool (repr: integer32CmpLt(self.repr, b.repr) )
 	}
 
 	public operator func greaterThan(b: Self): Bool {
-		Bool ( integer32CmpGt(self.repr, b.repr) )
+		Bool (repr: integer32CmpGt(self.repr, b.repr) )
 	}
 
 	public operator func lessThanEq(b: Self): Bool {
-		Bool ( integer32CmpLte(self.repr, b.repr) )
+		Bool (repr: integer32CmpLte(self.repr, b.repr) )
 	}
 
 	public operator func greaterThanEq(b: Self): Bool {
-		Bool ( integer32CmpGte(self.repr, b.repr) )
+		Bool (repr: integer32CmpGte(self.repr, b.repr) )
 	}
 
 	
 	public operator func negate(): Self {
-		Self ( integer32Negate(self.repr) )
+		Self (repr: integer32Negate(self.repr) )
 	}
 
 	public operator func invert(): Self {
-		Self ( integer32Invert(self.repr) )
+		Self (repr: integer32Invert(self.repr) )
 	}
 
 	public operator func unit(): Self {
@@ -87,39 +87,39 @@ public struct UInt32 /*: IntegerLiteralRepresentable */ {
 	}
 
 	public operator func openRange(upper: Self): UInt32Range {
-		UInt32Range(self, upper + 1)
+		UInt32Range(low: self, high: upper + 1)
 	}
 
 	public operator func closedRange(upper: Self): UInt32Range {
-		UInt32Range(self, upper)
+		UInt32Range(low: self, high: upper)
 	}
 
 	public static func bitcastInt8(i: Int8): Self {
-		UInt32 ( integer8ExtZero32(i.repr) )
+		UInt32 (repr: integer8ExtZero32(i.repr) )
 	}
 
 	public static func bitcastInt16(i: Int16): Self {
-		UInt32 ( integer16ExtZero32(i.repr) )
+		UInt32 (repr: integer16ExtZero32(i.repr) )
 	}
 
 	public static func bitcastInt32(i: Int32): Self {
-		UInt32 ( i.repr )
+		UInt32 (repr: i.repr )
 	}
 
 	public static func extendUInt8(i: UInt8): Self {
-		UInt32 ( integer8ExtZero32(i.repr) )
+		UInt32 (repr: integer8ExtZero32(i.repr) )
 	}
 
 	public static func extendUInt16(i: UInt16): Self {
-		UInt32 ( integer16ExtZero32(i.repr) )
+		UInt32 (repr: integer16ExtZero32(i.repr) )
 	}
 
 	public static func truncUInt64(i: UInt64): Self {
-		UInt32 ( integer64Trunc32(i.repr) )
+		UInt32 (repr: integer64Trunc32(i.repr) )
 	}
 
 	public static func truncInt64(i: Int64): Self {
-		UInt32 ( integer64Trunc32(i.repr) )
+		UInt32 (repr: integer64Trunc32(i.repr) )
 	}
 }
 

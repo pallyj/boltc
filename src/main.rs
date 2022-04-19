@@ -4,7 +4,6 @@ use std::process::Command;
 
 use args::Args;
 use blir::{BlirContext, Library};
-use blir_passes::ClosureResolvePass;
 use clap::StructOpt;
 use codegen::config::{BuildConfig, BuildOutput, BuildProfile};
 use errors::{debugger::Debugger, fileinterner::FileInterner};
@@ -128,8 +127,9 @@ impl Project {
         if debugger.has_errors() {
             return (false, None);
         }
-        
-        blir_passes::type_check::run_pass(self.library.as_mut().unwrap(), &mut debugger);
+
+        blir_passes::TypeCheckPass::new(&mut debugger)
+            .run_pass(self.library.as_mut().unwrap());
 
         if debugger.has_errors() {
             return (false, None);
@@ -139,6 +139,8 @@ impl Project {
         lowerer.lower();
 
         let library = lowerer.finish();
+
+        //println!("{library}");
 
         let config = BuildConfig::new(BuildProfile::Release, BuildOutput::Object, None);
 

@@ -9,7 +9,6 @@ use crate::{variant::TypeVariant, replace::TypeReplaceContext};
 pub struct TypeInferContext<'a, 'b> {
 	checker: 	VarlessTypeChecker<TypeVariant>,
 	infer_keys: HashMap<u64, TcKey>,
-	p_maps: 	HashMap<u64, Vec<Type>>,
 	debugger: 	&'a mut Debugger<'b>,
 	context:	&'a BlirContext,
 }
@@ -18,7 +17,6 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 	pub fn new(debugger: &'a mut Debugger<'b>, context: &'a BlirContext) -> Self {
 		Self { checker:    VarlessTypeChecker::new(),
 			   infer_keys: HashMap::new(),
-			   p_maps: 	   HashMap::new(),
 			   debugger,
 			   context }
 	}
@@ -31,7 +29,6 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 		TypeReplaceContext {
 			constraint_table,
 			infer_keys: &self.infer_keys,
-			p_maps: &mut self.p_maps,
 			context: self.context,
 			debugger: self.debugger,
 			is_final_run: false
@@ -46,7 +43,6 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 		TypeReplaceContext {
 			constraint_table,
 			infer_keys: &self.infer_keys,
-			p_maps: &mut self.p_maps,
 			context: self.context,
 			debugger: self.debugger,
 			is_final_run: true
@@ -168,6 +164,17 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 				}
 			}
 		}
+	}
+
+	pub fn infer_variable(
+		&mut self,
+		typ: &Type,
+		value: &Value,
+		scope: &ScopeRef)
+	{
+		self.constrain_two_way(typ, &value.typ);
+
+		self.constrain_value(value, scope);
 	}
 
 	pub fn infer_codeblock(

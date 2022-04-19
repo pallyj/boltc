@@ -35,12 +35,14 @@ The Bolt language is compiled ahead of time, using a LLVM backend to output opti
 
 ## Benchmarks
 
-| Name      | Bolt 0.3.2 | C      | Rust   | Javascript |
-|-----------|------------|--------|--------|------------|
-| factorial | 0.140s     | 0.130s | 0.460s | 3.09s		|
-| speedup   | 1x		 | 0.93x  | 3.3x   | 22x		|
+| Name          | Bolt 0.4.0 | C      | Rust   | Javascript |
+|---------------|------------|--------|--------|------------|
+| factorial/sec | 7.9M	     | 8.0M   | 1.6M   | 310k		|
+| speedup       | 1x		 | 0.98x  | 4.9x   | 25x		|
 
-Even in its early stages, Bolt is blazing fast. Bolt runs the factorials example 22 times faster than nodejs (!), 3.3 faster than rust, and only 7% slower than C.  
+Even in its early stages, Bolt is blazing fast. Bolt runs the factorials example 25 times faster than nodejs (!), 4.9 faster than rust, and with the margin of error from C.
+
+Bolt will be as fast a C in CPU-bound tasks, faster than Rust and Javascript in IO-bound tasks, and significantly faster than javascript in memory-bound tasks.
 
 ## Using
 
@@ -49,7 +51,7 @@ First, compile the standard library. Run std/compile.sh and libprint.o will be a
 With the standard library compiled, a test program can be run with
 
 ```
-cargo run -- test/main.bolt --lib=test
+cargo run -- examples/factorial/bolt/main.bolt --lib=test
 ```
 
 ## Development
@@ -61,11 +63,11 @@ cargo run -- test/main.bolt --lib=test
 - Enums
 - Strings
 - Tuples
-- Bolt libraries
-- C interop
 - Compiler plugins
+- Documentation
+- Web Console
 
-### Bolt 0.4
+### Bolt 0.4 [Current Version]
 
 - Operators
 - Polymorphism
@@ -74,7 +76,7 @@ cargo run -- test/main.bolt --lib=test
 - Initializers
 - Closures
 
-### Bolt 0.3.2 [Current Version]
+### Bolt 0.3.2 
 
 - Attributes
 - Use static methods as values

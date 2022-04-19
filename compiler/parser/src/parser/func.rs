@@ -14,7 +14,7 @@ impl<'input, 'l> Parser<'input, 'l> {
             self.error("expected code block");
         }
 
-        marker.complete(self, SyntaxKind::InitDef);
+        marker.complete(self, SyntaxKind::FuncDef);
     }
 
     pub fn parse_func(&mut self, marker: Marker) {

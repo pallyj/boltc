@@ -39,11 +39,14 @@ pub enum ValueKind {
     FloatLiteral(f64),
     BoolLiteral(bool),
     Closure(Closure),
+    Uninit,
+    //Deref(Box<Value>),
 
     // Variable Values
     Metatype(TypeKind),
     LocalVariable(String),
     FunctionParam(String),
+    Assign(Box<Value>, Box<Value>),
 
     // Function Values
     UnaryIntrinsicFn(UnaryIntrinsicFn),
@@ -184,6 +187,9 @@ impl Debug for Value {
             ValueKind::IntLiteral(i) => write!(f, "{i}"),
             ValueKind::FloatLiteral(fl) => write!(f, "{}", fl),
             ValueKind::BoolLiteral(b) => write!(f, "{b}"),
+            ValueKind::Uninit => write!(f, "uninit<{:?}>", self.typ),
+            ValueKind::Assign(ptr, value) => write!(f, "{ptr:?} = {value:?}"),
+            //ValueKind::Deref(value) => write!(f, "*{value:?}"),
             ValueKind::Closure(c) => write!(f, "{{ {:?} }}", c.code),
             ValueKind::Metatype(t) => write!(f, "<{:?}>", t.clone().anon()),
             ValueKind::LocalVariable(name) => write!(f, "{name}"),

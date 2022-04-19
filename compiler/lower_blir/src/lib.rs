@@ -1,3 +1,5 @@
+#![feature(let_else)]
+
 mod func;
 mod smt;
 mod struct_;

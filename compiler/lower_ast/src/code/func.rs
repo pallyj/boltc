@@ -86,9 +86,10 @@ impl AstLowerer {
         let span = self.span(range);
 
         let visibility = self.lower_visibility(func.visibility());
-        let is_static = func.is_static() || func.is_operator();
+        let is_static = func.is_static() || func.is_operator() || func.is_init();
         let is_operator = func.is_operator();
-        let name = func.name();
+        let is_init = func.is_init();
+        let name = if is_init { "init".to_string() } else { func.name() };
         let params = func.parameters()
                          .iter()
                          .map(|param| {
@@ -103,9 +104,13 @@ impl AstLowerer {
                                         typ:       self.lower_type(param.typ()), }
                          })
                          .collect();
-        let return_type = func.return_type()
-                              .map(|rt| self.lower_type(rt))
-                              .unwrap_or_else(|| TypeKind::Void.anon());
+        let return_type = if is_init {
+            reciever.clone()
+        } else {
+            func.return_type()
+                .map(|rt| self.lower_type(rt))
+                .unwrap_or_else(|| TypeKind::Void.anon())
+        };
         let code = self.lower_code_block(func.code().unwrap());
 
         let attributes = self.lower_attributes(func.attributes());

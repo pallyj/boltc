@@ -1,4 +1,4 @@
-use crate::{code::{FuncParam, CodeBlock}, typ::Type};
+use crate::{code::{CodeBlock}, typ::Type};
 
 #[derive(Clone)]
 pub struct Closure {

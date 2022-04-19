@@ -9,6 +9,7 @@ pub struct Span {
 }
 
 impl Span {
+    pub fn empty() -> Span { Span { range: TextRange::empty(TextSize::from(0)), file: 0 } }
     pub fn new(range: TextRange, file: u32) -> Span { Span { range, file } }
 
     pub fn range(&self) -> TextRange { self.range }
@@ -79,4 +80,4 @@ impl Span {
 // func square = mul($1, $1)
 //
 
-use rowan::TextRange;
+use rowan::{TextRange, TextSize};

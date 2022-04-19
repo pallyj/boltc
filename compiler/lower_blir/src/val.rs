@@ -21,7 +21,12 @@ impl BlirLowerer {
                 self.lower_func_call(function.as_ref(), lowered_args)
             }
 
-            ValueKind::LocalVariable(local_var_name) => self.context.lookup_var(local_var_name).cloned().unwrap(),
+            ValueKind::LocalVariable(local_var_name) => {
+                if self.context.lookup_var(local_var_name).is_none() {
+                    println!("{local_var_name}");
+                }
+                self.context.lookup_var(local_var_name).cloned().unwrap()
+            },
 
             ValueKind::FunctionParam(param_name) => self.context.lookup_var(param_name).cloned().unwrap(),
 
@@ -39,8 +44,44 @@ impl BlirLowerer {
 
             ValueKind::Closure(closure) => self.lower_closure(closure, &value.typ),
 
+            ValueKind::Uninit => self.lower_uninit(&value.typ),
+
+            ValueKind::Assign(ptr, val) => self.lower_assign(ptr, val),
+
+            _ => {
+                if let ValueKind::Polymorphic(pmf) = &value.kind {
+                    for possibility in pmf.open_possibilities() {
+                        println!("{possibility:?}");
+                    }
+                }
+                panic!("{value:?}")
+            }
+        }
+    }
+
+    fn lower_pvalue(&mut self, value: &Value) -> Option<LabelValue> {
+        match &value.kind {
+
+            ValueKind::InstanceVariable { reciever, var } => Some(self.lower_field_paccess(reciever.as_ref(), &var.borrow().name)),
+
             _ => panic!("{value:?}"),
         }
+    }
+
+    fn lower_assign(&mut self, ptr: &Value, val: &Value) -> LabelValue {
+        let Some(ptr) = self.lower_pvalue(ptr) else {
+            println!("Can't assign to {ptr:?}");
+            return LabelValue::void()
+        };
+        let val = self.lower_value(val);
+        self.builder().build_assign_ptr(ptr, val);
+        LabelValue::void()
+    }
+
+    fn lower_uninit(&mut self, typ: &Type) -> LabelValue {
+        let lowered_type = self.lower_type(typ);
+
+        self.builder().build_stack_alloc_undef(lowered_type)
     }
 
     fn lower_closure(&mut self, closure: &Closure, closure_type: &Type) -> LabelValue {
@@ -90,7 +131,7 @@ impl BlirLowerer {
 
                 self.lower_init(ty, vec![literal])
             }
-            _ => panic!(""),
+            _ => panic!("{ty:?} is not an integer"),
         }
     }
 
@@ -170,10 +211,13 @@ impl BlirLowerer {
             }
 
             ValueKind::StaticMethod(function) => {
-                let static_func = self.ssa_library()
-                                      .get_function(function.borrow().info.link_name())
-                                      .cloned()
-                                      .unwrap();
+                let Some(static_func) = self.ssa_library()
+                                            .get_function(function.borrow().info.link_name())
+                                            .cloned() else
+                {
+                    println!("No function found {}", function.borrow().info.link_name());
+                    panic!();
+                };
 
                 let function = self.builder().build_function(&static_func);
                 self.builder().build_call(function, args)
@@ -291,6 +335,12 @@ impl BlirLowerer {
         let parent = self.lower_value(parent);
 
         self.builder().build_deref_struct_field(parent, field)
+    }
+
+    fn lower_field_paccess(&mut self, parent: &Value, field: &str) -> LabelValue {
+        let parent = self.lower_value(parent);
+
+        self.builder().build_access_struct_field(parent, field)
     }
 
     fn lower_init(&mut self, ty: &Type, args: Vec<LabelValue>) -> LabelValue {

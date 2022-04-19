@@ -98,7 +98,7 @@ impl Variant for TypeVariant {
 impl Constructable for TypeVariant {
     type Type = TypeKind;
 
-    fn construct(&self, children: &[Self::Type]) -> Result<Self::Type, <Self as rusttyc::ContextSensitiveVariant>::Err> {
+    fn construct(&self, _children: &[Self::Type]) -> Result<Self::Type, <Self as rusttyc::ContextSensitiveVariant>::Err> {
         todo!()
     }
 }

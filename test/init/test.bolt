@@ -1,0 +1,43 @@
+import intrinsics
+
+struct Vec2 {
+	var i: i64
+	var j: i64
+
+	init(l: i64) {
+		Vec2(i: l, j: l)
+	}
+
+	init(i i: i64) {
+		Vec2(i: i, j: 0)
+	}
+
+	init(j j: i64) {
+		Vec2(i: 0, j: j)
+	}
+}
+
+@entryPoint
+func main() {
+	let x = Vec2(i: 1, j: 0)
+
+	printInt64(x.i)
+	printInt64(x.j)
+
+	let y = Vec2(10)
+
+	printInt64(y.i)
+	printInt64(y.j)
+
+	let z = Vec2(i: 5)
+
+	printInt64(z.i)
+	printInt64(z.j)
+
+	let a = Vec2(j: 8)
+
+	printInt64(a.i)
+	printInt64(a.j)
+}
+
+func printInt64(i: i64);

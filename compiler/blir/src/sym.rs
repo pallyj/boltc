@@ -1,5 +1,3 @@
-use std::cell::Ref;
-
 use crate::{code::{ExternFunctionRef, FunctionRef, MethodRef, FunctionInfo},
             scope::ScopeRelation,
             typ::{TypeKind, Type},
@@ -105,13 +103,13 @@ impl Monomorphizer {
             .push(SomeFunction::ExternFunction(function))
     }
 
-    fn params(info: &FunctionInfo) -> (Vec<Option<String>>, Vec<Type>) {
+    /*fn params(info: &FunctionInfo) -> (Vec<Option<String>>, Vec<Type>) {
         info.params()
             .clone()
             .into_iter()
             .map(|param| (param.label, param.typ))
             .unzip()
-    }
+    }*/
 
     pub fn combine(&mut self, mut other: Monomorphizer) {
         self.functions.append(&mut other.functions)
@@ -136,6 +134,10 @@ impl Monomorphizer {
             .len()
     }
 
+    pub fn open_possibilities(&self) -> &Vec<SomeFunction> {
+        &self.functions
+    }
+
     pub fn resolve(&self) -> Option<SomeFunction> {
         if self.degrees() == 1 {
             Some(self.functions[0].clone())
@@ -152,6 +154,10 @@ fn labels_match(sig: &FunctionInfo, labels: &Vec<Option<String>>) -> bool {
 }
 
 fn types_match(sig: &FunctionInfo, types: &Vec<Type>) -> bool {
+    if sig.params().len() != types.len() {
+        return false
+    }
+    
     sig.params().iter()
        .zip(types)
        .all(|(sig, types)| is_assignable_from(&sig.typ, types) )

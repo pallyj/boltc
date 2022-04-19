@@ -1,4 +1,4 @@
-use blir::{Library, BlirContext, code::{FunctionRef, MethodRef}, typ::{StructRef, Type, TypeKind}, value::Closure, scope::ScopeRef};
+use blir::{Library, BlirContext, code::{FunctionRef, MethodRef}, typ::{StructRef, Type, TypeKind}, value::{Closure, Value}, scope::ScopeRef};
 use errors::debugger::Debugger;
 use tyinfer::context::TypeInferContext;
 
@@ -23,12 +23,57 @@ impl<'a, 'l> TypeInferPass<'a, 'l> {
 		for func in library.functions.iter() {
 			self.infer_func(func);
 		}
+
+		let scope = library.scope();
+
+		for constant in &library.constants {
+			let mut borrow_ref = constant.borrow_mut();
+			let borrow = &mut *borrow_ref;
+			self.infer_variable(&mut borrow.typ, &mut borrow.value, &scope);
+		}
 	}
 
 	fn infer_struct(&mut self, r#struct: &StructRef) {
+		for r#struct in &r#struct.borrow().substructs {
+			self.infer_struct(r#struct);
+		}
+
 		for method in &r#struct.borrow().methods {
 			self.infer_method(method);
 		}
+
+		let scope = r#struct.borrow().scope().clone();
+
+		for constant in &r#struct.borrow().constants {
+			let mut borrow_ref = constant.borrow_mut();
+			let borrow = &mut *borrow_ref;
+			self.infer_variable(&mut borrow.typ, &mut borrow.value, &scope);
+		}
+
+		for variable in &r#struct.borrow().instance_vars {
+			let mut borrow_ref = variable.borrow_mut();
+			let borrow = &mut *borrow_ref;
+			if let Some(value) = &mut borrow.default_value {
+				self.infer_variable(&mut borrow.typ, value, &scope);
+			}
+		}
+	}
+
+	fn infer_variable(&mut self, typ: &mut Type, value: &mut Value, scope: &ScopeRef) {
+		let mut infer_context = TypeInferContext::new(self.debugger, self.context);
+
+
+		infer_context.infer_variable(typ, value, scope);
+
+		infer_context
+			.replace()
+			.replace_variable(typ, value, scope);
+
+		infer_context.infer_variable(typ, value, scope);
+
+		infer_context
+			.finish()
+			.replace_variable(typ, value, scope);
 	}
 
 	fn infer_func(&mut self, func: &FunctionRef) {

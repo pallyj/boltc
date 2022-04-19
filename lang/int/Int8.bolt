@@ -8,69 +8,69 @@ public struct Int8 /*: IntegerLiteralRepr */ {
 	internal var repr: i8
 
 	public operator func add(b: Self): Self {
-		Self( integer8Add(self.repr, b.repr) )
+		Self(repr: integer8Add(self.repr, b.repr) )
 	}
 
 	public operator func sub(b: Self): Self {
-		Self( integer8Sub(self.repr, b.repr) )
+		Self(repr: integer8Sub(self.repr, b.repr) )
 	}
 
 	public operator func mul(b: Self): Self {
-		Self ( integer8Mul(self.repr, b.repr) )
+		Self (repr: integer8Mul(self.repr, b.repr) )
 	}
 
 	public operator func div(b: Self): Self {
-		Self ( integer8DivSig(self.repr, b.repr) )
+		Self (repr: integer8DivSig(self.repr, b.repr) )
 	}
 
 	public operator func mod(b: Self): Self {
-		Self ( integer8RemSig(self.repr, b.repr) )
+		Self (repr: integer8RemSig(self.repr, b.repr) )
 	}
 
 
 	public operator func bitOr(b: Self): Self {
-		Self ( integer8Or(self.repr, b.repr) )
+		Self (repr: integer8Or(self.repr, b.repr) )
 	}
 
 	public operator func bitXor(b: Self): Self {
-		Self ( integer8Xor(self.repr, b.repr) )
+		Self (repr: integer8Xor(self.repr, b.repr) )
 	}
 
 	public operator func bitAnd(b: Self): Self {
-		Self ( integer8And(self.repr, b.repr) )
+		Self (repr: integer8And(self.repr, b.repr) )
 	}
 
 	public operator func shiftLeft(b: Self): Self {
-		Self ( integer8Shl(self.repr, b.repr) )
+		Self (repr: integer8Shl(self.repr, b.repr) )
 	}
 
 	public operator func shiftRight(b: Self): Self {
-		Self ( integer8ShrSig(self.repr, b.repr) )
+		Self (repr: integer8ShrSig(self.repr, b.repr) )
 	}
 
 
 	public operator func equal(b: Self): Bool {
-		Bool ( integer8CmpEq(self.repr, b.repr) )
+		Bool (repr: integer8CmpEq(self.repr, b.repr) )
 	}
 
 	public operator func notEqual(b: Self): Bool {
-		Bool ( integer8CmpNeq(self.repr, b.repr) )
+		Bool (repr: integer8CmpNeq(self.repr, b.repr) )
 	}
 
 	public operator func lessThan(b: Self): Bool {
-		Bool ( integer8CmpLtSig(self.repr, b.repr) )
+		Bool (repr: integer8CmpLtSig(self.repr, b.repr) )
 	}
 
 	public operator func greaterThan(b: Self): Bool {
-		Bool ( integer8CmpGtSig(self.repr, b.repr) )
+		Bool (repr: integer8CmpGtSig(self.repr, b.repr) )
 	}
 
 	public operator func lessThanEq(b: Self): Bool {
-		Bool ( integer8CmpLteSig(self.repr, b.repr) )
+		Bool (repr: integer8CmpLteSig(self.repr, b.repr) )
 	}
 
 	public operator func greaterThanEq(b: Self): Bool {
-		Bool ( integer8CmpGteSig(self.repr, b.repr) )
+		Bool (repr: integer8CmpGteSig(self.repr, b.repr) )
 	}
 
 	public operator func unit(): Self {
@@ -78,49 +78,49 @@ public struct Int8 /*: IntegerLiteralRepr */ {
 	}
 	
 	public operator func negate(): Self {
-		Self ( integer8Negate(self.repr) )
+		Self (repr: integer8Negate(self.repr) )
 	}
 
 	public operator func invert(): Self {
-		Self ( integer8Invert(self.repr) )
+		Self (repr: integer8Invert(self.repr) )
 	}
 
 	public operator func openRange(upper: Self): Int8Range {
-		Int8Range(self, upper + 1)
+		Int8Range(low: self, high: upper + 1)
 	}
 
 	public operator func closedRange(upper: Self): Int8Range {
-		Int8Range(self, upper)
+		Int8Range(low: self, high: upper)
 	}
 
-	public static func truncUInt16(i: UInt16): Self {
-		Self ( integer16Trunc8(i.repr) )
+	public init(truncating i: UInt16) {
+		Self (repr: integer16Trunc8(i.repr) )
 	}
 
-	public static func truncUInt32(i: UInt32): Self {
-		Self ( integer32Trunc8(i.repr) )
+	public init(truncating i: UInt32) {
+		Self (repr: integer32Trunc8(i.repr) )
 	}
 
-	public static func truncUInt64(i: UInt64): Self {
-		Self ( integer64Trunc8(i.repr) )
+	public init(truncating i: UInt64) {
+		Self (repr: integer64Trunc8(i.repr) )
 	}
 
-	public static func truncInt16(i: Int16): Self {
-		Self ( integer16Trunc8(i.repr) )
+	public init(truncating i: Int16) {
+		Self (repr: integer16Trunc8(i.repr) )
 	}
 
-	public static func truncInt32(i: Int32): Self {
-		Self ( integer32Trunc8(i.repr) )
+	public init(truncating i: Int32) {
+		Self (repr: integer32Trunc8(i.repr) )
 	}
 
-	public static func truncInt64(i: Int64): Self {
-		Self ( integer64Trunc8(i.repr) )
+	public init(truncating i: Int64) {
+		Self (repr: integer64Trunc8(i.repr) )
 	}
 
-	// Convert from integers
+	// Convert from unsigned integers
 
-	public static func bitcastUInt8(i: UInt8): Self {
-		Self ( i.repr )
+	public init(bitcast i: UInt8) {
+		Self (repr: i.repr )
 	}
 }
 

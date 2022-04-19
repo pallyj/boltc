@@ -8,78 +8,78 @@ public struct Int64 /*: IntegerLiteralRepr */ {
 	internal var repr: i64
 
 	public operator func add(b: Self): Self {
-		Self( integer64Add(self.repr, b.repr) )
+		Self(repr: integer64Add(self.repr, b.repr) )
 	}
 
 	public operator func sub(b: Self): Self {
-		Self( integer64Sub(self.repr, b.repr) )
+		Self(repr: integer64Sub(self.repr, b.repr) )
 	}
 
 	public operator func mul(b: Self): Self {
-		Self ( integer64Mul(self.repr, b.repr) )
+		Self (repr: integer64Mul(self.repr, b.repr) )
 	}
 
 	public operator func div(b: Self): Self {
-		Self ( integer64DivSig(self.repr, b.repr) )
+		Self (repr: integer64DivSig(self.repr, b.repr) )
 	}
 
 	public operator func mod(b: Self): Self {
-		Self ( integer64RemSig(self.repr, b.repr) )
+		Self (repr: integer64RemSig(self.repr, b.repr) )
 	}
 
 
 	public operator func bitOr(b: Self): Self {
-		Self ( integer64Or(self.repr, b.repr) )
+		Self (repr: integer64Or(self.repr, b.repr) )
 	}
 
 	public operator func bitXor(b: Self): Self {
-		Self ( integer64Xor(self.repr, b.repr) )
+		Self (repr: integer64Xor(self.repr, b.repr) )
 	}
 
 	public operator func bitAnd(b: Self): Self {
-		Self ( integer64And(self.repr, b.repr) )
+		Self (repr: integer64And(self.repr, b.repr) )
 	}
 
 	public operator func shiftLeft(b: Self): Self {
-		Self ( integer64Shl(self.repr, b.repr) )
+		Self (repr: integer64Shl(self.repr, b.repr) )
 	}
 
 	public operator func shiftRight(b: Self): Self {
-		Self ( integer64ShrSig(self.repr, b.repr) )
+		Self (repr: integer64ShrSig(self.repr, b.repr) )
 	}
 
 
 	public operator func equal(b: Self): Bool {
-		Bool ( integer64CmpEq(self.repr, b.repr) )
+		Bool (repr: integer64CmpEq(self.repr, b.repr) )
 	}
 
 	public operator func notEqual(b: Self): Bool {
-		Bool ( integer64CmpNeq(self.repr, b.repr) )
+		Bool (repr: integer64CmpNeq(self.repr, b.repr) )
 	}
 
 	public operator func lessThan(b: Self): Bool {
-		Bool ( integer64CmpLtSig(self.repr, b.repr) )
+		Bool (repr: integer64CmpLtSig(self.repr, b.repr) )
 	}
 
 	public operator func greaterThan(b: Self): Bool {
-		Bool ( integer64CmpGtSig(self.repr, b.repr) )
+		Bool (repr: integer64CmpGtSig(self.repr, b.repr) )
 	}
 
 	public operator func lessThanEq(b: Self): Bool {
-		Bool ( integer64CmpLteSig(self.repr, b.repr) )
+		Bool (repr: integer64CmpLteSig(self.repr, b.repr) )
 	}
 
 	public operator func greaterThanEq(b: Self): Bool {
-		Bool ( integer64CmpGteSig(self.repr, b.repr) )
+		Bool (repr: integer64CmpGteSig(self.repr, b.repr) )
 	}
 
 	
 	public operator func negate(): Self {
-		Self ( integer64Negate(self.repr) )
+		Self (repr: integer64Negate(self.repr) )
 	}
 
 	public operator func invert(): Self {
-		Self ( integer64Invert(self.repr) )
+		Self (repr: integer64Invert(self.repr) )
 	}
 
 	public operator func unit(): Self {
@@ -87,62 +87,62 @@ public struct Int64 /*: IntegerLiteralRepr */ {
 	}
 
 	public operator func openRange(upper: Self): Int64Range {
-		Int64Range(self, upper + 1)
+		Int64Range(low: self, high: upper + 1)
 	}
 
 	public operator func closedRange(upper: Self): Int64Range {
-		Int64Range(self, upper)
+		Int64Range(low: self, high: upper)
 	}
 
 	
-	public static func fromFloat(f: Float): Self {
-		Int64 ( float32ToIntSig(f.repr) )
+	public init(f: Float) {
+		Int64 (repr: float32ToIntSig(f.repr) )
 	}
 
-	public static func fromDouble(f: Double): Self {
-		Int64 ( float64ToIntSig(f.repr) )
+	public init(f: Double) {
+		Int64 (repr: float64ToIntSig(f.repr) )
 	}
 
-	public static func fromHalf(f: Half): Self {
-		Int64 ( float16ToIntSig(f.repr) )
+	public init(f: Half) {
+		Int64 (repr: float16ToIntSig(f.repr) )
 	}
 
-	public static func extendInt8(i: Int8): Self {
-		Int64 ( integer8ExtSig64(i.repr) )
+	public init(i: Int8) {
+		Int64 (repr: integer8ExtSig64(i.repr) )
 	}
 
-	public static func extendInt16(i: Int16): Self {
-		Int64 ( integer16ExtSig64(i.repr) )
+	public init(i: Int16) {
+		Int64 (repr: integer16ExtSig64(i.repr) )
 	}
 
-	public static func extendInt32(i: Int32): Self {
-		Int64 ( integer32ExtSig64(i.repr) )
+	public init(i: Int32) {
+		Int64 (repr: integer32ExtSig64(i.repr) )
 	}
 
-	public static func fromInt(i: Int): Self {
-		Int64 ( i.repr )
+	public init(i: Int) {
+		Int64 (repr: i.repr )
 	}
 
-	public static func extendUInt8(i: UInt8): Self {
-		Int64 ( integer8ExtZero64(i.repr) )
+	public init(i: UInt8) {
+		Int64 (repr: integer8ExtZero64(i.repr) )
 	}
 
-	public static func extendUInt16(i: UInt16): Self {
-		Int64 ( integer16ExtZero64(i.repr) )
+	public init(i: UInt16) {
+		Int64 (repr: integer16ExtZero64(i.repr) )
 	}
 
-	public static func extendUInt32(i: UInt32): Self {
-		Int64 ( integer32ExtZero64(i.repr) )
+	public init(i: UInt32) {
+		Int64 (repr: integer32ExtZero64(i.repr) )
 	}
 
 	// Convert from integers
 
-	public static func bitcastUInt64(i: UInt64): Self {
-		Int64 ( i.repr )
+	public init(bitcast i: UInt64) {
+		Int64 (repr: i.repr )
 	}
 
-	public static func bitcastUInt(i: UInt): Self {
-		Int64 ( i.repr )
+	public init(bitcast i: UInt) {
+		Int64 (repr: i.repr )
 	}
 }
 

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use blir::{code::{CodeBlock, Statement, StatementKind}, scope::{ScopeRef}, typ::{Type, TypeKind}, value::{Value, ValueKind, IfValue, IfBranch}, SomeFunction, Symbol, BlirContext};
-use errors::{debugger::Debugger, error::ErrorCode, Span};
+use errors::{debugger::Debugger, Span, error::ErrorCode};
 use rusttyc::{PreliminaryTypeTable, TcKey, Preliminary};
 
 use crate::variant::TypeVariant;
@@ -10,7 +10,6 @@ pub struct TypeReplaceContext<'a, 'b> {
 	pub (crate) constraint_table: 	PreliminaryTypeTable<TypeVariant>,
 	pub (crate) context:			&'a BlirContext,
 	pub (crate) infer_keys: 		&'a HashMap<u64, TcKey>,
-	pub (crate) p_maps: 			&'a mut HashMap<u64, Vec<Type>>,
 	pub (crate) debugger: 			&'a mut Debugger<'b>,
 	pub (crate) is_final_run:		bool
 }
@@ -24,6 +23,17 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 		for smt in codeblock.statements_mut() {
 			self.replace_smt(smt, scope);
 		}
+	}
+
+	pub fn replace_variable(
+		&mut self,
+		typ: &mut Type,
+		value: &mut Value,
+		scope: &ScopeRef)
+	{
+		let span = typ.span();
+		self.replace_type(typ, &span);
+		self.replace_value(value, scope);
 	}
 
 	pub fn replace_smt(
@@ -67,6 +77,11 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 
 				monomorphizer.filter_types(args);
 
+				if monomorphizer.degrees() == 0 {
+					self.debugger.throw_single(ErrorCode::FunctionSigNotFound, &value.span);
+					return;
+				}
+
 				if let Some(resolved_function) = monomorphizer.resolve() {
 					self.replace_function(value, resolved_function);
 				}
@@ -80,6 +95,11 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 				};
 
 				polymorphic.filter_types(args);
+
+				if polymorphic.degrees() == 0 {
+					self.debugger.throw_single(ErrorCode::FunctionSigNotFound, &value.span);
+					return;
+				}
 
 				if let Some(resolved_function) = polymorphic.resolve() {
 					let parent = std::mem::take(reciever.as_mut());

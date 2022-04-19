@@ -11,7 +11,7 @@ long factorial(long n) {
 }
 
 int main() {
-	for ( long i = 0; i < 1000000; i++ ) {
+	for ( long i = 0; i < 100000000; i++ ) {
 		long n = i % 20;
 
 		long factorial_n = factorial(n);

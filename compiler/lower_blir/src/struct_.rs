@@ -41,14 +41,14 @@ impl BlirLowerer {
 
             self_struct.add_field(field);
         }
-    }
-
-    pub(super) fn lower_struct_code(&mut self, r#struct: StructRef) {
-        let borrowed_struct = r#struct.borrow();
 
         for method in &borrowed_struct.methods {
             self.lower_method_signature(method);
         }
+    }
+
+    pub(super) fn lower_struct_code(&mut self, r#struct: StructRef) {
+        let borrowed_struct = r#struct.borrow();
 
         for method in &borrowed_struct.methods {
             self.lower_method(method);
