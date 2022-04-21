@@ -9,7 +9,8 @@ Bolt is a powerful coding language designed for expressiveness and speed. Bolt c
 - first-class polymorphic functions
 - basic data structures
 - overridable operators
-- closures
+- non capturing closures
+- type initializers
 
 The Bolt Language focuses on
 
@@ -20,18 +21,18 @@ The Bolt Language focuses on
 
 ## Safety
 
-Bolt is designed with safety in mind. All types are determined at compile time, and implicit conversion is frowned upon. Bolt has no concept of null pointers, the single most dangerous aspect of programming. Bolt uses automatic reference counting to manage memory safely, preventing leaks and dangling pointers.
+Bolt is designed with safety in mind. All types are statically determined, and implicit conversion is frowned upon. Bolt has pointer safety, preventing dangerous null pointer exceptions and making nil checking mandatory. Bolt uses automatic reference counting to prevent memory leaks and ensure memory safety.
 ## Expressiveness
 
-Bolt syntax is designed to concisely show what the program does, without excess verbosity. Bolt guesses the developers intent, and annotations can be added to specify it when the compiler is wrong.
+The Bolt language is a fresh, fun take on speedy coding languages. Bolt code is easy to write and understand, and just looks better than any other language. The compiler can be extended to support low-level features, with attribute semantics to add them to your code.
 
 ## Accessibility
 
-Bolt code is easy to understand for both beginners and those coming over from another language. The compiler has built-in package management, and can compile C code.
+Bolt code is easily accessible for beginners and the experienced alike. Beginners will instinctively get the javascript-like syntax and python like methodology, while being able to code in a way that feels natural. Advanced coders will appreciate the built-in package management and C interoperability.
 
 ## Speed
 
-The Bolt language is compiled ahead of time, using a LLVM backend to output optimized code for any backend. The lack of an inefficient garbage collector prevents lengthy pauses and cuts down on memory usage.
+The Bolt compiler is optimized for speed. Pure, raw speed. Quick building, quick execution, and quick development. Bolt uses the LLVM framework to output the fastest code possible. In CPU-bound workloads, Bolt approaches the speed of C. The lack of a garbage collector makes bolt faster than Java and .NET in memoy bound tasks.
 
 ## Benchmarks
 
@@ -42,7 +43,7 @@ The Bolt language is compiled ahead of time, using a LLVM backend to output opti
 
 Even in its early stages, Bolt is blazing fast. Bolt runs the factorials example 25 times faster than nodejs (!), 4.9 faster than rust, and with the margin of error from C.
 
-Bolt will be as fast a C in CPU-bound tasks, faster than Rust and Javascript in IO-bound tasks, and significantly faster than javascript in memory-bound tasks.
+Bolt will be as fast C in CPU-bound tasks, faster than Rust and Javascript in IO-bound tasks, and significantly faster than javascript in memory-bound tasks.
 
 ## Using
 
