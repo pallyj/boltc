@@ -9,7 +9,7 @@ use codegen::config::{BuildConfig, BuildOutput, BuildProfile};
 use errors::{debugger::Debugger, fileinterner::FileInterner};
 use lower_ast::AstLowerer;
 use lower_blir::BlirLowerer;
-use parser::parser::parse;
+use parser::{parser::parse, operators::OperatorFactory};
 
 fn main() {
     let args = Args::parse();
@@ -76,8 +76,11 @@ impl Project {
     pub fn compile(&mut self) -> (bool, Option<String>) {
         let mut debugger = Debugger::new(&self.interner);
 
+        let mut operator_factory = OperatorFactory::new();
+        operator_factory.register_intrinsics();
+
         for file in self.interner.iter() {
-            let parse = parse(file.1.text(), &mut debugger, file.0);
+            let parse = parse(file.1.text(), &mut debugger, file.0, &operator_factory);
 
             if debugger.has_errors() {
                 continue;
@@ -97,6 +100,7 @@ impl Project {
 
         blir_passes::TypeResolvePass::new(
             &attribute_factory,
+            &operator_factory,
             &mut context,
             &mut debugger)
             .run_pass(self.library.as_mut().unwrap());
@@ -118,6 +122,7 @@ impl Project {
 
         blir_passes::ClosureResolvePass::new(
             &attribute_factory,
+            &operator_factory,
             &mut context,
             &mut debugger)
             .run_pass(self.library.as_mut().unwrap());

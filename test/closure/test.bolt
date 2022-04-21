@@ -1,9 +1,31 @@
+import intrinsics
+
 @entryPoint
 func main() {
-	// Anonymous closure
-	let closure = {
-		print(it)
-	}
+	let closure1 = { print(it) }
+	//let closure2 = { print(it) }
+	//let closure3 = { print(it) }
 
-	for(0..<10, closure)
+	monomorph(closure1)
+	/*polymorph(a: 1, closure2)
+	polymorph(b: 1, closure3)
+
+	monomorph { print(it) }
+	polymorph(a: 1) { print(it) }
+	polymorph(b: 1) { print(it) }*/
 }
+
+func monomorph(f: func(i64)) {
+
+}
+
+func polymorph(a a: i64, f: func(i64)) {
+
+}
+
+func polymorph(b b: i32, f: func(i32)) {
+
+}
+
+func print(n: i32) {}
+func print(n: i64) {}

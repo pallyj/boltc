@@ -25,8 +25,16 @@ pub enum ErrorCode {
     MissingParams,
 
     FunctionSigNotFound,
+    AmbiguousFunc,
 
+    AttributeDoesNotExist(String),
     IsNotAFunc,
+
+    OperatorDNE(String),
+
+    OperatorNotDefined(String, String),
+
+    OperatorExpectedParams(String, usize),
 }
 
 impl ErrorCode {
@@ -40,16 +48,21 @@ impl ErrorCode {
             ErrorCode::MemberNotATy { name } => format!("Member {} is not a type", name),
             ErrorCode::MemberNotAVal { name } => format!("Member {} is not a value", name),
             ErrorCode::AmbiguousTy => format!("Couldn't infer a type for"),
-            ErrorCode::MismatchedType { expected } => format!("Mismatched type, expected '{expected}' found this"),
-            ErrorCode::TypeIsNotAnInteger => format!("Mismatched type, expected '' found this"),
-            ErrorCode::TypeIsNotAFloat => format!("Mismatched type, expected '' found this"),
-            ErrorCode::TypeIsNotABool => format!("Mismatched type, expected '' found this"),
-            ErrorCode::ExpectedFound(expected, found) => format!("Expected {expected}, found {found}"),
+            ErrorCode::MismatchedType { expected } => format!("Mismatched type: expected '{expected}', found this"),
+            ErrorCode::TypeIsNotAnInteger => format!("Mismatched type: expected '', found integer"),
+            ErrorCode::TypeIsNotAFloat => format!("Mismatched type: expected '', found float"),
+            ErrorCode::TypeIsNotABool => format!("Mismatched type: expected '', found bool"),
+            ErrorCode::ExpectedFound(expected, found) => format!("Mismatched type: Expected {expected}, found {found}"),
             ErrorCode::ExtraParams => format!("Found extra parameters"),
             ErrorCode::MissingParams => format!("Missing argument for parameter"),
             ErrorCode::MismatchedIfBranchTypes => format!("If branches have mismatched types"),
             ErrorCode::IsNotAFunc => format!("Value is not a function"),
             ErrorCode::FunctionSigNotFound => format!("No function matching this signature was found"),
+            ErrorCode::AttributeDoesNotExist(name) => format!("cannot find attribute `{name}`"),
+            ErrorCode::AmbiguousFunc => format!("ambiguous function signatures"),
+            ErrorCode::OperatorDNE(name) => format!("operator `{name} is not defined`"),
+            ErrorCode::OperatorNotDefined(operator, typ) => format!("cannot use operator {operator} on {typ}",),
+            ErrorCode::OperatorExpectedParams(name, nParams) => format!("operator {name} takes {nParams} parameter")
         }
     }
 }

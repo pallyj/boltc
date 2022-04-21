@@ -49,7 +49,7 @@ public struct UInt /*: IntegerLiteralRepresentable */ {
 	}
 
 
-	public operator func equalual(b: Self): Bool {
+	public operator func equal(b: Self): Bool {
 		Bool (repr: integer64CmpEq(self.repr, b.repr) )
 	}
 

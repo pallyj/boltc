@@ -1,3 +1,5 @@
+use errors::Span;
+
 use crate::{code::{ExternFunctionRef, FunctionRef, MethodRef, FunctionInfo},
             scope::ScopeRelation,
             typ::{TypeKind, Type},
@@ -65,6 +67,15 @@ impl SomeFunction {
             Self::ExternFunction(function) => function.info(),
             Self::InstanceMethod(method) => method.info(),
             Self::StaticMethod(method) => method.info(),
+        }
+    }
+
+    pub fn span(&self) -> Span {
+        match self {
+            Self::Function(function) => function.borrow().span.clone(),
+            Self::ExternFunction(function) => function.borrow().span.clone(),
+            Self::InstanceMethod(method) => method.borrow().span.clone(),
+            Self::StaticMethod(method) => method.borrow().span.clone(),
         }
     }
 }

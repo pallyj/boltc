@@ -75,15 +75,10 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 					_ => return,
 				};
 
-				monomorphizer.filter_types(args);
-
-				if monomorphizer.degrees() == 0 {
-					self.debugger.throw_single(ErrorCode::FunctionSigNotFound, &value.span);
-					return;
-				}
-
 				if let Some(resolved_function) = monomorphizer.resolve() {
 					self.replace_function(value, resolved_function);
+				} else {
+					monomorphizer.filter_types(args);
 				}
 			}
 
@@ -94,17 +89,17 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 					_ => return,
 				};
 
-				polymorphic.filter_types(args);
-
-				if polymorphic.degrees() == 0 {
-					self.debugger.throw_single(ErrorCode::FunctionSigNotFound, &value.span);
-					return;
-				}
-
 				if let Some(resolved_function) = polymorphic.resolve() {
 					let parent = std::mem::take(reciever.as_mut());
 					self.replace_member_function(value, parent, resolved_function);
+				} else {
+					polymorphic.filter_types(args);
 				}
+
+				/*if polymorphic.degrees() == 0 {
+					self.debugger.throw_single(ErrorCode::FunctionSigNotFound, &value.span);
+					return;
+				}*/
 			}
 
 			ValueKind::FuncCall { function, args } => {
@@ -121,11 +116,11 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 				for (arg, param) in args.args.iter_mut().zip(params) {
 					self.replace_value(arg, scope);
 
-					if matches!(param.kind(), TypeKind::Infer { .. }) {
+					/*if matches!(param.kind(), TypeKind::Infer { .. }) {
 						param.set_kind(arg.typ.kind().clone());
 					} else if matches!(arg.typ.kind(), TypeKind::Infer { .. }) {
 						arg.typ.set_kind(param.kind().clone());
-					}
+					}*/
 				}
 
 				self.replace_value(function, scope);
@@ -155,7 +150,7 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 				// TODO: Make operators into instance functions
 				let Some(Symbol::Function(polymorphizer)) = container_type.lookup_static_item(&operator_name) else {
 					// Throw an error
-					println!("Error: Operator {} isn't defined for type {:?}", operator, container_type);
+					self.debugger.throw_single(ErrorCode::OperatorNotDefined(operator.to_string(), type_to_string(container_type)), &value.span);
 					return;
 				};
 
@@ -373,7 +368,29 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 			TypeVariant::SomeFloat if self.is_final_run => self.context.default_float_repr.clone().map(TypeKind::Struct),
 			TypeVariant::SomeBool if self.is_final_run => self.context.default_bool_repr.clone().map(TypeKind::Struct),
 
+			TypeVariant::Function { params, labels, return_type } =>
+				Some(TypeKind::Function {
+					return_type: return_type.clone(),
+					params: params.clone(),
+					labels: labels.clone() }),
+
 			_ => None
 		}
+	}
+}
+
+fn type_to_string(
+	ty: &Type) -> String
+{
+	match ty.kind() {
+		TypeKind::Struct(r#struct) => format!("struct `{}`", r#struct.name()),
+
+		TypeKind::Void => "()".to_string(),
+		TypeKind::Divergent => "!".to_string(),
+
+		TypeKind::Integer { bits } => format!("intrinsics.i{bits}"),
+		TypeKind::Float { bits } => format!("intrinsics.f{bits}"),
+
+		_ => "unknown".to_string()
 	}
 }

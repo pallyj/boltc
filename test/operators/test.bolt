@@ -4,16 +4,16 @@ import intrinsics
 struct Number {
 	var repr: i64
 
-	operator func add( left: Self, right: Self ): Self {
-		Self ( integer64Add(left.repr, right.repr) )
+	operator func add( right: Self ): Self {
+		Self ( integer64Add(self.repr, right.repr) )
 	}
 
-	operator func negate( operand: Self ): Self {
-		Self ( integer64Negate(operand.repr) )
+	operator func negate( ): Self {
+		Self ( integer64Negate(self.repr) )
 	}
 
-	operator func equal( left: Self, right: Self ): Bool {
-		Bool ( integer64CmpEq(left.repr, right.repr) )
+	operator func equal( b: Self ): Bool {
+		Bool ( integer64CmpEq(self.repr, b.repr) )
 	}
 }
 

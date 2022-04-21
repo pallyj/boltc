@@ -20,21 +20,17 @@ use crate::{ast::{Parse, SyntaxNode},
 
 struct Parser<'input, 'l> {
     lexemes: &'l [Token<'input>],
-    operators: OperatorFactory,
+    operators: &'input OperatorFactory,
     events:  Vec<Event<'input>>,
     cursor:  usize,
 }
 
 impl<'input, 'l> Parser<'input, 'l> {
-    pub fn new(lexemes: &'l [Token<'input>]) -> Self {
+    pub fn new(lexemes: &'l [Token<'input>], operator_factory: &'input OperatorFactory) -> Self {
         Self { lexemes,
                events: Vec::new(),
-               operators: OperatorFactory::new(),
+               operators: operator_factory,
                cursor: 0 }
-    }
-
-    pub fn operator_factory(&mut self) -> &mut OperatorFactory {
-        &mut self.operators
     }
 
     pub fn check(&mut self, token: SyntaxKind) -> bool {
@@ -247,13 +243,10 @@ impl<'input, 'l> Parser<'input, 'l> {
     }
 }
 
-pub fn parse<'input>(input: &'input str, debugger: &'input mut Debugger, file: usize) -> Parse {
+pub fn parse<'input>(input: &'input str, debugger: &'input mut Debugger, file: usize, operator_factory: &OperatorFactory) -> Parse {
     let lexemes: Vec<_> = Lexer::new(input).collect();
 
-    let mut parser = Parser::new(&lexemes);
-
-    parser.operator_factory()
-          .register_intrinsics();
+    let parser = Parser::new(&lexemes, operator_factory);
 
     let events = parser.parse_file();
     let sink = Sink::new(events, &lexemes, file);

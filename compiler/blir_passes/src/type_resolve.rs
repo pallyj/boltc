@@ -5,6 +5,7 @@ use blir::{attributes::AttributeFactory,
            value::{ConstantRef, IfBranch, IfValue, Value, ValueKind, VarRef, Closure, ClosureParam},
            BlirContext, Library, Symbol, Visibility};
 use errors::{debugger::Debugger, error::ErrorCode};
+use parser::operators::{OperatorFactory, OperatorFix};
 
 use crate::init_default::add_default_initializer;
 
@@ -34,15 +35,22 @@ use crate::init_default::add_default_initializer;
 pub struct TypeResolvePass<'a, 'l> {
     factory: &'a AttributeFactory,
     context: &'a mut BlirContext,
-    debugger: &'a mut Debugger<'l>
+    debugger: &'a mut Debugger<'l>,
+    operator_factory: &'a OperatorFactory,
 }
 
 impl<'a, 'l> TypeResolvePass<'a, 'l> {
-    pub fn new(factory: &'a AttributeFactory, context: &'a mut BlirContext, debugger: &'a mut Debugger<'l>) -> Self {
+    pub fn new(
+        factory: &'a AttributeFactory,
+        operator_factory: &'a OperatorFactory,
+        context: &'a mut BlirContext,
+        debugger: &'a mut Debugger<'l>) -> Self
+    {
         Self {
             factory,
             context,
-            debugger
+            debugger,
+            operator_factory
         }
     }
 
@@ -53,6 +61,10 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
             self.resolve_extern_func_types(extern_func);
 
             // Apply function attributes
+        }
+
+        for constant in &library.constants {
+            self.resolve_constant(constant, library.scope());
         }
 
         // Resolve types in each struct
@@ -192,6 +204,19 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
         // Add the functions parameters to its scope
         borrowed_func.add_params();
+
+        if borrowed_func.is_operator {
+            let Some(operator) = self.operator_factory.get_op(borrowed_func.info.name()) else {
+                self.debugger.throw(ErrorCode::OperatorDNE(borrowed_func.info.name().clone()), vec![borrowed_func.span]);
+                return;
+            };
+
+            let nop = if operator.fix() == OperatorFix::Infix { 2 } else { 1 };
+
+            if borrowed_func.info.params().len() != nop {
+                self.debugger.throw(ErrorCode::OperatorExpectedParams(borrowed_func.info.name().clone(), nop - 1), vec![borrowed_func.span])
+            }
+        }
     }
 
     fn resolve_function_code(&mut self, func: &FunctionRef) {

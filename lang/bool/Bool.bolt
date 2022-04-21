@@ -13,10 +13,6 @@ public struct Bool /*: BooleanLiteralRepr */ {
 		Self(repr: integer1Or(self.repr, right.repr) )
 	}
 
-	public operator func xor(right: Self): Self {
-		Self(repr: integer1Xor(self.repr, right.repr) )
-	}
-
 	public operator func invert(): Self {
 		Self(repr:integer1Invert(self.repr))
 	}

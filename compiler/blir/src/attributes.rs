@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use errors::{debugger::Debugger, Span};
+use errors::{debugger::Debugger, Span, error::ErrorCode};
 
 use crate::{code::FunctionInfo, typ::StructRef, BlirContext};
 
@@ -62,6 +62,7 @@ impl AttributeFactory {
                 attribute.apply(struct_ref, context, debugger);
             } else {
                 // Throw an error
+                debugger.throw(ErrorCode::AttributeDoesNotExist(attribute.name().to_string()), vec![ attribute.span() ]);
             }
         }
     }
@@ -72,6 +73,7 @@ impl AttributeFactory {
                 attribute.apply(func_info, context, debugger);
             } else {
                 // Throw an error
+                debugger.throw(ErrorCode::AttributeDoesNotExist(attribute.name().to_string()), vec![ attribute.span() ]);
             }
         }
     }

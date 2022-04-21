@@ -49,7 +49,7 @@ public struct UInt16 /*: IntegerLiteralRepresentable */ {
 	}
 
 
-	public operator func equalual(b: Self): Bool {
+	public operator func equal(b: Self): Bool {
 		Bool (repr: integer16CmpEq(self.repr, b.repr) )
 	}
 

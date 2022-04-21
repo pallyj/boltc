@@ -1,0 +1,44 @@
+@entryPoint
+func main() {
+	polyError()
+	monoError()
+}
+
+func polyError() {
+
+	poly(0, 1);
+}
+
+func monoError() {
+	let b: Int = 0;
+
+	mono(b, 0, 1)
+}
+
+
+func poly(a: Int, b: Int) {
+	print(0)
+}
+
+func poly(a: Int, b: Int16) {
+	print(1)
+}
+
+func poly(a: Int, b: Int8) {
+	print(2)
+}
+
+
+func mono(a: Int) {
+	print(3)
+}
+
+func operators() {
+	let op = 1 + 1 * 1 << 1 >> 1 ^ 1 % 1 & 1 | 1;
+}
+
+struct Operators {
+	operator func notAnOperator() {
+
+	}
+}

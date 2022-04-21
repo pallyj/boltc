@@ -36,7 +36,7 @@ impl StatementKind {
 #[derive(Clone)]
 pub struct Statement {
     pub kind: StatementKind,
-    span:     Option<Span>,
+    pub span:     Option<Span>,
 }
 
 impl Statement {

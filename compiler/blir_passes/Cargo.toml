@@ -9,3 +9,4 @@ edition = "2021"
 errors = { path = "../errors" }
 blir = { path = "../blir" }
 tyinfer = { path = "../tyinfer" }
+parser = { path = "../parser" }

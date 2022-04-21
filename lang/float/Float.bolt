@@ -1,7 +1,7 @@
 import intrinsics
 
 @transparent
-@defaultFloatLiteral
+@defaultFloatRepr
 public struct Float /*: FloatLiteralRepr*/ {
 	internal var repr: f32
 

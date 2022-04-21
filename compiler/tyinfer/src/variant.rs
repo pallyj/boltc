@@ -1,4 +1,4 @@
-use blir::typ::{StructRef, TypeKind};
+use blir::typ::{StructRef, TypeKind, Type};
 use rusttyc::{Variant, Partial, Constructable};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -17,7 +17,11 @@ pub enum TypeVariant {
 	Struct(StructRef),
 
 	// TODO: Add function type
-	Function,
+	Function {
+		params: Vec<Type>,
+		labels: Vec<Option<String>>,
+		return_type: Box<Type>
+	},
 
 	Void,
 	Diverges,
@@ -51,6 +55,8 @@ impl Variant for TypeVariant {
 			(Self::SomeBool, Self::LlvmBool) |
 			(Self::LlvmBool, Self::SomeBool)
 				=> Ok(Self::LlvmBool),
+
+			(Self::SomeFunction, function @ Self::Function { .. }) => Ok(function),
 
 			(Self::SomeInteger, Self::Struct(integer_struct)) |
 			(Self::Struct(integer_struct), Self::SomeInteger) => {

@@ -249,7 +249,7 @@ impl<'input, 'l> Parser<'input, 'l> {
 			}
 		} else if self.check(SyntaxKind::Operator) {
             let operator_symbol = self.lexemes[self.cursor].source;
-            let is_prefix_operator = self.operator_factory().get_prefix_op(operator_symbol).is_some();
+            let is_prefix_operator = self.operators.get_prefix_op(operator_symbol).is_some();
 
             self.bump();
 

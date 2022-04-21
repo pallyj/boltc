@@ -1,7 +1,9 @@
+use std::cmp::Ordering;
+
 use blir::{code::{CodeBlock, FunctionRef, MethodRef, Statement, StatementKind},
            typ::{StructRef, Type, TypeKind},
            value::{IfBranch, IfValue, Value, ValueKind, VarRef, ConstantRef},
-           Library};
+           Library, Monomorphizer};
 use errors::{debugger::Debugger, error::ErrorCode, Span};
 
 pub struct TypeCheckPass<'a, 'b> {
@@ -56,7 +58,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
         let func_code = &borrowed.code;
 
         if let Err(error) = self.check_codeblock(func_code, func_return_type, func_return_type) {
-            println!("Error: function");
+            self.handle_return_yield_error(error, &func_return_type.span);
         }
     }
 
@@ -66,7 +68,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
         let func_code = &borrowed.code;
 
         if let Err(error) = self.check_codeblock(func_code, func_return_type, func_return_type) {
-            println!("Error: function");
+            self.handle_return_yield_error(error, &func_return_type.span);
         }
     }
 
@@ -109,7 +111,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
     {
         match &statement.kind {
             StatementKind::Eval { value, .. } => self.check_value(value, return_type),
-            StatementKind::Bind { name, typ, value, .. } => {
+            StatementKind::Bind { typ, value, .. } => {
                 let Some(value) = value else { return };
 
                 if let Err(error) = self.check_type(typ, &value.typ) {
@@ -138,16 +140,18 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
     {
         // TODO: Move this to another function
         match value.typ.kind() {
-            TypeKind::Error => println!("Error: error type"),
+            TypeKind::Error => panic!("Compiler Error: error type"),
 
             TypeKind::SomeBool |
             TypeKind::SomeInteger |
             TypeKind::SomeFloat | 
             TypeKind::SomeFunction |
-            TypeKind::Infer { .. } => println!("Error: couldn't infer"),
+            TypeKind::Infer { .. } => {
+                self.debugger.throw_single(ErrorCode::AmbiguousTy, &value.span);
+            }
 
-            TypeKind::Named(_) => println!("Error: named type"),
-            TypeKind::Member { .. } => println!("Error: member type"),
+            TypeKind::Named(name) => self.debugger.throw_single(ErrorCode::SymNotAType { name: name.clone() }, &value.span),
+            TypeKind::Member { member, .. } => self.debugger.throw_single(ErrorCode::MemberNotATy { name: member.clone() }, &value.span),
 
             _ => {}
         }
@@ -163,12 +167,12 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
 
             ValueKind::Closure(closure) => {
                 let TypeKind::Function { return_type, .. } = value.typ.kind() else {
-                    println!("Error: not a function");
+                    self.debugger.throw_single(ErrorCode::IsNotAFunc, &value.span);
                     return
                 };
 
                 if let Err(error) = self.check_codeblock(&closure.code, return_type, return_type) {
-                    println!("Error: handle closure error");
+                    self.handle_return_yield_error(error, &value.span);
                 }
             }
             ValueKind::FuncCall { function, args } => {
@@ -178,13 +182,26 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                     TypeKind::Function { params, .. } => params,
                     TypeKind::Method { params, .. } => params,
                     _ => {
-                        println!("Error: not a function");
+                        self.debugger.throw_single(ErrorCode::IsNotAFunc, &value.span);
                         return
                     }
                 };
 
-                if params.len() != args.args.len() {
-                    println!("ICE");
+                match params.len().cmp(&args.args.len()) {
+                    Ordering::Greater => {
+                        // Less params
+                        self.debugger.throw_single(ErrorCode::MissingParams, &value.span);
+                    }
+                    Ordering::Less => {
+                        // Extra params
+                        let spans = args.args
+                            .iter()
+                            .skip(params.len())
+                            .filter_map(|arg| arg.span.clone())
+                            .collect();
+                        self.debugger.throw(ErrorCode::ExtraParams, spans);
+                    }
+                    Ordering::Equal => {}
                 }
 
                 for (param, arg) in params.iter().zip(&args.args) {
@@ -199,14 +216,37 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
             ValueKind::InstanceMethod { reciever, .. } => self.check_value(reciever, return_type),
             ValueKind::InstanceVariable { reciever, .. } => self.check_value(reciever, return_type),
 
-            ValueKind::Error => println!("Error: error"),
-            ValueKind::Member { .. } => println!("Error: member"),
-            ValueKind::Named(_) => println!("Error: named"),
-            ValueKind::Operator(_) => println!("Error: operator"),
-            ValueKind::Polymorphic(polymorphic) => println!("Error: poly"),
-            ValueKind::PolymorphicMethod { polymorphic, .. } => println!("Error: poly"),
+            ValueKind::Error => panic!("Compiler Error: error value"),
+            ValueKind::Member { member, .. } => self.debugger.throw_single(ErrorCode::MemberNotAVal { name: member.clone() }, &value.span),
+            ValueKind::Named(name, ) => self.debugger.throw_single(ErrorCode::SymNotAValue { name: name.clone() }, &value.span),
+            ValueKind::Operator(name) => panic!("Compiler Error: operator {name} couldn't be found"),
+            ValueKind::Polymorphic(polymorphic) => self.check_polymorphic(polymorphic, &value.span),
+            ValueKind::PolymorphicMethod { polymorphic, .. } => self.check_polymorphic(polymorphic, &value.span),
 
             _ => { /* Do nothing */ }
+        }
+    }
+
+    fn check_polymorphic(
+        &mut self,
+        polymorphic: &Monomorphizer,
+        span: &Option<Span>)
+    {
+        match polymorphic.degrees() {
+            0 => {
+                self.debugger.throw_single(ErrorCode::FunctionSigNotFound, span);
+            },
+            _ => {
+                let mut spans = polymorphic
+                    .open_possibilities()
+                    .iter()
+                    .map(|possibility| possibility.span())
+                    .collect::<Vec<_>>();
+                if let Some(span) = span {
+                    spans.insert(0, span.clone());
+                }
+                self.debugger.throw(ErrorCode::AmbiguousFunc, spans)
+            }
         }
     }
 
@@ -232,7 +272,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                         spans.extend(if_value.positive.span());
                     }
                 }
-                IfBranch::Else(else_if_branch) => return self.check_if_value(if_value, if_type, return_type, spans),
+                IfBranch::Else(else_if_branch) => return self.check_if_value(else_if_branch, if_type, return_type, spans),
             }
         }
     
@@ -261,7 +301,18 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
         error: TypeCheckError,
         statement: &Statement)
     {
-        println!("Error: let");
+        match error {
+            TypeCheckError::CouldNotInfer => {
+                self.debugger.throw_single(ErrorCode::AmbiguousTy, &statement.span)
+            }
+            TypeCheckError::MismatchedTypes(t1, t2) => {
+                self.debugger.throw_single(
+                    ErrorCode::ExpectedFound(
+                            self.type_to_string(&t1),
+                            self.type_to_string(&t2)),
+                    &statement.span);
+            }
+        }
     }
 
     fn handle_var_error(
@@ -274,7 +325,11 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 self.debugger.throw(ErrorCode::AmbiguousTy, vec![span.clone()])
             }
             TypeCheckError::MismatchedTypes(t1, t2) => {
-                println!("Mismatched types {t1:?} {t2:?}")
+                self.debugger.throw(
+                    ErrorCode::ExpectedFound(
+                            self.type_to_string(&t1),
+                            self.type_to_string(&t2)),
+                        vec![span.clone()]);
             }
         }
     }
@@ -284,7 +339,37 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
         error: TypeCheckError,
         statement: &Statement)
     {
-        println!("Error: return");
+        match error {
+            TypeCheckError::CouldNotInfer => {
+                self.debugger.throw_single(ErrorCode::AmbiguousTy, &statement.span)
+            }
+            TypeCheckError::MismatchedTypes(t1, t2) => {
+                self.debugger.throw_single(
+                    ErrorCode::ExpectedFound(
+                            self.type_to_string(&t1),
+                            self.type_to_string(&t2)),
+                    &statement.span);
+            }
+        }
+    }
+
+    fn handle_return_yield_error(
+        &mut self,
+        error: TypeCheckError,
+        span: &Option<Span>)
+    {
+        match error {
+            TypeCheckError::CouldNotInfer => {
+                self.debugger.throw_single(ErrorCode::AmbiguousTy, span)
+            }
+            TypeCheckError::MismatchedTypes(t1, t2) => {
+                self.debugger.throw_single(
+                    ErrorCode::ExpectedFound(
+                            self.type_to_string(&t1),
+                            self.type_to_string(&t2)),
+                    span);
+            }
+        }
     }
 
     fn handle_call_error(
@@ -292,7 +377,35 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
         error: TypeCheckError,
         arg: &Value)
     {
-        println!("Error: call");
+        match error {
+            TypeCheckError::CouldNotInfer => {
+                self.debugger.throw_single(ErrorCode::AmbiguousTy, &arg.span)
+            }
+            TypeCheckError::MismatchedTypes(t1, t2) => {
+                self.debugger.throw_single(
+                    ErrorCode::ExpectedFound(
+                            self.type_to_string(&t1),
+                            self.type_to_string(&t2)),
+                    &arg.span);
+            }
+        }
+    }
+
+    fn type_to_string(
+        &self,
+        ty: &Type) -> String
+    {
+        match ty.kind() {
+            TypeKind::Struct(r#struct) => format!("struct `{}`", r#struct.name()),
+
+            TypeKind::Void => "()".to_string(),
+            TypeKind::Divergent => "!".to_string(),
+
+            TypeKind::Integer { bits } => format!("intrinsics.i{bits}"),
+            TypeKind::Float { bits } => format!("intrinsics.f{bits}"),
+
+            _ => "unknown".to_string()
+        }
     }
 }
 

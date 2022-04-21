@@ -12,6 +12,7 @@ struct Vec2 {
 		Vec2(i: i, j: 0)
 	}
 
+
 	init(j j: i64) {
 		Vec2(i: 0, j: j)
 	}
@@ -39,5 +40,3 @@ func main() {
 	printInt64(a.i)
 	printInt64(a.j)
 }
-
-func printInt64(i: i64);

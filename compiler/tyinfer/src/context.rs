@@ -73,7 +73,12 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 				match function_type.kind() {
 					TypeKind::Function { params, .. } |
 					TypeKind::Method { params, .. } => {
-						if self.fully_constrained(&params) {
+						for (param, arg) in params.iter().zip(&args.args) {
+							self.constrain_value(arg, scope);
+
+							self.constrain_two_way( param, &arg.typ );
+						}
+						/*if self.fully_constrained(&params) {
 							for (param, arg) in params.iter().zip(&args.args) {
 								self.constrain_value(arg, scope);
 
@@ -86,7 +91,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 
 								self.constrain_one_way( param, &arg.typ );
 							}
-						}
+						}*/
 					}
 
 					_ => panic!("{function_type:?}"),
@@ -245,7 +250,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 	}
 
 	fn constrain_func(&mut self, value: &Value) {
-		//println!("{value:?} <- some Float");
+		//println!("{value:?} <- some Function");
 		if let Some(infer_key) = self.infer_key(&value.typ) {
 			let constraint =
 				self.checker
@@ -338,7 +343,10 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 
 			TypeKind::Struct(r#struct) => TypeVariant::Struct(r#struct.clone()),
 
-			TypeKind::Function { .. } => TypeVariant::Function,
+			TypeKind::Function { return_type, labels, params } => TypeVariant::Function {
+				params: params.clone(),
+				labels: labels.clone(),
+				return_type: return_type.clone() },
 
 			TypeKind::Error => TypeVariant::Error,
 

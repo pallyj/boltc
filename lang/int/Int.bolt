@@ -37,7 +37,7 @@ public struct Int /*: IntegerLiteralRepr */ {
 		Self (repr: integer64Xor(self.repr, b.repr) )
 	}
 
-	public func bitAnd(b: Self): Self {
+	public operator func bitAnd(b: Self): Self {
 		Self (repr: integer64And(self.repr, b.repr) )
 	}
 
