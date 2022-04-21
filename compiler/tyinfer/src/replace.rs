@@ -115,6 +115,8 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 
 				for (arg, param) in args.args.iter_mut().zip(params) {
 					self.replace_value(arg, scope);
+					let span = param.span;
+					self.replace_type(param, &span);
 
 					/*if matches!(param.kind(), TypeKind::Infer { .. }) {
 						param.set_kind(arg.typ.kind().clone());

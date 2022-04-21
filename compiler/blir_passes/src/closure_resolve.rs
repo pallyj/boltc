@@ -1,4 +1,4 @@
-use blir::{attributes::AttributeFactory, BlirContext, Library, code::{CodeBlock, StatementKind}, value::{Value, ValueKind}, scope::ScopeRef};
+use blir::{attributes::AttributeFactory, BlirContext, Library, code::{CodeBlock, StatementKind}, value::{Value, ValueKind, IfValue, IfBranch}, scope::{ScopeRef}, typ::StructRef};
 use errors::debugger::Debugger;
 use parser::operators::OperatorFactory;
 
@@ -30,7 +30,44 @@ impl<'a, 'l> ClosureResolvePass<'a, 'l> {
 		&mut self,
 		library: &mut Library)
 	{
-		for func in &mut library.functions {
+		let scope = library.scope().clone();
+
+		for constant in &library.constants {
+			self.resolve_value(&mut constant.borrow_mut().value, &scope);
+		}
+
+		for func in &library.functions {
+			let scope = func.borrow().scope().clone();
+
+			self.resolve_code_block(&mut func.borrow_mut().code, &scope)
+		}
+
+		for r#struct in &library.structs {
+			self.resolve_struct(r#struct);
+		}
+	}
+
+	fn resolve_struct(
+		&mut self,
+		r#struct: &StructRef)
+	{
+		let scope = r#struct.borrow().scope().clone();
+
+		for r#struct in &r#struct.borrow().substructs {
+			self.resolve_struct(r#struct);
+		}
+
+		for constant in &r#struct.borrow().constants {
+			self.resolve_value(&mut constant.borrow_mut().value, &scope);
+		}
+
+		for var in &r#struct.borrow().instance_vars {
+			if let Some(value) = &mut var.borrow_mut().default_value {
+				self.resolve_value(value, &scope);
+			}
+		}
+
+		for func in &r#struct.borrow().methods {
 			let scope = func.borrow().scope().clone();
 
 			self.resolve_code_block(&mut func.borrow_mut().code, &scope)
@@ -84,11 +121,32 @@ impl<'a, 'l> ClosureResolvePass<'a, 'l> {
 			}
 
 			//TODO: Fill this out
-			ValueKind::If(if_statement) => {
+			ValueKind::If(if_statement) => self.resolve_if_statement(if_statement, scope),
 
-			}
+			ValueKind::InstanceMethod { reciever, .. } => self.resolve_value(reciever, scope),
+
+			ValueKind::InstanceVariable { reciever, .. } => self.resolve_value(reciever, scope),
 
 			_ => { }
 		}
+	}
+
+	fn resolve_if_statement(
+		&mut self,
+		if_statement: &mut IfValue,
+		scope: &ScopeRef)
+	{
+		self.resolve_value(&mut if_statement.condition, scope);
+
+		self.resolve_code_block(&mut if_statement.positive, scope);
+
+		if let Some(negative) = &mut if_statement.negative {
+			match negative {
+				IfBranch::CodeBlock(negative_block) => self.resolve_code_block(negative_block, scope),
+				IfBranch::Else(else_if_branch) => self.resolve_if_statement(else_if_branch, scope),
+			}
+		}
+
+		
 	}
 }

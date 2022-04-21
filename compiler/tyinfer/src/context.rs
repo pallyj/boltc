@@ -202,7 +202,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 	fn constrain_bool(&mut self, value: &Value) {
 		//println!("{value:?} <- some Bool");
 		if let Some(infer_key) = self.infer_key(&value.typ) {
-			let constraint =
+			let _constraint =
 				self.checker
 					.impose(infer_key.concretizes_explicit(TypeVariant::SomeBool));
 
@@ -226,7 +226,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 			self.debugger.throw_single(ErrorCode::TypeIsNotAnInteger, &value.span);
 
 			match constraint.err().unwrap() {
-				TcErr::KeyEquation(key1, key2, error) => {
+				TcErr::KeyEquation(_key1, _key2, _error) => {
 					println!("Incompatible types");
 					
 				}
@@ -241,7 +241,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 	fn constrain_float(&mut self, value: &Value) {
 		//println!("{value:?} <- some Float");
 		if let Some(infer_key) = self.infer_key(&value.typ) {
-			let constraint =
+			let _constraint =
 				self.checker
 					.impose(infer_key.concretizes_explicit(TypeVariant::SomeFloat));
 
@@ -252,7 +252,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 	fn constrain_func(&mut self, value: &Value) {
 		//println!("{value:?} <- some Function");
 		if let Some(infer_key) = self.infer_key(&value.typ) {
-			let constraint =
+			let _constraint =
 				self.checker
 					.impose(infer_key.concretizes_explicit(TypeVariant::SomeFunction));
 
@@ -285,7 +285,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 			return
 		};
 
-		let constraint = if let Some(absolute_key) = self.infer_key(absolute) {
+		let _constraint = if let Some(absolute_key) = self.infer_key(absolute) {
 			self.checker.impose(constrain_key.concretizes(absolute_key))
 		} else {
 			let bound = self.variant(absolute);
@@ -368,10 +368,5 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 
 			Some(new_tc_key)
 		}
-	}
-
-	fn fully_constrained(&self, types: &[Type]) -> bool {
-		!types.iter()
-			.any(|ty| matches!(ty.kind, TypeKind::Infer { .. }))
 	}
 }
