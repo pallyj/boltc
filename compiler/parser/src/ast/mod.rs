@@ -54,7 +54,7 @@ macro_rules! ast {
 			}
 		}
 	};
-	(enum $enum_name:ident { $($name:ident),* }) => {
+	(enum $enum_name:ident { $($name:ident, )* }) => {
 		pub enum $enum_name {
 			$(
 				$name($name),

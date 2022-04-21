@@ -51,7 +51,7 @@ ast!(
         PostfixExpr,
         InfixExpr,
         ClosureExpr,
-        TrailingClosureExpr
+        TrailingClosureExpr,
     }
 );
 
@@ -78,7 +78,7 @@ impl Debug for Expr {
 ast!(
     enum IfExprNegative {
         IfExpr,
-        CodeBlock
+        CodeBlock,
     }
 );
 
@@ -146,12 +146,7 @@ impl Debug for LiteralExpr {
 }
 
 impl ParenthesizedExpr {
-    pub fn expr(&self) -> Expr {
-        self.0
-            .first_child()
-            .map(Expr::cast)
-            .unwrap_or(Expr::Error)
-    }
+    pub fn expr(&self) -> Expr { self.0.first_child().map(Expr::cast).unwrap_or(Expr::Error) }
 }
 
 impl Debug for ParenthesizedExpr {
@@ -202,12 +197,7 @@ impl IfExpr {
 }
 
 impl FuncCallExpr {
-    pub fn function(&self) -> Expr {
-        self.0
-            .first_child()
-            .map(Expr::cast)
-            .unwrap()
-    }
+    pub fn function(&self) -> Expr { self.0.first_child().map(Expr::cast).unwrap() }
 
     pub fn args(&self) -> impl Iterator<Item = FuncArg> {
         self.0
@@ -220,79 +210,48 @@ impl FuncCallExpr {
 }
 
 impl FuncArg {
-    pub fn label(&self) -> Option<String> {
-        find_token(&self.0, SyntaxKind::Ident)
-            .map(|arg_label| arg_label.text().to_string())
-    }
+    pub fn label(&self) -> Option<String> { find_token(&self.0, SyntaxKind::Ident).map(|arg_label| arg_label.text().to_string()) }
 
-    pub fn value(&self) -> Expr {
-        self.0
-            .last_child()
-            .map(Expr::cast)
-            .unwrap()
-    }
+    pub fn value(&self) -> Expr { self.0.last_child().map(Expr::cast).unwrap() }
 }
 
 impl PrefixExpr {
     pub fn operator(&self) -> String {
-        find_token(&self.0, SyntaxKind::Operator)
-            .map(|op| op.text().to_string())
-            .unwrap()
+        find_token(&self.0, SyntaxKind::Operator).map(|op| op.text().to_string())
+                                                 .unwrap()
     }
 
-    pub fn unit(&self) -> Expr {
-        self.0.first_child()
-            .map(Expr::cast)
-            .unwrap()
-    }
+    pub fn unit(&self) -> Expr { self.0.first_child().map(Expr::cast).unwrap() }
 }
 
 impl PostfixExpr {
     pub fn operator(&self) -> String {
-        find_token(&self.0, SyntaxKind::Operator)
-            .map(|op| op.text().to_string())
-            .unwrap()
+        find_token(&self.0, SyntaxKind::Operator).map(|op| op.text().to_string())
+                                                 .unwrap()
     }
 
-    pub fn unit(&self) -> Expr {
-        self.0.first_child()
-            .map(Expr::cast)
-            .unwrap()
-    }
+    pub fn unit(&self) -> Expr { self.0.first_child().map(Expr::cast).unwrap() }
 }
 
 impl InfixExpr {
     pub fn operator(&self) -> String {
-        find_token(&self.0, SyntaxKind::Operator)
-            .map(|op| op.text().to_string())
-            .unwrap()
+        find_token(&self.0, SyntaxKind::Operator).map(|op| op.text().to_string())
+                                                 .unwrap()
     }
 
-    pub fn left(&self) -> Expr {
-        self.0.first_child()
-            .map(Expr::cast)
-            .unwrap()
-    }
+    pub fn left(&self) -> Expr { self.0.first_child().map(Expr::cast).unwrap() }
 
-    pub fn right(&self) -> Expr {
-        self.0.last_child()
-            .map(Expr::cast)
-            .unwrap()
-    }
+    pub fn right(&self) -> Expr { self.0.last_child().map(Expr::cast).unwrap() }
 }
 
 impl ClosureParam {
     pub fn bind_name(&self) -> String {
-        find_token(&self.0, SyntaxKind::Ident)
-            .unwrap()
-            .text()
-            .to_string()
+        find_token(&self.0, SyntaxKind::Ident).unwrap()
+                                              .text()
+                                              .to_string()
     }
 
-    pub fn explicit_type(&self) -> Option<Type> {
-        self.0.last_child()
-            .map(Type::cast)
-    }
+    pub fn explicit_type(&self) -> Option<Type> { self.0.last_child().map(Type::cast) }
 }
 
 impl Debug for ClosureParam {
@@ -306,27 +265,22 @@ impl Debug for ClosureParam {
 }
 
 impl ClosureExpr {
-    pub fn parameters(&self) -> Option<impl Iterator<Item=ClosureParam>> {
-        self.0.children()
+    pub fn parameters(&self) -> Option<impl Iterator<Item = ClosureParam>> {
+        self.0
+            .children()
             .find(|node| node.kind() == SyntaxKind::CommaSeparatedList)
-            .map(|params| params
-                .children()
-                .filter_map(ClosureParam::cast))
+            .map(|params| params.children().filter_map(ClosureParam::cast))
     }
-    pub fn code_block(&self) -> CodeBlock {
-        self.0.children()
-            .find_map(CodeBlock::cast)
-            .unwrap()
-    }
+
+    pub fn code_block(&self) -> CodeBlock { self.0.children().find_map(CodeBlock::cast).unwrap() }
 }
 
 impl Debug for ClosureExpr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if let Some(parameters) = self.parameters() {
-            let parameters = parameters
-                .map(|d| format!("{d:?}"))
-                .collect::<Vec<_>>()
-                .join(", ");
+            let parameters = parameters.map(|d| format!("{d:?}"))
+                                       .collect::<Vec<_>>()
+                                       .join(", ");
 
             write!(f, "{{ {parameters} => {:?} }}", self.code_block())
         } else {
@@ -336,26 +290,14 @@ impl Debug for ClosureExpr {
 }
 
 impl TrailingClosureExpr {
-    pub fn function(&self) -> Expr {
-        self.0.first_child()
-            .map(Expr::cast)
-            .unwrap()
-    }
+    pub fn function(&self) -> Expr { self.0.first_child().map(Expr::cast).unwrap() }
 
-    pub fn closure(&self) -> ClosureExpr {
-        self.0.last_child()
-            .and_then(ClosureExpr::cast)
-            .unwrap()
-    }
+    pub fn closure(&self) -> ClosureExpr { self.0.last_child().and_then(ClosureExpr::cast).unwrap() }
 }
 
 impl Debug for TrailingClosureExpr {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?} {:?}", self.function(), self.closure())
-    }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{:?} {:?}", self.function(), self.closure()) }
 }
-
-
 
 impl Debug for FuncCallExpr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -396,19 +338,19 @@ impl Debug for FuncArg {
 }
 
 impl Debug for PrefixExpr {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "({} {:?})", self.operator(), self.unit())
-    }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "({} {:?})", self.operator(), self.unit()) }
 }
 
 impl Debug for PostfixExpr {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "({:?} {})", self.unit(), self.operator())
-    }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "({:?} {})", self.unit(), self.operator()) }
 }
 
 impl Debug for InfixExpr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "({:?} {} {:?})", self.left(), self.operator(), self.right())
+        write!(f,
+               "({:?} {} {:?})",
+               self.left(),
+               self.operator(),
+               self.right())
     }
 }

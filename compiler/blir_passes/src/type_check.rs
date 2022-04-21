@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 
 use blir::{code::{CodeBlock, FunctionRef, MethodRef, Statement, StatementKind},
            typ::{StructRef, Type, TypeKind},
-           value::{IfBranch, IfValue, Value, ValueKind, VarRef, ConstantRef},
+           value::{ConstantRef, IfBranch, IfValue, Value, ValueKind, VarRef},
            Library, Monomorphizer};
 use errors::{debugger::Debugger, error::ErrorCode, Span};
 
@@ -12,11 +12,7 @@ pub struct TypeCheckPass<'a, 'b> {
 
 // TODO: Error for non-existant attributes
 impl<'a, 'b> TypeCheckPass<'a, 'b> {
-    pub fn new(debugger: &'a mut Debugger <'b>) -> Self {
-        Self {
-            debugger
-        }
-    }
+    pub fn new(debugger: &'a mut Debugger<'b>) -> Self { Self { debugger } }
 
     pub fn run_pass(&mut self, library: &mut Library) {
         for func in &library.functions {
@@ -90,12 +86,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
         }
     }
 
-    fn check_codeblock(
-        &mut self,
-        code_block: &CodeBlock,
-        code_block_type: &Type,
-        return_type: &Type) -> Result<(), TypeCheckError>
-    {
+    fn check_codeblock(&mut self, code_block: &CodeBlock, code_block_type: &Type, return_type: &Type) -> Result<(), TypeCheckError> {
         for smt in code_block.statements() {
             self.check_smt(smt, return_type);
         }
@@ -104,11 +95,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
         self.check_type(code_block_type, &code_block.typ())
     }
 
-    fn check_smt(
-        &mut self,
-        statement: &Statement,
-        return_type: &Type)
-    {
+    fn check_smt(&mut self, statement: &Statement, return_type: &Type) {
         match &statement.kind {
             StatementKind::Eval { value, .. } => self.check_value(value, return_type),
             StatementKind::Bind { typ, value, .. } => {
@@ -119,8 +106,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 }
             }
             StatementKind::Return { value } => {
-                let check_result =
-                if let Some(value) = value {
+                let check_result = if let Some(value) = value {
                     self.check_type(return_type, &value.typ)
                 } else {
                     self.check_type(return_type, &TypeKind::Void.anon())
@@ -133,25 +119,21 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
         }
     }
 
-    fn check_value(
-        &mut self,
-        value: &Value,
-        return_type: &Type)
-    {
+    fn check_value(&mut self, value: &Value, return_type: &Type) {
         // TODO: Move this to another function
         match value.typ.kind() {
             TypeKind::Error => panic!("Compiler Error: error type"),
 
-            TypeKind::SomeBool |
-            TypeKind::SomeInteger |
-            TypeKind::SomeFloat | 
-            TypeKind::SomeFunction |
-            TypeKind::Infer { .. } => {
-                self.debugger.throw_single(ErrorCode::AmbiguousTy, &value.span);
+            TypeKind::SomeBool | TypeKind::SomeInteger | TypeKind::SomeFloat | TypeKind::SomeFunction | TypeKind::Infer { .. } => {
+                self.debugger
+                    .throw_single(ErrorCode::AmbiguousTy, &value.span);
             }
 
-            TypeKind::Named(name) => self.debugger.throw_single(ErrorCode::SymNotAType { name: name.clone() }, &value.span),
-            TypeKind::Member { member, .. } => self.debugger.throw_single(ErrorCode::MemberNotATy { name: member.clone() }, &value.span),
+            TypeKind::Named(name) => self.debugger
+                                         .throw_single(ErrorCode::SymNotAType { name: name.clone() }, &value.span),
+            TypeKind::Member { member, .. } => self.debugger
+                                                   .throw_single(ErrorCode::MemberNotATy { name: member.clone() },
+                                                                 &value.span),
 
             _ => {}
         }
@@ -162,7 +144,6 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 self.check_value(value, return_type);
 
                 // TODO: Check that they have the same type
-
             }
 
             ValueKind::Closure(closure) => {
@@ -176,29 +157,31 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 }
             }
             ValueKind::FuncCall { function, args } => {
-                self.check_value(&function, return_type);
+                self.check_value(function, return_type);
 
                 let params = match &function.typ.kind {
                     TypeKind::Function { params, .. } => params,
                     TypeKind::Method { params, .. } => params,
                     _ => {
-                        self.debugger.throw_single(ErrorCode::IsNotAFunc, &value.span);
-                        return
+                        self.debugger
+                            .throw_single(ErrorCode::IsNotAFunc, &value.span);
+                        return;
                     }
                 };
 
                 match params.len().cmp(&args.args.len()) {
                     Ordering::Greater => {
                         // Less params
-                        self.debugger.throw_single(ErrorCode::MissingParams, &value.span);
+                        self.debugger
+                            .throw_single(ErrorCode::MissingParams, &value.span);
                     }
                     Ordering::Less => {
                         // Extra params
                         let spans = args.args
-                            .iter()
-                            .skip(params.len())
-                            .filter_map(|arg| arg.span.clone())
-                            .collect();
+                                        .iter()
+                                        .skip(params.len())
+                                        .filter_map(|arg| arg.span)
+                                        .collect();
                         self.debugger.throw(ErrorCode::ExtraParams, spans);
                     }
                     Ordering::Equal => {}
@@ -217,8 +200,11 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
             ValueKind::InstanceVariable { reciever, .. } => self.check_value(reciever, return_type),
 
             ValueKind::Error => panic!("Compiler Error: error value"),
-            ValueKind::Member { member, .. } => self.debugger.throw_single(ErrorCode::MemberNotAVal { name: member.clone() }, &value.span),
-            ValueKind::Named(name, ) => self.debugger.throw_single(ErrorCode::SymNotAValue { name: name.clone() }, &value.span),
+            ValueKind::Member { member, .. } => self.debugger
+                                                    .throw_single(ErrorCode::MemberNotAVal { name: member.clone() },
+                                                                  &value.span),
+            ValueKind::Named(name) => self.debugger
+                                          .throw_single(ErrorCode::SymNotAValue { name: name.clone() }, &value.span),
             ValueKind::Operator(name) => panic!("Compiler Error: operator {name} couldn't be found"),
             ValueKind::Polymorphic(polymorphic) => self.check_polymorphic(polymorphic, &value.span),
             ValueKind::PolymorphicMethod { polymorphic, .. } => self.check_polymorphic(polymorphic, &value.span),
@@ -227,174 +213,121 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
         }
     }
 
-    fn check_polymorphic(
-        &mut self,
-        polymorphic: &Monomorphizer,
-        span: &Option<Span>)
-    {
+    fn check_polymorphic(&mut self, polymorphic: &Monomorphizer, span: &Option<Span>) {
         match polymorphic.degrees() {
             0 => {
-                self.debugger.throw_single(ErrorCode::FunctionSigNotFound, span);
-            },
+                self.debugger
+                    .throw_single(ErrorCode::FunctionSigNotFound, span);
+            }
             _ => {
-                let mut spans = polymorphic
-                    .open_possibilities()
-                    .iter()
-                    .map(|possibility| possibility.span())
-                    .collect::<Vec<_>>();
+                let mut spans = polymorphic.open_possibilities()
+                                           .iter()
+                                           .map(|possibility| possibility.span())
+                                           .collect::<Vec<_>>();
                 if let Some(span) = span {
-                    spans.insert(0, span.clone());
+                    spans.insert(0, *span);
                 }
                 self.debugger.throw(ErrorCode::AmbiguousFunc, spans)
             }
         }
     }
 
-    fn check_if_value(
-        &mut self,
-        if_value: &IfValue,
-        if_type: &Type,
-        return_type: &Type,
-        mut spans: Vec<Span>)
-    {
-        self.check_value(if_value.condition.as_ref(),
-                         &if_value.condition.typ);
-    
+    fn check_if_value(&mut self, if_value: &IfValue, if_type: &Type, return_type: &Type, mut spans: Vec<Span>) {
+        self.check_value(if_value.condition.as_ref(), &if_value.condition.typ);
+
         // Get the value of the if
-        if let Err(_) = self.check_codeblock(&if_value.positive, if_type, return_type) {
+        if self.check_codeblock(&if_value.positive, if_type, return_type).is_err() {
             spans.extend(if_value.positive.span());
         }
 
         if let Some(negative) = &if_value.negative {
             match negative {
                 IfBranch::CodeBlock(negative_block) => {
-                    if let Err(_) = self.check_codeblock(negative_block, if_type, return_type) {
+                    if self.check_codeblock(negative_block, if_type, return_type).is_err() {
                         spans.extend(if_value.positive.span());
                     }
                 }
                 IfBranch::Else(else_if_branch) => return self.check_if_value(else_if_branch, if_type, return_type, spans),
             }
         }
-    
+
         if !spans.is_empty() {
-            self.debugger.throw(ErrorCode::MismatchedIfBranchTypes, spans);
+            self.debugger
+                .throw(ErrorCode::MismatchedIfBranchTypes, spans);
         }
     }
 
-    fn check_type(
-        &self,
-        place: &Type,
-        value: &Type) -> Result<(), TypeCheckError>
-    {
+    fn check_type(&self, place: &Type, value: &Type) -> Result<(), TypeCheckError> {
         match (place.kind(), value.kind()) {
             (_, TypeKind::Infer { .. }) | (TypeKind::Infer { .. }, _) => Err(TypeCheckError::CouldNotInfer),
 
             (ty1, ty2) if ty1 == ty2 => Ok(()),
             (_, TypeKind::Divergent) => Ok(()),
 
-            _ => Err(TypeCheckError::MismatchedTypes(place.clone(), value.clone()))
+            _ => Err(TypeCheckError::MismatchedTypes(place.clone(), value.clone())),
         }
     }
 
-    fn handle_let_error(
-        &mut self,
-        error: TypeCheckError,
-        statement: &Statement)
-    {
+    fn handle_let_error(&mut self, error: TypeCheckError, statement: &Statement) {
         match error {
-            TypeCheckError::CouldNotInfer => {
-                self.debugger.throw_single(ErrorCode::AmbiguousTy, &statement.span)
-            }
+            TypeCheckError::CouldNotInfer => self.debugger
+                                                 .throw_single(ErrorCode::AmbiguousTy, &statement.span),
             TypeCheckError::MismatchedTypes(t1, t2) => {
-                self.debugger.throw_single(
-                    ErrorCode::ExpectedFound(
-                            self.type_to_string(&t1),
-                            self.type_to_string(&t2)),
-                    &statement.span);
+                self.debugger
+                    .throw_single(ErrorCode::ExpectedFound(self.type_to_string(&t1), self.type_to_string(&t2)),
+                                  &statement.span);
             }
         }
     }
 
-    fn handle_var_error(
-        &mut self,
-        error: TypeCheckError,
-        span: &Span)
-    {
+    fn handle_var_error(&mut self, error: TypeCheckError, span: &Span) {
         match error {
-            TypeCheckError::CouldNotInfer => {
-                self.debugger.throw(ErrorCode::AmbiguousTy, vec![span.clone()])
-            }
+            TypeCheckError::CouldNotInfer => self.debugger
+                                                 .throw(ErrorCode::AmbiguousTy, vec![*span]),
             TypeCheckError::MismatchedTypes(t1, t2) => {
-                self.debugger.throw(
-                    ErrorCode::ExpectedFound(
-                            self.type_to_string(&t1),
-                            self.type_to_string(&t2)),
-                        vec![span.clone()]);
+                self.debugger
+                    .throw(ErrorCode::ExpectedFound(self.type_to_string(&t1), self.type_to_string(&t2)),
+                           vec![*span]);
             }
         }
     }
 
-    fn handle_return_error(
-        &mut self,
-        error: TypeCheckError,
-        statement: &Statement)
-    {
+    fn handle_return_error(&mut self, error: TypeCheckError, statement: &Statement) {
         match error {
-            TypeCheckError::CouldNotInfer => {
-                self.debugger.throw_single(ErrorCode::AmbiguousTy, &statement.span)
-            }
+            TypeCheckError::CouldNotInfer => self.debugger
+                                                 .throw_single(ErrorCode::AmbiguousTy, &statement.span),
             TypeCheckError::MismatchedTypes(t1, t2) => {
-                self.debugger.throw_single(
-                    ErrorCode::ExpectedFound(
-                            self.type_to_string(&t1),
-                            self.type_to_string(&t2)),
-                    &statement.span);
+                self.debugger
+                    .throw_single(ErrorCode::ExpectedFound(self.type_to_string(&t1), self.type_to_string(&t2)),
+                                  &statement.span);
             }
         }
     }
 
-    fn handle_return_yield_error(
-        &mut self,
-        error: TypeCheckError,
-        span: &Option<Span>)
-    {
+    fn handle_return_yield_error(&mut self, error: TypeCheckError, span: &Option<Span>) {
         match error {
-            TypeCheckError::CouldNotInfer => {
-                self.debugger.throw_single(ErrorCode::AmbiguousTy, span)
-            }
+            TypeCheckError::CouldNotInfer => self.debugger.throw_single(ErrorCode::AmbiguousTy, span),
             TypeCheckError::MismatchedTypes(t1, t2) => {
-                self.debugger.throw_single(
-                    ErrorCode::ExpectedFound(
-                            self.type_to_string(&t1),
-                            self.type_to_string(&t2)),
-                    span);
+                self.debugger
+                    .throw_single(ErrorCode::ExpectedFound(self.type_to_string(&t1), self.type_to_string(&t2)),
+                                  span);
             }
         }
     }
 
-    fn handle_call_error(
-        &mut self,
-        error: TypeCheckError,
-        arg: &Value)
-    {
+    fn handle_call_error(&mut self, error: TypeCheckError, arg: &Value) {
         match error {
-            TypeCheckError::CouldNotInfer => {
-                self.debugger.throw_single(ErrorCode::AmbiguousTy, &arg.span)
-            }
+            TypeCheckError::CouldNotInfer => self.debugger
+                                                 .throw_single(ErrorCode::AmbiguousTy, &arg.span),
             TypeCheckError::MismatchedTypes(t1, t2) => {
-                self.debugger.throw_single(
-                    ErrorCode::ExpectedFound(
-                            self.type_to_string(&t1),
-                            self.type_to_string(&t2)),
-                    &arg.span);
+                self.debugger
+                    .throw_single(ErrorCode::ExpectedFound(self.type_to_string(&t1), self.type_to_string(&t2)),
+                                  &arg.span);
             }
         }
     }
 
-    fn type_to_string(
-        &self,
-        ty: &Type) -> String
-    {
+    fn type_to_string(&self, ty: &Type) -> String {
         match ty.kind() {
             TypeKind::Struct(r#struct) => format!("struct `{}`", r#struct.name()),
 
@@ -404,12 +337,12 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
             TypeKind::Integer { bits } => format!("intrinsics.i{bits}"),
             TypeKind::Float { bits } => format!("intrinsics.f{bits}"),
 
-            _ => "unknown".to_string()
+            _ => "unknown".to_string(),
         }
     }
 }
 
 enum TypeCheckError {
     CouldNotInfer,
-    MismatchedTypes(Type, Type)
+    MismatchedTypes(Type, Type),
 }

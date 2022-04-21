@@ -26,7 +26,7 @@ impl<'input, 'l> Sink<'input, 'l> {
 
     pub(super) fn finish(mut self, debugger: &mut Debugger) -> GreenNode {
         for idx in 0..self.events.len() {
-            //self.eat_trivia();
+            // self.eat_trivia();
             let event = std::mem::replace(&mut self.events[idx], Event::Placeholder);
             match event {
                 Event::StartNode { kind, forward_parent } => {
@@ -57,7 +57,7 @@ impl<'input, 'l> Sink<'input, 'l> {
                 Event::AddToken { kind, text } => {
                     self.eat_trivia();
                     self.token(kind, text)
-                },
+                }
                 Event::FinishNode => {
                     self.builder.finish_node();
                     self.eat_trivia();

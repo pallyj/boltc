@@ -37,7 +37,7 @@ ast!(
         FuncDef,
         ImportDef,
         LetDef,
-        NoOp
+        NoOp,
     }
 );
 

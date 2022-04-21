@@ -11,7 +11,7 @@ pub fn lower_basic_typ<'a, 'ctx>(t: &Type, context: &ModuleContext<'a, 'ctx>) ->
         Type::Float { bits } => lower_float_type(*bits, context)?.as_basic_type_enum(),
 
         Type::Function { return_type, pars } => lower_function_type(&*return_type, pars, context)?.ptr_type(AddressSpace::Global)
-                                                                                                   .as_basic_type_enum(),
+                                                                                                  .as_basic_type_enum(),
 
         Type::Pointer { pointee } => lower_pointer_typ(&*pointee, context)?.as_basic_type_enum(),
 

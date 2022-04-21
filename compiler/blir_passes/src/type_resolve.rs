@@ -2,30 +2,29 @@ use blir::{attributes::AttributeFactory,
            code::{CodeBlock, ExternFunctionRef, FunctionRef, MethodRef, Statement, StatementKind},
            scope::{ScopeRef, ScopeRelation, ScopeType},
            typ::{StructRef, Type, TypeKind},
-           value::{ConstantRef, IfBranch, IfValue, Value, ValueKind, VarRef, Closure, ClosureParam},
+           value::{Closure, ClosureParam, ConstantRef, IfBranch, IfValue, Value, ValueKind, VarRef},
            BlirContext, Library, Symbol, Visibility};
 use errors::{debugger::Debugger, error::ErrorCode};
 use parser::operators::{OperatorFactory, OperatorFix};
 
 use crate::init_default::add_default_initializer;
 
-/// 
 /// Resolves types in recently lowered BLIR code
-/// 
+///
 /// First, the parameters and return type of external functions are resolved
-/// 
+///
 /// Next, types in each struct are resolved. This consists of a number of steps
-/// 
+///
 /// - Types in substructs are resolved
 /// - Types of fields are resolved
 /// - Types of methods are resolved
 /// - Attributes are applied to methods
 /// - Attributes are applied to structs
-/// 
+///
 /// Next, types in functions are resolved and attributes are applied
-/// 
+///
 /// Finally, code in each function and method is resolved by the following process
-/// 
+///
 /// - Each statement is stepped over
 /// - Explicit types are resolved
 /// - Each named value is resolved
@@ -33,25 +32,18 @@ use crate::init_default::add_default_initializer;
 ///     - The value will be resolved to the set of functions which match
 ///           the labels and number of parameters
 pub struct TypeResolvePass<'a, 'l> {
-    factory: &'a AttributeFactory,
-    context: &'a mut BlirContext,
-    debugger: &'a mut Debugger<'l>,
+    factory:          &'a AttributeFactory,
+    context:          &'a mut BlirContext,
+    debugger:         &'a mut Debugger<'l>,
     operator_factory: &'a OperatorFactory,
 }
 
 impl<'a, 'l> TypeResolvePass<'a, 'l> {
-    pub fn new(
-        factory: &'a AttributeFactory,
-        operator_factory: &'a OperatorFactory,
-        context: &'a mut BlirContext,
-        debugger: &'a mut Debugger<'l>) -> Self
-    {
-        Self {
-            factory,
-            context,
-            debugger,
-            operator_factory
-        }
+    pub fn new(factory: &'a AttributeFactory, operator_factory: &'a OperatorFactory, context: &'a mut BlirContext, debugger: &'a mut Debugger<'l>) -> Self {
+        Self { factory,
+               context,
+               debugger,
+               operator_factory }
     }
 
     pub fn run_pass(mut self, library: &mut Library) {
@@ -74,7 +66,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
         for r#struct in &library.structs {
             // Create a default initializer
-            add_default_initializer(&r#struct);
+            add_default_initializer(r#struct);
         }
 
         // Resolve code in each struct
@@ -89,13 +81,13 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
             // Set link name
             let mangled_name = func.borrow().mangle();
-            func.borrow_mut().info
-                .set_link_name(mangled_name);
+            func.borrow_mut().info.set_link_name(mangled_name);
 
             // Apply function attributes
             let mut func = func.borrow_mut();
             let attributes = func.attributes.clone();
-            self.factory.apply_func_attributes(&attributes, &mut func.info, self.context, self.debugger)
+            self.factory
+                .apply_func_attributes(&attributes, &mut func.info, self.context, self.debugger)
         }
 
         for func in &library.functions {
@@ -109,7 +101,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
         let parent_scope = borrowed_func.parent.clone();
 
         // Resolve the return type
-        self.resolve_type(&mut borrowed_func.info.return_type_mut(), &parent_scope);
+        self.resolve_type(borrowed_func.info.return_type_mut(), &parent_scope);
 
         // Resolve each parameter's type
         for param in borrowed_func.info.params_mut() {
@@ -118,19 +110,20 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
     }
 
     fn resolve_struct_types(&mut self, r#struct: &StructRef) {
-        self.factory.apply_struct_attributes(r#struct, self.context, self.debugger);
-    
+        self.factory
+            .apply_struct_attributes(r#struct, self.context, self.debugger);
+
         let r#struct = r#struct.borrow();
         let scope = r#struct.scope();
-    
+
         for substruct in &r#struct.substructs {
             self.resolve_struct_types(substruct);
         }
-    
+
         for constant in &r#struct.constants {
             self.resolve_constant(constant, scope);
         }
-    
+
         for variable in &r#struct.instance_vars {
             self.resolve_variable(variable, scope);
         }
@@ -141,19 +134,19 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
             // Set link name
             let mangled_name = method.borrow().mangle();
-            method.borrow_mut().info
-                  .set_link_name(mangled_name);
+            method.borrow_mut().info.set_link_name(mangled_name);
 
             // Apply function attributes
             let mut method = method.borrow_mut();
             let attributes = method.attributes.clone();
-            self.factory.apply_func_attributes(&attributes, &mut method.info, self.context, self.debugger)
+            self.factory
+                .apply_func_attributes(&attributes, &mut method.info, self.context, self.debugger)
         }
     }
 
     fn resolve_struct_code(&mut self, r#struct: &StructRef) {
         let r#struct = r#struct.borrow();
-    
+
         for substruct in &r#struct.substructs {
             self.resolve_struct_code(substruct);
         }
@@ -168,7 +161,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
         // Resolve value
     }
-    
+
     fn resolve_constant(&mut self, var: &ConstantRef, scope: &ScopeRef) {
         self.resolve_type(&mut var.borrow_mut().typ, scope);
         // Resolve value
@@ -179,7 +172,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
         let parent_scope = borrowed_func.scope().clone();
 
         // Resolve the return type
-        self.resolve_type(&mut borrowed_func.info.return_type_mut(), &parent_scope);
+        self.resolve_type(borrowed_func.info.return_type_mut(), &parent_scope);
 
         // Resolve each parameter's type
         for param in borrowed_func.info.params_mut() {
@@ -195,7 +188,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
         let parent_scope = borrowed_func.scope().clone();
 
         // Resolve the return type
-        self.resolve_type(&mut borrowed_func.info.return_type_mut(), &parent_scope);
+        self.resolve_type(borrowed_func.info.return_type_mut(), &parent_scope);
 
         // Resolve each parameter's type
         for param in borrowed_func.info.params_mut() {
@@ -211,10 +204,16 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 return;
             };
 
-            let nop = if operator.fix() == OperatorFix::Infix { 2 } else { 1 };
+            let nop = if operator.fix() == OperatorFix::Infix {
+                2
+            } else {
+                1
+            };
 
             if borrowed_func.info.params().len() != nop {
-                self.debugger.throw(ErrorCode::OperatorExpectedParams(borrowed_func.info.name().clone(), nop - 1), vec![borrowed_func.span])
+                self.debugger
+                    .throw(ErrorCode::OperatorExpectedParams(borrowed_func.info.name().clone(), nop - 1),
+                           vec![borrowed_func.span])
             }
         }
     }
@@ -242,7 +241,6 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                     return;
                 };
 
-
                 match resolved_symbol.resolve() {
                     Symbol::Type(resolved_type) => {
                         typ.set_kind(resolved_type);
@@ -250,7 +248,9 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
                     _ => {
                         // Do something with `other_symbol`
-                        self.debugger.throw_single(ErrorCode::SymNotAType { name: symbol_name.clone() }, &typ.span);
+                        self.debugger
+                            .throw_single(ErrorCode::SymNotAType { name: symbol_name.clone(), },
+                                          &typ.span);
                     }
                 };
             }
@@ -259,18 +259,21 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 self.resolve_type(parent, scope);
 
                 // TODO: Add more detail to the error messages
-                match parent.lookup_static_item(&member) {
+                match parent.lookup_static_item(member) {
                     Some(Symbol::Type(resolved_type)) => {
                         typ.set_kind(resolved_type);
                     }
 
                     Some(_) => {
                         // Do something with `other_symbol`
-                        self.debugger.throw_single(ErrorCode::MemberNotATy { name: member.clone() }, &typ.span);
+                        self.debugger
+                            .throw_single(ErrorCode::MemberNotATy { name: member.clone() }, &typ.span);
                     }
 
                     None => {
-                        self.debugger.throw_single(ErrorCode::MemberNotFound { name: member.clone() }, &typ.span);
+                        self.debugger
+                            .throw_single(ErrorCode::MemberNotFound { name: member.clone() },
+                                          &typ.span);
                     }
                 };
             }
@@ -294,23 +297,23 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
             self.resolve_statement(smt, scope);
         }
     }
-    
+
     fn resolve_statement(&mut self, smt: &mut Statement, scope: &ScopeRef) {
         match &mut smt.kind {
             StatementKind::Bind { name, typ, value } => {
                 self.resolve_type(typ, scope);
-    
+
                 *name = scope.define_variable(name, typ.clone());
-    
+
                 if let Some(value) = value {
                     self.resolve_value(value, scope)
                 }
             }
-    
+
             StatementKind::Eval { value, .. } => {
                 self.resolve_value(value, scope);
             }
-    
+
             StatementKind::Return { value } => {
                 if let Some(value) = value {
                     self.resolve_value(value, scope);
@@ -318,7 +321,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
             }
         }
     }
-    
+
     fn resolve_value(&mut self, value: &mut Value, scope: &ScopeRef) {
         match &mut value.kind {
             ValueKind::Named(name) => {
@@ -326,7 +329,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                     self.debugger.throw_single(ErrorCode::SymbolNotFound { name: name.clone() }, &value.span );
                     return
                 };
-    
+
                 match sym {
                     Symbol::Type(ty) => {
                         value.set_kind(ValueKind::Metatype(ty.clone()));
@@ -334,16 +337,16 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                             value.typ.set_kind(TypeKind::Metatype(Box::new(ty.anon())));
                         }
                     }
-    
+
                     Symbol::Value(res_val) => {
                         value.set_kind(res_val.kind);
                         value.set_type(res_val.typ);
                     }
-    
+
                     Symbol::Function(function) => {
                         value.set_kind(ValueKind::Polymorphic(function));
                     }
-    
+
                     Symbol::InstanceVariable(instance) => {
                         value.set_type(instance.borrow().typ.clone());
                         let self_type = scope.scope_type("self")
@@ -352,20 +355,19 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                         value.set_kind(ValueKind::InstanceVariable { reciever: Box::new(myself),
                                                                      var:      instance, })
                     }
-    
+
                     Symbol::Constant(constant) => {
                         let constant_value = constant.borrow().value.clone();
-    
+
                         value.set_kind(constant_value.kind);
                         value.typ = constant_value.typ;
                     }
-
                 }
             }
-    
+
             ValueKind::FuncCall { function, args } => {
                 self.resolve_value(function, scope);
-    
+
                 if let ValueKind::Metatype(t) = &mut function.kind {
                     let init_type = std::mem::replace(t, TypeKind::Void).anon();
 
@@ -381,8 +383,8 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                         }
                     }
 
-                    //function.set_type(init_type.init_type().anon());
-                    //function.set_kind(ValueKind::Init(init_type));
+                    // function.set_type(init_type.init_type().anon());
+                    // function.set_kind(ValueKind::Init(init_type));
                 }
 
                 for arg in &mut args.args {
@@ -392,17 +394,16 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 if let ValueKind::Polymorphic(polymorphics) = &mut function.kind {
                     polymorphics.filter_labels(&args.labels);
                 }
-    
-                if let TypeKind::Function { return_type, .. }
-                     | TypeKind::Method { return_type, .. } = function.typ.kind() {
+
+                if let TypeKind::Function { return_type, .. } | TypeKind::Method { return_type, .. } = function.typ.kind() {
                     let return_type = return_type.as_ref().clone();
-    
+
                     value.set_type(return_type);
                 }
             }
-    
+
             ValueKind::Member { parent, member: _ } => self.resolve_value(parent, scope),
-    
+
             ValueKind::If(if_value) => self.resolve_if_value(if_value, scope),
 
             ValueKind::Closure(closure) => {
@@ -416,43 +417,34 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
                 self.resolve_type(&mut value.typ, scope);
             }
-    
+
             _ => {}
         }
     }
 
-    pub fn resolve_closure(
-        &mut self,
-        closure: &mut Closure,
-        closure_type: &mut Type,
-        scope: &ScopeRef)
-    {
-        let closure_scope = ScopeRef::new(
-            Some(scope),
-            ScopeRelation::Scope,
-            ScopeType::Code,
-            false,
-            true
-        );
+    pub fn resolve_closure(&mut self, closure: &mut Closure, closure_type: &mut Type, scope: &ScopeRef) {
+        let closure_scope = ScopeRef::new(Some(scope),
+                                          ScopeRelation::Scope,
+                                          ScopeType::Code,
+                                          false,
+                                          true);
 
         self.add_closure_params(closure, closure_type);
 
         for param in &mut closure.params {
             let param_value = ValueKind::FunctionParam(param.name.clone()).anon(param.typ.clone());
 
-            closure_scope.add_symbol(param.name.clone(), Visibility::Local, Symbol::Value(param_value));
+            closure_scope.add_symbol(param.name.clone(),
+                                     Visibility::Local,
+                                     Symbol::Value(param_value));
         }
 
         self.resolve_code_block(&mut closure.code, &closure_scope);
     }
 
-    fn add_closure_params(
-        &mut self,
-        closure: &mut Closure,
-        closure_type: &mut Type)
-    {
+    fn add_closure_params(&mut self, closure: &mut Closure, closure_type: &mut Type) {
         if !closure.params.is_empty() {
-            return
+            return;
         }
 
         let TypeKind::Function { params, .. } = closure_type.kind() else {
@@ -463,27 +455,23 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
         if params.len() == 1 {
             let it_type = params.first().unwrap().clone();
 
-            closure.params.push(ClosureParam {
-                name: "it".to_string(),
-                typ: it_type
-            });
+            closure.params.push(ClosureParam { name: "it".to_string(),
+                                               typ:  it_type, });
 
             return;
         }
 
         for (i, param) in params.iter().enumerate() {
-            closure.params.push(ClosureParam {
-                name: format!("${i}"),
-                typ: param.clone()
-            });
+            closure.params.push(ClosureParam { name: format!("${i}"),
+                                               typ:  param.clone(), });
         }
     }
-    
+
     fn resolve_if_value(&mut self, if_value: &mut IfValue, scope: &ScopeRef) {
         self.resolve_value(&mut if_value.condition, scope);
-    
+
         self.resolve_code_block(&mut if_value.positive, scope);
-    
+
         if let Some(negative_block) = &mut if_value.negative {
             match negative_block {
                 IfBranch::CodeBlock(codeblock) => self.resolve_code_block(codeblock, scope),

@@ -11,19 +11,14 @@
 
 use std::fmt::Debug;
 
-use super::{attribute::Attributes, smt::CodeBlock, typ::Type, find_token};
+use super::{attribute::Attributes, find_token, smt::CodeBlock, typ::Type};
 use crate::lexer::SyntaxKind;
 
 ast!(struct FuncPar(FuncPar));
 ast!(struct FuncDef(FuncDef));
 
 impl FuncDef {
-    pub fn attributes(&self) -> Attributes {
-        self.0
-            .children()
-            .find_map(Attributes::cast)
-            .unwrap()
-    }
+    pub fn attributes(&self) -> Attributes { self.0.children().find_map(Attributes::cast).unwrap() }
 
     pub fn visibility(&self) -> Option<SyntaxKind> {
         self.0
@@ -111,12 +106,7 @@ impl Debug for FuncDef {
 }
 
 impl FuncPar {
-    pub fn first_label(&self) -> String {
-        self.0
-            .first_token()
-            .map(|t| t.text().to_string())
-            .unwrap()
-    }
+    pub fn first_label(&self) -> String { self.0.first_token().map(|t| t.text().to_string()).unwrap() }
 
     pub fn second_label(&self) -> Option<String> {
         self.0
@@ -126,23 +116,19 @@ impl FuncPar {
             .map(|bind_name_token| bind_name_token.text().to_string())
     }
 
-
-
-    pub fn typ(&self) -> Type {
-        self.0
-            .last_child()
-            .map(Type::cast)
-            .unwrap_or(Type::Error)
-    }
+    pub fn typ(&self) -> Type { self.0.last_child().map(Type::cast).unwrap_or(Type::Error) }
 }
 
 impl Debug for FuncPar {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if let Some(second_label) = self.second_label() {
-            write!(f, "{} {}: {:?}", self.first_label(), second_label, self.typ())
+            write!(f,
+                   "{} {}: {:?}",
+                   self.first_label(),
+                   second_label,
+                   self.typ())
         } else {
             write!(f, "{}: {:?}", self.first_label(), self.typ())
         }
-       
     }
 }

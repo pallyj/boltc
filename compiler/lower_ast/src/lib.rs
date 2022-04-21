@@ -2,7 +2,8 @@
 
 use blir::intrinsics::Intrinsics;
 use errors::Span;
-use parser::{ast::{file::FileItem, Parse, Root}, operators::OperatorFactory};
+use parser::{ast::{file::FileItem, Parse, Root},
+             operators::OperatorFactory};
 use rowan::TextRange;
 
 mod code;
@@ -14,9 +15,9 @@ mod attributes;
 mod tests;
 
 pub struct AstLowerer {
-    file:       u32,
-    parse:      Root,
-    factory:    OperatorFactory,
+    file:    u32,
+    parse:   Root,
+    factory: OperatorFactory,
 }
 
 impl AstLowerer {
@@ -25,7 +26,7 @@ impl AstLowerer {
 
         factory.register_intrinsics();
 
-        AstLowerer { file:  parse.file as u32,
+        AstLowerer { file: parse.file as u32,
                      parse: Root::cast(parse.root).unwrap(),
                      factory }
     }

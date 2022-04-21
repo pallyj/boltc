@@ -12,12 +12,7 @@ ast!(struct VariableDef(VarDef));
 ast!(struct LetDef(LetDef));
 
 impl LetDef {
-    pub fn attributes(&self) -> Attributes {
-        self.0
-            .children()
-            .find_map(Attributes::cast)
-            .unwrap()
-    }
+    pub fn attributes(&self) -> Attributes { self.0.children().find_map(Attributes::cast).unwrap() }
 
     pub fn is_static(&self) -> bool {
         self.0
@@ -79,12 +74,7 @@ impl Debug for LetDef {
 }
 
 impl VariableDef {
-    pub fn attributes(&self) -> Attributes {
-        self.0
-            .children()
-            .find_map(Attributes::cast)
-            .unwrap()
-    }
+    pub fn attributes(&self) -> Attributes { self.0.children().find_map(Attributes::cast).unwrap() }
 
     pub fn visibility(&self) -> Option<SyntaxKind> {
         self.0

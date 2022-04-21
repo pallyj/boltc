@@ -51,7 +51,13 @@ impl AstLowerer {
         let attributes = self.lower_attributes(var.attributes());
         let span = self.span(var.range());
 
-        Var::new(attributes, visibility, name, typ, default_value, false, span)
+        Var::new(attributes,
+                 visibility,
+                 name,
+                 typ,
+                 default_value,
+                 false,
+                 span)
     }
 
     pub fn lower_struct(&self, def: StructDef, parent: &ScopeRef, parent_mangle: &Path) -> StructRef {

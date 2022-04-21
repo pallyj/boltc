@@ -4,7 +4,7 @@ use std::{cell::{Ref, RefCell, RefMut},
           sync::Arc};
 
 use errors::Span;
-use mangle::{Path, MangledFunction};
+use mangle::{MangledFunction, Path};
 
 use super::{CodeBlock, FuncParam, FunctionInfo};
 use crate::{attributes::Attributes,
@@ -19,16 +19,16 @@ pub struct Method {
 
 #[allow(dead_code)]
 pub struct MethodInner {
-    pub attributes: Attributes,
-    pub visibility: Visibility,
-    pub is_static:  bool,
+    pub attributes:  Attributes,
+    pub visibility:  Visibility,
+    pub is_static:   bool,
     pub is_operator: bool,
-    pub info:       FunctionInfo,
-    pub code:       CodeBlock,
-    pub span:       Span,
-    scope:          ScopeRef,
-    self_type:      Type,
-    path:         Path,
+    pub info:        FunctionInfo,
+    pub code:        CodeBlock,
+    pub span:        Span,
+    scope:           ScopeRef,
+    self_type:       Type,
+    path:            Path,
 }
 
 impl MethodInner {
@@ -43,14 +43,11 @@ impl MethodInner {
         }
 
         if self.is_operator {
-            let self_param = FuncParam {
-                label: None,
-                bind_name: "self".to_string(),
-                typ: self.self_type.clone(),
-            };
+            let self_param = FuncParam { label:     None,
+                                         bind_name: "self".to_string(),
+                                         typ:       self.self_type.clone(), };
 
-            self.info.params_mut()
-                .insert(0, self_param)
+            self.info.params_mut().insert(0, self_param)
         }
 
         self.scope
@@ -88,21 +85,18 @@ impl MethodInner {
         }
     }
 
-    pub fn path(&self) -> &Path {
-        &self.path
-    }
+    pub fn path(&self) -> &Path { &self.path }
 
     pub fn mangle(&self) -> String {
-        let (args, labels) = self.info.params()
-            .iter()
-            .map(|param| (param.typ.mangle(), param.label.as_ref().map(|param| param.as_str())))
-            .unzip();
+        let (args, labels) = self.info
+                                 .params()
+                                 .iter()
+                                 .map(|param| (param.typ.mangle(), param.label.as_ref().map(|param| param.as_str())))
+                                 .unzip();
 
-        MangledFunction {
-            path: &self.path,
-            args,
-            labels,
-        }.to_string()
+        MangledFunction { path: &self.path,
+                          args,
+                          labels }.to_string()
     }
 }
 
@@ -133,7 +127,7 @@ impl Method {
                                                       ScopeType::Code,
                                                       !is_static,
                                                       true),
-                                 self_type, };
+                                 self_type };
 
         MethodRef { func: Arc::new(Method { inner: RefCell::new(func), }), }
     }

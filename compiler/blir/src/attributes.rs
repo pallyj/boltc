@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use errors::{debugger::Debugger, Span, error::ErrorCode};
+use errors::{debugger::Debugger, error::ErrorCode, Span};
 
 use crate::{code::FunctionInfo, typ::StructRef, BlirContext};
 
@@ -62,7 +62,8 @@ impl AttributeFactory {
                 attribute.apply(struct_ref, context, debugger);
             } else {
                 // Throw an error
-                debugger.throw(ErrorCode::AttributeDoesNotExist(attribute.name().to_string()), vec![ attribute.span() ]);
+                debugger.throw(ErrorCode::AttributeDoesNotExist(attribute.name().to_string()),
+                               vec![attribute.span()]);
             }
         }
     }
@@ -73,7 +74,8 @@ impl AttributeFactory {
                 attribute.apply(func_info, context, debugger);
             } else {
                 // Throw an error
-                debugger.throw(ErrorCode::AttributeDoesNotExist(attribute.name().to_string()), vec![ attribute.span() ]);
+                debugger.throw(ErrorCode::AttributeDoesNotExist(attribute.name().to_string()),
+                               vec![attribute.span()]);
             }
         }
     }
@@ -122,9 +124,7 @@ impl FuncAttribute for EntryPointAttribute {
 impl FuncAttribute for ExportCAttribute {
     fn name(&self) -> &'static str { "exportC" }
 
-    fn apply(&self, info: &mut FunctionInfo, _context: &mut BlirContext, _debugger: &mut Debugger) {
-        info.set_link_name(info.name().clone())
-    }
+    fn apply(&self, info: &mut FunctionInfo, _context: &mut BlirContext, _debugger: &mut Debugger) { info.set_link_name(info.name().clone()) }
 }
 
 impl StructAttribute for TransparentAttribute {

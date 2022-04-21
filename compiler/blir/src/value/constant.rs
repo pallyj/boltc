@@ -19,7 +19,7 @@ pub struct ConstantInner {
 
     pub value: Value,
 
-    pub span: Span
+    pub span: Span,
 }
 
 pub struct Constant {

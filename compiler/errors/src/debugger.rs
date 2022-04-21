@@ -38,13 +38,12 @@ impl<'a> Debugger<'a> {
 
         let width = line_info.col + (3 * ntabs);
 
-        let sep = (0..(span.1.1 - span.1.0)).map(|_| '^')
-                                            .collect::<String>()
-                                            .red()
-                                            .bold();
+        let sep = (0..(span.1 .1 - span.1 .0)).map(|_| '^')
+                                              .collect::<String>()
+                                              .red()
+                                              .bold();
 
-        println!("     {:width$}  {sep}",
-                 "|".bold().blue());
+        println!("     {:width$}  {sep}", "|".bold().blue());
 
         println!("     {} ", "|".bold().blue());
 

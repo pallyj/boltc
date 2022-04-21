@@ -3,25 +3,25 @@ use std::fmt::Display;
 use crate::Path;
 
 pub enum MangledType {
-	Integer8,
-	Integer1,
-	Char,
-	Float64,
-	Float32,
-	Float16,
-	Integer64,
-	Integer32,
-	Integer16,
-	Generic,
-	StringSlice,
-	Pointer,
-	Void,
-	Varargs,
-	Diverges,
+    Integer8,
+    Integer1,
+    Char,
+    Float64,
+    Float32,
+    Float16,
+    Integer64,
+    Integer32,
+    Integer16,
+    Generic,
+    StringSlice,
+    Pointer,
+    Void,
+    Varargs,
+    Diverges,
 
-	Tuple(Vec<MangledType>),
-	Function(Vec<MangledType>, Box<MangledType>),
-	Struct(Path),
+    Tuple(Vec<MangledType>),
+    Function(Vec<MangledType>, Box<MangledType>),
+    Struct(Path),
 }
 
 impl Display for MangledType {
@@ -43,27 +43,23 @@ impl Display for MangledType {
             MangledType::Varargs => write!(f, "v"),
             MangledType::Diverges => write!(f, "z"),
 
-			MangledType::Tuple(tuple_items) => {
-				let tuple_items = tuple_items
-					.iter()
-					.map(ToString::to_string)
-					.collect::<String>();
+            MangledType::Tuple(tuple_items) => {
+                let tuple_items = tuple_items.iter()
+                                             .map(ToString::to_string)
+                                             .collect::<String>();
 
-				write!(f, "T{tuple_items}E")
-			}
+                write!(f, "T{tuple_items}E")
+            }
 
-			MangledType::Function(params, return_type) => {
-				let params = params
-					.iter()
-					.map(ToString::to_string)
-					.collect::<String>();
+            MangledType::Function(params, return_type) => {
+                let params = params.iter().map(ToString::to_string).collect::<String>();
 
-				write!(f, "F{params}E{return_type}")
-			}
+                write!(f, "F{params}E{return_type}")
+            }
 
-			MangledType::Struct(path) => {
-				write!(f, "{path}S")
-			}
+            MangledType::Struct(path) => {
+                write!(f, "{path}S")
+            }
         }
     }
 }

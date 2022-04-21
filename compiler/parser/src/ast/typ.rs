@@ -22,7 +22,7 @@ ast!(
         NamedType,
         MemberType,
         UnitType,
-        FuncType
+        FuncType,
     }
 );
 
@@ -79,11 +79,7 @@ impl FuncType {
         self.0
             .children()
             .find(|syn| syn.kind() == SyntaxKind::CommaSeparatedList)
-            .map(|syn| {
-                syn.children()
-                   .map(Type::cast)
-                   .collect()
-            })
+            .map(|syn| syn.children().map(Type::cast).collect())
             .unwrap_or_else(Vec::new)
     }
 }

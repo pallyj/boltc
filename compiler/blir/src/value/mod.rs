@@ -1,18 +1,19 @@
+mod closure;
 mod constant;
 mod var;
-mod closure;
 
 use std::{fmt::Debug,
           ops::{Deref, DerefMut}};
 
+pub use closure::*;
 pub use constant::*;
 use errors::Span;
 pub use var::*;
-pub use closure::*;
 
 use crate::{code::{CodeBlock, ExternFunctionRef, FunctionRef, MethodRef},
             intrinsics::{BinaryIntrinsicFn, UnaryIntrinsicFn},
-            typ::{Type, TypeKind}, Monomorphizer};
+            typ::{Type, TypeKind},
+            Monomorphizer};
 
 #[derive(Clone)]
 pub enum ValueKind {
@@ -30,7 +31,7 @@ pub enum ValueKind {
     Polymorphic(Monomorphizer),
     PolymorphicMethod {
         reciever:    Box<Value>,
-        polymorphic: Monomorphizer
+        polymorphic: Monomorphizer,
     },
     Operator(String),
 
@@ -40,7 +41,7 @@ pub enum ValueKind {
     BoolLiteral(bool),
     Closure(Closure),
     Uninit,
-    //Deref(Box<Value>),
+    // Deref(Box<Value>),
 
     // Variable Values
     Metatype(TypeKind),
@@ -126,7 +127,7 @@ impl Value {
 
 #[derive(Clone)]
 pub struct FunctionArgs {
-    pub args: Vec<Value>,
+    pub args:   Vec<Value>,
     pub labels: Vec<Option<String>>,
 }
 
@@ -189,7 +190,7 @@ impl Debug for Value {
             ValueKind::BoolLiteral(b) => write!(f, "{b}"),
             ValueKind::Uninit => write!(f, "uninit<{:?}>", self.typ),
             ValueKind::Assign(ptr, value) => write!(f, "{ptr:?} = {value:?}"),
-            //ValueKind::Deref(value) => write!(f, "*{value:?}"),
+            // ValueKind::Deref(value) => write!(f, "*{value:?}"),
             ValueKind::Closure(c) => write!(f, "{{ {:?} }}", c.code),
             ValueKind::Metatype(t) => write!(f, "<{:?}>", t.clone().anon()),
             ValueKind::LocalVariable(name) => write!(f, "{name}"),
@@ -219,9 +220,6 @@ impl Debug for Value {
     }
 }
 
-
 impl Default for Value {
-    fn default() -> Self {
-        ValueKind::Unit.infer()
-    }
+    fn default() -> Self { ValueKind::Unit.infer() }
 }

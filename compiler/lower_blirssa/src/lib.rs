@@ -18,8 +18,8 @@ pub fn lower_blirssa_library(library: Library, context: &Context) -> Result<Modu
     let builder = context.create_builder();
 
     let module_context = ModuleContext { context,
-                                         module:  &module,
-                                         builder: &builder, };
+                                         module: &module,
+                                         builder: &builder };
 
     // let error_context = ErrorContext::new();
 

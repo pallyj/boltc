@@ -16,13 +16,14 @@ use self::{event::Event,
            marker::{CompletedMarker, Marker},
            sink::Sink};
 use crate::{ast::{Parse, SyntaxNode},
-            lexer::{Lexer, SyntaxKind, Token}, operators::OperatorFactory};
+            lexer::{Lexer, SyntaxKind, Token},
+            operators::OperatorFactory};
 
 struct Parser<'input, 'l> {
-    lexemes: &'l [Token<'input>],
+    lexemes:   &'l [Token<'input>],
     operators: &'input OperatorFactory,
-    events:  Vec<Event<'input>>,
-    cursor:  usize,
+    events:    Vec<Event<'input>>,
+    cursor:    usize,
 }
 
 impl<'input, 'l> Parser<'input, 'l> {
@@ -207,10 +208,12 @@ impl<'input, 'l> Parser<'input, 'l> {
         while let Some(lexeme) = self.lexemes.get(raw_index) {
             raw_index += 1;
 
-            if lexeme.kind.is_trivia() { continue; }
+            if lexeme.kind.is_trivia() {
+                continue;
+            }
 
             if i == n {
-                return Some(lexeme.kind); 
+                return Some(lexeme.kind);
             } else if i > n {
                 return None;
             }
@@ -234,10 +237,7 @@ impl<'input, 'l> Parser<'input, 'l> {
     pub fn parse_visibility(&mut self) {
         let marker = self.start();
 
-        if self.eat(SyntaxKind::PublicKw)
-            || self.eat(SyntaxKind::InternalKw)
-            || self.eat(SyntaxKind::FilePrivateKw)
-            || self.eat(SyntaxKind::PrivateKw) { }
+        if self.eat(SyntaxKind::PublicKw) || self.eat(SyntaxKind::InternalKw) || self.eat(SyntaxKind::FilePrivateKw) || self.eat(SyntaxKind::PrivateKw) {}
 
         marker.complete(self, SyntaxKind::Visibility);
     }

@@ -62,7 +62,7 @@ impl ErrorCode {
             ErrorCode::AmbiguousFunc => format!("ambiguous function signatures"),
             ErrorCode::OperatorDNE(name) => format!("operator `{name} is not defined`"),
             ErrorCode::OperatorNotDefined(operator, typ) => format!("cannot use operator {operator} on {typ}",),
-            ErrorCode::OperatorExpectedParams(name, n_params) => format!("operator {name} takes {n_params} parameter")
+            ErrorCode::OperatorExpectedParams(name, n_params) => format!("operator {name} takes {n_params} parameter"),
         }
     }
 }

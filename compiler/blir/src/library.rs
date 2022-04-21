@@ -5,7 +5,8 @@ use mangle::Path;
 use crate::{code::{ExternFunctionRef, FunctionRef},
             scope::{ScopeRef, ScopeRelation, ScopeType},
             typ::{StructRef, TypeKind},
-            Symbol, SymbolWrapper, value::ConstantRef};
+            value::ConstantRef,
+            Symbol, SymbolWrapper};
 
 pub struct Library {
     name: String,

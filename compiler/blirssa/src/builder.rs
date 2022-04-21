@@ -82,7 +82,7 @@ impl Builder {
                 } else if let Type::Pointer { .. } = value.typ_ref() {
                     let pointee_deref = self.build_deref(value);
 
-                    return self.build_return(Some(pointee_deref))
+                    return self.build_return(Some(pointee_deref));
                 } else {
                     Instruction::Return { value: Some(value) }
                 }

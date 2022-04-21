@@ -191,9 +191,7 @@ pub enum SyntaxKind {
 }
 
 impl SyntaxKind {
-    pub(crate) fn is_trivia(self) -> bool {
-        matches!(self, SyntaxKind::Comment | SyntaxKind::Whitespace)
-    }
+    pub(crate) fn is_trivia(self) -> bool { matches!(self, SyntaxKind::Comment | SyntaxKind::Whitespace) }
 }
 
 pub struct Lexer<'a> {

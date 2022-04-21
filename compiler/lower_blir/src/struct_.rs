@@ -1,4 +1,5 @@
-use blir::{code::MethodRef, typ::{StructRef, TypeKind}};
+use blir::{code::MethodRef,
+           typ::{StructRef, TypeKind}};
 use blirssa::{typ::StructField, value::LabelValue};
 
 use crate::BlirLowerer;
@@ -76,7 +77,8 @@ impl BlirLowerer {
         let mut func_n = if func.is_static() { 0 } else { 1 };
         for param in func.borrow().info.params() {
             if let TypeKind::Void = param.typ.kind() {
-                self.context.define_var(&param.bind_name, LabelValue::void());
+                self.context
+                    .define_var(&param.bind_name, LabelValue::void());
                 continue;
             }
             let arg_value = method.arg(func_n);

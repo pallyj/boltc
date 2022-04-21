@@ -4,7 +4,7 @@ use std::{cell::{Ref, RefCell, RefMut},
           sync::Arc};
 
 use errors::Span;
-use mangle::{Path, MangledFunction};
+use mangle::{MangledFunction, Path};
 
 use super::CodeBlock;
 use crate::{attributes::Attributes,
@@ -51,21 +51,18 @@ impl FunctionInner {
 
     pub fn scope(&self) -> &ScopeRef { &self.scope }
 
-    pub fn path(&self) -> &Path {
-        &self.path
-    }
+    pub fn path(&self) -> &Path { &self.path }
 
     pub fn mangle(&self) -> String {
-        let (args, labels) = self.info.params()
-            .iter()
-            .map(|param| (param.typ.mangle(), param.label.as_ref().map(|param| param.as_str())))
-            .unzip();
+        let (args, labels) = self.info
+                                 .params()
+                                 .iter()
+                                 .map(|param| (param.typ.mangle(), param.label.as_ref().map(|param| param.as_str())))
+                                 .unzip();
 
-        MangledFunction {
-            path: &self.path,
-            args,
-            labels,
-        }.to_string()
+        MangledFunction { path: &self.path,
+                          args,
+                          labels }.to_string()
     }
 }
 

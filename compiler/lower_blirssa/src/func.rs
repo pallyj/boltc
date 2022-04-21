@@ -75,7 +75,10 @@ fn lower_block<'a, 'ctx>(blir_block: &BlockRef, context: &ModuleContext<'a, 'ctx
             Instruction::Branch { condition,
                                   positive,
                                   negative, } => {
-                let condition = fn_ctx.get_local(condition).unwrap().basic().into_int_value();
+                let condition = fn_ctx.get_local(condition)
+                                      .unwrap()
+                                      .basic()
+                                      .into_int_value();
 
                 let then_block = fn_ctx.get_basic_block(positive.index());
                 let else_block = fn_ctx.get_basic_block(negative.index());
@@ -130,12 +133,7 @@ impl<'ctx> FunctionContext<'ctx> {
 
     pub fn define_local(&self, label: &LabelValue, value: LLVMValue<'ctx>) { self.locals.borrow_mut().insert(label.label(), value); }
 
-    pub fn get_local(&self, label: &LabelValue) -> Option<LLVMValue<'ctx>> {
-        self.locals
-            .borrow()
-            .get(&label.label())
-            .cloned()
-    }
+    pub fn get_local(&self, label: &LabelValue) -> Option<LLVMValue<'ctx>> { self.locals.borrow().get(&label.label()).cloned() }
 
     pub fn add_basic_block(&self, n: u64, block: BasicBlock<'ctx>) { self.basic_blocks.borrow_mut().insert(n, block); }
 

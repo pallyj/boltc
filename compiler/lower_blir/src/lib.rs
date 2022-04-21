@@ -8,14 +8,14 @@ mod val;
 
 use std::collections::HashMap;
 
-use blir::{Library, value::Closure};
+use blir::{value::Closure, Library};
 use blirssa::{code::FunctionRef, value::LabelValue, Builder, Library as SsaLibrary};
 
 pub struct BlirLowerer {
-    ssa_lib: SsaLibrary,
-    builder: Builder,
-    lib:     Library,
-    context: FunctionLowerContext,
+    ssa_lib:  SsaLibrary,
+    builder:  Builder,
+    lib:      Library,
+    context:  FunctionLowerContext,
     closures: Vec<(String, Closure)>,
 }
 

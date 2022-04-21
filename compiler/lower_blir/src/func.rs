@@ -1,5 +1,6 @@
 use blir::{code::{ExternFunctionRef, FunctionRef},
-           typ::TypeKind, value::Closure};
+           typ::TypeKind,
+           value::Closure};
 use blirssa::value::LabelValue;
 
 use crate::BlirLowerer;
@@ -32,7 +33,8 @@ impl BlirLowerer {
         let mut func_n = 0;
         for param in func.borrow().info.params() {
             if let TypeKind::Void = param.typ.kind() {
-                self.context.define_var(&param.bind_name, LabelValue::void());
+                self.context
+                    .define_var(&param.bind_name, LabelValue::void());
                 continue;
             }
             let arg_value = function.arg(func_n);
@@ -50,22 +52,17 @@ impl BlirLowerer {
     }
 
     pub(super) fn lower_closure_code(&mut self, name: &str, closure: &Closure) {
-        let function = self.ssa_library()
-                           .get_function(name)
-                           .cloned()
-                           .unwrap();
+        let function = self.ssa_library().get_function(name).cloned().unwrap();
 
         self.context.enter_function(&function);
 
-        let mut func_n = 0;
-        for param in &closure.params {
+        for (func_n, param) in closure.params.iter().enumerate() {
             if let TypeKind::Void = param.typ.kind() {
-                //self.context.define_var(&param.name, LabelValue::void());
-                //continue;
+                // self.context.define_var(&param.name, LabelValue::void());
+                // continue;
             }
             let arg_value = function.arg(func_n);
             self.context.define_var(&param.name, arg_value);
-            func_n += 1;
         }
 
         let start_block = function.append_block("enter");

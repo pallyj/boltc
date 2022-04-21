@@ -2,8 +2,8 @@
 fn test_code() {
     let interner = FileInterner::new();
     let mut debugger = Debugger::new(&interner);
-	let mut operator_factory = OperatorFactory::new();
-	operator_factory.register_intrinsics();
+    let mut operator_factory = OperatorFactory::new();
+    operator_factory.register_intrinsics();
 
     let code = r#"
 import intrinsics
@@ -45,6 +45,6 @@ func gcd(a: Int64, b: Int64): Int64 {
 
 use blir::Library;
 use errors::{debugger::Debugger, fileinterner::FileInterner};
-use parser::{parser::parse, operators::OperatorFactory};
+use parser::{operators::OperatorFactory, parser::parse};
 
 use crate::AstLowerer;

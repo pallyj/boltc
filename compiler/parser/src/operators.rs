@@ -63,7 +63,7 @@ impl OperatorFactory {
     pub fn new() -> Self {
         Self { prefix_ops:  HashMap::new(),
                postfix_ops: HashMap::new(),
-               operators:   HashMap::new() }
+               operators:   HashMap::new(), }
     }
 
     pub fn register(&mut self, op: Operator) {
@@ -77,8 +77,6 @@ impl OperatorFactory {
         } else {
             self.postfix_ops.insert(symbol, op);
         }
-
-        
     }
 
     pub fn register_infix(&mut self, name: &str, sym: &str, precedence: OperatorPrecedence) { self.register(Operator::new(name, sym, OperatorFix::Infix, precedence)); }
@@ -104,8 +102,8 @@ impl OperatorFactory {
         self.register_infix("and", "&&", OperatorPrecedence::And);
         self.register_infix("or", "||", OperatorPrecedence::Or);
 
-        //self.register_infix("instanceEq", "===", OperatorPrecedence::Comparison);
-        //self.register_infix("instanceNeq", "!==", OperatorPrecedence::Comparison);
+        // self.register_infix("instanceEq", "===", OperatorPrecedence::Comparison);
+        // self.register_infix("instanceNeq", "!==", OperatorPrecedence::Comparison);
         self.register_infix("equal", "==", OperatorPrecedence::Comparison);
         self.register_infix("notEqual", "!=", OperatorPrecedence::Comparison);
         self.register_infix("greaterThan", ">", OperatorPrecedence::Comparison);
@@ -117,7 +115,6 @@ impl OperatorFactory {
         //
         self.register_infix("openRange", "..=", OperatorPrecedence::Secondary);
         self.register_infix("closedRange", "..<", OperatorPrecedence::Secondary);
-        //
         // self.register_infix("addAssign", "+=", OperatorPrecedence::Assignment);
         // self.register_infix("subAssign", "-=", OperatorPrecedence::Assignment);
         // self.register_infix("mulAssign", "*=", OperatorPrecedence::Assignment);

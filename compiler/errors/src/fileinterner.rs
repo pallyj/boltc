@@ -19,9 +19,10 @@ impl FileInterner {
 
         self.files.push(file);
     }
-    
+
     pub fn test_code(&mut self, code: &str) {
-        self.files.push(File::new("test.bolt".to_string(), code.to_string()));
+        self.files
+            .push(File::new("test.bolt".to_string(), code.to_string()));
     }
 
     pub fn iter(&self) -> impl Iterator<Item = (usize, &File)> { self.files.iter().enumerate() }

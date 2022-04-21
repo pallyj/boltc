@@ -1,8 +1,9 @@
 mod struct_;
 
 use std::{fmt::Debug,
+          hash::Hash,
           ops::{Deref, DerefMut},
-          sync::atomic::{AtomicU64, Ordering}, hash::Hash};
+          sync::atomic::{AtomicU64, Ordering}};
 
 use errors::Span;
 use mangle::MangledType;
@@ -149,13 +150,12 @@ impl Type {
             TypeKind::Float { bits: 32 } => MangledType::Float32,
             TypeKind::Float { bits: 64 } => MangledType::Float64,
 
-            
-            TypeKind::Function { return_type, params, labels: _ } => {
-                let params = params.iter()
-                    .map(|param| param.mangle())
-                    .collect();
+            TypeKind::Function { return_type,
+                                 params,
+                                 labels: _, } => {
+                let params = params.iter().map(|param| param.mangle()).collect();
 
-                MangledType::Function( params, Box::new(return_type.mangle()) )
+                MangledType::Function(params, Box::new(return_type.mangle()))
             }
             TypeKind::Struct(r#struct) => MangledType::Struct(r#struct.borrow().path().clone()),
 
@@ -168,9 +168,7 @@ impl Type {
 }
 
 impl Hash for Type {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.kind.hash(state);
-    }
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) { self.kind.hash(state); }
 }
 
 impl Deref for Type {

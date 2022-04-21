@@ -1,8 +1,8 @@
 #![feature(let_else)]
 
-pub mod variant;
 pub mod context;
 pub mod replace;
+pub mod variant;
 
 #[cfg(test)]
 mod tests {

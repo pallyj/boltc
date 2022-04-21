@@ -9,7 +9,7 @@ use codegen::config::{BuildConfig, BuildOutput, BuildProfile};
 use errors::{debugger::Debugger, fileinterner::FileInterner};
 use lower_ast::AstLowerer;
 use lower_blir::BlirLowerer;
-use parser::{parser::parse, operators::OperatorFactory};
+use parser::{operators::OperatorFactory, parser::parse};
 
 fn main() {
     let args = Args::parse();
@@ -89,7 +89,6 @@ impl Project {
             AstLowerer::new(parse).lower_file(self.library.as_mut().unwrap());
         }
 
-
         if debugger.has_errors() {
             return (false, None);
         }
@@ -98,43 +97,35 @@ impl Project {
 
         let attribute_factory = blir::attributes::default_attributes();
 
-        blir_passes::TypeResolvePass::new(
-            &attribute_factory,
-            &operator_factory,
-            &mut context,
-            &mut debugger)
-            .run_pass(self.library.as_mut().unwrap());
-            
-        if debugger.has_errors() {
-            return (false, None);
-        }
-
-        //println!("{:?}", self.library);
-
-        blir_passes::TypeInferPass::new(
-            &mut context,
-            &mut debugger)
-            .run_pass(self.library.as_mut().unwrap());
+        blir_passes::TypeResolvePass::new(&attribute_factory,
+                                          &operator_factory,
+                                          &mut context,
+                                          &mut debugger).run_pass(self.library.as_mut().unwrap());
 
         if debugger.has_errors() {
             return (false, None);
         }
 
-        blir_passes::ClosureResolvePass::new(
-            &attribute_factory,
-            &operator_factory,
-            &mut context,
-            &mut debugger)
-            .run_pass(self.library.as_mut().unwrap());
+        // println!("{:?}", self.library);
 
-        //println!("{:?}", self.library.as_ref().unwrap());
+        blir_passes::TypeInferPass::new(&mut context, &mut debugger).run_pass(self.library.as_mut().unwrap());
 
         if debugger.has_errors() {
             return (false, None);
         }
 
-        blir_passes::TypeCheckPass::new(&mut debugger)
-            .run_pass(self.library.as_mut().unwrap());
+        blir_passes::ClosureResolvePass::new(&attribute_factory,
+                                             &operator_factory,
+                                             &mut context,
+                                             &mut debugger).run_pass(self.library.as_mut().unwrap());
+
+        // println!("{:?}", self.library.as_ref().unwrap());
+
+        if debugger.has_errors() {
+            return (false, None);
+        }
+
+        blir_passes::TypeCheckPass::new(&mut debugger).run_pass(self.library.as_mut().unwrap());
 
         if debugger.has_errors() {
             return (false, None);
@@ -145,7 +136,7 @@ impl Project {
 
         let library = lowerer.finish();
 
-        //println!("{library}");
+        // println!("{library}");
 
         let config = BuildConfig::new(BuildProfile::Release, BuildOutput::Object, None);
 

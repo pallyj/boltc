@@ -1,5 +1,6 @@
 use super::{marker::Marker, Parser};
-use crate::{lexer::SyntaxKind, parser::file::{INNER_ITEM_RECOVERY_SET, ITEM_RECOVERY_SET}};
+use crate::{lexer::SyntaxKind,
+            parser::file::{INNER_ITEM_RECOVERY_SET, ITEM_RECOVERY_SET}};
 
 impl<'input, 'l> Parser<'input, 'l> {
     pub fn parse_init(&mut self, marker: Marker) {
@@ -58,14 +59,12 @@ impl<'input, 'l> Parser<'input, 'l> {
         }
 
         if !self.check(SyntaxKind::Colon) {
-            self.name(&[SyntaxKind::Comma,
-                        SyntaxKind::CloseParen]);
+            self.name(&[SyntaxKind::Comma, SyntaxKind::CloseParen]);
         }
 
         if !self.eat(SyntaxKind::Colon) {
-
             self.error_recover("expected function param", &[SyntaxKind::Comma,
-                                                                SyntaxKind::CloseParen]);
+                                                            SyntaxKind::CloseParen]);
         }
 
         self.parse_ty();

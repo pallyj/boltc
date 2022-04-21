@@ -2,7 +2,10 @@ use std::{cell::RefCell,
           collections::HashMap,
           sync::{Arc, Weak}};
 
-use crate::{typ::Type, value::ValueKind, Symbol, SymbolWrapper, Visibility, code::{FunctionRef, ExternFunctionRef, MethodRef}, Monomorphizer};
+use crate::{code::{ExternFunctionRef, FunctionRef, MethodRef},
+            typ::Type,
+            value::ValueKind,
+            Monomorphizer, Symbol, SymbolWrapper, Visibility};
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ScopeRelation {

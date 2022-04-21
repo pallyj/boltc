@@ -21,7 +21,7 @@ pub struct VarInner {
 
     pub is_constant: bool,
 
-    pub span: Span
+    pub span: Span,
 }
 
 pub struct Var {

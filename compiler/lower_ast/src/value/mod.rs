@@ -1,7 +1,7 @@
-use blir::{typ::{TypeKind, Type},
-           value::{FunctionArgs, IfBranch, IfValue, Value, ValueKind, ClosureParam, Closure}};
+use blir::{typ::{Type, TypeKind},
+           value::{Closure, ClosureParam, FunctionArgs, IfBranch, IfValue, Value, ValueKind}};
 use errors::Span;
-use parser::ast::expr::{Expr as AstExpr, IfExpr, IfExprNegative, LiteralKind, ClosureExpr};
+use parser::ast::expr::{ClosureExpr, Expr as AstExpr, IfExpr, IfExprNegative, LiteralKind};
 
 use crate::AstLowerer;
 
@@ -20,47 +20,39 @@ impl AstLowerer {
                 let operator_symbol = prefix.operator();
                 let operator = self.factory.get_prefix_op(&operator_symbol).unwrap();
 
-                let function = TypeKind::Function {
-                    return_type: Box::new(Type::infer()),
-                    params: vec![ Type::infer() ],
-                    labels: vec![ None ] }.anon();
+                let function = TypeKind::Function { return_type: Box::new(Type::infer()),
+                                                    params:      vec![Type::infer()],
+                                                    labels:      vec![None], }.anon();
 
-                ValueKind::FuncCall {
-                    function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
-                    args: FunctionArgs {
-                        args: vec![ self.lower_expr(prefix.unit()) ],
-                        labels: vec![ None ] }}.spanned(Type::infer(), span)
-            },
+                ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
+                                      args:     FunctionArgs { args:   vec![self.lower_expr(prefix.unit())],
+                                                               labels: vec![None], }, }.spanned(Type::infer(), span)
+            }
             AstExpr::PostfixExpr(postfix) => {
                 let operator_symbol = postfix.operator();
                 let operator = self.factory.get_postfix_op(&operator_symbol).unwrap();
 
-                let function = TypeKind::Function {
-                    return_type: Box::new(Type::infer()),
-                    params: vec![ Type::infer() ],
-                    labels: vec![ None ] }.anon();
+                let function = TypeKind::Function { return_type: Box::new(Type::infer()),
+                                                    params:      vec![Type::infer()],
+                                                    labels:      vec![None], }.anon();
 
-                ValueKind::FuncCall {
-                    function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
-                    args: FunctionArgs {
-                        args: vec![ self.lower_expr(postfix.unit()) ],
-                        labels: vec![ None ] }}.spanned(Type::infer(), span)
-            },
+                ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
+                                      args:     FunctionArgs { args:   vec![self.lower_expr(postfix.unit())],
+                                                               labels: vec![None], }, }.spanned(Type::infer(), span)
+            }
             AstExpr::InfixExpr(infix) => {
                 let operator_symbol = infix.operator();
                 let operator = self.factory.get_postfix_op(&operator_symbol).unwrap();
 
-                let function = TypeKind::Function {
-                    return_type: Box::new(Type::infer()),
-                    params: vec![ Type::infer(), Type::infer() ],
-                    labels: vec![ None, None ] }.anon();
+                let function = TypeKind::Function { return_type: Box::new(Type::infer()),
+                                                    params:      vec![Type::infer(), Type::infer()],
+                                                    labels:      vec![None, None], }.anon();
 
-                ValueKind::FuncCall {
-                    function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
-                    args: FunctionArgs {
-                        args: vec![ self.lower_expr(infix.left()), self.lower_expr(infix.right()) ],
-                        labels: vec![ None, None ] }}.spanned(Type::infer(), span)
-            },
+                ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
+                                      args:     FunctionArgs { args:   vec![self.lower_expr(infix.left()),
+                                                                            self.lower_expr(infix.right())],
+                                                               labels: vec![None, None], }, }.spanned(Type::infer(), span)
+            }
 
             AstExpr::LiteralExpr(literal) => {
                 let text = literal.text().replace("_", "");
@@ -89,16 +81,13 @@ impl AstLowerer {
             AstExpr::FuncCallExpr(call) => {
                 let mut func = self.lower_expr(call.function());
 
-                let (labels, args): (Vec<_>, Vec<_>) =
-                    call.args()
-                        .map(|arg| (arg.label(), self.lower_expr(arg.value())))
-                        .unzip();
+                let (labels, args): (Vec<_>, Vec<_>) = call.args()
+                                                           .map(|arg| (arg.label(), self.lower_expr(arg.value())))
+                                                           .unzip();
 
-                let return_type = Box::new( Type::infer() );
-                let params = (0..args.len())
-                    .map(|_| Type::infer() )
-                    .collect();
-                    
+                let return_type = Box::new(Type::infer());
+                let params = (0..args.len()).map(|_| Type::infer()).collect();
+
                 let function_type = TypeKind::Function { return_type,
                                                          params,
                                                          labels: labels.clone() };
@@ -111,32 +100,30 @@ impl AstLowerer {
             AstExpr::ClosureExpr(closure) => self.lower_closure_expr(closure, span),
 
             AstExpr::TrailingClosureExpr(trailing_closure) => {
-                let mut function = self.lower_expr( trailing_closure.function() );
+                let mut function = self.lower_expr(trailing_closure.function());
                 let closure = self.lower_closure_expr(trailing_closure.closure(), span);
 
                 if let ValueKind::FuncCall { args, function: func } = &mut function.kind {
                     match func.typ.kind_mut() {
                         TypeKind::Function { params, .. } => {
                             params.push(Type::infer());
-                        },
+                        }
                         _ => panic!(),
                     }
                     args.args.push(closure);
                     function
                 } else {
-                    let return_type = Box::new( Type::infer() );
-                    let params = vec![ Type::infer() ];
-                        
+                    let return_type = Box::new(Type::infer());
+                    let params = vec![Type::infer()];
+
                     let function_type = TypeKind::Function { return_type,
-                                                            params,
-                                                            labels: vec![] };
+                                                             params,
+                                                             labels: vec![] };
                     function.typ.set_kind(function_type);
 
-                    ValueKind::FuncCall {
-                        function: Box::new(function),
-                        args: FunctionArgs {
-                            args: vec![ closure ],
-                            labels: vec![ ] }}.spanned_infer(span)
+                    ValueKind::FuncCall { function: Box::new(function),
+                                          args:     FunctionArgs { args:   vec![closure],
+                                                                   labels: vec![], }, }.spanned_infer(span)
                 }
             }
 
@@ -152,57 +139,39 @@ impl AstLowerer {
         }
     }
 
-    fn lower_closure_expr(
-        &self,
-        closure: ClosureExpr,
-        span: Span) -> Value
-    {
+    fn lower_closure_expr(&self, closure: ClosureExpr, span: Span) -> Value {
         if let Some(parameters) = closure.parameters() {
             // Set the type to a function of the parameters
-            let blir_params: Vec<_> = parameters
-                .map(|closure_param| {
-                    let typ = closure_param
-                        .explicit_type()
-                        .map(|typ| self.lower_type(typ))
-                        .unwrap_or_else(|| Type::infer());
+            let blir_params: Vec<_> = parameters.map(|closure_param| {
+                                                    let typ = closure_param.explicit_type()
+                                                                           .map(|typ| self.lower_type(typ))
+                                                                           .unwrap_or_else(Type::infer);
 
-                    ClosureParam {
-                        name: closure_param.bind_name(),
-                        typ,
-                    }
-                }).collect();
+                                                    ClosureParam { name: closure_param.bind_name(),
+                                                                   typ }
+                                                })
+                                                .collect();
 
-            let function_parameter_types = blir_params
-                .iter()
-                .map(|param| param.typ.clone())
-                .collect();
+            let function_parameter_types = blir_params.iter().map(|param| param.typ.clone()).collect();
 
-            let function_type = TypeKind::Function {
-                return_type: Box::new(Type::infer()),
-                params: function_parameter_types,
-                labels: vec![] }.anon();
+            let function_type = TypeKind::Function { return_type: Box::new(Type::infer()),
+                                                     params:      function_parameter_types,
+                                                     labels:      vec![], }.anon();
 
             let code = self.lower_code_block(closure.code_block());
 
-            let closure = Closure {
-                params: blir_params,
-                code,
-            };
+            let closure = Closure { params: blir_params,
+                                    code };
 
-            ValueKind::Closure(closure)
-                .spanned(function_type, span)
+            ValueKind::Closure(closure).spanned(function_type, span)
         } else {
             let code = self.lower_code_block(closure.code_block());
-            
-            let closure = Closure {
-                params: vec![],
-                code
-            };
+
+            let closure = Closure { params: vec![], code };
 
             let closure_type = Type::infer();
 
-            ValueKind::Closure(closure)
-                .spanned(closure_type, span)
+            ValueKind::Closure(closure).spanned(closure_type, span)
         }
     }
 

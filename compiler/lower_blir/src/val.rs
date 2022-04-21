@@ -2,7 +2,7 @@ use std::panic;
 
 use blir::{intrinsics::{BinaryIntrinsicFn, UnaryIntrinsicFn},
            typ::{Type, TypeKind},
-           value::{IfBranch, IfValue, Value, ValueKind, Closure}};
+           value::{Closure, IfBranch, IfValue, Value, ValueKind}};
 use blirssa::value::{BinaryIntrinsicFn as SsaBinaryIntrinsicFn, LabelValue, UnaryIntrinsicFn as SsaUnaryIntrinsicFn};
 
 use crate::BlirLowerer;
@@ -26,7 +26,7 @@ impl BlirLowerer {
                     println!("{local_var_name}");
                 }
                 self.context.lookup_var(local_var_name).cloned().unwrap()
-            },
+            }
 
             ValueKind::FunctionParam(param_name) => self.context.lookup_var(param_name).cloned().unwrap(),
 
@@ -61,7 +61,6 @@ impl BlirLowerer {
 
     fn lower_pvalue(&mut self, value: &Value) -> Option<LabelValue> {
         match &value.kind {
-
             ValueKind::InstanceVariable { reciever, var } => Some(self.lower_field_paccess(reciever.as_ref(), &var.borrow().name)),
 
             _ => panic!("{value:?}"),
@@ -98,7 +97,10 @@ impl BlirLowerer {
         self.ssa_library_mut()
             .add_function(&closure_mangled_name, closure_type);
 
-        let closure_function = self.ssa_library().get_function(&closure_mangled_name).cloned().unwrap();
+        let closure_function = self.ssa_library()
+                                   .get_function(&closure_mangled_name)
+                                   .cloned()
+                                   .unwrap();
         let function = self.builder().build_function(&closure_function);
         let function_pointer = self.builder().build_function_pointer(function);
 

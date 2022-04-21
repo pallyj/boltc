@@ -1,9 +1,10 @@
 use std::{cell::{Ref, RefCell, RefMut},
           fmt::Debug,
+          hash::Hash,
           ops::Deref,
-          sync::Arc, hash::Hash};
+          sync::Arc};
 
-use mangle::{Path, MangledStruct};
+use mangle::{MangledStruct, Path};
 
 use super::{Type, TypeKind};
 use crate::{attributes::Attributes,
@@ -40,13 +41,9 @@ pub struct StructInner {
 impl StructInner {
     pub fn scope(&self) -> &ScopeRef { &self.scope }
 
-    pub fn path(&self) -> &Path {
-        &self.path
-    }
+    pub fn path(&self) -> &Path { &self.path }
 
-    pub fn mangle(&self) -> String {
-        MangledStruct(&self.path).to_string()
-    }
+    pub fn mangle(&self) -> String { MangledStruct(&self.path).to_string() }
 }
 
 impl Struct {
@@ -99,7 +96,6 @@ impl Struct {
         } else {
             method.name()
         };
-            
 
         self.borrow().scope.add_method(name, method)
     }
@@ -196,9 +192,7 @@ impl StructRef {
         }
 
         match vars[0].borrow().typ.kind() {
-            TypeKind::Integer { bits } => {
-                *bits > 1
-            }
+            TypeKind::Integer { bits } => *bits > 1,
             _ => false,
         }
     }

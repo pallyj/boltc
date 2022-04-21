@@ -21,7 +21,7 @@ ast!(
         EvalSmt,
         ReturnSmt,
         LetSmt,
-        NoOp
+        NoOp,
     }
 );
 
@@ -115,12 +115,7 @@ impl Debug for LetSmt {
 ast!(struct CodeBlock(CodeBlock));
 
 impl CodeBlock {
-    pub fn statements(&self) -> Vec<Smt> {
-        self.0
-            .children()
-            .map(Smt::cast)
-            .collect()
-    }
+    pub fn statements(&self) -> Vec<Smt> { self.0.children().map(Smt::cast).collect() }
 }
 
 impl Debug for CodeBlock {

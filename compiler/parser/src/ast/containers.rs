@@ -26,7 +26,7 @@ ast!(
         FuncDef,
         VariableDef,
         LetDef,
-        NoOp
+        NoOp,
     }
 );
 
@@ -44,12 +44,7 @@ impl Debug for StructItem {
 }
 
 impl StructDef {
-    pub fn attributes(&self) -> Attributes {
-        self.0
-            .children()
-            .find_map(Attributes::cast)
-            .unwrap()
-    }
+    pub fn attributes(&self) -> Attributes { self.0.children().find_map(Attributes::cast).unwrap() }
 
     pub fn visibility(&self) -> Option<SyntaxKind> {
         self.0
@@ -92,12 +87,7 @@ impl Debug for StructDef {
 }
 
 impl StructBody {
-    pub fn items(&self) -> Vec<StructItem> {
-        self.0
-            .children()
-            .map(StructItem::cast)
-            .collect()
-    }
+    pub fn items(&self) -> Vec<StructItem> { self.0.children().map(StructItem::cast).collect() }
 }
 
 impl Debug for StructBody {

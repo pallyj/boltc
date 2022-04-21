@@ -1,6 +1,7 @@
 use super::{marker::{CompletedMarker, Marker},
             Parser};
-use crate::{lexer::SyntaxKind, operators::{OperatorPrecedence, OperatorFix}};
+use crate::{lexer::SyntaxKind,
+            operators::{OperatorFix, OperatorPrecedence}};
 
 const EXPR_RECOVERY_SET: &[SyntaxKind] = &[SyntaxKind::LetKw,
                                            SyntaxKind::ReturnKw,
@@ -11,18 +12,13 @@ const EXPR_RECOVERY_SET: &[SyntaxKind] = &[SyntaxKind::LetKw,
                                            SyntaxKind::Period];
 
 impl<'input, 'l> Parser<'input, 'l> {
-    pub fn parse_expr(&mut self) {
-        self.parse_expr_raw(OperatorPrecedence::None, false)
-    }
+    const CLOSURE_YIELD_SYMBOL: SyntaxKind = SyntaxKind::BigArrow;
 
-    pub fn parse_expr_before_brace(&mut self) {
-        self.parse_expr_raw(OperatorPrecedence::None, true)
-    }
+    pub fn parse_expr(&mut self) { self.parse_expr_raw(OperatorPrecedence::None, false) }
 
-    pub fn parse_expr_raw(
-        &mut self,
-        in_precedence: OperatorPrecedence,
-        is_before_brace: bool) {
+    pub fn parse_expr_before_brace(&mut self) { self.parse_expr_raw(OperatorPrecedence::None, true) }
+
+    pub fn parse_expr_raw(&mut self, in_precedence: OperatorPrecedence, is_before_brace: bool) {
         let mut completed = self.parse_expr_atom(is_before_brace);
 
         let mut cur = usize::MAX;
@@ -30,34 +26,36 @@ impl<'input, 'l> Parser<'input, 'l> {
         while cur != self.cursor {
             cur = self.cursor;
             if self.eat(SyntaxKind::Period) {
-				if self.check(SyntaxKind::Ident) {
-					let marker = completed.precede(self);
-					self.bump();
-					completed = marker.complete(self, SyntaxKind::MemberExpr);
-				} else {
-					self.error_recover("expected member name", EXPR_RECOVERY_SET);
-				}
-			} else if self.check(SyntaxKind::OpenParen) {
-				let marker = completed.precede(self);
+                if self.check(SyntaxKind::Ident) {
+                    let marker = completed.precede(self);
+                    self.bump();
+                    completed = marker.complete(self, SyntaxKind::MemberExpr);
+                } else {
+                    self.error_recover("expected member name", EXPR_RECOVERY_SET);
+                }
+            } else if self.check(SyntaxKind::OpenParen) {
+                let marker = completed.precede(self);
 
-				self.parse_paren_comma_seq(Self::parse_func_arg);
+                self.parse_paren_comma_seq(Self::parse_func_arg);
 
-				completed = marker.complete(self, SyntaxKind::FuncCallExpr);
-			} else if self.check(SyntaxKind::Operator) {
+                completed = marker.complete(self, SyntaxKind::FuncCallExpr);
+            } else if self.check(SyntaxKind::Operator) {
                 if let Some(next) = self.parse_expr_postfix(in_precedence, is_before_brace, completed) {
                     completed = next;
                 } else {
-                    break
+                    break;
                 }
-			} else if self.check(SyntaxKind::OpenBrace) {
-                if is_before_brace { break; }
+            } else if self.check(SyntaxKind::OpenBrace) {
+                if is_before_brace {
+                    break;
+                }
 
                 completed = self.parse_trailing_closure(completed);
             }
-			// Do trailing closures
-			else {
-				break;
-			}
+            // Do trailing closures
+            else {
+                break;
+            }
         }
     }
 
@@ -76,12 +74,7 @@ impl<'input, 'l> Parser<'input, 'l> {
         marker.complete(self, SyntaxKind::FuncArg);
     }
 
-    pub fn parse_expr_postfix(
-        &mut self,
-        in_precedence: OperatorPrecedence,
-        is_before_brace: bool,
-        completed: CompletedMarker) -> Option<CompletedMarker>
-    {
+    pub fn parse_expr_postfix(&mut self, in_precedence: OperatorPrecedence, is_before_brace: bool, completed: CompletedMarker) -> Option<CompletedMarker> {
         assert!(self.check(SyntaxKind::Operator));
 
         let operator_symbol = self.lexemes[self.cursor].source;
@@ -103,7 +96,7 @@ impl<'input, 'l> Parser<'input, 'l> {
 
         if !operator_precedence.shifts(in_precedence) {
             // Do nothing
-            return None
+            return None;
         }
 
         // Parse as an infix operator
@@ -126,7 +119,7 @@ impl<'input, 'l> Parser<'input, 'l> {
     pub fn parse_closure(&mut self, marker: Marker) -> CompletedMarker {
         assert!(self.check(SyntaxKind::OpenBrace));
         self.eat(SyntaxKind::OpenBrace);
-        
+
         self.parse_closure_args();
         self.parse_closure_body();
 
@@ -134,12 +127,10 @@ impl<'input, 'l> Parser<'input, 'l> {
     }
 
     fn parse_closure_body(&mut self) {
-        self.parse_delim_end(SyntaxKind::CodeBlock,
-            SyntaxKind::CloseBrace,
-            |parser| parser.parse_smt())
+        self.parse_delim_end(SyntaxKind::CodeBlock, SyntaxKind::CloseBrace, |parser| {
+                parser.parse_smt()
+            })
     }
-
-    const CLOSURE_YIELD_SYMBOL: SyntaxKind = SyntaxKind::BigArrow;
 
     fn parse_closure_args(&mut self) {
         // Determine if the closure takes arguments
@@ -197,8 +188,8 @@ impl<'input, 'l> Parser<'input, 'l> {
 
         if !self.eat(SyntaxKind::Ident) {
             self.error_recover("expected closure param", &[SyntaxKind::Comma,
-                                                            SyntaxKind::CloseBrace,
-                                                            SyntaxKind::BigArrow]);
+                                                           SyntaxKind::CloseBrace,
+                                                           SyntaxKind::BigArrow]);
         }
 
         if self.eat(SyntaxKind::Colon) {
@@ -209,45 +200,44 @@ impl<'input, 'l> Parser<'input, 'l> {
     }
 
     pub fn check_expr(&mut self) -> bool {
-        self.check(SyntaxKind::Ident) ||
-		self.check(SyntaxKind::LiteralDecInt) ||
-		self.check(SyntaxKind::LiteralBinInt) ||
-		self.check(SyntaxKind::LiteralOctInt) ||
-		self.check(SyntaxKind::LiteralHexInt) ||
-		self.check(SyntaxKind::LiteralDecFloat) ||
-		self.check(SyntaxKind::Operator) ||
-		self.check(SyntaxKind::OpenParen) ||
-		self.check(SyntaxKind::IfKw)
+        self.check(SyntaxKind::Ident)
+        || self.check(SyntaxKind::LiteralDecInt)
+        || self.check(SyntaxKind::LiteralBinInt)
+        || self.check(SyntaxKind::LiteralOctInt)
+        || self.check(SyntaxKind::LiteralHexInt)
+        || self.check(SyntaxKind::LiteralDecFloat)
+        || self.check(SyntaxKind::Operator)
+        || self.check(SyntaxKind::OpenParen)
+        || self.check(SyntaxKind::IfKw)
     }
 
     pub fn parse_expr_atom(&mut self, is_before_brace: bool) -> CompletedMarker {
         let marker = self.start();
 
         if self.eat(SyntaxKind::Ident) {
-			marker.complete(self, SyntaxKind::NamedExpr)
-		} else if
-		   self.eat(SyntaxKind::LiteralDecInt) ||
-		   self.eat(SyntaxKind::LiteralBinInt) ||
-		   self.eat(SyntaxKind::LiteralOctInt) ||
-		   self.eat(SyntaxKind::LiteralHexInt) ||
-		   self.eat(SyntaxKind::LiteralDecFloat) ||
-		   self.eat(SyntaxKind::LiteralTrue) ||
-		   self.eat(SyntaxKind::LiteralFalse) {
-			   marker.complete(self, SyntaxKind::Literal)
-		   }
-		else if self.eat(SyntaxKind::OpenParen) {
-			if self.eat(SyntaxKind::CloseParen) {
-				marker.complete(self, SyntaxKind::UnitExpr)
-			} else {
-				self.parse_expr();
+            marker.complete(self, SyntaxKind::NamedExpr)
+        } else if self.eat(SyntaxKind::LiteralDecInt)
+                  || self.eat(SyntaxKind::LiteralBinInt)
+                  || self.eat(SyntaxKind::LiteralOctInt)
+                  || self.eat(SyntaxKind::LiteralHexInt)
+                  || self.eat(SyntaxKind::LiteralDecFloat)
+                  || self.eat(SyntaxKind::LiteralTrue)
+                  || self.eat(SyntaxKind::LiteralFalse)
+        {
+            marker.complete(self, SyntaxKind::Literal)
+        } else if self.eat(SyntaxKind::OpenParen) {
+            if self.eat(SyntaxKind::CloseParen) {
+                marker.complete(self, SyntaxKind::UnitExpr)
+            } else {
+                self.parse_expr();
 
-				if !self.eat(SyntaxKind::CloseParen) {
-					// Error:
-					self.bump();
-				}
-				marker.complete(self, SyntaxKind::ParenthesizedExpr)
-			}
-		} else if self.check(SyntaxKind::Operator) {
+                if !self.eat(SyntaxKind::CloseParen) {
+                    // Error:
+                    self.bump();
+                }
+                marker.complete(self, SyntaxKind::ParenthesizedExpr)
+            }
+        } else if self.check(SyntaxKind::Operator) {
             let operator_symbol = self.lexemes[self.cursor].source;
             let is_prefix_operator = self.operators.get_prefix_op(operator_symbol).is_some();
 
@@ -261,18 +251,20 @@ impl<'input, 'l> Parser<'input, 'l> {
                 marker.complete(self, SyntaxKind::Error)
             }
         } else if self.eat(SyntaxKind::IfKw) {
-			self.parse_expr_if(marker)
-		} else if self.check(SyntaxKind::OpenBrace) {
+            self.parse_expr_if(marker)
+        } else if self.check(SyntaxKind::OpenBrace) {
             self.parse_closure(marker)
         } else {
-			// Try to do recovery
-			self.error_recover("expected expression", EXPR_RECOVERY_SET);
+            // Try to do recovery
+            self.error_recover("expected expression", EXPR_RECOVERY_SET);
             marker.complete(self, SyntaxKind::Error)
-		}
+        }
     }
 
     pub fn parse_expr_if(&mut self, marker: Marker) -> CompletedMarker {
-        self.node(SyntaxKind::Condition, |parser| parser.parse_expr_before_brace());
+        self.node(SyntaxKind::Condition, |parser| {
+                parser.parse_expr_before_brace()
+            });
 
         self.node(SyntaxKind::Positive, |parser| parser.parse_codeblock());
 
