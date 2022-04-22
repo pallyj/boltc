@@ -66,7 +66,7 @@ cargo run -- examples/factorial/bolt/main.bolt --lib=test
 - Tuples
 - Compiler plugins
 - Documentation
-- Web Console
+- Web Playground
 
 ### Bolt 0.4 [Current Version]
 
