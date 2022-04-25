@@ -45,6 +45,8 @@ impl<'input, 'l> Parser<'input, 'l> {
                 } else {
                     break;
                 }
+            } else if self.check(SyntaxKind::OpenBracket) {
+                completed = self.parse_index(completed);
             } else if self.check(SyntaxKind::OpenBrace) {
                 if is_before_brace {
                     break;
@@ -105,6 +107,20 @@ impl<'input, 'l> Parser<'input, 'l> {
         self.parse_expr_raw(operator_precedence, is_before_brace);
 
         Some(marker.complete(self, SyntaxKind::InfixExpr))
+    }
+
+    fn parse_index(&mut self, marker: CompletedMarker) -> CompletedMarker {
+        assert!(self.check(SyntaxKind::OpenBracket));
+        let marker = marker.precede(self);
+        self.bump();
+
+        self.parse_expr();
+
+        if !self.eat(SyntaxKind::CloseBracket) {
+            self.error_recover("expected close bracket", EXPR_RECOVERY_SET);
+        }
+
+        marker.complete(self, SyntaxKind::IndexExpr)
     }
 
     pub fn parse_trailing_closure(&mut self, marker: CompletedMarker) -> CompletedMarker {

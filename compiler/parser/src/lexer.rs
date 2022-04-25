@@ -151,6 +151,7 @@ pub enum SyntaxKind {
     InfixExpr,
     NamedExpr,
     Literal,
+    IndexExpr,
 
     Condition,
     Positive,

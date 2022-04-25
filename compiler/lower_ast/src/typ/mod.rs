@@ -40,7 +40,7 @@ impl AstLowerer {
                 TypeKind::Tuple(tuple_types)
             }
 
-            // TODO: Add infer
+            AstType::InferType(_) => Type::infer().kind,
             AstType::Error => panic!(),
         }.spanned(span)
     }

@@ -27,6 +27,7 @@ ast!(
         FuncType,
         ParenthesizedType,
         TupleType,
+        InferType,
     }
 );
 
@@ -39,6 +40,7 @@ impl Debug for Type {
             Self::FuncType(arg0) => write!(f, "{arg0:?}"),
             Self::ParenthesizedType(arg0) => write!(f, "{arg0:?}"),
             Self::TupleType(arg0) => write!(f, "{arg0:?}"),
+            Self::InferType(_) => write!(f, "_"),
             Self::Error => write!(f, "Error"),
         }
     }

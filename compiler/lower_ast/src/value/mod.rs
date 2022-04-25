@@ -62,6 +62,18 @@ impl AstLowerer {
                                                                             self.lower_expr(infix.right())],
                                                                labels: vec![None, None], }, }.spanned(Type::infer(), span)
             }
+            AstExpr::IndexExpr(index) => {
+                let operator = "index".to_string();
+
+                let function = TypeKind::Function { return_type: Box::new(Type::infer()),
+                                                    params:      vec![Type::infer(), Type::infer()],
+                                                    labels:      vec![None, None], }.anon();
+
+                ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator).anon(function)),
+                                      args:     FunctionArgs { args:   vec![self.lower_expr(index.parent()),
+                                                                            self.lower_expr(index.index())],
+                                                               labels: vec![None, None], }, }.spanned(Type::infer(), span)
+            }
 
             AstExpr::LiteralExpr(literal) => {
                 let kind = literal.literal_kind();

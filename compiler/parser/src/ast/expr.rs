@@ -35,6 +35,7 @@ ast!(struct InfixExpr(InfixExpr));
 ast!(struct ClosureExpr(Closure));
 ast!(struct TrailingClosureExpr(TrailingClosure));
 ast!(struct TupleExpr(Tuple));
+ast!(struct IndexExpr(IndexExpr));
 
 ast!(struct FuncArg(FuncArg));
 ast!(struct ClosureParam(FuncPar));
@@ -54,6 +55,7 @@ ast!(
         ClosureExpr,
         TrailingClosureExpr,
         TupleExpr,
+        IndexExpr,
     }
 );
 
@@ -73,6 +75,7 @@ impl Debug for Expr {
             Self::ClosureExpr(arg0) => write!(f, "{arg0:?}"),
             Self::TrailingClosureExpr(arg0) => write!(f, "{arg0:?}"),
             Self::TupleExpr(arg0) => write!(f, "{arg0:?}"),
+            Self::IndexExpr(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "Error"),
         }
     }
@@ -380,5 +383,17 @@ impl Debug for TupleExpr {
             .join(", ");
 
         write!(f, "({tuple_items})")
+    }
+}
+
+impl IndexExpr {
+    pub fn parent(&self) -> Expr { self.0.first_child().map(Expr::cast).unwrap() }
+
+    pub fn index(&self) -> Expr { self.0.last_child().map(Expr::cast).unwrap() }
+}
+
+impl Debug for IndexExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}[{:?}]", self.parent(), self.index())
     }
 }

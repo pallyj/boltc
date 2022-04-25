@@ -60,7 +60,7 @@ impl ErrorCode {
             ErrorCode::FunctionSigNotFound => format!("No function matching this signature was found"),
             ErrorCode::AttributeDoesNotExist(name) => format!("cannot find attribute `{name}`"),
             ErrorCode::AmbiguousFunc => format!("ambiguous function signatures"),
-            ErrorCode::OperatorDNE(name) => format!("operator `{name} is not defined`"),
+            ErrorCode::OperatorDNE(name) => format!("operator `{name}` is not defined"),
             ErrorCode::OperatorNotDefined(operator, typ) => format!("cannot use operator {operator} on {typ}",),
             ErrorCode::OperatorExpectedParams(name, n_params) => format!("operator {name} takes {n_params} parameter"),
         }

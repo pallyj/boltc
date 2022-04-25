@@ -136,6 +136,8 @@ impl OperatorFactory {
         self.register_prefix("invert", "!");
 
         self.register_prefix("lowerRange", "..");
+        
+        self.register_infix("index", "[", OperatorPrecedence::None);
     }
 
     pub fn get_prefix_op(&self, text: &str) -> Option<&Operator> { self.prefix_ops.get(text) }
