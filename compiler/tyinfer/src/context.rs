@@ -62,6 +62,18 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
             ValueKind::FloatLiteral(_) => self.constrain_float(value),
             ValueKind::StringLiteral(_) => self.constrain_string(value),
 
+            ValueKind::Tuple(tuple_items) => {
+                match &value.typ.kind() {
+                    TypeKind::Tuple(tuple_items_type) => {
+                        for (item, typ) in tuple_items.iter().zip(tuple_items_type) {
+                            self.constrain_value(item, scope);
+                            self.constrain_two_way(typ, &item.typ);
+                        }
+                    }
+                    _ => panic!(),
+                }
+            }
+
             ValueKind::FuncCall { function, args } => {
                 let function_type = &function.typ;
 
@@ -105,6 +117,10 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
             ValueKind::Closure(_) => {
                 // Constrain the closure's return type to the return type of its code
                 self.constrain_func(value);
+            }
+
+            ValueKind::TupleField(value, _) => {
+                self.constrain_value(value, scope);
             }
 
             _ => {}
@@ -278,7 +294,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
     fn constrain_two_way(&mut self, ty1: &Type, ty2: &Type) {
         // println!("{ty1:?} <-> {ty2:?}");
         let _constraint = match (self.infer_key(ty1), self.infer_key(ty2)) {
-            (Some(key1), Some(key2)) => self.checker.impose(key1.equate_with(key2)),
+            (Some(key1), Some(key2)) if key1 != key2 => self.checker.impose(key1.equate_with(key2)),
             (Some(key1), None) => {
                 let variant = self.variant(ty2);
                 self.checker.impose(key1.concretizes_explicit(variant))
@@ -310,6 +326,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 
                 return;
             }
+            _ => return,
         };
 
         /*match constraint.err() {

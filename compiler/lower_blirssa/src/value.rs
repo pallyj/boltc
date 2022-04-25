@@ -214,6 +214,59 @@ pub fn lower_value<'a, 'ctx>(value: &Value, context: &ModuleContext<'a, 'ctx>, f
                                         .as_basic_value_enum())
             }
         }
+
+        Value::AccessTupleField { tuple, field, .. } => {
+            let Type::Pointer { pointee } = tuple.typ_ref() else {
+				panic!("access-tuple-field can only be used on a pointer to a tuple");
+			};
+
+            let Type::Tuple(_) = &**pointee else {
+				panic!("access-tuple-field can only be used on a pointer to a tuple");
+			};
+
+            let tuple = fn_ctx.get_local(tuple).unwrap();
+
+            let ptr = tuple.basic().into_pointer_value();
+
+            LLVMValue::Basic(context.builder
+                                    .build_struct_gep(ptr, *field as u32, "access-tuple-field")
+                                    .unwrap()
+                                    .as_basic_value_enum())
+        }
+
+        Value::DerefTupleField { tuple, field, .. } => match tuple.typ_ref() {
+            Type::Pointer { pointee } => {
+                let Type::Tuple(_) = &**pointee else {
+						panic!("deref-tuple-field can only be used on a pointer to a tuple");
+					};
+
+                let tuple = fn_ctx.get_local(tuple).unwrap();
+
+                let ptr = tuple.basic().into_pointer_value();
+                let idx = *field as u32; 
+
+                let gep =context.builder
+                                .build_struct_gep(ptr, idx, "deref-tuple-field")
+                                .unwrap();
+
+                LLVMValue::Basic(context.builder.build_load(gep, "deref"))
+            }
+
+            Type::Tuple(_) => {
+                let tuple = fn_ctx.get_local(tuple).unwrap();
+
+                let ptr = tuple.basic().into_struct_value();
+                let idx = *field as u32;
+
+                LLVMValue::Basic(context.builder
+                                        .build_extract_value(ptr, idx, "deref-tuple-field")
+                                        .unwrap()
+                                        .as_basic_value_enum())
+            }
+
+            _ => panic!("deref-struct-field can only be used on a struct or a pointer to one"),
+        },
+
     })
 }
 

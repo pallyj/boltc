@@ -206,8 +206,10 @@ impl<'input, 'l> Parser<'input, 'l> {
         || self.check(SyntaxKind::LiteralOctInt)
         || self.check(SyntaxKind::LiteralHexInt)
         || self.check(SyntaxKind::LiteralDecFloat)
+        || self.check(SyntaxKind::StringLiteral)
         || self.check(SyntaxKind::Operator)
         || self.check(SyntaxKind::OpenParen)
+        || self.check(SyntaxKind::OpenBrace)
         || self.check(SyntaxKind::IfKw)
     }
 
@@ -226,17 +228,13 @@ impl<'input, 'l> Parser<'input, 'l> {
                   || self.eat(SyntaxKind::StringLiteral)
         {
             marker.complete(self, SyntaxKind::Literal)
-        } else if self.eat(SyntaxKind::OpenParen) {
-            if self.eat(SyntaxKind::CloseParen) {
-                marker.complete(self, SyntaxKind::UnitExpr)
-            } else {
-                self.parse_expr();
+        } else if self.check(SyntaxKind::OpenParen) {
+            let tuple_types_len = self.parse_paren_comma_seq(Self::parse_expr);
 
-                if !self.eat(SyntaxKind::CloseParen) {
-                    // Error:
-                    self.bump();
-                }
-                marker.complete(self, SyntaxKind::ParenthesizedExpr)
+            match tuple_types_len {
+                0 => marker.complete(self, SyntaxKind::UnitExpr),
+                1 => marker.complete(self, SyntaxKind::ParenthesizedExpr),
+                _ => marker.complete(self, SyntaxKind::Tuple),
             }
         } else if self.check(SyntaxKind::Operator) {
             let operator_symbol = self.lexemes[self.cursor].source;

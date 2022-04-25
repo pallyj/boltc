@@ -34,6 +34,7 @@ ast!(struct PostfixExpr(PostfixExpr));
 ast!(struct InfixExpr(InfixExpr));
 ast!(struct ClosureExpr(Closure));
 ast!(struct TrailingClosureExpr(TrailingClosure));
+ast!(struct TupleExpr(Tuple));
 
 ast!(struct FuncArg(FuncArg));
 ast!(struct ClosureParam(FuncPar));
@@ -52,6 +53,7 @@ ast!(
         InfixExpr,
         ClosureExpr,
         TrailingClosureExpr,
+        TupleExpr,
     }
 );
 
@@ -70,6 +72,7 @@ impl Debug for Expr {
             Self::InfixExpr(arg0) => write!(f, "{arg0:?}"),
             Self::ClosureExpr(arg0) => write!(f, "{arg0:?}"),
             Self::TrailingClosureExpr(arg0) => write!(f, "{arg0:?}"),
+            Self::TupleExpr(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "Error"),
         }
     }
@@ -354,5 +357,28 @@ impl Debug for InfixExpr {
                self.left(),
                self.operator(),
                self.right())
+    }
+}
+
+
+impl TupleExpr {
+    pub fn items(&self) -> impl Iterator<Item = Expr> {
+        self.0
+            .first_child()
+            .unwrap()
+            .children()
+            .map(Expr::cast)
+    }
+}
+
+impl Debug for TupleExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let tuple_items = self
+            .items()
+            .map(|typ| format!("{typ:?}"))
+            .collect::<Vec<_>>()
+            .join(", ");
+
+        write!(f, "({tuple_items})")
     }
 }

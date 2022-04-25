@@ -63,6 +63,18 @@ pub enum Value {
         typ:      Type,
     },
 
+    DerefTupleField {
+        tuple: LabelValue,
+        field: usize,
+        typ:   Type,
+    },
+
+    AccessTupleField {
+        tuple: LabelValue,
+        field: usize,
+        typ:   Type,
+    },
+
     Function {
         function: FunctionRef,
     },
@@ -104,6 +116,9 @@ impl Value {
 
             Self::AccessStructField { typ, .. } => typ,
             Self::DerefStructField { typ, .. } => typ,
+
+            Self::AccessTupleField { typ, .. } => typ,
+            Self::DerefTupleField { typ, .. } => typ,
         }.clone()
     }
 }
@@ -149,6 +164,9 @@ impl Display for Value {
 
             Value::AccessStructField { r#struct, field, typ } => write!(f, "access-struct-field \"{field}\" {struct} : {typ}"),
             Value::DerefStructField { r#struct, field, typ } => write!(f, "deref-struct-field \"{field}\" {struct} : {typ}"),
+
+            Value::AccessTupleField { tuple, field, typ } => write!(f, "access-tuple-field \"{field}\" {tuple} : {typ}"),
+            Value::DerefTupleField { tuple, field, typ } => write!(f, "deref-tuple-field \"{field}\" {tuple} : {typ}"),
         }
     }
 }

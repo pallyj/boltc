@@ -115,6 +115,21 @@ impl Type {
         match &self.kind {
             TypeKind::Metatype(ty) => ty.clone().lookup_static_item(named),
             TypeKind::Struct(r#struct) => r#struct.lookup_instance_item(named, scope),
+            TypeKind::Tuple(items) => {
+                if !named.starts_with("item") {
+                    return None
+                }
+
+                let Ok(field_number) = usize::from_str_radix(&named[4..], 10) else {
+                    return None
+                };
+
+                if field_number > items.len() || field_number == 0 {
+                    return None
+                }
+
+                Some(Symbol::TupleField(items[field_number - 1].clone(), field_number - 1))
+            }
             _ => None,
         }
     }

@@ -16,6 +16,15 @@ impl AstLowerer {
             AstExpr::MemberExpr(member_expr) => ValueKind::Member { parent: Box::new(self.lower_expr(member_expr.parent())),
                                                                     member: member_expr.child().unwrap(), }.spanned_infer(span),
 
+            AstExpr::TupleExpr(tuple_expr) => {
+                let tuple_items = tuple_expr.items().map(|item| self.lower_expr(item)).collect::<Vec<_>>();
+
+                let infer_items = (0..tuple_items.len()).map(|_| Type::infer()).collect();
+                let tuple_type = TypeKind::Tuple(infer_items).anon();
+
+                ValueKind::Tuple(tuple_items).spanned(tuple_type, span)
+            }
+
             AstExpr::PrefixExpr(prefix) => {
                 let operator_symbol = prefix.operator();
                 let operator = self.factory.get_prefix_op(&operator_symbol).unwrap();

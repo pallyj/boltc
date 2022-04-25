@@ -42,6 +42,7 @@ pub enum ValueKind {
     StringLiteral(String),
     Closure(Closure),
     Uninit,
+    Tuple(Vec<Value>),
     // Deref(Box<Value>),
 
     // Variable Values
@@ -67,6 +68,7 @@ pub enum ValueKind {
         reciever: Box<Value>,
         var:      VarRef,
     },
+    TupleField(Box<Value>, usize),
 
     // Logic
     If(IfValue),
@@ -214,6 +216,12 @@ impl Debug for Value {
                     write!(f, "if {:?} {:?}", if_value.condition, if_value.positive)
                 }
             }
+            ValueKind::Tuple(items) => {
+                let tuple_items = items.iter().map(|item| format!("{item:?}")).collect::<Vec<_>>().join(", ");
+
+                write!(f, "({tuple_items})")
+            }
+            ValueKind::TupleField(value, n) => write!(f, "{value:?}.item{n}"),
             ValueKind::Unit => write!(f, "()"),
             ValueKind::Error => write!(f, "Error"),
         }?;

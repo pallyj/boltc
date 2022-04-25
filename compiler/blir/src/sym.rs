@@ -17,6 +17,8 @@ pub enum Symbol {
     InstanceVariable(VarRef),
 
     Type(TypeKind),
+
+    TupleField(Type, usize)
 }
 
 #[derive(Clone)]

@@ -89,6 +89,14 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 // }
             }
 
+            ValueKind::Tuple(tuple_items) => {
+                for item in tuple_items {
+                    self.replace_value(item, scope);
+
+                    self.replace_type(&mut item.typ, &item.span);
+                }
+            }
+
             ValueKind::FuncCall { function, args } => {
                 if let ValueKind::PolymorphicMethod { polymorphic, .. } = &mut function.kind {
                     polymorphic.filter_labels(&args.labels);
@@ -176,6 +184,10 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 self.replace_codeblock(&mut closure.code, scope);
             }
 
+            ValueKind::TupleField(value, _) => {
+                self.replace_value(value, scope);
+            }
+
             _ => {}
         }
     }
@@ -249,6 +261,10 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                                                               polymorphic: monomorphizer, });
 
                 self.replace_value(value, scope);
+            }
+            Symbol::TupleField(ty, field_number) => {
+                value.set_kind(ValueKind::TupleField(Box::new(parent), field_number));
+                value.set_type(ty);
             }
         }
     }

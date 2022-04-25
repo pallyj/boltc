@@ -49,6 +49,10 @@ impl BlirLowerer {
 
             ValueKind::Assign(ptr, val) => self.lower_assign(ptr, val),
 
+            ValueKind::Tuple(items) => self.lower_tuple(items, &value.typ),
+
+            ValueKind::TupleField(parent, field_n) => self.lower_tuple_field(parent, *field_n),
+
             _ => {
                 if let ValueKind::Polymorphic(pmf) = &value.kind {
                     for possibility in pmf.open_possibilities() {
@@ -58,6 +62,29 @@ impl BlirLowerer {
                 panic!("{value:?}")
             }
         }
+    }
+
+    fn lower_tuple_field(&mut self, parent: &Value, field_n: usize) -> LabelValue {
+        let tuple = self.lower_value(parent);
+
+        let field = self.builder().build_deref_tuple_field(tuple, field_n);
+
+        field
+    }
+
+    fn lower_tuple(&mut self, items: &[Value], ty: &Type) -> LabelValue {
+        let self_type = self.lower_type(ty);
+        let tuple_value = self.builder().build_stack_alloc_undef(self_type);
+
+        for (i, value) in items.iter().enumerate() {
+            let value = self.lower_value(value);
+
+            let field_ptr = self.builder()
+                                .build_access_tuple_field(tuple_value.clone(), i);
+            self.builder().build_assign_ptr(field_ptr, value);
+        }
+
+        self.builder().build_deref(tuple_value)
     }
 
     fn lower_pvalue(&mut self, value: &Value) -> Option<LabelValue> {
@@ -86,7 +113,7 @@ impl BlirLowerer {
 
     fn lower_closure(&mut self, closure: &Closure, closure_type: &Type) -> LabelValue {
         // Make a name based on:
-        //   [ ]The closures type
+        //   [ ] The closures type
         //   [ ] The enclosing function
         //   [x] A random number
         //   [ ] The index of the closure

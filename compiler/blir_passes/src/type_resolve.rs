@@ -368,6 +368,8 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                         value.set_kind(constant_value.kind);
                         value.typ = constant_value.typ;
                     }
+                    
+                    Symbol::TupleField(..) => unreachable!(),
                 }
             }
 

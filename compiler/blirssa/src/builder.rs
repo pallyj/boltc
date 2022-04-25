@@ -173,6 +173,38 @@ impl Builder {
         self.build_av(value)
     }
 
+    pub fn build_access_tuple_field(&mut self, tuple: LabelValue, field: usize) -> LabelValue {
+        let Type::Pointer { pointee } = tuple.typ_ref() else {
+			panic!();
+		};
+
+        let Type::Tuple(items) = pointee.as_ref() else {
+			panic!();
+		};
+
+        let typ = items[field].clone().pointer();
+
+        let value = Value::AccessTupleField { r#tuple,
+                                              field,
+                                              typ };
+
+        self.build_av(value)
+    }
+
+    pub fn build_deref_tuple_field(&mut self, tuple: LabelValue, field: usize) -> LabelValue {
+        let Type::Tuple(items) = tuple.typ_ref() else {
+			panic!();
+		};
+
+        let typ = items[field].clone().pointer();
+
+        let value = Value::DerefTupleField { r#tuple,
+                                             field,
+                                             typ };
+
+        self.build_av(value)
+    }
+
     pub fn build_stack_alloc_undef(&mut self, typ: Type) -> LabelValue {
         let value = Value::AllocOnStackUndef { typ: Type::Pointer { pointee: Box::new(typ) }, };
 
