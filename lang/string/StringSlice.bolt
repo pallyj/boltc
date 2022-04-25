@@ -1,0 +1,10 @@
+import intrinsics
+
+@defaultStringRepr
+public struct StringSlice {
+	internal var slice: strslice
+
+	public func length(): Int {
+		Int(repr: strslice_len(self.slice))
+	}
+}

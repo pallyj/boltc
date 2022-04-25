@@ -223,6 +223,7 @@ impl<'input, 'l> Parser<'input, 'l> {
                   || self.eat(SyntaxKind::LiteralDecFloat)
                   || self.eat(SyntaxKind::LiteralTrue)
                   || self.eat(SyntaxKind::LiteralFalse)
+                  || self.eat(SyntaxKind::StringLiteral)
         {
             marker.complete(self, SyntaxKind::Literal)
         } else if self.eat(SyntaxKind::OpenParen) {

@@ -60,6 +60,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
             ValueKind::BoolLiteral(_) => self.constrain_bool(value),
             ValueKind::IntLiteral(_) => self.constrain_int(value),
             ValueKind::FloatLiteral(_) => self.constrain_float(value),
+            ValueKind::StringLiteral(_) => self.constrain_string(value),
 
             ValueKind::FuncCall { function, args } => {
                 let function_type = &function.typ;
@@ -215,6 +216,16 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
         }
     }
 
+    fn constrain_string(&mut self, value: &Value) {
+        //println!("{value:?} <- some String");
+        if let Some(infer_key) = self.infer_key(&value.typ) {
+            let _constraint = self.checker
+                                  .impose(infer_key.concretizes_explicit(TypeVariant::SomeString));
+
+            // Match constraint for errors
+        }
+    }
+
     fn constrain_func(&mut self, value: &Value) {
         // println!("{value:?} <- some Function");
         if let Some(infer_key) = self.infer_key(&value.typ) {
@@ -239,6 +250,12 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 
             for (param1, param2) in params_1.iter().zip(params_2) {
                 self.constrain_one_way(param1, param2);
+            }
+        }  else if let (TypeKind::Tuple(tuple_items_1), 
+                        TypeKind::Tuple(tuple_items_2)) = (constrain.kind(), absolute.kind())
+        {
+            for (tuple_item_1, tuple_item_2) in tuple_items_1.iter().zip(tuple_items_2) {
+                self.constrain_one_way(tuple_item_1, tuple_item_2);
             }
         }
 
@@ -283,6 +300,12 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                     for (param1, param2) in params_1.iter().zip(params_2) {
                         self.constrain_two_way(param1, param2);
                     }
+                } else if let (TypeKind::Tuple(tuple_items_1), 
+                               TypeKind::Tuple(tuple_items_2)) = (ty1.kind(), ty2.kind())
+                {
+                    for (tuple_item_1, tuple_item_2) in tuple_items_1.iter().zip(tuple_items_2) {
+                        self.constrain_two_way(tuple_item_1, tuple_item_2);
+                    }
                 }
 
                 return;
@@ -304,6 +327,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
             TypeKind::Integer { bits: 1 } => TypeVariant::LlvmBool,
             TypeKind::Integer { bits } => TypeVariant::LlvmInt { bits: *bits as u32 },
             TypeKind::Float { bits } => TypeVariant::LlvmFloat { bits: *bits as u32 },
+            TypeKind::StrSlice => TypeVariant::LlvmString,
 
             TypeKind::Struct(r#struct) => TypeVariant::Struct(r#struct.clone()),
 
@@ -313,9 +337,11 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                                                                       labels:      labels.clone(),
                                                                       return_type: return_type.clone(), },
 
+            TypeKind::Tuple(tuple_items) => TypeVariant::Tuple(tuple_items.clone()),
+
             TypeKind::Error => TypeVariant::Error,
 
-            _ => panic!(),
+            _ => panic!("{ty:?}"),
         }
     }
 

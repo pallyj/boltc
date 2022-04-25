@@ -10,6 +10,7 @@ pub enum Type {
     Float {
         bits: u32,
     },
+    StrSlice,
 
     Function {
         pars:        Vec<Type>,
@@ -24,6 +25,7 @@ pub enum Type {
     Struct {
         container: StructRef,
     },
+    Tuple(Vec<Type>),
 }
 
 impl Type {
@@ -42,6 +44,7 @@ impl std::fmt::Display for Type {
 
             Type::Integer { bits } => write!(f, "i{bits}"),
             Type::Float { bits } => write!(f, "f{bits}"),
+            Type::StrSlice => write!(f, "strslice"),
 
             Type::Function { pars, return_type } => {
                 let pars = pars.iter()
@@ -58,6 +61,14 @@ impl std::fmt::Display for Type {
 
             Type::Struct { container } => {
                 write!(f, "struct {}", container.name())
+            }
+            Type::Tuple(tuple_items) => {
+                let tuple_items = tuple_items.iter()
+                                             .map(|item| item.to_string())
+                                             .collect::<Vec<_>>()
+                                             .join(", ");
+
+                write!(f, "({tuple_items})")
             }
         }
     }

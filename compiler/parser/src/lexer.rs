@@ -126,6 +126,9 @@ pub enum SyntaxKind {
     #[regex(r"[ \n\r\f\t]")]
     Whitespace,
 
+    #[regex(r#""[^"]*""#)]
+    StringLiteral,
+
     #[error]
     Error,
 
@@ -186,6 +189,10 @@ pub enum SyntaxKind {
 
     Closure,
     TrailingClosure,
+
+    ParenthesizedType,
+    TupleType,
+    Tuple,
 
     _Invalid,
 }

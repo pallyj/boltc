@@ -299,6 +299,12 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 }
             }
 
+            TypeKind::Tuple(tuple_items) => {
+                for tuple_item in tuple_items {
+                    self.replace_type(tuple_item, span);
+                }
+            }
+
             TypeKind::Member { parent, .. } => self.replace_type(parent, span),
 
             TypeKind::Method { reciever, .. } => self.replace_type(reciever, span),
@@ -314,6 +320,7 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
             TypeVariant::LlvmInt { bits } => Some(TypeKind::Integer { bits: *bits as u64 }),
             TypeVariant::LlvmFloat { bits } => Some(TypeKind::Float { bits: *bits as u64 }),
             TypeVariant::LlvmBool => Some(TypeKind::Integer { bits: 1 }),
+            TypeVariant::LlvmString => Some(TypeKind::StrSlice),
             TypeVariant::Struct(r#struct) => Some(TypeKind::Struct(r#struct.clone())),
 
             TypeVariant::SomeInteger if self.is_final_run => self.context
@@ -325,12 +332,15 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                                                                .clone()
                                                                .map(TypeKind::Struct),
             TypeVariant::SomeBool if self.is_final_run => self.context.default_bool_repr.clone().map(TypeKind::Struct),
+            TypeVariant::SomeString if self.is_final_run => self.context.default_string_repr.clone().map(TypeKind::Struct),
 
             TypeVariant::Function { params,
                                     labels,
                                     return_type, } => Some(TypeKind::Function { return_type: return_type.clone(),
                                                                                 params:      params.clone(),
                                                                                 labels:      labels.clone(), }),
+
+            TypeVariant::Tuple(tuple_items) => Some(TypeKind::Tuple(tuple_items.clone())),
 
             _ => None,
         }

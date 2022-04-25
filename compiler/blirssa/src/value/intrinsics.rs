@@ -156,6 +156,8 @@ pub enum UnaryIntrinsicFn {
 
     FloatToInt,
     FloatToIntSig,
+
+    StrSliceLen,
 }
 
 impl UnaryIntrinsicFn {
@@ -177,6 +179,8 @@ impl UnaryIntrinsicFn {
             Self::FloatTrunc16 => IntrinsicFnOutput::Float(16),
 
             Self::FloatToInt | Self::FloatToIntSig => IntrinsicFnOutput::Integer(64),
+
+            Self::StrSliceLen => IntrinsicFnOutput::Integer(64)
         }
     }
 
@@ -212,6 +216,8 @@ impl UnaryIntrinsicFn {
 
             Self::FloatToInt => "float.toint",
             Self::FloatToIntSig => "float.toint.sig",
+
+            Self::StrSliceLen => "strslice.len"
         }
     }
 }

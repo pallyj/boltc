@@ -1,0 +1,13 @@
+@entryPoint
+public func main() {
+	let tuple: (Int, Int) = (100, 200)
+	let tuple: (String, Int) = ("Hello, World", 400)
+	let tuple = (600, "Hello, World")
+	let tuple: (Int32, _) = (1000, "Hello, World")
+}
+
+func getTuple(): (Int, Int)
+func useTuple(tuple: (Int, Int)) {
+	//print(tuple.0)
+	//print(tuple.1)
+}

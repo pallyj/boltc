@@ -226,6 +226,21 @@ impl StructRef {
             _ => false,
         }
     }
+
+    pub fn string_repr(&self) -> bool {
+        let struct_ptr = unsafe { &*self.inner.as_ptr() };
+
+        let vars = &struct_ptr.instance_vars;
+
+        if vars.len() != 1 {
+            return false;
+        }
+
+        match vars[0].borrow().typ.kind() {
+            TypeKind::StrSlice => true,
+            _ => false,
+        }
+    }
 }
 
 impl Hash for StructRef {

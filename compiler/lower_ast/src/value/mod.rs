@@ -55,20 +55,30 @@ impl AstLowerer {
             }
 
             AstExpr::LiteralExpr(literal) => {
-                let text = literal.text().replace("_", "");
+                let kind = literal.literal_kind();
 
-                match literal.literal_kind() {
-                    LiteralKind::True => ValueKind::BoolLiteral(true).spanned_infer(span),
-                    LiteralKind::False => ValueKind::BoolLiteral(false).spanned_infer(span),
+                if let LiteralKind::String =  kind {
+                    let text = literal.text();
+                    let text_range = 1..(text.len() - 1);
 
-                    LiteralKind::DecInteger => ValueKind::IntLiteral(str::parse(&text).unwrap()).spanned_infer(span),
-                    LiteralKind::HexInteger => ValueKind::IntLiteral(u64::from_str_radix(&text[2..], 16).unwrap()).spanned_infer(span),
-                    LiteralKind::OctInteger => ValueKind::IntLiteral(u64::from_str_radix(&text[2..], 8).unwrap()).spanned_infer(span),
-                    LiteralKind::BinInteger => ValueKind::IntLiteral(u64::from_str_radix(&text[2..], 2).unwrap()).spanned_infer(span),
+                    ValueKind::StringLiteral(text[text_range].to_string()).spanned_infer(span)
+                } else {
+                    let text = literal.text().replace("_", "");
 
-                    LiteralKind::DecFloat => ValueKind::FloatLiteral(fast_float::parse(&text).unwrap()).spanned_infer(span),
+                    match literal.literal_kind() {
+                        LiteralKind::True => ValueKind::BoolLiteral(true).spanned_infer(span),
+                        LiteralKind::False => ValueKind::BoolLiteral(false).spanned_infer(span),
 
-                    _ => ValueKind::BoolLiteral(true).spanned_infer(span),
+                        LiteralKind::DecInteger => ValueKind::IntLiteral(str::parse(&text).unwrap()).spanned_infer(span),
+                        LiteralKind::HexInteger => ValueKind::IntLiteral(u64::from_str_radix(&text[2..], 16).unwrap()).spanned_infer(span),
+                        LiteralKind::OctInteger => ValueKind::IntLiteral(u64::from_str_radix(&text[2..], 8).unwrap()).spanned_infer(span),
+                        LiteralKind::BinInteger => ValueKind::IntLiteral(u64::from_str_radix(&text[2..], 2).unwrap()).spanned_infer(span),
+
+                        LiteralKind::DecFloat => ValueKind::FloatLiteral(fast_float::parse(&text).unwrap()).spanned_infer(span),
+
+                        LiteralKind::String => unreachable!(),
+                        LiteralKind::Error => panic!(),
+                    }
                 }
             }
 

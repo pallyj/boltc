@@ -8,6 +8,7 @@ pub enum TypeVariant {
     SomeInteger,
     SomeFloat,
     SomeBool,
+    SomeString,
     SomeFunction,
 
     LlvmInt {
@@ -17,15 +18,16 @@ pub enum TypeVariant {
         bits: u32,
     },
     LlvmBool,
+    LlvmString,
 
     Struct(StructRef),
 
-    // TODO: Add function type
     Function {
         params:      Vec<Type>,
         labels:      Vec<Option<String>>,
         return_type: Box<Type>,
     },
+    Tuple(Vec<Type>),
 
     Void,
     Diverges,
@@ -49,6 +51,8 @@ impl Variant for TypeVariant {
             (Self::SomeFloat, Self::LlvmFloat { bits }) | (Self::LlvmFloat { bits }, Self::SomeFloat) => Ok(Self::LlvmFloat { bits }),
 
             (Self::SomeBool, Self::LlvmBool) | (Self::LlvmBool, Self::SomeBool) => Ok(Self::LlvmBool),
+
+            (Self::SomeString, Self::LlvmString) | (Self::LlvmString, Self::SomeString) => Ok(Self::LlvmString),
 
             (Self::SomeFunction, function @ Self::Function { .. }) => Ok(function),
 
@@ -76,6 +80,15 @@ impl Variant for TypeVariant {
                 } else {
                     Err(format!("struct '{}' is not representable by a boolean",
                                 bool_struct.name()))
+                }
+            }
+
+            (Self::SomeString, Self::Struct(string_struct)) | (Self::Struct(string_struct), Self::SomeString) => {
+                if string_struct.string_repr() {
+                    Ok(Self::Struct(string_struct))
+                } else {
+                    Err(format!("struct '{}' is not representable by a string",
+                                string_struct.name()))
                 }
             }
 

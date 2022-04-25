@@ -32,6 +32,14 @@ impl AstLowerer {
                                      labels: vec![] }
             }
 
+            AstType::ParenthesizedType(paren_type) => return self.lower_type(paren_type.typ()),
+
+            AstType::TupleType(tuple_type) => {
+                let tuple_types = tuple_type.types().map(|ty| self.lower_type(ty)).collect();
+
+                TypeKind::Tuple(tuple_types)
+            }
+
             // TODO: Add infer
             AstType::Error => panic!(),
         }.spanned(span)

@@ -31,7 +31,8 @@ fn main() {
                 "int/UInt8.bolt",
                 "int/UInt16.bolt",
                 "int/UInt32.bolt",
-                "int/UInt64.bolt"];
+                "int/UInt64.bolt",
+                "string/StringSlice.bolt"];
 
     for file in lang {
         project.open_file(&format!("lang/{file}"));
@@ -136,7 +137,7 @@ impl Project {
 
         let library = lowerer.finish();
 
-        // println!("{library}");
+        //println!("{library}");
 
         let config = BuildConfig::new(BuildProfile::Release, BuildOutput::Object, None);
 

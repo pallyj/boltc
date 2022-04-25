@@ -113,6 +113,7 @@ pub enum LiteralKind {
     OctInteger,
     BinInteger,
     DecFloat,
+    String,
     Error,
 }
 
@@ -135,6 +136,7 @@ impl LiteralExpr {
                 SyntaxKind::LiteralDecFloat => LiteralKind::DecFloat,
                 SyntaxKind::LiteralFalse => LiteralKind::False,
                 SyntaxKind::LiteralTrue => LiteralKind::True,
+                SyntaxKind::StringLiteral => LiteralKind::String,
                 _ => LiteralKind::Error,
             })
             .unwrap_or(LiteralKind::Error)

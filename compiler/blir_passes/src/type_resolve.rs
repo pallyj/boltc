@@ -286,6 +286,12 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 }
             }
 
+            TypeKind::Tuple(tuple_items) => {
+                for item in tuple_items {
+                    self.resolve_type(item, scope);
+                }
+            }
+
             _ => {
                 // Do nothing
             }

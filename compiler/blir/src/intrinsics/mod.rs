@@ -34,6 +34,8 @@ pub enum UnaryIntrinsicFn {
     Float16FromIntegerSig,
     Float32FromIntegerSig,
     Float64FromIntegerSig,
+
+    StrSliceLen,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -97,6 +99,19 @@ impl Intrinsics {
         self.add_float_type(64);
 
         self.add_bool_type();
+        self.add_strslice_type();
+    }
+
+    pub fn add_strslice_type(&self) {
+        let strslice = TypeKind::StrSlice;
+        let length = TypeKind::Integer { bits: 64 };
+
+        self.scope.add_symbol("strslice".to_string(),
+                              Visibility::Public,
+                              Symbol::Type(strslice.clone()));
+
+        // strslice_len
+        self.add_unary_func("strslice_len".to_string(), UnaryIntrinsicFn::StrSliceLen, &strslice, &length);
     }
 
     /// Adds a float type with arithmatic

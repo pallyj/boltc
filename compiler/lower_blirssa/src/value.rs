@@ -5,7 +5,7 @@ use inkwell::{builder::Builder,
               values::{BasicValue, BasicValueEnum, CallableValue, FunctionValue},
               FloatPredicate, IntPredicate};
 
-use crate::{func::FunctionContext, typ::lower_basic_typ, ModuleContext};
+use crate::{func::FunctionContext, typ::{lower_basic_typ, lower_strslice_type}, ModuleContext};
 
 pub fn lower_value<'a, 'ctx>(value: &Value, context: &ModuleContext<'a, 'ctx>, fn_ctx: &FunctionContext<'ctx>) -> Result<LLVMValue<'ctx>, String> {
     Ok(match value {
@@ -18,6 +18,15 @@ pub fn lower_value<'a, 'ctx>(value: &Value, context: &ModuleContext<'a, 'ctx>, f
                                                                                             .into_float_type()
                                                                                             .const_float(*value)
                                                                                             .as_basic_value_enum()),
+        Value::GlobalString { value, .. } => {
+            // TODO: Give it a better name
+            let pointer = context.builder.build_global_string_ptr(&value, "global-string").as_basic_value_enum();
+            let length = context.context.i64_type().const_int(value.len() as u64, false).as_basic_value_enum();
+
+            let slice = lower_strslice_type(context).const_named_struct(&[pointer, length]);
+
+            LLVMValue::Basic(slice.as_basic_value_enum())
+        }
 
         Value::BinaryIntrinsic { name, left, right, .. } => {
             let lhs = fn_ctx.get_local(left).unwrap().basic();
@@ -388,11 +397,25 @@ fn build_unary_intrinsic<'ctx>(name: UnaryIntrinsicFn, value: BasicValueEnum<'ct
         UnaryIntrinsicFn::FloatTrunc16 => builder.build_float_trunc(value.into_float_value(), context.f16_type(), "floatTrunc16")
                                                  .as_basic_value_enum(),
 
-        // TODO: Add float to signed int
         UnaryIntrinsicFn::FloatToInt => builder.build_float_to_unsigned_int(value.into_float_value(), context.i64_type(), "ftoui")
                                                .as_basic_value_enum(),
         UnaryIntrinsicFn::FloatToIntSig => builder.build_float_to_signed_int(value.into_float_value(), context.i64_type(), "ftosi")
                                                   .as_basic_value_enum(),
+
+        UnaryIntrinsicFn::StrSliceLen => {
+            if value.is_struct_value() {
+                let slice_value = value.into_struct_value();
+                builder.build_extract_value(slice_value, 1, "string-len")
+                       .unwrap()
+                       .as_basic_value_enum()
+            } else if value.is_pointer_value() {
+                let pointer_value = value.into_pointer_value();
+                let length_pointer = builder.build_struct_gep(pointer_value, 1, "string-len-ptr").unwrap();
+                builder.build_load(length_pointer, "str-len").as_basic_value_enum()
+            } else {
+                panic!()
+            }
+        }
     }
 }
 

@@ -37,18 +37,18 @@ pub enum TypeKind {
         params:      Vec<Type>,
         labels:      Vec<Option<String>>,
     },
-
-    SomeInteger,
-    SomeFloat,
-    SomeBool,
-    SomeFunction,
-
     Method {
         reciever:    Box<Type>,
         return_type: Box<Type>,
         params:      Vec<Type>,
     },
     Struct(StructRef),
+    Tuple(Vec<Type>),
+
+    SomeInteger,
+    SomeFloat,
+    SomeBool,
+    SomeFunction,
 
     // Intrinsic types
     Integer {
@@ -57,6 +57,7 @@ pub enum TypeKind {
     Float {
         bits: u64,
     },
+    StrSlice,
 
     // Second-class types
     Divergent,
@@ -162,6 +163,10 @@ impl Type {
             TypeKind::Void => MangledType::Void,
             TypeKind::Divergent => MangledType::Diverges,
 
+            TypeKind::StrSlice => MangledType::StringSlice,
+
+            TypeKind::Tuple(types) => MangledType::Tuple(types.iter().map(Self::mangle).collect()),
+
             _ => panic!(),
         }
     }
@@ -206,6 +211,14 @@ impl Debug for Type {
 
                 write!(f, "func ({params}): {return_type:?}")
             }
+            TypeKind::Tuple(tuple_items) => {
+                let tuple_items = tuple_items.iter()
+                                .map(|par| format!("{par:?}"))
+                                .collect::<Vec<_>>()
+                                .join(", ");
+
+                write!(f, "({tuple_items})")
+            }
             TypeKind::Method { reciever,
                                return_type,
                                params, } => {
@@ -219,6 +232,7 @@ impl Debug for Type {
             TypeKind::Struct(struct_ref) => write!(f, "struct {}", struct_ref.name()),
             TypeKind::Integer { bits } => write!(f, "i{bits}"),
             TypeKind::Float { bits } => write!(f, "f{bits}"),
+            TypeKind::StrSlice => write!(f, "strslice"),
             TypeKind::Divergent => write!(f, "!"),
             TypeKind::Metatype(t) => write!(f, "<{:?}>", t),
             TypeKind::Error => write!(f, "error"),

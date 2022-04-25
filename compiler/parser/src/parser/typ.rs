@@ -18,7 +18,7 @@ impl<'input, 'l> Parser<'input, 'l> {
             let completed = ty.complete(self, SyntaxKind::NamedType);
 
             self.parse_ty_postfix(completed);
-        } else if self.eat(SyntaxKind::OpenParen) {
+        } else if self.check(SyntaxKind::OpenParen) {
             self.parse_ty_unit(ty)
         } else if self.eat(SyntaxKind::FuncKw) {
             self.parse_ty_func(ty)
@@ -32,13 +32,13 @@ impl<'input, 'l> Parser<'input, 'l> {
     }
 
     pub fn parse_ty_unit(&mut self, marker: Marker) {
-        if self.eat(SyntaxKind::CloseParen) {
-            marker.complete(self, SyntaxKind::UnitType);
-        } else {
-            self.error_recover("expected closing parenthesis", TYPE_RECOVERY_SET);
+        let tuple_types_len = self.parse_paren_comma_seq(Self::parse_ty);
 
-            marker.complete(self, SyntaxKind::Error);
-        }
+        match tuple_types_len {
+            0 => marker.complete(self, SyntaxKind::UnitType),
+            1 => marker.complete(self, SyntaxKind::ParenthesizedType),
+            _ => marker.complete(self, SyntaxKind::TupleType),
+        };
     }
 
     pub fn parse_ty_func(&mut self, marker: Marker) {

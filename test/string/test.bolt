@@ -1,0 +1,10 @@
+@entryPoint
+func main() {
+	print(withLength: "Hello, World!")
+}
+
+func print(withLength slice: StringSlice) {
+	print(slice)
+	print(" with length: ")
+	printLine(slice.length())
+}

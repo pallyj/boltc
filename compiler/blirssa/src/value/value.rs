@@ -13,6 +13,10 @@ pub enum Value {
         typ:   Type,
         value: f64,
     },
+    GlobalString {
+        typ:   Type,
+        value: String,
+    },
 
     UnaryIntrinsic {
         name:        UnaryIntrinsicFn,
@@ -84,6 +88,7 @@ impl Value {
         match self {
             Self::IntegerLiteral { typ, .. } => typ,
             Self::FloatLiteral { typ, .. } => typ,
+            Self::GlobalString { typ, .. } => typ,
 
             Self::UnaryIntrinsic { return_type, .. } => return_type,
             Self::BinaryIntrinsic { return_type, .. } => return_type,
@@ -108,6 +113,7 @@ impl Display for Value {
         match self {
             Value::IntegerLiteral { typ, value } => write!(f, "integer-literal {value} : {typ}"),
             Value::FloatLiteral { typ, value } => write!(f, "float-literal {value} : {typ}"),
+            Value::GlobalString { typ, value } => write!(f, "global-string \"{value}\" : {typ}"),
 
             Value::UnaryIntrinsic { name, arg, return_type } => write!(f,
                                                                        "intrinsic \"{name}\" ( {arg} ) : {return_type}",

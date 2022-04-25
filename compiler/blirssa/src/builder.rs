@@ -37,6 +37,14 @@ impl Builder {
         return self.build_av(value);
     }
 
+    pub fn build_string_literal(&mut self, value: String) -> LabelValue {
+        let typ = Type::StrSlice;
+
+        let value = Value::GlobalString { value, typ };
+
+        return self.build_av(value);
+    }
+
     pub fn build_unary_intrinsic(&mut self, intrinsic: UnaryIntrinsicFn, arg: LabelValue) -> LabelValue {
         let output = intrinsic.output_type();
 

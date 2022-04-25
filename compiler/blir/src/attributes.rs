@@ -91,6 +91,7 @@ pub fn default_attributes() -> AttributeFactory {
     factory.register_struct_attribute(DefaultIntegerReprAttribute {});
     factory.register_struct_attribute(DefaultFloatReprAttribute {});
     factory.register_struct_attribute(DefaultBoolReprAttribute {});
+    factory.register_struct_attribute(DefaultStringReprAttribute {});
 
     factory
 }
@@ -114,6 +115,8 @@ struct TransparentAttribute;
 struct DefaultIntegerReprAttribute;
 struct DefaultFloatReprAttribute;
 struct DefaultBoolReprAttribute;
+
+struct DefaultStringReprAttribute;
 
 impl FuncAttribute for EntryPointAttribute {
     fn name(&self) -> &'static str { "entryPoint" }
@@ -171,5 +174,17 @@ impl StructAttribute for DefaultBoolReprAttribute {
         }
 
         context.default_bool_repr = Some(struct_ref.clone());
+    }
+}
+
+impl StructAttribute for DefaultStringReprAttribute {
+    fn name(&self) -> &'static str { "defaultStringRepr" }
+
+    fn apply(&self, struct_ref: &StructRef, context: &mut BlirContext, _debugger: &mut Debugger) {
+        if !struct_ref.string_repr() {
+            // Throw an error
+        }
+
+        context.default_string_repr = Some(struct_ref.clone());
     }
 }

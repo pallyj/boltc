@@ -14,6 +14,7 @@ impl BlirLowerer {
             ValueKind::IntLiteral(n) => self.lower_int_literal(*n, &value.typ),
             ValueKind::FloatLiteral(n) => self.lower_float_literal(*n, &value.typ),
             ValueKind::BoolLiteral(b) => self.lower_bool_literal(*b, &value.typ),
+            ValueKind::StringLiteral(str) => self.lower_string_literal(str.clone(), &value.typ),
 
             ValueKind::FuncCall { function, args } => {
                 let lowered_args = args.args.iter().map(|arg| self.lower_value(arg)).collect();
@@ -175,6 +176,27 @@ impl BlirLowerer {
                 self.lower_init(ty, vec![literal])
             }
             _ => panic!("{ty:?}"),
+        }
+    }
+
+    fn lower_string_literal(&mut self, s: String, ty: &Type) -> LabelValue {
+        match ty.kind() {
+            TypeKind::StrSlice => self.builder()
+                                      .build_string_literal(s),
+            TypeKind::Struct(r#struct) => {
+                // TODO: Do this by insert value
+                if !r#struct.string_repr() {
+                    panic!()
+                }
+
+                let borrowed_struct = r#struct.borrow();
+                let borrowed_var = borrowed_struct.instance_vars[0].borrow();
+
+                let literal = self.lower_string_literal(s, &borrowed_var.typ);
+
+                self.lower_init(ty, vec![literal])
+            }
+            _ => panic!("{ty:?} is not a string"),
         }
     }
 
@@ -442,5 +464,6 @@ fn lower_unary_intrinsic(intrinsic: UnaryIntrinsicFn) -> blirssa::value::UnaryIn
         UnaryIntrinsicFn::Float16FromIntegerSig => SsaUnaryIntrinsicFn::IntegerToFloat16Sig,
         UnaryIntrinsicFn::Float32FromIntegerSig => SsaUnaryIntrinsicFn::IntegerToFloat32Sig,
         UnaryIntrinsicFn::Float64FromIntegerSig => SsaUnaryIntrinsicFn::IntegerToFloat64Sig,
+        UnaryIntrinsicFn::StrSliceLen => SsaUnaryIntrinsicFn::StrSliceLen,
     }
 }

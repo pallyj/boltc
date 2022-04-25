@@ -16,6 +16,8 @@ ast!(struct MemberType(MemberType));
 ast!(struct UnitType(UnitType));
 ast!(struct FuncType(FuncType));
 ast!(struct InferType(InferType));
+ast!(struct ParenthesizedType(ParenthesizedType));
+ast!(struct TupleType(TupleType));
 
 ast!(
     enum Type {
@@ -23,6 +25,8 @@ ast!(
         MemberType,
         UnitType,
         FuncType,
+        ParenthesizedType,
+        TupleType,
     }
 );
 
@@ -33,6 +37,8 @@ impl Debug for Type {
             Self::MemberType(arg0) => write!(f, "{arg0:?}"),
             Self::UnitType(_) => write!(f, "()"),
             Self::FuncType(arg0) => write!(f, "{arg0:?}"),
+            Self::ParenthesizedType(arg0) => write!(f, "{arg0:?}"),
+            Self::TupleType(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "Error"),
         }
     }
@@ -96,5 +102,44 @@ impl Debug for FuncType {
             Some(ty) => write!(f, "func ({params}): {ty:?}"),
             None => write!(f, "func ({params})"),
         }
+    }
+}
+
+impl ParenthesizedType {
+    pub fn typ(&self) -> Type {
+        self.0
+            .first_child()
+            .unwrap()
+            .first_child()
+            .map(Type::cast)
+            .unwrap()
+    }
+}
+
+impl Debug for ParenthesizedType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({:?})", self.typ())
+    }
+}
+
+impl TupleType {
+    pub fn types(&self) -> impl Iterator<Item = Type> {
+        self.0
+            .first_child()
+            .unwrap()
+            .children()
+            .map(Type::cast)
+    }
+}
+
+impl Debug for TupleType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let tuple_types = self
+            .types()
+            .map(|typ| format!("{typ:?}"))
+            .collect::<Vec<_>>()
+            .join(", ");
+
+        write!(f, "({tuple_types})")
     }
 }

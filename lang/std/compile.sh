@@ -1,1 +1,1 @@
-clang -c std/print.c -o bin/print.o
+clang -c lang/std/print.c -o bin/print.o

@@ -86,15 +86,17 @@ impl<'input, 'l> Parser<'input, 'l> {
         marker.complete(self, node);
     }
 
-    fn parse_delim_separated(&mut self, node: SyntaxKind, bra: SyntaxKind, ket: SyntaxKind, sep: SyntaxKind, mut f: impl FnMut(&mut Self)) {
+    fn parse_delim_separated(&mut self, node: SyntaxKind, bra: SyntaxKind, ket: SyntaxKind, sep: SyntaxKind, mut f: impl FnMut(&mut Self)) -> usize {
         let marker = self.start();
+        let mut n = 0;
 
         if !self.eat(bra) {
             // Throw an error
             // Recover from this
-            self.bump();
+            self.error(&format!("token {bra:?} not found"));
         } else {
             while !self.eat(ket) {
+                n += 1;
                 f(self);
 
                 if !self.eat(sep) {
@@ -108,6 +110,7 @@ impl<'input, 'l> Parser<'input, 'l> {
         }
 
         marker.complete(self, node);
+        n
     }
 
     pub fn error(&mut self, error: &str) {
@@ -226,7 +229,7 @@ impl<'input, 'l> Parser<'input, 'l> {
 
     fn peek_raw(&self) -> Option<SyntaxKind> { self.lexemes.get(self.cursor).map(|token| token.kind) }
 
-    pub fn parse_paren_comma_seq(&mut self, f: impl FnMut(&mut Self)) {
+    pub fn parse_paren_comma_seq(&mut self, f: impl FnMut(&mut Self)) -> usize {
         self.parse_delim_separated(SyntaxKind::CommaSeparatedList,
                                    SyntaxKind::OpenParen,
                                    SyntaxKind::CloseParen,
