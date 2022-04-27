@@ -3,13 +3,13 @@ use super::{marker::{CompletedMarker, Marker},
 use crate::{lexer::SyntaxKind,
             operators::{OperatorFix, OperatorPrecedence}};
 
-const EXPR_RECOVERY_SET: &[SyntaxKind] = &[SyntaxKind::LetKw,
-                                           SyntaxKind::ReturnKw,
-                                           SyntaxKind::OpenBrace,
-                                           SyntaxKind::CloseBrace,
-                                           SyntaxKind::Semicolon,
-                                           SyntaxKind::OpenParen,
-                                           SyntaxKind::Period];
+pub const EXPR_RECOVERY_SET: &[SyntaxKind] = &[SyntaxKind::LetKw,
+                                               SyntaxKind::ReturnKw,
+                                               SyntaxKind::OpenBrace,
+                                               SyntaxKind::CloseBrace,
+                                               SyntaxKind::Semicolon,
+                                               SyntaxKind::OpenParen,
+                                               SyntaxKind::Period];
 
 impl<'input, 'l> Parser<'input, 'l> {
     const CLOSURE_YIELD_SYMBOL: SyntaxKind = SyntaxKind::BigArrow;
@@ -267,8 +267,15 @@ impl<'input, 'l> Parser<'input, 'l> {
             }
         } else if self.eat(SyntaxKind::IfKw) {
             self.parse_expr_if(marker)
+        } else if self.eat(SyntaxKind::MatchKw) {
+            self.parse_expr_match(marker)
         } else if self.check(SyntaxKind::OpenBrace) {
             self.parse_closure(marker)
+        } else if self.eat(SyntaxKind::Period) {
+            if !self.eat(SyntaxKind::Ident) {
+                self.error_recover("expected ident in variant", EXPR_RECOVERY_SET);
+            }
+            marker.complete(self, SyntaxKind::VariantLiteral)
         } else {
             // Try to do recovery
             self.error_recover("expected expression", EXPR_RECOVERY_SET);
@@ -300,5 +307,46 @@ impl<'input, 'l> Parser<'input, 'l> {
         }
 
         marker.complete(self, SyntaxKind::IfExpr)
+    }
+
+    pub fn parse_expr_match(&mut self, marker: Marker) -> CompletedMarker {
+        self.node(SyntaxKind::Condition, Parser::parse_expr_before_brace);
+
+        if !self.eat(SyntaxKind::OpenBrace) {
+            self.error_recover("expected open brace", EXPR_RECOVERY_SET);
+            return marker.complete(self, SyntaxKind::Error)
+        }
+
+        // Parse branches
+        while !self.eat(SyntaxKind::CloseBrace) {
+            self.parse_match_branch();
+        }
+
+        marker.complete(self, SyntaxKind::MatchExpr)
+    }
+
+    pub fn parse_match_branch(&mut self) {
+        let marker = self.start();
+
+        self.parse_pattern();
+
+        if !self.eat(SyntaxKind::BigArrow) {
+            self.error_recover("expected `=>`", EXPR_RECOVERY_SET);
+            marker.complete(self, SyntaxKind::Error);
+            return;
+        }
+
+        if self.check(SyntaxKind::OpenBrace) {
+            self.parse_codeblock();
+            self.eat(SyntaxKind::Comma);
+        } else {
+            self.parse_expr();
+            if !self.eat(SyntaxKind::Comma) {
+                self.error("expected comma");
+            }
+        }
+
+        marker.complete(self, SyntaxKind::MatchBranch);
+        return
     }
 }

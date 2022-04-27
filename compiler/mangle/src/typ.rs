@@ -22,6 +22,7 @@ pub enum MangledType {
     Tuple(Vec<MangledType>),
     Function(Vec<MangledType>, Box<MangledType>),
     Struct(Path),
+    Enum(Path)
 }
 
 impl Display for MangledType {
@@ -59,6 +60,10 @@ impl Display for MangledType {
 
             MangledType::Struct(path) => {
                 write!(f, "{path}S")
+            }
+
+            MangledType::Enum(path) => {
+                write!(f, "{path}V")
             }
         }
     }

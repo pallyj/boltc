@@ -1,7 +1,7 @@
 use blir::{attributes::AttributeFactory,
            code::{CodeBlock, ExternFunctionRef, FunctionRef, MethodRef, Statement, StatementKind},
            scope::{ScopeRef, ScopeRelation, ScopeType},
-           typ::{StructRef, Type, TypeKind},
+           typ::{StructRef, Type, TypeKind, EnumRef},
            value::{Closure, ClosureParam, ConstantRef, IfBranch, IfValue, Value, ValueKind, VarRef},
            BlirContext, Library, Symbol, Visibility};
 use errors::{debugger::Debugger, error::ErrorCode};
@@ -64,6 +64,10 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
             self.resolve_struct_types(r#struct);
         }
 
+        for r#enum in &library.enums {
+            self.resolve_enum_types(r#enum);
+        }
+
         for r#struct in &library.structs {
             // Create a default initializer
             add_default_initializer(r#struct);
@@ -106,6 +110,16 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
         // Resolve each parameter's type
         for param in borrowed_func.info.params_mut() {
             self.resolve_type(&mut param.typ, &parent_scope);
+        }
+    }
+
+    fn resolve_enum_types(&mut self, r#enum: &EnumRef) {
+        let mut tag_counter = 0;
+
+        for variant in r#enum.variants().iter() {
+            variant.set_tag(tag_counter);
+
+            tag_counter += 1;
         }
     }
 

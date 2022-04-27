@@ -4,7 +4,7 @@ use mangle::Path;
 
 use crate::{code::{ExternFunctionRef, FunctionRef},
             scope::{ScopeRef, ScopeRelation, ScopeType},
-            typ::{StructRef, TypeKind},
+            typ::{StructRef, TypeKind, EnumRef},
             value::ConstantRef,
             Symbol, SymbolWrapper};
 
@@ -18,6 +18,7 @@ pub struct Library {
     pub functions:        Vec<FunctionRef>,
     pub extern_functions: Vec<ExternFunctionRef>,
     pub structs:          Vec<StructRef>,
+    pub enums:            Vec<EnumRef>,
     pub constants:        Vec<ConstantRef>,
 
     files: Vec<ScopeRef>,
@@ -31,6 +32,7 @@ impl Library {
                   functions:        Vec::new(),
                   extern_functions: Vec::new(),
                   structs:          Vec::new(),
+                  enums:            Vec::new(),
                   constants:        Vec::new(),
                   files:            vec![], }
     }
@@ -81,6 +83,18 @@ impl Library {
         self.scope.add_symbol(name, visibility, symbol)
     }
 
+    pub fn add_enum(&mut self, r#enum: EnumRef) -> Option<SymbolWrapper> {
+        // Add the substruct to the list of substructs
+        self.enums.push(r#enum.clone());
+
+        // Add the substructs symbol, returning another symbol if it exists
+        let visibility = r#enum.visibility();
+        let name = r#enum.name().to_string();
+
+        let symbol = Symbol::Type(r#enum.get_type());
+        self.scope.add_symbol(name, visibility, symbol)
+    }
+
     pub fn add_constant(&mut self, var: ConstantRef) -> Option<SymbolWrapper> {
         // Add the function to the list of functions
         self.constants.push(var.clone());
@@ -106,6 +120,10 @@ impl Debug for Library {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for r#struct in &self.structs {
             writeln!(f, "{struct:?}")?;
+        }
+
+        for r#enum in &self.enums {
+            writeln!(f, "{enum:?}")?;
         }
 
         for func in &self.functions {

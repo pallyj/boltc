@@ -53,6 +53,12 @@ impl BlirLowerer {
 
             ValueKind::TupleField(parent, field_n) => self.lower_tuple_field(parent, *field_n),
 
+            ValueKind::EnumVariant { of_enum, variant } => {
+                let enum_type = self.lower_type(&TypeKind::Enum(of_enum.clone()).anon());
+
+                self.builder().build_create_enum_variant(enum_type, variant.name())
+            }
+
             _ => {
                 if let ValueKind::Polymorphic(pmf) = &value.kind {
                     for possibility in pmf.open_possibilities() {

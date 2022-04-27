@@ -12,7 +12,7 @@ pub use var::*;
 
 use crate::{code::{CodeBlock, ExternFunctionRef, FunctionRef, MethodRef},
             intrinsics::{BinaryIntrinsicFn, UnaryIntrinsicFn},
-            typ::{Type, TypeKind},
+            typ::{Type, TypeKind, CaseRef, EnumRef},
             Monomorphizer};
 
 #[derive(Clone)]
@@ -40,10 +40,16 @@ pub enum ValueKind {
     FloatLiteral(f64),
     BoolLiteral(bool),
     StringLiteral(String),
+    VariantLiteral(String),
     Closure(Closure),
     Uninit,
     Tuple(Vec<Value>),
     // Deref(Box<Value>),
+
+    EnumVariant {
+        of_enum: EnumRef,
+        variant: CaseRef,
+    },
 
     // Variable Values
     Metatype(TypeKind),
@@ -178,8 +184,6 @@ impl Debug for IfBranch {
 
 impl Debug for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "(")?;
-
         match self.deref() {
             ValueKind::Named(name) => write!(f, "%{name}"),
             ValueKind::Member { parent, member } => write!(f, "{parent:?}.{member}"),
@@ -192,6 +196,8 @@ impl Debug for Value {
             ValueKind::FloatLiteral(fl) => write!(f, "{}", fl),
             ValueKind::StringLiteral(string) => write!(f, r#""{string}""#),
             ValueKind::BoolLiteral(b) => write!(f, "{b}"),
+            ValueKind::VariantLiteral(name) => write!(f, ".{name}"),
+            ValueKind::EnumVariant { of_enum, variant } => write!(f, "{}.{}", of_enum.name(), variant.name()),
             ValueKind::Uninit => write!(f, "uninit<{:?}>", self.typ),
             ValueKind::Assign(ptr, value) => write!(f, "{ptr:?} = {value:?}"),
             // ValueKind::Deref(value) => write!(f, "*{value:?}"),
@@ -226,7 +232,7 @@ impl Debug for Value {
             ValueKind::Error => write!(f, "Error"),
         }?;
 
-        write!(f, " : {:?})", self.typ)
+        write!(f, " <{:?}>", self.typ)
     }
 }
 

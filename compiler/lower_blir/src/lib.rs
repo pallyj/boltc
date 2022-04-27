@@ -5,6 +5,7 @@ mod smt;
 mod struct_;
 mod typ;
 mod val;
+mod enum_;
 
 use std::collections::HashMap;
 
@@ -40,9 +41,19 @@ impl BlirLowerer {
             self.lower_struct_definition(r#struct);
         }
 
+        // Lower enum definitions
+        for r#enum in self.lib.enums.clone() {
+            self.lower_enum_definition(r#enum);
+        }
+
         // Lower struct signatures
         for r#struct in self.lib.structs.clone() {
             self.lower_struct_signatures(r#struct);
+        }
+
+         // Lower enum signatures
+         for r#enum in self.lib.enums.clone() {
+            self.lower_enum_signature(r#enum);
         }
 
         // Lower function signatures

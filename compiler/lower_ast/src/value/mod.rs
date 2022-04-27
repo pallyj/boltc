@@ -166,7 +166,9 @@ impl AstLowerer {
 
             AstExpr::UnitExpr(_) => ValueKind::Unit.spanned(TypeKind::Void.anon(), span),
 
-            AstExpr::Error => panic!(),
+            AstExpr::VariantLiteral(variant_expr) => ValueKind::VariantLiteral(variant_expr.variant_name()).spanned(Type::infer(), span),
+
+            AstExpr::Error => panic!("{expr:?}"),
         }
     }
 

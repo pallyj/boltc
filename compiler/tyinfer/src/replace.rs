@@ -188,6 +188,19 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 self.replace_value(value, scope);
             }
 
+            ValueKind::VariantLiteral(named) => {
+                let TypeKind::Enum(enum_type) = value.typ.kind() else {
+                    return
+                };
+
+                let Some(variant) = enum_type.get_variant(named) else {
+                    return
+                };
+                let enum_variant_value = ValueKind::EnumVariant { of_enum: enum_type.clone(), variant };
+
+                value.set_kind(enum_variant_value);
+            }
+
             _ => {}
         }
     }
@@ -338,6 +351,7 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
             TypeVariant::LlvmBool => Some(TypeKind::Integer { bits: 1 }),
             TypeVariant::LlvmString => Some(TypeKind::StrSlice),
             TypeVariant::Struct(r#struct) => Some(TypeKind::Struct(r#struct.clone())),
+            TypeVariant::Enum(r#enum) => Some(TypeKind::Enum(r#enum.clone())),
 
             TypeVariant::SomeInteger if self.is_final_run => self.context
                                                                  .default_integer_repr

@@ -1,4 +1,4 @@
-use blir::typ::{StructRef, Type, TypeKind};
+use blir::typ::{StructRef, Type, TypeKind, EnumRef};
 use rusttyc::{Constructable, Partial, Variant};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -21,6 +21,7 @@ pub enum TypeVariant {
     LlvmString,
 
     Struct(StructRef),
+    Enum(EnumRef),
 
     Function {
         params:      Vec<Type>,

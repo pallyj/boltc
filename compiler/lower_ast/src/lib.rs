@@ -70,6 +70,12 @@ impl AstLowerer {
                     library.add_struct(lowered_struct);
                 }
 
+                FileItem::EnumDef(enum_def) => {
+                    let lowered_enum = self.lower_enum(enum_def, &parent, library.path());
+
+                    library.add_enum(lowered_enum);
+                }
+
                 FileItem::NoOp(_) => {}
 
                 FileItem::Error => panic!(),

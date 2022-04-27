@@ -93,6 +93,11 @@ pub enum Value {
         args:     Vec<LabelValue>,
         typ:      Type,
     },
+
+    CreateEnumVariant {
+        variant: String,
+        typ: Type,
+    },
 }
 
 impl Value {
@@ -119,6 +124,8 @@ impl Value {
 
             Self::AccessTupleField { typ, .. } => typ,
             Self::DerefTupleField { typ, .. } => typ,
+
+            Self::CreateEnumVariant { typ, .. } => typ,
         }.clone()
     }
 }
@@ -167,6 +174,8 @@ impl Display for Value {
 
             Value::AccessTupleField { tuple, field, typ } => write!(f, "access-tuple-field \"{field}\" {tuple} : {typ}"),
             Value::DerefTupleField { tuple, field, typ } => write!(f, "deref-tuple-field \"{field}\" {tuple} : {typ}"),
+
+            Value::CreateEnumVariant { variant, typ } => write!(f, "create-enum-variant .{variant} : {typ}"),
         }
     }
 }

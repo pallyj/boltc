@@ -1,4 +1,4 @@
-use blirssa::typ::{StructRef, Type};
+use blirssa::typ::{StructRef, Type, EnumRef};
 use inkwell::{types::{BasicMetadataTypeEnum, BasicType, BasicTypeEnum, FloatType, FunctionType, IntType, PointerType, StructType},
               AddressSpace};
 
@@ -21,6 +21,8 @@ pub fn lower_basic_typ<'a, 'ctx>(t: &Type, context: &ModuleContext<'a, 'ctx>) ->
 
         Type::Struct { container } => lower_struct_typ(container, context)?.as_basic_type_enum(),
 
+        Type::Enum(container) => lower_enum_typ(container, context)?.as_basic_type_enum(),
+
         Type::Void => return None,
     })
 }
@@ -33,6 +35,12 @@ pub fn lower_struct_typ<'a, 'ctx>(container: &StructRef, context: &ModuleContext
                     .get_struct_type(container.name())?
                     .as_basic_type_enum())
     }
+}
+
+pub fn lower_enum_typ<'a, 'ctx>(container: &EnumRef, context: &ModuleContext<'a, 'ctx>) -> Option<BasicTypeEnum<'ctx>> {
+    Some(context.module
+                .get_struct_type(container.name())?
+                .as_basic_type_enum())
 }
 
 pub fn lower_pointer_typ<'a, 'ctx>(t: &Type, context: &ModuleContext<'a, 'ctx>) -> Option<PointerType<'ctx>> {
@@ -50,6 +58,8 @@ pub fn lower_pointer_typ<'a, 'ctx>(t: &Type, context: &ModuleContext<'a, 'ctx>) 
         Type::Tuple(tuple_items) => lower_tuple_type(tuple_items, context)?.ptr_type(AddressSpace::Global),
 
         Type::Struct { container } => lower_struct_typ(container, context)?.ptr_type(AddressSpace::Global),
+
+        Type::Enum(container) => lower_enum_typ(container, context)?.ptr_type(AddressSpace::Global),
 
         Type::Pointer { pointee } => lower_pointer_typ(&*pointee, context)?.ptr_type(AddressSpace::Global),
     })

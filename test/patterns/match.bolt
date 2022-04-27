@@ -1,0 +1,7 @@
+match (n, m) {
+	(.negative, .negative) => 1,
+	(.positive, .positive) => 1,
+	(.zero, _) => 0,
+	(_, .zero) => 0,
+	_ => -1,
+}

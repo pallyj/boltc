@@ -9,6 +9,8 @@ mod smt;
 mod struct_;
 mod typ;
 mod var;
+mod enum_;
+mod pattern;
 
 use errors::debugger::Debugger;
 
@@ -19,7 +21,7 @@ use crate::{ast::{Parse, SyntaxNode},
             lexer::{Lexer, SyntaxKind, Token},
             operators::OperatorFactory};
 
-struct Parser<'input, 'l> {
+pub struct Parser<'input, 'l> {
     lexemes:   &'l [Token<'input>],
     operators: &'input OperatorFactory,
     events:    Vec<Event<'input>>,
@@ -252,6 +254,21 @@ pub fn parse<'input>(input: &'input str, debugger: &'input mut Debugger, file: u
     let parser = Parser::new(&lexemes, operator_factory);
 
     let events = parser.parse_file();
+    let sink = Sink::new(events, &lexemes, file);
+
+    Parse { file,
+            root: SyntaxNode::new_root(sink.finish(debugger)) }
+}
+
+pub fn test<'input, F>(input: &'input str, debugger: &'input mut Debugger, file: usize, operator_factory: &OperatorFactory, test: F) -> Parse
+    where F: Fn(&mut Parser)
+{
+    let lexemes: Vec<_> = Lexer::new(input).collect();
+
+    let parser = Parser::new(&lexemes, operator_factory);
+
+    let events = parser.parse_test(test);
+
     let sink = Sink::new(events, &lexemes, file);
 
     Parse { file,

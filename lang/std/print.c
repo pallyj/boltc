@@ -58,7 +58,7 @@ typedef struct {
 } strslice_t;
 
 void printString(strslice_t slice) {
-	printf("%s", slice.string);
+	printf("%.*s", slice.len, slice.string);
 }
 
 void printLine() {

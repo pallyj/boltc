@@ -100,7 +100,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 						}*/
 					}
 
-                    _ => panic!("{function_type:?}"),
+                    _ => {},
                 }
             }
 
@@ -347,6 +347,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
             TypeKind::StrSlice => TypeVariant::LlvmString,
 
             TypeKind::Struct(r#struct) => TypeVariant::Struct(r#struct.clone()),
+            TypeKind::Enum(r#enum) => TypeVariant::Enum(r#enum.clone()),
 
             TypeKind::Function { return_type,
                                  labels,

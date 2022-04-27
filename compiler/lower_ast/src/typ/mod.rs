@@ -1,4 +1,5 @@
 mod struct_;
+mod enum_;
 
 use blir::typ::{Type, TypeKind};
 use parser::ast::typ::Type as AstType;

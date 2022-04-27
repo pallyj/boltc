@@ -3,18 +3,41 @@ use logos::Logos;
 #[derive(Logos, Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[repr(u16)]
 pub enum SyntaxKind {
-    // class, enum, case, protocol, extension, alias
-    // guard, match
-    // try, catch, throws, async, await
-    // defer, throw
-    // for, in, while, repeat
-    // as
-    // break, continue
-    // get, set
+    // 0.6
+    //
     // mutating
-    // operator
+    // break continue
+    // while repeat
+    // guard
+
+    // 0.7
+    //
+    // get set
+    // protocol
+    // alias
+    // extension
+
+    // 0.9
+    //
+    // class as
+
+    // 0.11
+    //
+    // throws try catch throw
+    // for in
+
+    // 2.0
+    //
+    // async await
+    // actor
+
+    // defer
     #[regex("struct")]
     StructKw,
+    #[regex("enum")]
+    EnumKw,
+    #[regex("case")]
+    CaseKw,
     #[regex("import")]
     ImportKw,
     #[regex("func")]
@@ -31,6 +54,8 @@ pub enum SyntaxKind {
     IfKw,
     #[regex("else", priority = 3)]
     ElseKw,
+    #[regex("match")]
+    MatchKw,
 
     #[regex("return", priority = 3)]
     ReturnKw,
@@ -144,6 +169,8 @@ pub enum SyntaxKind {
     PrefixExpr,
     ParenthesizedExpr,
     IfExpr,
+    MatchExpr,
+    MatchBranch,
     UnitExpr,
     MemberExpr,
     FuncCallExpr,
@@ -177,6 +204,11 @@ pub enum SyntaxKind {
     StructDef,
     StructBody,
 
+    EnumDef,
+    EnumBody,
+    CaseDef,
+    CaseItem,
+
     Visibility,
 
     Import,
@@ -194,6 +226,14 @@ pub enum SyntaxKind {
     ParenthesizedType,
     TupleType,
     Tuple,
+
+    VariantLiteral,
+
+    BindPattern,
+    WildcardPattern,
+    VariantPattern,
+    TuplePattern,
+    LiteralPattern,
 
     _Invalid,
 }

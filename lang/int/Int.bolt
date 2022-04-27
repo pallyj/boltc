@@ -151,6 +151,9 @@ public struct Int /*: IntegerLiteralRepr */ {
 public struct IntRange {
 	fileprivate var low: Int
 	fileprivate var high: Int
+
+	public func bottom(): Int { self.low }
+	public func top(): Int { self.high }
 }
 
 public func for(range: IntRange, f: func (Int)) {

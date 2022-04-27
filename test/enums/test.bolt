@@ -1,0 +1,10 @@
+@entryPoint
+func main() {
+	move(to: .last)
+}
+
+enum Order {
+	case first, last
+}
+
+func move(to order: Order)

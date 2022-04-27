@@ -1,6 +1,7 @@
 #![feature(let_else)]
 
 use blirssa::{typ::Type, Library};
+use enum_::lower_enum;
 use func::lower_function;
 use inkwell::{builder::Builder,
               context::Context,
@@ -12,6 +13,7 @@ pub(crate) mod func;
 pub(crate) mod struct_;
 pub(crate) mod typ;
 pub(crate) mod value;
+pub(crate) mod enum_;
 
 pub fn lower_blirssa_library(library: Library, context: &Context) -> Result<Module, String> {
     let module = context.create_module(library.name());
@@ -30,9 +32,19 @@ pub fn lower_blirssa_library(library: Library, context: &Context) -> Result<Modu
         }
     }
 
+    // Create a definition for each enum
+    for r#enum in library.enums() {
+        context.opaque_struct_type(r#enum.name());
+    }
+
     // Fill in the fields for the structs
     for r#struct in library.structs() {
         lower_struct(r#struct, &module_context);
+    }
+
+    // Fill in the fields for the structs
+    for r#enum in library.enums() {
+        lower_enum(r#enum, &module_context);
     }
 
     // Create a definition for each extern function

@@ -19,6 +19,12 @@ impl BlirLowerer {
                                                                         .get_struct(&sref.link_name())
                                                                         .cloned()
                                                                         .unwrap(), },
+
+            TypeKind::Enum(eref) => SsaType::Enum(self.ssa_library()
+                .get_enum(&eref.link_name())
+                .cloned()
+                .unwrap()),
+
             TypeKind::Function { return_type,
                                  params,
                                  labels: _, } => SsaType::Function { return_type: Box::new(self.lower_type(return_type)),

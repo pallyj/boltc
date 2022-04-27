@@ -60,6 +60,7 @@ impl<'input, 'l> Parser<'input, 'l> {
             Some(SyntaxKind::LetKw) => self.parse_let(marker),
             Some(SyntaxKind::StructKw) => self.parse_struct(marker),
             Some(SyntaxKind::ImportKw) => self.parse_import(marker),
+            Some(SyntaxKind::EnumKw) => self.parse_enum(marker),
             _ => {
                 self.error_recover("expected item", ITEM_RECOVERY_SET);
                 marker.complete(self, SyntaxKind::Error);
@@ -75,6 +76,24 @@ impl<'input, 'l> Parser<'input, 'l> {
         while (last_idx != self.cursor) && (self.cursor < self.lexemes.len()) {
             last_idx = self.cursor;
             self.parse_file_item();
+            self.eat_trivia();
+        }
+
+        marker.complete(&mut self, SyntaxKind::Root);
+
+        self.events
+    }
+
+    pub (crate) fn parse_test<F>(mut self, test: F) -> Vec<Event<'input>>
+        where F: Fn(&mut Parser)
+    {
+        let marker = self.start();
+
+        let mut last_idx = usize::MAX;
+
+        while (last_idx != self.cursor) && (self.cursor < self.lexemes.len()) {
+            last_idx = self.cursor;
+            test(&mut self);
             self.eat_trivia();
         }
 

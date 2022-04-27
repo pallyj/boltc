@@ -8,6 +8,12 @@ impl<'a> Display for MangledStruct<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{}S", self.0) }
 }
 
+pub struct MangledEnum<'a>(pub &'a Path);
+
+impl<'a> Display for MangledEnum<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{}V", self.0) }
+}
+
 pub struct MangledFunction<'s> {
     pub path:   &'s Path,
     pub args:   Vec<MangledType>,

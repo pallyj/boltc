@@ -258,6 +258,12 @@ impl Builder {
         return self.build_av(call_value);
     }
 
+    pub fn build_create_enum_variant(&mut self, enum_type: Type, variant: &str) -> LabelValue {
+        let value = Value::CreateEnumVariant { variant: variant.to_string(), typ: enum_type };
+
+        self.build_av(value)
+    }
+
     pub fn build_branch(&mut self, condition: LabelValue, positive: &BlockRef, negative: &BlockRef) {
         let instruction = Instruction::Branch { condition,
                                                 positive: positive.clone(),

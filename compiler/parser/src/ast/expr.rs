@@ -1,11 +1,18 @@
-// Expr syntax 0.3
+// Expr syntax 0.5
 //
 // Integer literal: *int_lit*
 // Float literal: *float_lit*
+// String literal: "text"
+// Boolean literal: true | false
+// Variant literal: `.` *ident*
 // Named: *ident*
 //
 // Member: **expr** `.` *ident*
 // Function Call: **expr** `(` (**function arg**),* `)`
+//
+// Tuple: `(` **expr**, + `)`
+//
+// Closure: `{` (**closure_param_list** `=>`) **closure_body** `}`
 //
 // Paren: `(` **expr** `)`
 //
@@ -15,6 +22,8 @@
 //
 // If: `if` **expr** **codeblock**
 // (`else` **codeblock** | **if_smt**)?
+//
+// Index: **expr** `[` **expr** `]`
 //
 
 use std::fmt::Debug;
@@ -36,6 +45,7 @@ ast!(struct ClosureExpr(Closure));
 ast!(struct TrailingClosureExpr(TrailingClosure));
 ast!(struct TupleExpr(Tuple));
 ast!(struct IndexExpr(IndexExpr));
+ast!(struct VariantLiteral(VariantLiteral));
 
 ast!(struct FuncArg(FuncArg));
 ast!(struct ClosureParam(FuncPar));
@@ -56,6 +66,7 @@ ast!(
         TrailingClosureExpr,
         TupleExpr,
         IndexExpr,
+        VariantLiteral,
     }
 );
 
@@ -76,6 +87,7 @@ impl Debug for Expr {
             Self::TrailingClosureExpr(arg0) => write!(f, "{arg0:?}"),
             Self::TupleExpr(arg0) => write!(f, "{arg0:?}"),
             Self::IndexExpr(arg0) => write!(f, "{arg0:?}"),
+            Self::VariantLiteral(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "Error"),
         }
     }
@@ -395,5 +407,15 @@ impl IndexExpr {
 impl Debug for IndexExpr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}[{:?}]", self.parent(), self.index())
+    }
+}
+
+impl VariantLiteral {
+    pub fn variant_name(&self) -> String { find_token(&self.0, SyntaxKind::Ident).unwrap().text().to_string() }
+}
+
+impl Debug for VariantLiteral {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, ".{}", self.variant_name())
     }
 }

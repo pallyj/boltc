@@ -1,4 +1,4 @@
-use super::StructRef;
+use super::{StructRef, EnumRef};
 
 #[derive(Clone, PartialEq, Eq)]
 pub enum Type {
@@ -25,6 +25,7 @@ pub enum Type {
     Struct {
         container: StructRef,
     },
+    Enum (EnumRef),
     Tuple(Vec<Type>),
 }
 
@@ -62,6 +63,11 @@ impl std::fmt::Display for Type {
             Type::Struct { container } => {
                 write!(f, "struct {}", container.name())
             }
+
+            Type::Enum(container) => {
+                write!(f, "enum {}", container.name())
+            }
+
             Type::Tuple(tuple_items) => {
                 let tuple_items = tuple_items.iter()
                                              .map(|item| item.to_string())

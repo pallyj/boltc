@@ -267,6 +267,27 @@ pub fn lower_value<'a, 'ctx>(value: &Value, context: &ModuleContext<'a, 'ctx>, f
             _ => panic!("deref-struct-field can only be used on a struct or a pointer to one"),
         },
 
+        Value::CreateEnumVariant { variant, typ } => {
+            let Type::Enum(enum_ref) = typ else {
+                panic!()
+            };
+
+            let enum_variant = enum_ref.get_variant(variant);
+            let tag = enum_variant.tag();
+
+            let lowered_type = lower_basic_typ(&typ, context).unwrap();
+
+            let struct_instance = context
+                .builder
+                .build_alloca(lowered_type, "empty-enum");
+
+            let tag_ptr = context.builder.build_struct_gep(struct_instance, 0, "enum-tag-ptr").unwrap();
+            context.builder.build_store(tag_ptr, context.context.i64_type().const_int(tag as u64, false));
+
+            LLVMValue::Basic(context.builder
+                                    .build_load(struct_instance, "enum-value"))
+        }
+
     })
 }
 

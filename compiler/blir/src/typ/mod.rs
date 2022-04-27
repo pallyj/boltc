@@ -1,4 +1,6 @@
 mod struct_;
+mod enum_;
+mod case_;
 
 use std::{fmt::Debug,
           hash::Hash,
@@ -8,6 +10,8 @@ use std::{fmt::Debug,
 use errors::Span;
 use mangle::MangledType;
 pub use struct_::*;
+pub use enum_::*;
+pub use case_::*;
 
 use crate::{scope::ScopeRef, Symbol};
 
@@ -43,6 +47,7 @@ pub enum TypeKind {
         params:      Vec<Type>,
     },
     Struct(StructRef),
+    Enum(EnumRef),
     Tuple(Vec<Type>),
 
     SomeInteger,
@@ -174,6 +179,7 @@ impl Type {
                 MangledType::Function(params, Box::new(return_type.mangle()))
             }
             TypeKind::Struct(r#struct) => MangledType::Struct(r#struct.borrow().path().clone()),
+            TypeKind::Enum(r#enum) => MangledType::Enum(r#enum.path()), // TODO: Fix
 
             TypeKind::Void => MangledType::Void,
             TypeKind::Divergent => MangledType::Diverges,
@@ -245,6 +251,7 @@ impl Debug for Type {
                 write!(f, "func (self: {reciever:?}, {params}): {return_type:?}")
             }
             TypeKind::Struct(struct_ref) => write!(f, "struct {}", struct_ref.name()),
+            TypeKind::Enum(enum_ref) => write!(f, "enum {}", enum_ref.name()),
             TypeKind::Integer { bits } => write!(f, "i{bits}"),
             TypeKind::Float { bits } => write!(f, "f{bits}"),
             TypeKind::StrSlice => write!(f, "strslice"),
