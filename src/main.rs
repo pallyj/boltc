@@ -17,7 +17,7 @@ fn main() {
     let mut project = Project::new(&args.lib);
 
     // Add standard library
-    /*let lang = ["std/print.bolt",
+    let lang = ["std/print.bolt",
                 "bool/Bool.bolt",
                 "float/Half.bolt",
                 "float/Float.bolt",
@@ -36,7 +36,7 @@ fn main() {
 
     for file in lang {
         project.open_file(&format!("lang/{file}"));
-    }*/
+    }
 
     project.open_file(&args.file);
 
@@ -46,7 +46,7 @@ fn main() {
         return;
     }
 
-    /*if let Some(entry_point) = compiled.1 {
+    if let Some(entry_point) = compiled.1 {
         // Link with the c standard library
         Command::new("clang").args(["bin/print.o",
                                     "bin/str.o",
@@ -59,7 +59,7 @@ fn main() {
                              .unwrap();
 
         Command::new(&format!("bin/{}", args.lib)).spawn().unwrap();
-    }*/
+    }
 }
 
 pub struct Project {
@@ -138,9 +138,9 @@ impl Project {
 
         let library = lowerer.finish();
 
-        println!("{library}");
+        //println!("{library}");
 
-        let config = BuildConfig::new(BuildProfile::Debug, BuildOutput::LLVM, None);
+        let config = BuildConfig::new(BuildProfile::Debug, BuildOutput::Object, None);
 
         codegen::compile(library, config);
 

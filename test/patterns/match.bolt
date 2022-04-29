@@ -5,3 +5,62 @@ match (n, m) {
 	(_, .zero) => 0,
 	_ => -1,
 }
+
+/*
+
+How a match compiles
+
+The match will select a branch based on the input value, and then run that branch.
+
+Each branch will point to the end of the match value.
+
+There is a pointer storing the output value. Each match branch will set the pointer to its value.
+
+match i {
+	1 => ,
+	2 => ,
+	3 => ,
+	_ =>
+}
+
+switch-literal i32 %i {
+	1 => br1,
+	2 => br2,
+	3 => br3,
+	_ => br4,
+}
+
+lets say we have this code:
+
+match step {
+	.left(1) => ...,
+	.left(n) => ...,
+	.right(1) => ...,
+	.right(n) => ...,
+}
+
+br0:
+	switch-enum %step {
+		.left => br1,
+		.right => br2,
+	}
+
+br1:
+	%0 = cast-enum-variant %step : %Movement.left
+	%1 = get-struct-member %0, 0
+
+	switch-literal %1 {
+		1 => br3,
+		_ => br4
+	}
+
+br2:
+
+
+br3:
+
+br4:
+
+
+
+*/

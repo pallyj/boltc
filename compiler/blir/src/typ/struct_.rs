@@ -165,6 +165,10 @@ impl Struct {
                                         .and_then(|sym| sym.filter(rel))
                                         .map(|sym| sym.resolve())
     }
+
+    pub fn scope(&self) -> Ref<ScopeRef> {
+        Ref::map(self.inner.borrow(), |inner| &inner.scope)
+    }
 }
 
 #[derive(Clone)]

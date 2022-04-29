@@ -6,6 +6,7 @@ pub mod intrinsics;
 pub mod scope;
 pub mod typ;
 pub mod value;
+pub mod pattern;
 
 mod library;
 mod sym;

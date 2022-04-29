@@ -28,7 +28,7 @@
 
 use std::fmt::Debug;
 
-use super::{find_token, smt::CodeBlock, typ::Type};
+use super::{find_token, smt::CodeBlock, typ::Type, pattern::Pattern};
 use crate::lexer::SyntaxKind;
 
 ast!(struct NamedExpr(NamedExpr));
@@ -46,7 +46,10 @@ ast!(struct TrailingClosureExpr(TrailingClosure));
 ast!(struct TupleExpr(Tuple));
 ast!(struct IndexExpr(IndexExpr));
 ast!(struct VariantLiteral(VariantLiteral));
+ast!(struct MatchExpr(MatchExpr));
 
+
+ast!(struct MatchBranch(MatchBranch));
 ast!(struct FuncArg(FuncArg));
 ast!(struct ClosureParam(FuncPar));
 
@@ -67,6 +70,7 @@ ast!(
         TupleExpr,
         IndexExpr,
         VariantLiteral,
+        MatchExpr,
     }
 );
 
@@ -88,6 +92,7 @@ impl Debug for Expr {
             Self::TupleExpr(arg0) => write!(f, "{arg0:?}"),
             Self::IndexExpr(arg0) => write!(f, "{arg0:?}"),
             Self::VariantLiteral(arg0) => write!(f, "{arg0:?}"),
+            Self::MatchExpr(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "Error"),
         }
     }
@@ -417,5 +422,65 @@ impl VariantLiteral {
 impl Debug for VariantLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, ".{}", self.variant_name())
+    }
+}
+
+impl MatchExpr {
+    pub fn discriminant(&self) -> Expr {
+        self.0
+            .children()
+            .find(|syn| syn.kind() == SyntaxKind::Condition)
+            .and_then(|condition| condition.first_child())
+            .map(Expr::cast)
+            .unwrap()
+    }
+
+    pub fn branches(&self) -> impl Iterator<Item=MatchBranch> {
+        self.0
+            .children()
+            .filter_map(MatchBranch::cast)
+    }
+}
+
+impl Debug for MatchExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "match {:?} {{", self.discriminant())?;
+
+        for branch in self.branches() {
+            writeln!(f, "{branch:?}")?;
+        }
+
+        write!(f, "}}")
+    }
+}
+
+impl MatchBranch {
+    pub fn pattern(&self) -> Pattern {
+        self.0
+            .first_child()
+            .map(Pattern::cast)
+            .unwrap()
+    }
+
+    pub fn code_block(&self) -> Option<CodeBlock> {
+        self.0
+            .last_child()
+            .and_then(CodeBlock::cast)
+    }
+
+    pub fn value(&self) -> Option<Expr> {
+        self.0
+            .last_child()
+            .map(Expr::cast)
+    }
+}
+
+impl Debug for MatchBranch {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(code_block) = self.code_block() {
+            write!(f, "{:?} => {code_block:?}", self.pattern())
+        } else {
+            write!(f, "{:?} => {:?}", self.pattern(), self.value().unwrap())
+        }
     }
 }

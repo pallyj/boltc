@@ -440,6 +440,14 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 self.resolve_type(&mut value.typ, scope);
             }
 
+            ValueKind::Match(match_value) => {
+                self.resolve_value(&mut match_value.discriminant, scope);
+
+                for branch in &mut match_value.branches {
+                    self.resolve_code_block(&mut branch.code, scope);
+                }
+            }
+
             _ => {}
         }
     }

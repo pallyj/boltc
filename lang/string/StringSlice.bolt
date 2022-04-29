@@ -1,6 +1,7 @@
 import intrinsics
 
 @defaultStringRepr
+@transparent
 public struct StringSlice {
 	internal var slice: strslice
 

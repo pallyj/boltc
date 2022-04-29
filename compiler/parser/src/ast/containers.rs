@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use super::{attribute::Attributes,
             file::NoOp,
             func::FuncDef,
-            var::{LetDef, VariableDef}, find_token};
+            var::{LetDef, VariableDef}, find_token, typ::Type};
 use crate::lexer::SyntaxKind;
 
 // Struct 0.3
@@ -177,6 +177,14 @@ impl EnumDef {
             .and_then(|func_name| func_name.first_token())
             .map(|name| name.text().to_string())
             .unwrap()
+    }
+
+    pub fn repr_type(&self) -> Option<Type> {
+        self.0
+            .children()
+            .find(|child| child.kind() == SyntaxKind::FuncReturn)
+            .and_then(|return_node| return_node.first_child())
+            .map(Type::cast)
     }
 
     pub fn body(&self) -> EnumBody {

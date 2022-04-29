@@ -3,7 +3,7 @@ use std::panic;
 use blir::{intrinsics::{BinaryIntrinsicFn, UnaryIntrinsicFn},
            typ::{Type, TypeKind},
            value::{Closure, IfBranch, IfValue, Value, ValueKind}};
-use blirssa::value::{BinaryIntrinsicFn as SsaBinaryIntrinsicFn, LabelValue, UnaryIntrinsicFn as SsaUnaryIntrinsicFn};
+use blirssa::{value::{BinaryIntrinsicFn as SsaBinaryIntrinsicFn, LabelValue, UnaryIntrinsicFn as SsaUnaryIntrinsicFn}, };
 
 use crate::BlirLowerer;
 
@@ -58,6 +58,8 @@ impl BlirLowerer {
 
                 self.builder().build_create_enum_variant(enum_type, variant.name())
             }
+
+            ValueKind::Match(match_value) => self.lower_match(match_value, &value.typ),
 
             _ => {
                 if let ValueKind::Polymorphic(pmf) = &value.kind {
@@ -312,7 +314,7 @@ impl BlirLowerer {
             }
         }
     }
-
+    
     fn lower_if_value(&mut self, value: &IfValue, ty: &Type) -> LabelValue {
         if value.negative.is_none() {
             self.lower_if_value_inner(value, None);

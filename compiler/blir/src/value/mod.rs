@@ -1,6 +1,7 @@
 mod closure;
 mod constant;
 mod var;
+pub mod match_;
 
 use std::{fmt::Debug,
           ops::{Deref, DerefMut}};
@@ -9,11 +10,14 @@ pub use closure::*;
 pub use constant::*;
 use errors::Span;
 pub use var::*;
+pub use match_::*;
 
 use crate::{code::{CodeBlock, ExternFunctionRef, FunctionRef, MethodRef},
             intrinsics::{BinaryIntrinsicFn, UnaryIntrinsicFn},
             typ::{Type, TypeKind, CaseRef, EnumRef},
             Monomorphizer};
+
+use self::match_::MatchValue;
 
 #[derive(Clone)]
 pub enum ValueKind {
@@ -78,6 +82,7 @@ pub enum ValueKind {
 
     // Logic
     If(IfValue),
+    Match(MatchValue),
 
     // Second-class Values
     Unit,
@@ -221,6 +226,9 @@ impl Debug for Value {
                 } else {
                     write!(f, "if {:?} {:?}", if_value.condition, if_value.positive)
                 }
+            }
+            ValueKind::Match(match_value) => {
+                write!(f, "{match_value:?}")
             }
             ValueKind::Tuple(items) => {
                 let tuple_items = items.iter().map(|item| format!("{item:?}")).collect::<Vec<_>>().join(", ");

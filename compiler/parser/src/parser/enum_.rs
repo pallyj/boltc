@@ -9,6 +9,8 @@ impl<'input, 'l> Parser<'input, 'l> {
 
         self.name(ITEM_RECOVERY_SET);
 
+        self.parse_enum_repr();
+
         self.parse_delim(SyntaxKind::EnumBody,
                          SyntaxKind::OpenBrace,
                          SyntaxKind::CloseBrace,
@@ -67,4 +69,8 @@ impl<'input, 'l> Parser<'input, 'l> {
         self.eat(SyntaxKind::Ident);
 		marker.complete(self, SyntaxKind::CaseItem);
 	}
+
+    pub fn parse_enum_repr(&mut self) {
+        self.parse_ty_return();
+    }
 }

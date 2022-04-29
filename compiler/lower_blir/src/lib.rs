@@ -6,6 +6,7 @@ mod struct_;
 mod typ;
 mod val;
 mod enum_;
+mod match_;
 
 use std::collections::HashMap;
 

@@ -4,7 +4,7 @@ use blir::{code::{CodeBlock, Statement, StatementKind},
            scope::ScopeRef,
            typ::{Type, TypeKind},
            value::{IfBranch, IfValue, Value, ValueKind},
-           BlirContext};
+           BlirContext, pattern::{Pattern, PatternKind}};
 use errors::{debugger::Debugger, error::ErrorCode};
 use rusttyc::{TcErr, TcKey, VarlessTypeChecker};
 
@@ -123,6 +123,18 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                 self.constrain_value(value, scope);
             }
 
+            ValueKind::Match(match_value) => {
+                self.constrain_value(&match_value.discriminant, scope);
+
+                let match_type = value.typ.clone();
+
+                for branch in &match_value.branches {
+                    self.constrain_pattern(&branch.pattern, &match_value.discriminant.typ, scope);
+
+                    self.infer_codeblock(&branch.code, &match_type, scope);
+                }
+            }
+
             _ => {}
         }
     }
@@ -184,6 +196,16 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
 
         for smt in block.statements() {
             self.infer_smt(smt, scope);
+        }
+    }
+
+    pub fn constrain_pattern(&mut self, pattern: &Pattern, typ: &Type, scope: &ScopeRef) {
+        match &pattern.kind {
+            PatternKind::Literal { value } => {
+                self.constrain_value(&value, scope);
+                self.constrain_two_way(&value.typ, typ);
+            },
+            _ => {}
         }
     }
 

@@ -9,6 +9,7 @@ use rowan::TextRange;
 mod code;
 mod typ;
 mod value;
+mod pattern;
 
 mod attributes;
 #[cfg(test)]

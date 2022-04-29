@@ -1,0 +1,44 @@
+@entryPoint
+func main() {
+	matchInt(1)
+	matchInt(2)
+	matchInt(3)
+	matchInt(4)
+
+	matchDirection(.north)
+	matchDirection(.east)
+	matchDirection(.south)
+	matchDirection(.west)
+
+	match "hello, world" {
+		"hello" => print("hello"),
+		"world" => print("world"),
+		//"hello, world" => print("hello, world"),
+		_ => { print("hello, world") }
+	}
+}
+
+func matchInt(i: Int) {
+	match i {
+		1 => printLine("one"),
+		2 => printLine("two"),
+		3 => printLine("three"),
+		_ => printLine("bigger"),
+	}
+}
+
+enum Direction {
+	case north, east, south, west
+}
+
+func matchDirection(d: Direction) {
+	let toString = match d {
+		.north => "north",
+		.east => "east",
+		.south => "south",
+		.west => "west",
+		_ => { "not needed" },
+	}
+
+	printLine(toString)
+}

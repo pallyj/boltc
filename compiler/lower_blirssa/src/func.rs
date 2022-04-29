@@ -106,6 +106,51 @@ fn lower_block<'a, 'ctx>(blir_block: &BlockRef, context: &ModuleContext<'a, 'ctx
                     context.builder.build_return(None);
                 }
             }
+
+            Instruction::SelectInteger { value, branches, default } => {
+                let value = fn_ctx.get_local(value).unwrap().basic().into_int_value();
+
+                let default_block = fn_ctx.get_basic_block(default.index());
+
+                let cases = branches
+                    .iter()
+                    .map(|branch| {
+                        let value = fn_ctx.get_local(&branch.0).unwrap().basic().into_int_value();
+                        let cref = fn_ctx.get_basic_block(branch.1.index());
+
+                        (value, cref)
+                    })
+                    .collect::<Vec<_>>();
+
+                context.builder.build_switch(value, default_block, &cases);
+            }
+
+            Instruction::SelectEnumTag { value, branches, default } => {
+                let Type::Enum(enum_ref) = value.typ() else {
+                    panic!()
+                };
+
+                let value = fn_ctx.get_local(value).unwrap().basic().into_struct_value();
+                let tag_value = context.builder.build_extract_value(value, 0, "enum-tag").unwrap().into_int_value();
+
+                let default_block = fn_ctx.get_basic_block(default.index());
+
+                let cases = branches
+                    .iter()
+                    .map(|branch| {
+                        let block_ref = fn_ctx.get_basic_block(branch.1.index());
+
+                        let enum_variant = enum_ref.get_variant(&branch.0);
+                        let tag = enum_variant.tag();
+
+                        let value = context.context.i64_type().const_int(tag as u64, false);
+
+                        (value, block_ref)
+                    })
+                    .collect::<Vec<_>>();
+
+                context.builder.build_switch(tag_value, default_block, &cases);
+            }
         }
     }
 

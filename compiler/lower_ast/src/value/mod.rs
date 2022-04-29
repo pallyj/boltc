@@ -1,5 +1,5 @@
 use blir::{typ::{Type, TypeKind},
-           value::{Closure, ClosureParam, FunctionArgs, IfBranch, IfValue, Value, ValueKind}};
+           value::{Closure, ClosureParam, FunctionArgs, IfBranch, IfValue, Value, ValueKind, match_::MatchValue, MatchBranch}, code::{CodeBlock, StatementKind}};
 use errors::Span;
 use parser::ast::expr::{ClosureExpr, Expr as AstExpr, IfExpr, IfExprNegative, LiteralKind};
 
@@ -167,6 +167,30 @@ impl AstLowerer {
             AstExpr::UnitExpr(_) => ValueKind::Unit.spanned(TypeKind::Void.anon(), span),
 
             AstExpr::VariantLiteral(variant_expr) => ValueKind::VariantLiteral(variant_expr.variant_name()).spanned(Type::infer(), span),
+
+            AstExpr::MatchExpr(match_expr) => {
+                let discriminant = Box::new(self.lower_expr(match_expr.discriminant()));
+
+                let branches = match_expr.branches()
+                    .map(|branch| {
+                        let pattern = self.lower_pattern(branch.pattern());
+
+                        let code = if let Some(code_block) = branch.code_block() {
+                            self.lower_code_block(code_block)
+                        } else {
+                            let value = self.lower_expr(branch.value().unwrap());
+                            let span = value.span.unwrap();
+                            let statement = StatementKind::Eval { value, escaped: false }.spanned(span);
+
+                            CodeBlock::new(vec! [statement], span)
+                        };
+
+                        MatchBranch { pattern, code }
+                    })
+                    .collect();
+
+                ValueKind::Match(MatchValue { discriminant, branches }).spanned_infer(span)
+            }
 
             AstExpr::Error => panic!("{expr:?}"),
         }

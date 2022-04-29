@@ -35,7 +35,7 @@ impl<'input, 'l> Parser<'input, 'l> {
 			 || self.check(SyntaxKind::LiteralFalse)
 			 || self.check(SyntaxKind::StringLiteral)
 		{
-			self.bump();
+			self.node(SyntaxKind::Literal, Parser::bump);
 			
 			pattern.complete(self, SyntaxKind::LiteralPattern);
 		}

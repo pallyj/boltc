@@ -45,6 +45,16 @@ pub enum Instruction {
     Return {
         value: Option<LabelValue>,
     },
+    SelectInteger {
+        value: LabelValue,
+        branches: Vec<(LabelValue, BlockRef)>,
+        default: BlockRef,
+    },
+    SelectEnumTag {
+        value: LabelValue,
+        branches: Vec<(String, BlockRef)>,
+        default: BlockRef,
+    },
 }
 
 impl Display for Instruction {
@@ -77,6 +87,24 @@ impl Display for Instruction {
                 } else {
                     write!(f, "return")
                 }
+            }
+
+            Instruction::SelectInteger { value, branches, default } => {
+                let branches = branches
+                    .iter()
+                    .map(|branch| format!("{} => {}", branch.0, branch.1.label()))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                write!(f, "select-integer {value} {default_name} {{ {branches} }}", default_name = default.label())
+            }
+
+            Instruction::SelectEnumTag { value, branches, default } => {
+                let branches = branches
+                    .iter()
+                    .map(|branch| format!(".{} => {}", branch.0, branch.1.label()))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                write!(f, "select-enum-tag {value} {default_name} {{ {branches} }}", default_name = default.label())
             }
         }
     }

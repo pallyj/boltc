@@ -4,7 +4,7 @@ use blir::{code::{CodeBlock, Statement, StatementKind},
            scope::ScopeRef,
            typ::{Type, TypeKind},
            value::{IfBranch, IfValue, Value, ValueKind},
-           BlirContext, SomeFunction, Symbol};
+           BlirContext, SomeFunction, Symbol, pattern::PatternKind};
 use errors::{debugger::Debugger, error::ErrorCode, Span};
 use rusttyc::{Preliminary, PreliminaryTypeTable, TcKey};
 
@@ -199,6 +199,19 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 let enum_variant_value = ValueKind::EnumVariant { of_enum: enum_type.clone(), variant };
 
                 value.set_kind(enum_variant_value);
+            }
+
+            ValueKind::Match(match_value) => {
+                self.replace_value(&mut match_value.discriminant, scope);
+
+                for branch in &mut match_value.branches {
+                    match &mut branch.pattern.kind {
+                        PatternKind::Literal { value } => self.replace_value(value, scope),
+                        _ => {}
+                    }
+
+                    self.replace_codeblock(&mut branch.code, scope);
+                }
             }
 
             _ => {}

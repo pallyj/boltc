@@ -278,6 +278,24 @@ impl Builder {
         self.build_i(instruction);
     }
 
+    pub fn build_select_integer(&mut self, discriminant: LabelValue, branches: Vec<(LabelValue, BlockRef)>, default: BlockRef) {
+        let instruction = Instruction::SelectInteger {
+            value: discriminant,
+            branches,
+            default };
+
+        self.build_i(instruction);
+    }
+
+    pub fn build_select_enum(&mut self, discriminant: LabelValue, branches: Vec<(String, BlockRef)>, default: BlockRef) {
+        let instruction = Instruction::SelectEnumTag {
+            value: discriminant,
+            branches,
+            default };
+
+        self.build_i(instruction);
+    }
+
     fn build_av(&mut self, value: Value) -> LabelValue {
         let label = self.function().next_index();
 
