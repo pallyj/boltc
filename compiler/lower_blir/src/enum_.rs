@@ -1,4 +1,4 @@
-use blir::typ::EnumRef;
+use blir::typ::{EnumRef, TypeKind};
 use blirssa::typ::EnumVariant;
 
 use crate::BlirLowerer;
@@ -10,7 +10,11 @@ impl BlirLowerer {
 		let mangle = enum_def.mangle();
 		enum_def.set_link_name(mangle);
 
-        ssa_lib.add_enum(&enum_def.link_name());
+		let TypeKind::Integer { bits } = enum_def.repr_type().kind() else {
+			panic!()
+		};
+
+        ssa_lib.add_enum(&enum_def.link_name(), *bits);
 	}
 
 	pub(super) fn lower_enum_signature(&mut self, enum_def: EnumRef) {

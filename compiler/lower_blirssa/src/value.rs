@@ -5,7 +5,7 @@ use inkwell::{builder::Builder,
               values::{BasicValue, BasicValueEnum, CallableValue, FunctionValue},
               FloatPredicate, IntPredicate};
 
-use crate::{func::FunctionContext, typ::{lower_basic_typ, lower_strslice_type}, ModuleContext};
+use crate::{func::FunctionContext, typ::{lower_basic_typ, lower_strslice_type, lower_integer_type}, ModuleContext};
 
 pub fn lower_value<'a, 'ctx>(value: &Value, context: &ModuleContext<'a, 'ctx>, fn_ctx: &FunctionContext<'ctx>) -> Result<LLVMValue<'ctx>, String> {
     Ok(match value {
@@ -282,7 +282,11 @@ pub fn lower_value<'a, 'ctx>(value: &Value, context: &ModuleContext<'a, 'ctx>, f
                 .build_alloca(lowered_type, "empty-enum");
 
             let tag_ptr = context.builder.build_struct_gep(struct_instance, 0, "enum-tag-ptr").unwrap();
-            context.builder.build_store(tag_ptr, context.context.i64_type().const_int(tag as u64, false));
+            let tag_value = lower_integer_type(enum_ref.bits() as u32, context)
+                .unwrap()
+                .const_int(tag as u64, false);
+
+            context.builder.build_store(tag_ptr, tag_value);
 
             LLVMValue::Basic(context.builder
                                     .build_load(struct_instance, "enum-value"))

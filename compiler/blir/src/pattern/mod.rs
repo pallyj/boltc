@@ -14,7 +14,7 @@ pub enum PatternKind {
 
 	Literal { value: Value },
 
-
+	Tuple { items: Vec<Pattern> }
 }
 
 impl PatternKind {
@@ -34,6 +34,7 @@ impl Debug for Pattern {
         match &self.kind {
 			PatternKind::Wildcard => write!(f, "_"),
 			PatternKind::Literal { value } => write!(f, "{value:?}"),
+			PatternKind::Tuple { items } => write!(f, "({})", items.iter().map(|item| format!("{item:?}")).collect::<Vec<_>>().join(", ") )
 		}
     }
 }

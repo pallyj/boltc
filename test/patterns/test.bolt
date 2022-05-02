@@ -27,8 +27,40 @@ func matchInt(i: Int) {
 	}
 }
 
-enum Direction {
+enum Direction: Int8 {
 	case north, east, south, west
+}
+
+/*
+
+match (left, right).item1 {
+	.north => match (left, right).item2 {
+		.north => true,
+		_ => goto _
+	}
+	.south => match (left, right).item2 {
+		.north => true,
+		_ => goto _
+	}
+	.east => match (left, right).item2 {
+		.north => true,
+		_ => goto _
+	}
+	.west => match (left, right).item2 {
+		.north => true,
+		_ => goto _
+	}
+}
+
+*/
+func equals(left: Direction, right: Direction): Bool {
+	match (left, right) {
+		(.north, .north) => true,
+		(.east, .east) => true,
+		(.south, .south) => true,
+		(.west, .west) => true,
+		_ => false,
+	}
 }
 
 func matchDirection(d: Direction) {

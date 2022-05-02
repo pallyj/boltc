@@ -2,12 +2,10 @@
 func main() {
 	let hello_world = "Hello, World!"
 
+	// Somethings up with the polymorphization...
 	let hello = hello_world[0..<5]
-	let hello2 = "Hello";
-
 
 	print(withLength: hello)
-	print(hello == hello2)
 }
 
 func print(withLength slice: StringSlice) {

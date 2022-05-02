@@ -6,7 +6,7 @@ use blirssa::{code::{BlockRef, FunctionRef},
 use inkwell::{basic_block::BasicBlock, values::FunctionValue};
 
 use crate::{value::{lower_value, LLVMValue},
-            ModuleContext};
+            ModuleContext, typ::lower_integer_type};
 
 pub fn lower_function<'a, 'ctx>(func: &FunctionRef, context: &ModuleContext<'a, 'ctx>) -> Result<(), String> {
     let llvm_func = context.module
@@ -143,9 +143,11 @@ fn lower_block<'a, 'ctx>(blir_block: &BlockRef, context: &ModuleContext<'a, 'ctx
                         let enum_variant = enum_ref.get_variant(&branch.0);
                         let tag = enum_variant.tag();
 
-                        let value = context.context.i64_type().const_int(tag as u64, false);
+                        let tag_value = lower_integer_type(enum_ref.bits() as u32, context)
+                            .unwrap()
+                            .const_int(tag as u64, false);
 
-                        (value, block_ref)
+                        (tag_value, block_ref)
                     })
                     .collect::<Vec<_>>();
 

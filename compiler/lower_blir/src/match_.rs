@@ -1,9 +1,9 @@
 use blir::{
-    pattern::{PatternKind},
+    pattern::{PatternKind, Pattern},
     value::{match_::MatchValue, MatchBranch, Value, ValueKind},
     typ::{TypeKind, Type, StructRef},
     Symbol,
-    SomeFunction};
+    SomeFunction, code::CodeBlock};
 use blirssa::{value::LabelValue, code::BlockRef};
 
 use crate::BlirLowerer;
@@ -57,6 +57,9 @@ impl BlirLowerer {
             TypeKind::Struct(struct_ref) => {
                 let lowered_value = self.lower_value(value);
                 self.lower_equality_layer(lowered_value, branches, before_branch, struct_ref, output_pointer)
+            }
+            TypeKind::Tuple(tuple_items) => {
+                tuple_items.
             }
 			_ => panic!()
 		}
@@ -231,3 +234,64 @@ impl BlirLowerer {
 	}
 
 }
+
+pub struct Candidate {
+    pattern: Pattern,
+    match_value: LabelValue,
+    subcandidates: Vec<Candidate>,
+}
+
+// Integer(Value)
+//
+
+
+// (.north, .north)
+
+// .north ~> .north =>> true
+// .east ~> .east =>> true
+// .south ~> .south =>> true
+// .west ~> .west =>> true
+// _ =>> true
+
+// Tree
+// Value
+// Pattern
+
+
+//      |--.north--|-.north---
+//      |          |------------------|
+//      |--.east---|-.east----        |
+// -----|          |------------------|
+//      |--.south--|-.south---        |-------
+//      |          |------------------|
+//      |--.west---|-.west----        |
+//                 |------------------|
+
+
+// match value tuple.0
+//  against
+//    .north
+//      match value tuple.1
+//       against
+//        .north
+//         return true
+//    .east
+//      match value tuple.1
+//       against
+//        .east
+//         return true
+//    .south
+//      match value tuple.1
+//       against
+//        .south
+//         return true
+//    .west
+//      match value tuple.1
+//       against
+//        .south
+//         return true
+
+// Match
+//   value: LabelValue
+//   patterns: Array<Match>
+//   default: Option<CodeBlock>

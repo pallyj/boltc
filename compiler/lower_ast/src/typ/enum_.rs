@@ -1,4 +1,4 @@
-use blir::{scope::ScopeRef, typ::{Enum, EnumRef, Case, CaseRef}};
+use blir::{scope::ScopeRef, typ::{Enum, EnumRef, Case, CaseRef, TypeKind}};
 use mangle::Path;
 use parser::ast::containers::{EnumDef, EnumItem, CaseDef};
 
@@ -15,7 +15,12 @@ impl AstLowerer {
 		let visibility = self.lower_visibility(def.visibility());
 		let name = def.name();
 
-		let enum_def = Enum::new(attributes, visibility, name, parent, parent_path);
+		let repr_type = def
+			.repr_type()
+			.map(|ty| self.lower_type(ty))
+			.unwrap_or(TypeKind::Integer { bits: 32 }.anon());
+
+		let enum_def = Enum::new(attributes, visibility, name, parent, parent_path, repr_type);
 		let enum_scope = enum_def.scope();
 
 		let enum_type = enum_def.get_type().anon();

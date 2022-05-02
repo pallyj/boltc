@@ -98,7 +98,8 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
             }
 
             ValueKind::FuncCall { function, args } => {
-                if let ValueKind::PolymorphicMethod { polymorphic, .. } = &mut function.kind {
+                if let ValueKind::PolymorphicMethod { polymorphic, .. } |
+                       ValueKind::Polymorphic(polymorphic) = &mut function.kind {
                     polymorphic.filter_labels(&args.labels);
                 }
 

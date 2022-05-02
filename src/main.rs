@@ -138,7 +138,7 @@ impl Project {
 
         let library = lowerer.finish();
 
-        //println!("{library}");
+        println!("{library}");
 
         let config = BuildConfig::new(BuildProfile::Debug, BuildOutput::Object, None);
 

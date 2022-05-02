@@ -29,8 +29,8 @@ impl Library {
         self.structs.insert(name.to_string(), r#struct);
     }
 
-    pub fn add_enum(&mut self, name: &str) {
-        let enum_def = Enum::new(name.to_string());
+    pub fn add_enum(&mut self, name: &str, bits: u64) {
+        let enum_def = Enum::new(name.to_string(), bits);
 
         self.enums.insert(name.to_string(), enum_def);
     }

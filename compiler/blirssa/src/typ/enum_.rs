@@ -1,17 +1,28 @@
 use std::{collections::HashMap, sync::Arc, ops::Deref, cell::{RefCell, Ref}, fmt::Display};
 
+use super::Type;
+
 pub struct Enum {
 	name: String,
+	bits: u64,
 	variants: RefCell<HashMap<String, EnumVariant>>,
 }
 
 impl Enum {
-	pub fn new(name: String) -> EnumRef {
-		EnumRef { enum_ref: Arc::new(Enum { name, variants: RefCell::new(HashMap::new()) }) }
+	pub fn new(name: String, bits: u64) -> EnumRef {
+		EnumRef { enum_ref: Arc::new(Enum { name, variants: RefCell::new(HashMap::new()), bits }) }
 	}
 
 	pub fn name(&self) -> &String {
 		&self.name
+	}
+
+	pub fn tag(&self) -> Type {
+		Type::Integer { bits: self.bits as u32 }
+	}
+
+	pub fn bits(&self) -> u64 {
+		self.bits
 	}
 
 	pub fn add_variant(&self, variant: EnumVariant) {
@@ -58,7 +69,7 @@ impl Deref for EnumRef {
 
 impl Display for Enum {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "enum {} {{", self.name)?;
+        writeln!(f, "enum {}: i{} {{", self.name, self.bits)?;
 
 		for (_, variant) in &*self.variants.borrow() {
 			writeln!(f, "\t{variant}")?;

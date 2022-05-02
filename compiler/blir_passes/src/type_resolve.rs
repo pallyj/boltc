@@ -65,7 +65,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
         }
 
         for r#enum in &library.enums {
-            self.resolve_enum_types(r#enum);
+            self.resolve_enum_types(r#enum, library.scope());
         }
 
         for r#struct in &library.structs {
@@ -113,7 +113,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
         }
     }
 
-    fn resolve_enum_types(&mut self, r#enum: &EnumRef) {
+    fn resolve_enum_types(&mut self, r#enum: &EnumRef, scope: &ScopeRef) {
         let mut tag_counter = 0;
 
         for variant in r#enum.variants().iter() {
@@ -121,6 +121,22 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
             tag_counter += 1;
         }
+
+        self.resolve_type(&mut *r#enum.repr_type_mut(), scope);
+
+        let ty = r#enum.repr_type().clone().kind;
+
+        match ty {
+            TypeKind::Integer { .. } => {}
+            TypeKind::Struct(struct_ref) if struct_ref.integer_repr() => {
+                let integer_type = struct_ref.borrow().instance_vars[0].borrow().typ.clone();
+
+                r#enum.repr_type_mut().set_kind(integer_type.kind);
+            }
+            _ => {
+                println!("error: type `{:?}` cannot be used as an enum backing", r#enum.repr_type())
+            }
+        } 
     }
 
     fn resolve_struct_types(&mut self, r#struct: &StructRef) {

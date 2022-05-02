@@ -1,10 +1,10 @@
-use std::{cell::{RefCell, Ref}, sync::Arc, ops::Deref, collections::HashMap};
+use std::{cell::{RefCell, Ref, RefMut}, sync::Arc, ops::Deref, collections::HashMap};
 
 use mangle::{Path, MangledEnum};
 
 use crate::{attributes::{Attributes}, Visibility, scope::ScopeRef, code::MethodRef};
 
-use super::{TypeKind, CaseRef};
+use super::{TypeKind, CaseRef, Type};
 
 pub struct Enum {
 	inner: RefCell<EnumInner>,
@@ -16,7 +16,8 @@ impl Enum {
 		visibility: Visibility,
 		name:		String,
 		parent:		&ScopeRef,
-		parent_path:&Path) -> EnumRef
+		parent_path:&Path,
+		repr_type:	Type) -> EnumRef
 	{
 		let enum_inner = EnumInner {
 			attributes,
@@ -27,7 +28,8 @@ impl Enum {
 			name,
 			methods: Vec::new(),
 			cases: 	 Vec::new(),
-			named_variants: HashMap::new()};
+			named_variants: HashMap::new(),
+			repr_type };
 
 		EnumRef { enum_ref: Arc::new(Enum { inner: RefCell::new(enum_inner) }) }
 	}
@@ -121,6 +123,18 @@ impl Enum {
 		Ref::map(self.inner.borrow(), |inner| &inner.cases)
 	}
 
+	pub fn repr_type(
+		&self) -> Ref<Type>
+	{
+		Ref::map(self.inner.borrow(), |inner| &inner.repr_type)
+	}
+
+	pub fn repr_type_mut(
+		&self) -> RefMut<Type>
+	{
+		RefMut::map(self.inner.borrow_mut(), |inner| &mut inner.repr_type)
+	}
+
 	pub fn mangle(&self) -> String { MangledEnum(&self.inner.borrow().path).to_string() }
 }
 
@@ -137,7 +151,9 @@ struct EnumInner {
 	methods:		Vec<MethodRef>,
 	cases:			Vec<CaseRef>,
 
-	named_variants: HashMap<String, CaseRef>
+	named_variants: HashMap<String, CaseRef>,
+
+	repr_type:		Type
 }
 
 #[derive(Clone)]

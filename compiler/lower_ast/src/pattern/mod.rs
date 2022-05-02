@@ -20,6 +20,14 @@ impl AstLowerer {
 
 				PatternKind::Literal { value }
 			}
+			AstPattern::TuplePattern(tuple_pat) => {
+				let sub_patterns = tuple_pat
+					.tuple_items()
+					.map(|tuple_item| self.lower_pattern(tuple_item))
+					.collect();
+
+				PatternKind::Tuple { items: sub_patterns }
+			}
 
 			AstPattern::Error => panic!(),
 		}.with_span(span)

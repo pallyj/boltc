@@ -1,4 +1,4 @@
-use blirssa::typ::{EnumRef, Type};
+use blirssa::typ::{EnumRef};
 
 use crate::{typ::lower_basic_typ, ModuleContext};
 
@@ -7,7 +7,7 @@ pub fn lower_enum<'a, 'ctx>(r#enum: &EnumRef, context: &ModuleContext<'a, 'ctx>)
         return
     };
 
-    let enum_tag_repr = Type::Integer { bits: 64 }; // TODO: It can be anything
+    let enum_tag_repr = r#enum.tag();
 
     let field_types = vec![
         lower_basic_typ(&enum_tag_repr, context).unwrap()

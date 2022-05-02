@@ -25,6 +25,15 @@ public struct StringSlice {
 
 		Self(slice: strslice_slice(self.slice, range.bottom(), range.top()))
 	}
+
+	public operator func index(unchecked range: IntRange): StringSlice {
+		let len = self.length();
+
+		//if range.top() >= len || range.top() < 0 { /* return nil */ }
+		//if (range.top() < range.bottom()) || range.bottom() < 0 { /* return nil */ }
+
+		Self(slice: strslice_slice(self.slice, range.bottom(), range.top()))
+	}
 }
 
 /*

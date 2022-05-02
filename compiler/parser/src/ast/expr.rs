@@ -406,7 +406,7 @@ impl Debug for TupleExpr {
 impl IndexExpr {
     pub fn parent(&self) -> Expr { self.0.first_child().map(Expr::cast).unwrap() }
 
-    pub fn index(&self) -> Expr { self.0.last_child().map(Expr::cast).unwrap() }
+    pub fn index(&self) -> FuncArg { self.0.last_child().and_then(FuncArg::cast).unwrap() }
 }
 
 impl Debug for IndexExpr {

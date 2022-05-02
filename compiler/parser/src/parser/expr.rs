@@ -114,7 +114,7 @@ impl<'input, 'l> Parser<'input, 'l> {
         let marker = marker.precede(self);
         self.bump();
 
-        self.parse_expr();
+        self.parse_func_arg();
 
         if !self.eat(SyntaxKind::CloseBracket) {
             self.error_recover("expected close bracket", EXPR_RECOVERY_SET);
