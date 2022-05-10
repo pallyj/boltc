@@ -1,15 +1,20 @@
-use std::{sync::Arc, ops::Deref, cell::{Cell}};
+use std::{sync::Arc, ops::Deref, cell::{Cell, RefCell, Ref, RefMut}};
+
+use super::Type;
 
 #[derive(Clone)]
 pub struct Case {
 	name: String,
-	tag: Cell<Option<usize>>
+	tag: Cell<Option<usize>>,
+	associated: RefCell<Vec<Type>>
 }
 
 impl Case {
-	pub fn new(name: String) -> CaseRef {
+	pub fn new(name: String, associated: Vec<Type>) -> CaseRef {
 		CaseRef {
-			case_ref: Arc::new(Case { name, tag: Cell::new(None) })
+			case_ref: Arc::new(Case { name,
+							   tag: Cell::new(None),
+							   associated: RefCell::new(associated) })
 		}
 	}
 
@@ -23,6 +28,14 @@ impl Case {
 
 	pub fn set_tag(&self, val: usize) {
 		self.tag.set(Some(val));
+	}
+
+	pub fn associated_types(&self) -> Ref<Vec<Type>> {
+		self.associated.borrow()
+	}
+
+	pub fn associated_types_mut(&self) -> RefMut<Vec<Type>> {
+		self.associated.borrow_mut()
 	}
 }
 
@@ -41,6 +54,15 @@ impl Deref for CaseRef {
 
 impl std::fmt::Debug for CaseRef {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "case {} = {}", self.name(), self.tag())
+		if self.associated_types().len() == 0 {
+        	write!(f, "case {} = {}", self.name(), self.tag())
+		} else {
+			let assoc_ty = self.associated_types()
+				.iter()
+				.map(|ty| format!("{ty:?}"))
+				.collect::<Vec<_>>()
+				.join(", ");
+			write!(f, "case {}({assoc_ty}) = {}", self.name(), self.tag())
+		}
     }
 }

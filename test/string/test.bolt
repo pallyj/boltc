@@ -1,15 +1,26 @@
+/* /* nested comments */ */
+
 @entryPoint
 func main() {
-	let hello_world = "Hello, World!"
+	let hello_world = """
+		Hello, World!"""
 
-	// Somethings up with the polymorphization...
 	let hello = hello_world[0..<5]
 
 	print(withLength: hello)
+
+	let json = """
+		{
+			"name": "John Smith",
+			"age": "25"
+		}
+	"""
+
+	print(withLength: json)
 }
 
 func print(withLength slice: StringSlice) {
-	print(slice)
-	print(" with length: ")
-	printLine(slice.length())
+	print(slice, newline: false)
+	print(" with length: ", newline: false)
+	print(slice.length())
 }

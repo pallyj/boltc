@@ -59,7 +59,17 @@ impl AstLowerer {
 		cases: CaseDef) -> Vec<CaseRef>
 	{
 		cases.items()
-			 .map(|item| Case::new(item.name()))
+			 .map(|item| {
+				      let associated_types = if let Some(associated_types) = item.associated_types() {
+					      associated_types
+						      .map(|typ| self.lower_type(typ))
+						      .collect()
+					  } else {
+						  vec![]
+					  };
+					      
+				      Case::new(item.name(), associated_types)
+				  })
 			 .collect()
 	}
 }

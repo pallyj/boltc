@@ -97,8 +97,14 @@ pub enum Value {
     CreateEnumVariant {
         variant: String,
         typ: Type,
+        associate: LabelValue,
     },
 
+    CastEnumCase {
+        value: LabelValue,
+        variant: String,
+        typ: Type,
+    }
     
 }
 
@@ -128,6 +134,8 @@ impl Value {
             Self::DerefTupleField { typ, .. } => typ,
 
             Self::CreateEnumVariant { typ, .. } => typ,
+
+            Self::CastEnumCase { typ, .. } => typ,
         }.clone()
     }
 }
@@ -177,7 +185,8 @@ impl Display for Value {
             Value::AccessTupleField { tuple, field, typ } => write!(f, "access-tuple-field \"{field}\" {tuple} : {typ}"),
             Value::DerefTupleField { tuple, field, typ } => write!(f, "deref-tuple-field \"{field}\" {tuple} : {typ}"),
 
-            Value::CreateEnumVariant { variant, typ } => write!(f, "create-enum-variant .{variant} : {typ}"),
+            Value::CreateEnumVariant { variant, typ, associate } => write!(f, "create-enum-variant {typ}.{variant} ({associate})"),
+            Value::CastEnumCase { value, variant, .. } => write!(f, "{value} as {}.{variant}", value.typ_ref()),
         }
     }
 }

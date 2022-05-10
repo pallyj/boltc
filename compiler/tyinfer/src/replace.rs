@@ -4,7 +4,7 @@ use blir::{code::{CodeBlock, Statement, StatementKind},
            scope::ScopeRef,
            typ::{Type, TypeKind},
            value::{IfBranch, IfValue, Value, ValueKind},
-           BlirContext, SomeFunction, Symbol, pattern::PatternKind};
+           BlirContext, SomeFunction, Symbol, pattern::{PatternKind, Pattern}};
 use errors::{debugger::Debugger, error::ErrorCode, Span};
 use rusttyc::{Preliminary, PreliminaryTypeTable, TcKey};
 
@@ -101,6 +101,25 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 if let ValueKind::PolymorphicMethod { polymorphic, .. } |
                        ValueKind::Polymorphic(polymorphic) = &mut function.kind {
                     polymorphic.filter_labels(&args.labels);
+                } else if let ValueKind::VariantLiteral(named) = &function.kind {
+                    let TypeKind::Enum(enum_type) = value.typ.kind() else {
+                        // TODO: Throw an error?
+                        return
+                    };
+    
+                    let Some(variant) = enum_type.get_variant(named) else {
+                        // TODO: Throw an error?
+                        return
+                    };
+                    let enum_variant_value = ValueKind::EnumVariant { of_enum: enum_type.clone(), variant: variant.clone() };
+    
+                    function.set_kind(enum_variant_value);
+
+                    let function_type = TypeKind::Function { return_type: Box::new(value.typ.clone()),
+                                                            params: variant.associated_types().clone(),
+                                                            labels: vec![] };
+
+                    function.set_type(function_type.anon());
                 }
 
                 let params = match function.typ.kind_mut() {
@@ -146,10 +165,12 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 
                 // Now we turn it into a polymorphizer
                 let operator_name = format!("op~{operator}");
-                // TODO: Make operators into instance functions
+
                 let Some(Symbol::Function(polymorphizer)) = container_type.lookup_static_item(&operator_name) else {
+                    let operator = operator.to_string();
 					// Throw an error
-					self.debugger.throw_single(ErrorCode::OperatorNotDefined(operator.to_string(), type_to_string(container_type)), &value.span);
+                    value.kind = ValueKind::Error;
+					self.debugger.throw_single(ErrorCode::OperatorNotDefined(operator, type_to_string(container_type)), &value.span);
 					return;
 				};
 
@@ -166,7 +187,9 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 }
 
                 let Some(resolved_member) = parent.typ.lookup_instance_item(member, scope) else {
-                    self.debugger.throw_single(ErrorCode::MemberNotFound { name: member.clone() }, &value.span);
+                    let member = member.clone();
+                    value.kind = ValueKind::Error;
+                    self.debugger.throw_single(ErrorCode::MemberNotFound { name: member }, &value.span);
                     return
 				};
 
@@ -206,15 +229,34 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 self.replace_value(&mut match_value.discriminant, scope);
 
                 for branch in &mut match_value.branches {
-                    match &mut branch.pattern.kind {
-                        PatternKind::Literal { value } => self.replace_value(value, scope),
-                        _ => {}
-                    }
+                    self.replace_pattern(&mut branch.pattern, scope);
 
                     self.replace_codeblock(&mut branch.code, scope);
                 }
             }
 
+            _ => {}
+        }
+    }
+
+    fn replace_pattern(
+        &mut self,
+        pattern: &mut Pattern,
+        scope: &ScopeRef)
+    {
+        match &mut pattern.kind {
+            PatternKind::Literal { value } => self.replace_value(value, scope),
+            PatternKind::Tuple { items } => {
+                for i in items {
+                    self.replace_pattern(i, scope);
+                }
+            }
+            PatternKind::Variant { variant, items } => {
+                self.replace_value(variant, scope);
+                for i in items {
+                    self.replace_pattern(i, scope);
+                }
+            }
             _ => {}
         }
     }
@@ -292,6 +334,27 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
             Symbol::TupleField(ty, field_number) => {
                 value.set_kind(ValueKind::TupleField(Box::new(parent), field_number));
                 value.set_type(ty);
+            }
+            Symbol::EnumCase(enum_ref, case_ref) => {
+                // If the enum variant is an empty tuple,
+                // Set value to an enum variant
+                if case_ref.associated_types().len() == 0 {
+                    value.set_type(enum_ref.get_type().anon());
+                    value.set_kind(ValueKind::EnumVariant { of_enum: enum_ref, variant: case_ref });
+                }
+                // If the enum variant is a non-empty tuple
+                // Set the value to an enum variant
+                // With a function type
+                else {
+                    let enum_type = enum_ref.get_type().anon();
+
+                    let function_type = TypeKind::Function { return_type: Box::new(enum_type),
+                                                             params: case_ref.associated_types().clone(),
+                                                             labels: vec![] };
+
+                    value.set_type(function_type.anon());
+                    value.set_kind(ValueKind::EnumVariant { of_enum: enum_ref.clone(), variant: case_ref });
+                }
             }
         }
     }

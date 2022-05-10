@@ -91,6 +91,22 @@ impl Struct {
              .get(name)
              .expect("Field doesn't exist")
     }
+
+    /*pub fn size(&self) -> usize {
+        if self.is_packed {
+            self.fields
+                .borrow()
+                .iter()
+                .map(|field| field.typ.size())
+                .fold(0, |acc, x| acc + x)
+        } else {
+            self.fields
+                .borrow()
+                .iter()
+                .map(|field| usize::max(field.typ.size(), field.typ.align()))
+                .fold(0, |acc, x| acc + x)
+        }
+    }*/
 }
 
 impl StructField {

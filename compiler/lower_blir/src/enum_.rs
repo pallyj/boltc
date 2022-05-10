@@ -26,8 +26,12 @@ impl BlirLowerer {
 		for variant in enum_def.variants().iter() {
 			let variant_name = variant.name().clone();
 			let variant_tag = variant.tag();
+			let variant_tuple = variant.associated_types()
+				.iter()
+				.map(|typ| self.lower_type(typ))
+				.collect();
 
-			let ssa_variant = EnumVariant::new(variant_name, variant_tag);
+			let ssa_variant = EnumVariant::new(variant_name, variant_tag, variant_tuple);
 
 			self_enum.add_variant(ssa_variant);
 		}

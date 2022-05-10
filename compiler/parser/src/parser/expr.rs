@@ -223,6 +223,7 @@ impl<'input, 'l> Parser<'input, 'l> {
         || self.check(SyntaxKind::LiteralHexInt)
         || self.check(SyntaxKind::LiteralDecFloat)
         || self.check(SyntaxKind::StringLiteral)
+        || self.check(SyntaxKind::LongStringLiteral)
         || self.check(SyntaxKind::Operator)
         || self.check(SyntaxKind::OpenParen)
         || self.check(SyntaxKind::OpenBrace)
@@ -242,6 +243,7 @@ impl<'input, 'l> Parser<'input, 'l> {
                   || self.eat(SyntaxKind::LiteralTrue)
                   || self.eat(SyntaxKind::LiteralFalse)
                   || self.eat(SyntaxKind::StringLiteral)
+                  || self.eat(SyntaxKind::LongStringLiteral)
         {
             marker.complete(self, SyntaxKind::Literal)
         } else if self.check(SyntaxKind::OpenParen) {
@@ -341,7 +343,7 @@ impl<'input, 'l> Parser<'input, 'l> {
             self.eat(SyntaxKind::Comma);
         } else {
             self.parse_expr();
-            if !self.eat(SyntaxKind::Comma) {
+            if !(self.eat(SyntaxKind::Comma) || self.check(SyntaxKind::CloseBrace)) {
                 self.error("expected comma");
             }
         }

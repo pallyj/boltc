@@ -12,7 +12,7 @@ pub fn lower_basic_typ<'a, 'ctx>(t: &Type, context: &ModuleContext<'a, 'ctx>) ->
 
         Type::StrSlice => lower_strslice_type(context).as_basic_type_enum(),
 
-        Type::Function { return_type, pars } => lower_function_type(&*return_type, pars, context)?.ptr_type(AddressSpace::Global)
+        Type::Function { return_type, pars } => lower_function_type(&*return_type, pars, context)?.ptr_type(AddressSpace::Generic)
                                                                                                   .as_basic_type_enum(),
 
         Type::Tuple(tuple_items) => lower_tuple_type(tuple_items, context)?.as_basic_type_enum(),
@@ -45,28 +45,28 @@ pub fn lower_enum_typ<'a, 'ctx>(container: &EnumRef, context: &ModuleContext<'a,
 
 pub fn lower_pointer_typ<'a, 'ctx>(t: &Type, context: &ModuleContext<'a, 'ctx>) -> Option<PointerType<'ctx>> {
     Some(match t {
-        Type::Void => context.context.i8_type().ptr_type(AddressSpace::Global),
+        Type::Void => context.context.i8_type().ptr_type(AddressSpace::Generic),
 
-        Type::Integer { bits } => lower_integer_type(*bits, context)?.ptr_type(AddressSpace::Global),
+        Type::Integer { bits } => lower_integer_type(*bits, context)?.ptr_type(AddressSpace::Generic),
 
-        Type::Float { bits } => lower_float_type(*bits, context)?.ptr_type(AddressSpace::Global),
+        Type::Float { bits } => lower_float_type(*bits, context)?.ptr_type(AddressSpace::Generic),
 
-        Type::StrSlice => lower_strslice_type(context).ptr_type(AddressSpace::Global),
+        Type::StrSlice => lower_strslice_type(context).ptr_type(AddressSpace::Generic),
 
-        Type::Function { return_type, pars } => lower_function_type(&*return_type, pars, context)?.ptr_type(AddressSpace::Global),
+        Type::Function { return_type, pars } => lower_function_type(&*return_type, pars, context)?.ptr_type(AddressSpace::Generic),
 
-        Type::Tuple(tuple_items) => lower_tuple_type(tuple_items, context)?.ptr_type(AddressSpace::Global),
+        Type::Tuple(tuple_items) => lower_tuple_type(tuple_items, context)?.ptr_type(AddressSpace::Generic),
 
-        Type::Struct { container } => lower_struct_typ(container, context)?.ptr_type(AddressSpace::Global),
+        Type::Struct { container } => lower_struct_typ(container, context)?.ptr_type(AddressSpace::Generic),
 
-        Type::Enum(container) => lower_enum_typ(container, context)?.ptr_type(AddressSpace::Global),
+        Type::Enum(container) => lower_enum_typ(container, context)?.ptr_type(AddressSpace::Generic),
 
-        Type::Pointer { pointee } => lower_pointer_typ(&*pointee, context)?.ptr_type(AddressSpace::Global),
+        Type::Pointer { pointee } => lower_pointer_typ(&*pointee, context)?.ptr_type(AddressSpace::Generic),
     })
 }
 
 pub fn lower_strslice_type<'a, 'ctx>(context: &ModuleContext<'a, 'ctx>) -> StructType<'ctx> {
-    let string_pointer_type = context.context.i8_type().ptr_type(AddressSpace::Global).as_basic_type_enum();
+    let string_pointer_type = context.context.i8_type().ptr_type(AddressSpace::Generic).as_basic_type_enum();
     let string_len_type = context.context.i64_type().as_basic_type_enum();
 
     context.context.struct_type(&[string_pointer_type, string_len_type], false)

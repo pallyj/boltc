@@ -3,7 +3,7 @@ use blir::{attributes::AttributeFactory,
            scope::{ScopeRef, ScopeRelation, ScopeType},
            typ::{StructRef, Type, TypeKind, EnumRef},
            value::{Closure, ClosureParam, ConstantRef, IfBranch, IfValue, Value, ValueKind, VarRef},
-           BlirContext, Library, Symbol, Visibility};
+           BlirContext, Library, Symbol, Visibility, pattern::{Pattern, PatternKind}};
 use errors::{debugger::Debugger, error::ErrorCode};
 use parser::operators::{OperatorFactory, OperatorFix};
 
@@ -120,6 +120,10 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
             variant.set_tag(tag_counter);
 
             tag_counter += 1;
+
+            variant.associated_types_mut()
+                   .iter_mut()
+                   .for_each(|typ| self.resolve_type(typ, scope))
         }
 
         self.resolve_type(&mut *r#enum.repr_type_mut(), scope);
@@ -400,6 +404,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                     }
                     
                     Symbol::TupleField(..) => unreachable!(),
+                    Symbol::EnumCase(..) => unreachable!(),
                 }
             }
 
@@ -456,14 +461,48 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 self.resolve_type(&mut value.typ, scope);
             }
 
+            ValueKind::Tuple(fields) => {
+                for field in fields {
+                    self.resolve_value(field, scope)
+                }
+            }
+
             ValueKind::Match(match_value) => {
                 self.resolve_value(&mut match_value.discriminant, scope);
 
                 for branch in &mut match_value.branches {
-                    self.resolve_code_block(&mut branch.code, scope);
+                    // Create a new scope
+                    let branch_scope = ScopeRef::new(Some(scope), ScopeRelation::Scope, ScopeType::Code, false, false);
+                    self.define_pattern_in_scope(&mut branch.pattern, &branch_scope);
+                    self.resolve_code_block(&mut branch.code, &branch_scope);
                 }
             }
 
+            _ => {}
+        }
+    }
+
+    fn define_pattern_in_scope(&mut self, pattern: &mut Pattern, scope: &ScopeRef) {
+        match &mut pattern.kind {
+            PatternKind::Bind(name) => {
+                if let Some(sym) = scope.lookup_symbol(name) {
+                    let sym = sym.resolve();
+                    if let Symbol::Constant(constant_ref) = sym {
+                        let span = pattern.span.clone();
+                        *pattern = PatternKind::Literal { value: constant_ref.borrow().value.clone() }.with_span(span);
+                        return;
+                    }
+                }
+                // We gotta 
+                let mangled_bind_name = scope.define_variable(name, pattern.match_type.clone());
+                *name = mangled_bind_name;
+            }
+            PatternKind::Tuple { items } |
+            PatternKind::Variant { items, .. } => {
+                items
+                    .iter_mut()
+                    .for_each(|pattern| self.define_pattern_in_scope(pattern, scope))
+            }
             _ => {}
         }
     }

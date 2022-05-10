@@ -34,6 +34,7 @@ impl<'input, 'l> Parser<'input, 'l> {
 			 || self.check(SyntaxKind::LiteralTrue)
 			 || self.check(SyntaxKind::LiteralFalse)
 			 || self.check(SyntaxKind::StringLiteral)
+			 || self.check(SyntaxKind::LongStringLiteral)
 		{
 			self.node(SyntaxKind::Literal, Parser::bump);
 			

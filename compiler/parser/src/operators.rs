@@ -128,7 +128,6 @@ impl OperatorFactory {
         // self.register_infix("bitXorAssign", "^=", OperatorPrecedence::Assignment);
         //
         // self.register_infix("assign", "=", OperatorPrecedence::Assignment);
-        //
         self.register_postfix("upperRange", "..");
         self.register_prefix("unit", "+");
         self.register_prefix("negate", "-");

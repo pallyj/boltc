@@ -200,11 +200,31 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
     }
 
     pub fn constrain_pattern(&mut self, pattern: &Pattern, typ: &Type, scope: &ScopeRef) {
+        self.constrain_two_way(pattern.match_type(), typ);
+        
         match &pattern.kind {
             PatternKind::Literal { value } => {
                 self.constrain_value(&value, scope);
                 self.constrain_two_way(&value.typ, typ);
             },
+            PatternKind::Tuple { items } => {
+                if let TypeKind::Tuple(tuple) = typ.kind() {
+                    for (item, tuple_item) in items.iter().zip(tuple) {
+                        self.constrain_pattern(item, tuple_item, scope)
+                    }
+                }
+            }
+            PatternKind::Variant { variant, items } => {
+                self.constrain_value(&variant, scope);
+                self.constrain_two_way(&variant.typ, typ);
+
+                if let ValueKind::EnumVariant { variant, .. } = &variant.kind {
+                    let tuple = variant.associated_types();
+                    for (item, tuple_item) in items.iter().zip(tuple.iter()) {
+                        self.constrain_pattern(item, tuple_item, scope)
+                    }
+                }
+            }
             _ => {}
         }
     }

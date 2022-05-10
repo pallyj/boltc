@@ -13,9 +13,12 @@ pub enum SyntaxKind {
     // 0.7
     //
     // get set
+
+    // 0.8
+    //
     // protocol
-    // alias
     // extension
+    // alias
 
     // 0.9
     //
@@ -145,7 +148,7 @@ pub enum SyntaxKind {
     At,
 
     #[regex("//.*")]
-    #[regex(r#"/\*[^\*]*\*/"#)]
+    #[regex(r#"/\*"#, lex_long_comment)]
     Comment,
 
     #[regex(r"[ \n\r\f\t]")]
@@ -153,6 +156,9 @@ pub enum SyntaxKind {
 
     #[regex(r#""[^"]*""#)]
     StringLiteral,
+
+    #[regex(r#"""""#, lex_long_string, priority = 2)]
+    LongStringLiteral,
 
     #[error]
     Error,
@@ -236,6 +242,53 @@ pub enum SyntaxKind {
     LiteralPattern,
 
     _Invalid,
+}
+
+fn lex_long_string(lexer: &mut logos::Lexer<SyntaxKind>) -> Result<(), ()> {
+    let remaining = lexer.remainder();
+
+    let mut look_behind = [' '; 3];
+
+    for (i, next_c) in remaining.chars().enumerate() {
+        if look_behind == ['"', '"', '"'] {
+            // The string is over
+            lexer.bump(i);
+            return Ok(());
+        }
+
+        look_behind[0] = look_behind[1];
+        look_behind[1] = look_behind[2];
+        look_behind[2] = next_c;
+    }
+
+    // Throw an error
+    return Err(())
+}
+
+fn lex_long_comment(lexer: &mut logos::Lexer<SyntaxKind>) -> Result<(), ()> {
+    let remaining = lexer.remainder();
+
+    let mut look_behind = [' '; 2];
+    let mut levels = 0;
+
+    for (i, next_c) in remaining.chars().enumerate() {
+        if look_behind == ['*', '/'] {
+            // The string is over
+            if levels <= 0 {
+                lexer.bump(i);
+                return Ok(());
+            }
+            levels -= 1;
+        } else if look_behind == ['/', '*'] {
+            levels += 1
+        }
+
+        look_behind[0] = look_behind[1];
+        look_behind[1] = next_c;
+    }
+
+    // Throw an error
+    return Err(())
 }
 
 impl SyntaxKind {

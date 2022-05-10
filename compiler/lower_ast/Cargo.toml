@@ -12,3 +12,4 @@ blir = { path = "../blir" }
 errors = { path = "../errors" }
 fast-float = "0.2.0"
 mangle = { path = "../mangle" }
+unindent = "0.1.9"

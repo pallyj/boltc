@@ -1,0 +1,52 @@
+enum Optional_Int: Int64 {
+	case some(Int)
+	case none
+}
+
+enum Fallible_Int_Float {
+	case ok(Int)
+	case err(Float)
+}
+
+func positive(x: Int): Optional_Int {
+	if x > 0 {
+		Optional_Int.some(x)
+	} else {
+		Optional_Int.none
+	}
+
+	/*
+	if x > 0 { x }
+	else { nil }
+	*/
+}
+
+func doSomething(x: Optional_Int) {
+	match x {
+		.some => print("Positive"),
+		.none => print("Negative"),
+		_ => print("ERROR")
+	}
+}
+
+@entryPoint
+func main() {
+	let pos = positive(10);
+	let neg = positive(-5);
+
+	let x: Optional_Int = .none
+	let y: Optional_Int = .some(10)
+
+	doSomething(x)
+	doSomething(y)
+	doSomething(pos)
+	doSomething(neg)
+}
+
+// Stuff I have to do
+//  - Enums can be constructed without literal
+//  - Construct enums with variants
+//     - Have it as a function
+//  - Match enums with variants
+//	   - Convert it to a tuple
+//	   - Match the tuple

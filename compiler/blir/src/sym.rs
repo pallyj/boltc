@@ -2,7 +2,7 @@ use errors::Span;
 
 use crate::{code::{ExternFunctionRef, FunctionInfo, FunctionRef, MethodRef},
             scope::ScopeRelation,
-            typ::{Type, TypeKind},
+            typ::{Type, TypeKind, EnumRef, CaseRef},
             value::{ConstantRef, Value, VarRef},
             Visibility};
 
@@ -18,7 +18,9 @@ pub enum Symbol {
 
     Type(TypeKind),
 
-    TupleField(Type, usize)
+    TupleField(Type, usize),
+
+    EnumCase(EnumRef, CaseRef),
 }
 
 #[derive(Clone)]

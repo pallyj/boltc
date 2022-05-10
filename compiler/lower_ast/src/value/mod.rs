@@ -2,6 +2,7 @@ use blir::{typ::{Type, TypeKind},
            value::{Closure, ClosureParam, FunctionArgs, IfBranch, IfValue, Value, ValueKind, match_::MatchValue, MatchBranch}, code::{CodeBlock, StatementKind}};
 use errors::Span;
 use parser::ast::expr::{ClosureExpr, Expr as AstExpr, IfExpr, IfExprNegative, LiteralKind};
+use unindent::unindent;
 
 use crate::AstLowerer;
 
@@ -82,11 +83,17 @@ impl AstLowerer {
             AstExpr::LiteralExpr(literal) => {
                 let kind = literal.literal_kind();
 
-                if let LiteralKind::String =  kind {
+                if let LiteralKind::String = kind {
                     let text = literal.text();
                     let text_range = 1..(text.len() - 1);
 
                     ValueKind::StringLiteral(text[text_range].to_string()).spanned_infer(span)
+                } else if let LiteralKind::LongString = kind {
+                    let text = literal.text();
+                    let text_range = 3..(text.len() - 3);
+                    let unindent = unindent(&text[text_range]);
+
+                    ValueKind::StringLiteral(unindent).spanned_infer(span)
                 } else {
                     let text = literal.text().replace("_", "");
 
@@ -102,6 +109,7 @@ impl AstLowerer {
                         LiteralKind::DecFloat => ValueKind::FloatLiteral(fast_float::parse(&text).unwrap()).spanned_infer(span),
 
                         LiteralKind::String => unreachable!(),
+                        LiteralKind::LongString => unreachable!(),
                         LiteralKind::Error => panic!(),
                     }
                 }

@@ -8,12 +8,14 @@ ast!(struct WildcardPattern(WildcardPattern));
 ast!(struct LiteralPattern(LiteralPattern));
 ast!(struct VariantPattern(VariantPattern));
 ast!(struct TuplePattern(TuplePattern));
+ast!(struct BindPattern(BindPattern));
 
 ast!(enum Pattern {
 	WildcardPattern,
 	LiteralPattern,
     VariantPattern,
     TuplePattern,
+    BindPattern,
 });
 
 impl LiteralPattern {
@@ -43,6 +45,7 @@ impl Debug for Pattern {
             Self::LiteralPattern(arg0) => write!(f, "{arg0:?}"),
             Self::VariantPattern(arg0) => write!(f, "{arg0:?}"),
             Self::TuplePattern(arg0) => write!(f, "{arg0:?}"),
+            Self::BindPattern(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "error"),
         }
     }
@@ -51,6 +54,12 @@ impl Debug for Pattern {
 impl VariantPattern {
     pub fn variant_name(&self) -> String {
         find_token(&self.0, SyntaxKind::Ident).unwrap().text().to_string()
+    }
+
+    pub fn associated_patterns(&self) -> Option<impl Iterator<Item = Pattern>> {
+        Some(self.0.last_child()?
+            .children()
+            .map(Pattern::cast))
     }
 }
 
@@ -78,5 +87,20 @@ impl Debug for TuplePattern {
                 .join(", ");
         
         write!(f, "({items})")
+    }
+}
+
+impl BindPattern {
+    pub fn bind_name(&self) -> String {
+        find_token(&self.0, SyntaxKind::Ident)
+            .unwrap()
+            .text()
+            .to_string()
+    }
+}
+
+impl Debug for BindPattern {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.bind_name())
     }
 }

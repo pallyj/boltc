@@ -65,8 +65,14 @@ impl<'input, 'l> Parser<'input, 'l> {
 
 	pub fn parse_case_item(&mut self) {
 		debug_assert!(self.check(SyntaxKind::Ident));
+
 		let marker = self.start();
         self.eat(SyntaxKind::Ident);
+
+        if self.check(SyntaxKind::OpenParen) {
+            self.parse_paren_comma_seq(Self::parse_ty);
+        }
+
 		marker.complete(self, SyntaxKind::CaseItem);
 	}
 

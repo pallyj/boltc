@@ -5,6 +5,8 @@ import intrinsics
 public struct Bool /*: BooleanLiteralRepr */ {
 	internal var repr: i1
 
+	//
+
 	public operator func and(right: Self): Self {
 		Self(repr: integer1And(self.repr, right.repr) )
 	}
@@ -14,14 +16,14 @@ public struct Bool /*: BooleanLiteralRepr */ {
 	}
 
 	public operator func invert(): Self {
-		Self(repr:integer1Invert(self.repr))
+		Self(repr: integer1Invert(self.repr))
 	}
 
 	public operator func equal(right: Self): Self {
-		Self(repr:integer1CmpEq(self.repr, right.repr))
+		Self(repr: integer1CmpEq(self.repr, right.repr))
 	}
 
 	public operator func notEqual(right: Self): Self {
-		Self(repr:integer1CmpNeq(self.repr, right.repr))
+		Self(repr: integer1CmpNeq(self.repr, right.repr))
 	}
 }

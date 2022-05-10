@@ -138,6 +138,16 @@ impl CaseItem {
             .text()
             .to_string()
     }
+
+    pub fn associated_types(&self) -> Option<impl Iterator<Item = Type>> {
+        Some(
+            self.0
+                .children()
+                .find(|child| child.kind() == SyntaxKind::CommaSeparatedList)?
+                .children()
+                .map(Type::cast)
+        )
+    }
 }
 
 impl Debug for CaseItem {
@@ -212,7 +222,7 @@ impl Debug for EnumDef {
 
 
 impl EnumBody {
-    pub fn items(&self) -> impl Iterator<Item=EnumItem> { self.0.children().map(EnumItem::cast) }
+    pub fn items(&self) -> impl Iterator<Item = EnumItem> { self.0.children().map(EnumItem::cast) }
 }
 
 impl Debug for EnumBody {

@@ -196,7 +196,7 @@ impl Builder {
 			panic!();
 		};
 
-        let typ = items[field].clone().pointer();
+        let typ = items[field].clone();
 
         let value = Value::DerefTupleField { r#tuple,
                                              field,
@@ -258,8 +258,21 @@ impl Builder {
         return self.build_av(call_value);
     }
 
-    pub fn build_create_enum_variant(&mut self, enum_type: Type, variant: &str) -> LabelValue {
-        let value = Value::CreateEnumVariant { variant: variant.to_string(), typ: enum_type };
+    pub fn build_create_enum_variant(&mut self, enum_type: Type, variant: &str, associate: LabelValue) -> LabelValue {
+        let value = Value::CreateEnumVariant { variant: variant.to_string(), typ: enum_type, associate };
+
+        self.build_av(value)
+    }
+
+    pub fn build_cast_enum_variant(&mut self, value: LabelValue, variant: &str) -> LabelValue {
+        let Type::Enum(enum_ref) = value.typ() else {
+            panic!()
+        };
+
+        let variant_cntr = enum_ref.get_variant(variant);
+        let variant_tuple_type = variant_cntr.tuple_type().clone();
+
+        let value = Value::CastEnumCase { value, variant: variant.to_string(), typ: variant_tuple_type };
 
         self.build_av(value)
     }

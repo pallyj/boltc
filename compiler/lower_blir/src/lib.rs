@@ -1,4 +1,5 @@
 #![feature(let_else)]
+#![feature(drain_filter)]
 
 mod func;
 mod smt;

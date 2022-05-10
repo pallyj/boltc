@@ -2,15 +2,16 @@ use std::fmt::Debug;
 
 use errors::Span;
 
-use crate::value::Value;
+use crate::{value::Value, typ::Type};
 
 #[derive(Clone)]
 pub enum PatternKind {
 	Wildcard,
 	
-	//Bind { name: String },
+	Bind(String),
 
-	//Variant { name: String },
+	Variant { variant: Value,
+			  items: Vec<Pattern> },
 
 	Literal { value: Value },
 
@@ -19,24 +20,41 @@ pub enum PatternKind {
 
 impl PatternKind {
 	pub fn with_span(self, span: Span) -> Pattern {
-		Pattern { kind: self, span }
+		Pattern { kind: self, span, match_type: Type::infer() }
 	}
 }
 
 #[derive(Clone)]
 pub struct Pattern {
 	pub kind: PatternKind,
-	span: Span
+	pub span: Span,
+	pub match_type: Type
 }
 
 impl Debug for Pattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self.kind {
 			PatternKind::Wildcard => write!(f, "_"),
+			PatternKind::Bind(name) => write!(f, "{name}"),
 			PatternKind::Literal { value } => write!(f, "{value:?}"),
-			PatternKind::Tuple { items } => write!(f, "({})", items.iter().map(|item| format!("{item:?}")).collect::<Vec<_>>().join(", ") )
+			PatternKind::Tuple { items } => write!(f, "({})", items.iter().map(|item| format!("{item:?}")).collect::<Vec<_>>().join(", ") ),
+			PatternKind::Variant { variant, items } => write!(f, "{variant:?}({})", items.iter().map(|item| format!("{item:?}")).collect::<Vec<_>>().join(", ") )
 		}
     }
+}
+
+impl Pattern {
+	pub fn match_type(&self) -> &Type {
+		&self.match_type
+	}
+
+	pub fn match_type_mut(&mut self) -> &mut Type {
+		&mut self.match_type
+	}
+
+	pub fn matches_any(&self) -> bool {
+		matches!(&self.kind, PatternKind::Bind(..) | PatternKind::Wildcard)
+	}
 }
 
 /*

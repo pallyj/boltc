@@ -1,8 +1,8 @@
-use std::{cell::{RefCell, Ref, RefMut}, sync::Arc, ops::Deref, collections::HashMap};
+use std::{cell::{RefCell, Ref, RefMut}, sync::{Arc, Weak}, ops::Deref, collections::HashMap};
 
 use mangle::{Path, MangledEnum};
 
-use crate::{attributes::{Attributes}, Visibility, scope::ScopeRef, code::MethodRef};
+use crate::{attributes::{Attributes}, Visibility, scope::ScopeRef, code::MethodRef, Symbol};
 
 use super::{TypeKind, CaseRef, Type};
 
@@ -19,19 +19,24 @@ impl Enum {
 		parent_path:&Path,
 		repr_type:	Type) -> EnumRef
 	{
-		let enum_inner = EnumInner {
-			attributes,
-			visibility,
-			link_name: name.clone(),
-			scope: parent.clone(),
-			path: parent_path.clone().append(&name),
-			name,
-			methods: Vec::new(),
-			cases: 	 Vec::new(),
-			named_variants: HashMap::new(),
-			repr_type };
+		let arc = Arc::new_cyclic(|enum_arc| {
+			let enum_inner = EnumInner {
+				attributes,
+				visibility,
+				link_name: name.clone(),
+				scope: parent.clone(),
+				path: parent_path.clone().append(&name),
+				name,
+				methods: Vec::new(),
+				cases: 	 Vec::new(),
+				named_variants: HashMap::new(),
+				repr_type,
+				self_ref: enum_arc.clone() };
 
-		EnumRef { enum_ref: Arc::new(Enum { inner: RefCell::new(enum_inner) }) }
+			Enum { inner: RefCell::new(enum_inner) }
+		});
+
+		EnumRef { enum_ref: arc }
 	}
 	pub fn attributes(
 		&self) -> Ref<Attributes>
@@ -101,6 +106,14 @@ impl Enum {
 
 		for case in &cases {
 			inner.named_variants.insert(case.name().clone(), case.clone());
+
+			// TODO: Have a bool determining if it is a function or not
+			let self_enum = EnumRef {enum_ref: inner.self_ref.upgrade().unwrap() };
+
+			let sym = Symbol::EnumCase(self_enum.clone(), case.clone());
+
+			inner.scope
+			     .add_symbol(case.name().clone(), Visibility::Public, sym);
 		}
 
 		inner.cases.extend(cases);
@@ -136,6 +149,12 @@ impl Enum {
 	}
 
 	pub fn mangle(&self) -> String { MangledEnum(&self.inner.borrow().path).to_string() }
+
+	pub fn lookup_static_item(&self, name: &str) -> Option<Symbol> {
+		self.scope()
+			.lookup_static_member(name)
+			.map(|wrapper| wrapper.resolve())
+	}
 }
 
 struct EnumInner {
@@ -153,7 +172,9 @@ struct EnumInner {
 
 	named_variants: HashMap<String, CaseRef>,
 
-	repr_type:		Type
+	repr_type:		Type,
+
+	self_ref:		Weak<Enum>
 }
 
 #[derive(Clone)]

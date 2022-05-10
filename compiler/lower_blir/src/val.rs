@@ -55,8 +55,10 @@ impl BlirLowerer {
 
             ValueKind::EnumVariant { of_enum, variant } => {
                 let enum_type = self.lower_type(&TypeKind::Enum(of_enum.clone()).anon());
+            
+                let tuple = self.lower_tuple(&[], &TypeKind::Tuple(vec![]).anon());
 
-                self.builder().build_create_enum_variant(enum_type, variant.name())
+                self.builder().build_create_enum_variant(enum_type, variant.name(), tuple)
             }
 
             ValueKind::Match(match_value) => self.lower_match(match_value, &value.typ),
@@ -296,6 +298,27 @@ impl BlirLowerer {
 
                 self.builder()
                     .build_unary_intrinsic(intrinsic, args[0].clone())
+            }
+
+            ValueKind::EnumVariant { of_enum, variant } => {
+                // Create an enum variant
+                let enum_type = self.lower_type(&TypeKind::Enum(of_enum.clone()).anon());
+
+                // Create the enum tuple
+                let self_type = self.lower_type(&TypeKind::Tuple(variant.associated_types().clone()).anon());
+                let tuple_value = self.builder().build_stack_alloc_undef(self_type);
+
+                for (i, value) in args.into_iter().enumerate() {
+                    let field_ptr = self.builder()
+                                        .build_access_tuple_field(tuple_value.clone(), i);
+                    self.builder().build_assign_ptr(field_ptr, value);
+                }
+
+                let enum_tuple = self.builder().build_deref(tuple_value);
+
+                // Use the parameters as part of the enum
+                self.builder()
+                    .build_create_enum_variant(enum_type, variant.name(), enum_tuple)
             }
 
             _ => {

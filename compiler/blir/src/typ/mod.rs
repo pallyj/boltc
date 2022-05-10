@@ -112,6 +112,7 @@ impl Type {
     pub fn lookup_static_item(&self, named: &str) -> Option<Symbol> {
         match &self.kind {
             TypeKind::Struct(r#struct) => r#struct.lookup_static_item(named),
+            TypeKind::Enum(r#enum) => r#enum.lookup_static_item(named),
             _ => None,
         }
     }

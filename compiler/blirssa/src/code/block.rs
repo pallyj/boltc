@@ -44,14 +44,14 @@ impl Block {
 
     pub fn function(&self) -> &FunctionWeakRef { &self.func }
 
-    pub fn label(&self) -> &String { &self.label }
+    pub fn label(&self) -> String { format!("{}{}", self.label, self.idx) }
 
     pub fn index(&self) -> u64 { self.idx }
 }
 
 impl Display for Block {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{}:", self.label)?;
+        writeln!(f, "{}{}:", self.label, self.idx)?;
 
         for i in self.instructions().iter() {
             writeln!(f, "    {i}")?;

@@ -1,0 +1,15 @@
+
+func matchNumber(n: Int, m: Int) {
+	match (n, m) {
+		(1, 1) => {
+			print(1)
+		}
+		_ => print(3)
+	}
+}
+
+@entryPoint
+func main() {
+	matchNumber(1, 1)
+	matchNumber(1, 4)
+}

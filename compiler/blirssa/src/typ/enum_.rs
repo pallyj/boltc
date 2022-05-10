@@ -33,16 +33,21 @@ impl Enum {
 	pub fn get_variant(&self, variant_name: &str) -> Ref<EnumVariant> {
 		Ref::map(self.variants.borrow(), |variants| variants.get(variant_name).unwrap())
 	}
+
+	pub fn variants(&self) -> Ref<HashMap<String, EnumVariant>> {
+		self.variants.borrow()
+	}
 }
 
 pub struct EnumVariant {
 	name: String,
 	tag: usize,
+	tuple_type: Type,
 }
 
 impl EnumVariant {
-	pub fn new(name: String, tag: usize) -> Self {
-		EnumVariant { name, tag }
+	pub fn new(name: String, tag: usize, associated_types: Vec<Type>) -> Self {
+		EnumVariant { name, tag, tuple_type: Type::Tuple(associated_types) }
 	}
 
 	pub fn name(&self) -> &String {
@@ -51,6 +56,10 @@ impl EnumVariant {
 
 	pub fn tag(&self) -> usize {
 		self.tag
+	}
+
+	pub fn tuple_type(&self) -> &Type {
+		&self.tuple_type
 	}
 }
 
@@ -81,7 +90,7 @@ impl Display for Enum {
 
 impl Display for EnumVariant {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} = {}", self.name(), self.tag())
+        write!(f, "{}{} = {}", self.name(), self.tuple_type(), self.tag())
     }
 }
 

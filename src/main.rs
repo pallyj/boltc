@@ -17,7 +17,8 @@ fn main() {
     let mut project = Project::new(&args.lib);
 
     // Add standard library
-    let lang = ["std/print.bolt",
+    let lang = [//"test/test.bolt"
+                "std/print.bolt",
                 "bool/Bool.bolt",
                 "float/Half.bolt",
                 "float/Float.bolt",
@@ -138,9 +139,9 @@ impl Project {
 
         let library = lowerer.finish();
 
-        println!("{library}");
+        //println!("{library}");
 
-        let config = BuildConfig::new(BuildProfile::Debug, BuildOutput::Object, None);
+        let config = BuildConfig::new(BuildProfile::Release, BuildOutput::Object, None);
 
         codegen::compile(library, config);
 

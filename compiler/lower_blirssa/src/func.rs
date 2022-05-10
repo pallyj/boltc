@@ -23,7 +23,7 @@ pub fn lower_function<'a, 'ctx>(func: &FunctionRef, context: &ModuleContext<'a, 
     let mut basic_blocks = Vec::new();
 
     for block in func.blocks().iter() {
-        let basic_block = context.context.append_basic_block(llvm_func, block.label());
+        let basic_block = context.context.append_basic_block(llvm_func, &block.label());
 
         function_context.add_basic_block(block.index(), basic_block);
         basic_blocks.push(basic_block);

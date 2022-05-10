@@ -1,59 +1,37 @@
+import intrinsics
+
 @entryPoint
 func main() {
-	matchInt(1)
-	matchInt(2)
-	matchInt(3)
-	matchInt(4)
+	//printLine(matchSquare(1, 1))
+	//printLine(matchSquare(2, 2))
+	//printLine(matchSquare(2, 4))
 
-	matchDirection(.north)
-	matchDirection(.east)
-	matchDirection(.south)
-	matchDirection(.west)
-
-	match "hello, world" {
-		"hello" => print("hello"),
-		"world" => print("world"),
-		//"hello, world" => print("hello, world"),
-		_ => { print("hello, world") }
-	}
+	matchOptional(.some(1))
+	matchOptional(.some(2))
+	matchOptional(.some(3))
+	matchOptional(.none)
 }
 
-func matchInt(i: Int) {
-	match i {
-		1 => printLine("one"),
-		2 => printLine("two"),
-		3 => printLine("three"),
-		_ => printLine("bigger"),
-	}
-}
-
-enum Direction: Int8 {
+enum Direction {
 	case north, east, south, west
 }
 
-/*
 
-match (left, right).item1 {
-	.north => match (left, right).item2 {
-		.north => true,
-		_ => goto _
-	}
-	.south => match (left, right).item2 {
-		.north => true,
-		_ => goto _
-	}
-	.east => match (left, right).item2 {
-		.north => true,
-		_ => goto _
-	}
-	.west => match (left, right).item2 {
-		.north => true,
-		_ => goto _
+enum Optional_Int {
+	case some(Int)
+	case none
+}
+
+func matchOptional(opt: Optional_Int) {
+	match opt {
+		.some(1) => print(1),
+		.some(2) => print(2),
+		.some(n) => print(n),
+		_ => print(100)
 	}
 }
 
-*/
-func equals(left: Direction, right: Direction): Bool {
+func matchTuple(left: Direction, right: Direction): i1 {
 	match (left, right) {
 		(.north, .north) => true,
 		(.east, .east) => true,
@@ -63,14 +41,12 @@ func equals(left: Direction, right: Direction): Bool {
 	}
 }
 
-func matchDirection(d: Direction) {
-	let toString = match d {
-		.north => "north",
-		.east => "east",
-		.south => "south",
-		.west => "west",
-		_ => { "not needed" },
+func matchSquare(a: Int, b: Int): i1 {
+	match (a, b) {
+		(1, 1) => true,
+		(2, 4) => true,
+		(3, 9) => true,
+		(4, 16) => true,
+		_ => false,
 	}
-
-	printLine(toString)
 }

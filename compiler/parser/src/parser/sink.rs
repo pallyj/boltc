@@ -30,7 +30,6 @@ impl<'input, 'l> Sink<'input, 'l> {
             let event = std::mem::replace(&mut self.events[idx], Event::Placeholder);
             match event {
                 Event::StartNode { kind, forward_parent } => {
-                    self.eat_trivia();
                     let mut kinds = vec![kind];
 
                     let mut idx = idx;
@@ -48,6 +47,10 @@ impl<'input, 'l> Sink<'input, 'l> {
                         } else {
                             unreachable!()
                         };
+                    }
+
+                    if kinds.first().map(|first| *first != SyntaxKind::Root).unwrap_or(true) {
+                        self.eat_trivia();
                     }
 
                     for kind in kinds.into_iter().rev() {

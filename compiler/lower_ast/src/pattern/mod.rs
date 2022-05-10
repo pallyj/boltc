@@ -18,7 +18,11 @@ impl AstLowerer {
 				let value = ValueKind::VariantLiteral(variant.variant_name())
 					.spanned_infer(span);
 
-				PatternKind::Literal { value }
+				if let Some(assoc) = variant.associated_patterns() {
+					PatternKind::Variant { variant: value, items: assoc.map(|pat| self.lower_pattern(pat)).collect() }
+				} else {
+					PatternKind::Literal { value }
+				}
 			}
 			AstPattern::TuplePattern(tuple_pat) => {
 				let sub_patterns = tuple_pat
@@ -27,6 +31,9 @@ impl AstLowerer {
 					.collect();
 
 				PatternKind::Tuple { items: sub_patterns }
+			}
+			AstPattern::BindPattern(bind_pattern) => {
+				PatternKind::Bind(bind_pattern.bind_name())
 			}
 
 			AstPattern::Error => panic!(),

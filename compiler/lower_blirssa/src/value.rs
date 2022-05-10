@@ -5,7 +5,7 @@ use inkwell::{builder::Builder,
               values::{BasicValue, BasicValueEnum, CallableValue, FunctionValue},
               FloatPredicate, IntPredicate};
 
-use crate::{func::FunctionContext, typ::{lower_basic_typ, lower_strslice_type, lower_integer_type}, ModuleContext};
+use crate::{func::FunctionContext, typ::{lower_basic_typ, lower_strslice_type, lower_integer_type, lower_pointer_typ}, ModuleContext};
 
 pub fn lower_value<'a, 'ctx>(value: &Value, context: &ModuleContext<'a, 'ctx>, fn_ctx: &FunctionContext<'ctx>) -> Result<LLVMValue<'ctx>, String> {
     Ok(match value {
@@ -267,7 +267,7 @@ pub fn lower_value<'a, 'ctx>(value: &Value, context: &ModuleContext<'a, 'ctx>, f
             _ => panic!("deref-struct-field can only be used on a struct or a pointer to one"),
         },
 
-        Value::CreateEnumVariant { variant, typ } => {
+        Value::CreateEnumVariant { variant, typ, associate } => {
             let Type::Enum(enum_ref) = typ else {
                 panic!()
             };
@@ -288,8 +288,51 @@ pub fn lower_value<'a, 'ctx>(value: &Value, context: &ModuleContext<'a, 'ctx>, f
 
             context.builder.build_store(tag_ptr, tag_value);
 
+            if let Type::Tuple(tuple_items) = enum_variant.tuple_type() {
+                if !tuple_items.is_empty() {
+                    let tuple = fn_ctx.get_local(associate).unwrap().basic();
+
+                    let assoc_ptr = context.builder.build_struct_gep(struct_instance, 1, "enum-assoc-ptr").unwrap();
+                    let lowered_type = lower_pointer_typ(enum_variant.tuple_type(), context).unwrap();
+                    let bitcast_ptr = context.builder.build_bitcast(assoc_ptr, lowered_type, "enum-assoc").into_pointer_value();
+                    context.builder.build_store(bitcast_ptr, tuple);
+                }
+            }
+
             LLVMValue::Basic(context.builder
                                     .build_load(struct_instance, "enum-value"))
+        }
+
+        Value::CastEnumCase { value, variant, typ } => {
+            if let Type::Pointer { pointee } = value.typ_ref() {
+                let Type::Enum(enum_ref) = &**pointee else {
+                    panic!()
+                };
+
+                let variant = enum_ref.get_variant(variant);
+                let tuple = fn_ctx.get_local(value).unwrap().basic();
+
+                let assoc_ptr = context.builder.build_struct_gep(tuple.into_pointer_value(), 1, "enum-assoc-ptr").unwrap();
+                let lowered_type = lower_pointer_typ(variant.tuple_type(), context).unwrap();
+                let bitcast_ptr = context.builder.build_bitcast(assoc_ptr, lowered_type, "enum-assoc");
+
+                LLVMValue::Basic(bitcast_ptr)
+            } else if let Type::Enum(_) = value.typ_ref() {
+                let enum_value = fn_ctx.get_local(value).unwrap().basic();
+                let enum_type = lower_basic_typ(value.typ_ref(), context).unwrap();
+                let tuple = context.builder.build_alloca(enum_type, "alloca");
+                context.builder.build_store(tuple, enum_value);
+
+                let assoc_ptr = context.builder.build_struct_gep(tuple, 1, "enum-assoc-ptr").unwrap();
+                let lowered_type = lower_pointer_typ(typ, context).unwrap();
+                let bitcast_ptr = context.builder.build_bitcast(assoc_ptr, lowered_type, "enum-assoc");
+
+                let load_value = context.builder.build_load(bitcast_ptr.into_pointer_value(), "enum-tuple");
+
+                LLVMValue::Basic(load_value)
+            } else {
+                panic!()
+            }
         }
 
     })
