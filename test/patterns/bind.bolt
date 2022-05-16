@@ -10,6 +10,21 @@ func matchNumber(n: Int, m: Int) {
 
 @entryPoint
 func main() {
-	matchNumber(1, 1)
-	matchNumber(1, 4)
+	//matchNumber(1, 1)
+	//matchNumber(1, 4)
+
+	print(matchInts(1, 0, 1))
+	print(matchInts(0, 1, 1))
+	print(matchInts(1, 1, 0))
+	print(matchInts(1, 1, 1))
+}
+
+func matchInts(x: Int, y: Int, z: Int): Int {
+	match (x, y, z) {
+		(_, 0, 1) => 1,
+		(0, 1, _) => 2,
+		(_, _, 0) => 3,
+		(_, _, 1) => 4,
+		_ => 5
+	}
 }

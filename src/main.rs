@@ -141,7 +141,7 @@ impl Project {
 
         //println!("{library}");
 
-        let config = BuildConfig::new(BuildProfile::Release, BuildOutput::Object, None);
+        let config = BuildConfig::new(BuildProfile::Release, BuildOutput::LLVM, None);
 
         codegen::compile(library, config);
 

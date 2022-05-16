@@ -547,7 +547,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
         }
 
         for (i, param) in params.iter().enumerate() {
-            closure.params.push(ClosureParam { name: format!("${i}"),
+            closure.params.push(ClosureParam { name: format!("$par{index}", index = i + 1),
                                                typ:  param.clone(), });
         }
     }

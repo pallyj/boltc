@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use errors::Span;
 
-use crate::{value::Value, typ::Type};
+use crate::{value::Value, typ::{Type, TypeKind}};
 
 #[derive(Clone)]
 pub enum PatternKind {
@@ -21,6 +21,10 @@ pub enum PatternKind {
 impl PatternKind {
 	pub fn with_span(self, span: Span) -> Pattern {
 		Pattern { kind: self, span, match_type: Type::infer() }
+	}
+
+	pub fn with_type(self, ty: Type) -> Pattern {
+		Pattern { kind: self, span: Span::empty(), match_type: ty }
 	}
 }
 
@@ -55,6 +59,16 @@ impl Pattern {
 	pub fn matches_any(&self) -> bool {
 		matches!(&self.kind, PatternKind::Bind(..) | PatternKind::Wildcard)
 	}
+
+	pub fn has_children(&self) -> bool {
+		matches!(&self.kind, PatternKind::Tuple { .. })
+	}
+}
+
+impl Default for Pattern {
+    fn default() -> Self {
+        Self { kind: PatternKind::Wildcard, span: Span::empty(), match_type: TypeKind::Void.anon() }
+    }
 }
 
 /*

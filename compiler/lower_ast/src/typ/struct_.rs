@@ -101,6 +101,14 @@ impl AstLowerer {
                     r#struct.add_var(var);
                 }
 
+                StructItem::TypeAlias(type_alias) => {
+                    let visibility = self.lower_visibility(type_alias.visibility());
+                    let name = type_alias.name();
+                    let aliased = self.lower_type(type_alias.aliased_type());
+
+                    r#struct.add_type(name, visibility, aliased.kind);
+                }
+
                 StructItem::NoOp(_) => {}
 
                 StructItem::Error => panic!(),

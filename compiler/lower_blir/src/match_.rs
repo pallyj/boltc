@@ -1,12 +1,13 @@
 use std::{fmt::Debug};
 
 use blir::{
-    pattern::{PatternKind, Pattern},
+    pattern::{PatternKind, Pattern, self},
     value::{match_::MatchValue, MatchBranch, Value, ValueKind},
     typ::{TypeKind, Type, StructRef},
     Symbol,
     SomeFunction, code::CodeBlock};
-use blirssa::{value::LabelValue, code::BlockRef};
+use blirssa::{value::LabelValue, code::{BlockRef, Block}};
+use patmat::{PatternMatrix, Maranget, DecisionTree};
 
 use crate::BlirLowerer;
 
@@ -22,11 +23,26 @@ impl BlirLowerer {
 
 		let before_block = self.context.function().append_block("beforeMatch");
 
-        let mut candidate_tree = self.generate_candidates(&value.discriminant, &value.branches);
+        let scrutinee = (*value.discriminant).clone();
+        let patterns = value.branches.iter()
+                                     .map(|branch| branch.pattern.clone() )
+                                     .collect();
+        let code_blocks = value.branches.iter()
+                                        .map(|branch| branch.code.clone())
+                                        .collect::<Vec<_>>();
+
+        let pattern_matrix = PatternMatrix::construct(scrutinee, patterns)
+            .expand();
+
+        let decision_tree = pattern_matrix.solve::<Maranget>();
+
+        self.lower_decision_tree(decision_tree, &code_blocks, assign_val_ptr.as_ref(), &before_block);
+
+        /*let mut candidate_tree = self.generate_candidates(&value.discriminant, &value.branches);
 
         self.optimize_candidate(&mut candidate_tree);
 
-		self.lower_some_candidate(candidate_tree, &before_block, None, assign_val_ptr.as_ref());
+		self.lower_some_candidate(candidate_tree, &before_block, None, assign_val_ptr.as_ref());*/
 
 		let after_block = self.context.function().append_block("afterMatch");
 		self.builder().position_at_end(&before_block);
@@ -35,6 +51,63 @@ impl BlirLowerer {
 
         assign_val_ptr.map(|assign_val_ptr| self.builder().build_deref(assign_val_ptr))
             .unwrap_or_else(|| LabelValue::void())
+    }
+
+    fn lower_decision_tree(
+        &mut self,
+        tree: DecisionTree,
+        leaves: &[CodeBlock],
+        pointer: Option<&LabelValue>,
+        sink: &BlockRef)
+    {
+        match tree {
+            DecisionTree::Fail => panic!(),
+            DecisionTree::Leaf(end) => {
+                let leaf = &leaves[end.index() as usize];
+
+                let code_value = self.lower_code_block(leaf);
+
+                if let Some((pointer, code_value)) = pointer.zip(code_value) {
+                    self.builder().build_assign_ptr(pointer.clone(), code_value);
+                }
+
+                self.builder().build_always_branch(sink);
+            },
+            DecisionTree::Switch { scrutinee,
+                                   patterns,
+                                   default } =>
+            {
+                let scrutinee = self.lower_value(&scrutinee);
+
+                if let Some(default) = default {
+                    let default_block = self.context.function().append_block("default");
+
+                    let switch_branches = patterns.iter()
+                                                  .map(|(pat, _)| {
+                                                      let block = self.context.function().append_block("case");
+                                                      let value = match &pat.kind {
+                                                          PatternKind::Literal { value } => self.lower_value(value),
+                                                          _ => unreachable!(),
+                                                      };
+ 
+                                                     (value, block)
+                                                  })
+                                                  .collect::<Vec<_>>();
+
+                    self.builder().build_select_integer(scrutinee, switch_branches.clone(), default_block.clone());
+
+                    self.builder().position_at_end(&default_block);
+                    self.lower_decision_tree(*default, leaves, pointer, sink);
+
+                    for ((_, block), (_, tree)) in switch_branches.iter().zip(patterns) {
+                        self.builder().position_at_end(&block);
+                        self.lower_decision_tree(tree, leaves, pointer, sink);
+                    }
+                } else {
+                    panic!()
+                }
+            }
+        }
     }
 
     fn optimize_candidate(

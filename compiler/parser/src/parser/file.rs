@@ -61,6 +61,7 @@ impl<'input, 'l> Parser<'input, 'l> {
             Some(SyntaxKind::StructKw) => self.parse_struct(marker),
             Some(SyntaxKind::ImportKw) => self.parse_import(marker),
             Some(SyntaxKind::EnumKw) => self.parse_enum(marker),
+            Some(SyntaxKind::TypeAliasKw) => self.parse_type_alias(marker),
             _ => {
                 self.error_recover("expected item", ITEM_RECOVERY_SET);
                 marker.complete(self, SyntaxKind::Error);

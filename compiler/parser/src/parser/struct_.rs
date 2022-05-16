@@ -38,6 +38,7 @@ impl<'input, 'l> Parser<'input, 'l> {
             Some(SyntaxKind::LetKw) => self.parse_let(marker),
             Some(SyntaxKind::InitKw) => self.parse_init(marker),
             Some(SyntaxKind::StructKw) => self.parse_struct(marker),
+            Some(SyntaxKind::TypeAliasKw) => self.parse_type_alias(marker),
             _ => {
                 // Error
                 self.error_recover("expected struct item", ITEM_RECOVERY_SET);

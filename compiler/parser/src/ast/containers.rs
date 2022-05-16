@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 
 use super::{attribute::Attributes,
+            alias::TypeAlias,
             file::NoOp,
             func::FuncDef,
             var::{LetDef, VariableDef}, find_token, typ::Type};
@@ -26,6 +27,7 @@ ast!(
         FuncDef,
         VariableDef,
         LetDef,
+        TypeAlias,
         NoOp,
     }
 );
@@ -52,6 +54,7 @@ impl Debug for StructItem {
             Self::FuncDef(arg0) => write!(f, "{arg0:?}"),
             Self::VariableDef(arg0) => write!(f, "{arg0:?}"),
             Self::LetDef(arg0) => write!(f, "{arg0:?}"),
+            Self::TypeAlias(arg0) => write!(f, "{arg0:?}"),
             Self::NoOp(_) => write!(f, ";"),
             Self::Error => write!(f, "Error"),
         }

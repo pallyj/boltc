@@ -11,6 +11,7 @@ mod typ;
 mod var;
 mod enum_;
 mod pattern;
+mod alias;
 
 use errors::debugger::Debugger;
 

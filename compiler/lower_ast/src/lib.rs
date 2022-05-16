@@ -77,6 +77,14 @@ impl AstLowerer {
                     library.add_enum(lowered_enum);
                 }
 
+                FileItem::TypeAlias(type_alias) => {
+                    let visibility = self.lower_visibility(type_alias.visibility());
+                    let name = type_alias.name();
+                    let aliased = self.lower_type(type_alias.aliased_type());
+
+                    library.add_type(name, visibility, aliased.kind);
+                }
+
                 FileItem::NoOp(_) => {}
 
                 FileItem::Error => panic!(),

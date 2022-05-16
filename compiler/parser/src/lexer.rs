@@ -78,6 +78,8 @@ pub enum SyntaxKind {
     UnderscoreKw,
     #[regex("operator", priority = 3)]
     OperatorKw,
+    #[regex("typealias", priority = 3)]
+    TypeAliasKw,
 
     #[regex("[a-zA-Z_$][a-zA-Z_$0-9]*", priority = 2)]
     Ident,
@@ -240,6 +242,8 @@ pub enum SyntaxKind {
     VariantPattern,
     TuplePattern,
     LiteralPattern,
+
+    TypeAlias,
 
     _Invalid,
 }

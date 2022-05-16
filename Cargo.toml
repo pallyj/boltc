@@ -34,7 +34,8 @@ members = [
 	"compiler/blirssa",
 	"compiler/lower_blirssa",
 	"compiler/codegen",
-	"compiler/tyinfer"
+	"compiler/tyinfer",
+	"compiler/patmat",
 ]
 
 exclude = [

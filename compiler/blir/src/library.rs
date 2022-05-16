@@ -6,7 +6,7 @@ use crate::{code::{ExternFunctionRef, FunctionRef},
             scope::{ScopeRef, ScopeRelation, ScopeType},
             typ::{StructRef, TypeKind, EnumRef},
             value::ConstantRef,
-            Symbol, SymbolWrapper};
+            Symbol, SymbolWrapper, Visibility};
 
 pub struct Library {
     name: String,
@@ -93,6 +93,12 @@ impl Library {
 
         let symbol = Symbol::Type(r#enum.get_type());
         self.scope.add_symbol(name, visibility, symbol)
+    }
+
+    pub fn add_type(&self, name: String, visibility: Visibility, typ: TypeKind) -> Option<SymbolWrapper> {
+        let sym = Symbol::Type(typ);
+
+        self.scope.add_symbol(name, visibility, sym)
     }
 
     pub fn add_constant(&mut self, var: ConstantRef) -> Option<SymbolWrapper> {

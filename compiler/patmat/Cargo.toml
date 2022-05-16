@@ -1,5 +1,5 @@
 [package]
-name = "lower_blir"
+name = "patmat"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,6 +7,3 @@ edition = "2021"
 
 [dependencies]
 blir = { path = "../blir" }
-patmat = { path = "../patmat" }
-blirssa = { path = "../blirssa" }
-rand = "0.8.4"
