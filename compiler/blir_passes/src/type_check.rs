@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 
 use blir::{code::{CodeBlock, FunctionRef, MethodRef, Statement, StatementKind},
-           typ::{StructRef, Type, TypeKind},
+           typ::{StructRef, Type, TypeKind, EnumRef},
            value::{ConstantRef, IfBranch, IfValue, Value, ValueKind, VarRef},
            Library, Monomorphizer};
 use errors::{debugger::Debugger, error::ErrorCode, Span};
@@ -23,6 +23,10 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
             self.check_struct(r#struct);
         }
 
+        for r#enum in &library.enums {
+            self.check_enum(r#enum);
+        }
+
         for constant in &library.constants {
             self.check_const(constant);
         }
@@ -35,6 +39,10 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
             self.check_struct(substruct);
         }
 
+        for subenum in &struct_ref.subenums {
+            self.check_enum(subenum);
+        }
+
         for method in &struct_ref.methods {
             self.check_method(method);
         }
@@ -45,6 +53,20 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
 
         for constant in &struct_ref.constants {
             self.check_const(constant);
+        }
+    }
+
+    fn check_enum(&mut self, r#enum: &EnumRef) {
+        for substruct in r#enum.substructs().iter() {
+            self.check_struct(substruct);
+        }
+
+        for subenum in r#enum.subenums().iter() {
+            self.check_enum(subenum);
+        }
+
+        for method in r#enum.methods().iter() {
+            self.check_method(method);
         }
     }
 

@@ -70,12 +70,15 @@ impl Maranget {
 
 		// Technically, if the first row is all wildcards, this case applies too
 		// However, in practice, this is the only time this case should occur
-		if matrix.columns() == 0 {
-			let leaf = matrix.rows()
-							 .next()
-							 .unwrap()
-							 .leaf();
-			return DecisionTree::Leaf(leaf)
+		let first_row = matrix.rows().next().unwrap();
+		if first_row
+			.patterns.iter()
+			.all(|pat| pat.matches_any())
+		{
+			let leaf = first_row.leaf();
+			let bindings = first_row.bindings().clone();
+			
+			return DecisionTree::Leaf(leaf, bindings)
 		}
 
 		let mut cases = Self::cases(&matrix);
@@ -209,7 +212,7 @@ impl Maranget {
 }
 
 pub enum DecisionTree {
-	Leaf(MatchEnd),
+	Leaf(MatchEnd, Vec<(String, Value)>),
 	Fail,
 	Switch {
 		scrutinee: Value,
@@ -221,7 +224,7 @@ pub enum DecisionTree {
 impl Debug for DecisionTree {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Leaf(arg0) => write!(f, "leaf {}", arg0.0),
+            Self::Leaf(arg0, ..) => write!(f, "leaf {}", arg0.0),
             Self::Fail => write!(f, "unreachable"),
             Self::Switch { scrutinee, patterns, default } => {
 				writeln!(f, "switch {scrutinee:?}")?;

@@ -66,3 +66,13 @@ impl std::fmt::Debug for CaseRef {
 		}
     }
 }
+
+impl PartialEq for CaseRef {
+    fn eq(&self, other: &Self) -> bool {
+		Arc::ptr_eq(&self.case_ref, &other.case_ref)
+    }
+}
+
+impl Eq for CaseRef {
+    fn assert_receiver_is_total_eq(&self) {}
+}

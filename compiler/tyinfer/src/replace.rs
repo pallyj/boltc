@@ -244,6 +244,8 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
         pattern: &mut Pattern,
         scope: &ScopeRef)
     {
+        let span = pattern.span.clone();
+        self.replace_type(pattern.match_type_mut(), &Some(span));
         match &mut pattern.kind {
             PatternKind::Literal { value } => self.replace_value(value, scope),
             PatternKind::Tuple { items } => {

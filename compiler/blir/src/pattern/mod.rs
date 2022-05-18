@@ -61,7 +61,11 @@ impl Pattern {
 	}
 
 	pub fn has_children(&self) -> bool {
-		matches!(&self.kind, PatternKind::Tuple { .. })
+		match &self.kind {
+			PatternKind::Tuple { .. } => true,
+			PatternKind::Variant { .. } => true,
+			_ => false
+		}
 	}
 }
 

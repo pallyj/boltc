@@ -37,6 +37,7 @@ impl<'input, 'l> Parser<'input, 'l> {
             Some(SyntaxKind::VarKw) => self.parse_var(marker),
             Some(SyntaxKind::LetKw) => self.parse_let(marker),
             Some(SyntaxKind::InitKw) => self.parse_init(marker),
+            Some(SyntaxKind::EnumKw) => self.parse_enum(marker),
             Some(SyntaxKind::StructKw) => self.parse_struct(marker),
             Some(SyntaxKind::TypeAliasKw) => self.parse_type_alias(marker),
             _ => {

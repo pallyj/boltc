@@ -6,15 +6,20 @@ func main() {
 	//printLine(matchSquare(2, 2))
 	//printLine(matchSquare(2, 4))
 
-	matchOptional(.some(1))
-	matchOptional(.some(2))
-	matchOptional(.some(3))
-	matchOptional(.none)
+	//matchOptional(.some(1))
+	//matchOptional(.some(2))
+	//matchOptional(.some(3))
+	//matchOptional(.none)
+
+	matchExample(.some(10), .none)
+	matchExample(.none, .some(5))
+	matchExample(.some(1), .some(1))
+	matchExample(.none, .none)
 }
 
-enum Direction {
+/*enum Direction {
 	case north, east, south, west
-}
+}*/
 
 
 enum Optional_Int {
@@ -22,6 +27,7 @@ enum Optional_Int {
 	case none
 }
 
+/*
 func matchOptional(opt: Optional_Int) {
 	match opt {
 		.some(1) => print(1),
@@ -48,5 +54,14 @@ func matchSquare(a: Int, b: Int): i1 {
 		(3, 9) => true,
 		(4, 16) => true,
 		_ => false,
+	}
+}*/
+
+func matchExample(a: Optional_Int, b: Optional_Int) {
+	match (a, b) {
+		(.some(a), .some(b)) => print("both"),
+		(.some(a), .none) => print(a),
+		(.none, .some(b)) => print(b),
+		(.none, .none) => print("none"),
 	}
 }

@@ -1,6 +1,14 @@
+/*
+TODO:
+
+EnumLiteral seems to be a wildcard
+
+*/
+
+
 use std::{fmt::Debug};
 
-use blir::{value::{Value, ValueKind}, pattern::{Pattern, PatternKind}, typ::{TypeKind, Type}};
+use blir::{value::{Value, ValueKind}, pattern::{Pattern, PatternKind}, typ::{TypeKind, Type, CaseRef}};
 
 use crate::solver::Solver;
 
@@ -69,7 +77,7 @@ impl PatternMatrix {
 											  .map(|row| PatternRow::proceed(row))
 											  .collect::<Vec<_>>();
 
-			let old_len = current_matrix.compare_values.len();
+			let mut did_expand = false;
 
 			for (i, compare_value) in current_matrix.compare_values.into_iter().enumerate() {
 				let should_split = current_matrix.rows
@@ -87,17 +95,20 @@ impl PatternMatrix {
 
 					// Add the pattern to each row
 					for (old_row, new_row) in current_matrix.rows.iter_mut().zip(&mut rows) {
-						let taken_pat = mem::take(&mut old_row.patterns[i]); // mem::replace(&mut old_row.patterns[i], mem::zeroed())
+						let mut taken_pat = mem::take(&mut old_row.patterns[i]); // mem::replace(&mut old_row.patterns[i], mem::zeroed())
 
 						// If the pattern we took is a bind, then add a bind to compare_value
 						if let PatternKind::Bind(bind_name) = &taken_pat.kind {
 							new_row.binds.push((bind_name.clone(), compare_value.clone()));
+							taken_pat.kind = PatternKind::Wildcard;
 						}
 
 						let sub_patterns = split_pattern(taken_pat, &split_types);
 
 						new_row.patterns.extend_from_slice(&sub_patterns)
 					}
+
+					did_expand = true;
 				} else {
 					// Add the old scrutinee
 					compare_values.push(compare_value.clone());
@@ -118,7 +129,7 @@ impl PatternMatrix {
 
 			current_matrix = Self { compare_values, rows };
 
-			if current_matrix.compare_values.len() == old_len {
+			if !did_expand {
 				break
 			}
 		}
@@ -173,8 +184,23 @@ fn split_scrutinee(scrutinee: &Value) -> Vec<Value> {
 					   .map(|(i, ty)| ValueKind::TupleField(Box::new(scrutinee.clone()), i).anon(ty.clone()))
 					   .collect()
 		}
+		TypeKind::Enum(enum_ref) => {
+			std::iter::once(scrutinee.clone()).chain(
+				enum_ref.variants()
+						.iter()
+						.filter(|variant| !variant.associated_types().is_empty())
+						.map(|variant| cast_enum_to_variant(scrutinee, variant)))
+				.collect()
+		}
 		_ => vec![ scrutinee.clone() ]
 	}
+}
+
+fn cast_enum_to_variant(value: &Value, variant: &CaseRef) -> Value {
+	let tuple_type = TypeKind::Tuple(variant.associated_types().clone()).anon();
+
+	ValueKind::CastEnumToVariant { enum_value: Box::new(value.clone()),
+								   variant: variant.clone() }.anon(tuple_type)
 }
 
 fn split_pattern(pattern: Pattern, tuple_types: &[Type]) -> Vec<Pattern> {
@@ -186,7 +212,50 @@ fn split_pattern(pattern: Pattern, tuple_types: &[Type]) -> Vec<Pattern> {
 
 	match pattern.kind {
 		PatternKind::Tuple { items } => items,
-		_ => unreachable!()
+		PatternKind::Variant { variant: Value { kind: ValueKind::EnumVariant { variant, .. }, ..}, mut items } => {
+			let TypeKind::Enum(enum_ref) = pattern.match_type.clone().kind else {
+				unreachable!()
+			};
+
+			// So what we'll do is a wildcard if it isn't equal to the variant, otherwise we'll return a tuple of items
+			let variants = enum_ref.variants();
+
+			let filtered_variants = variants
+										.iter()
+										.filter(|variant| !variant.associated_types().is_empty());
+			
+			let variant_value = ValueKind::EnumVariant { of_enum: enum_ref.clone(),
+														 variant: variant.clone() }.anon(pattern.match_type.clone());
+			let variant_pattern = PatternKind::Literal { value: variant_value }.with_type(pattern.match_type.clone());
+
+			std::iter::once(variant_pattern).chain(
+				filtered_variants
+					.zip(tuple_types)
+					.map(|(test_variant, variant_ty)| {
+						if test_variant == &variant {
+							let items = std::mem::take(&mut items);
+							PatternKind::Tuple { items: items }
+						} else {
+							PatternKind::Wildcard
+						}.with_type(variant_ty.clone())
+					}))
+				.collect()
+		},
+		PatternKind::Literal { value: Value {
+							   kind: ValueKind::EnumVariant { .. }, .. } } =>
+		{
+			std::iter::once(pattern).chain(
+				tuple_types
+					.iter()
+					.skip(1)
+					   .map(|ty| PatternKind::Wildcard.with_type(ty.clone())))
+				.collect()
+		}
+		_ => {
+			tuple_types.iter()
+				   	   .map(|ty| PatternKind::Wildcard.with_type(ty.clone()))
+					   .collect()
+		}
 	}
 }
 
@@ -199,6 +268,10 @@ impl PatternRow {
 
 	pub fn leaf(&self) -> MatchEnd {
 		self.end
+	}
+
+	pub fn bindings(&self) -> &Vec<(String, Value)> {
+		&self.binds
 	}
 }
 
@@ -237,24 +310,3 @@ impl Debug for PatternMatrix {
 		Ok(())
     }
 }
-
-
-
-// construct
-// expand
-// 
-
-
-// [a, b, c]
-//
-// [1, 2, 3]
-// [1, _, 1]
-// [_, 2, _]
-// _
-
-
-// a     b      c
-// 1     2      3
-// 1     _      1
-// _     2      _
-// _     _      _

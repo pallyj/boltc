@@ -6,7 +6,7 @@ use std::{cell::{Ref, RefCell, RefMut},
 
 use mangle::{MangledStruct, Path};
 
-use super::{Type, TypeKind};
+use super::{Type, TypeKind, EnumRef};
 use crate::{attributes::Attributes,
             code::MethodRef,
             scope::{ScopeRef, ScopeRelation, ScopeType},
@@ -32,6 +32,7 @@ pub struct StructInner {
     pub methods:       Vec<MethodRef>,
     pub instance_vars: Vec<VarRef>,
     pub constants:     Vec<ConstantRef>,
+    pub subenums:      Vec<EnumRef>,
 
     pub is_transparent: bool,
 
@@ -57,6 +58,7 @@ impl Struct {
                                                           false,
                                                           false),
                                      substructs: Vec::new(),
+                                     subenums: Vec::new(),
                                      methods: Vec::new(),
                                      instance_vars: Vec::new(),
                                      path: parent_path.append(&name),
@@ -82,6 +84,19 @@ impl Struct {
         let name = substruct.name();
 
         let symbol = Symbol::Type(TypeKind::Struct(substruct));
+
+        self.borrow().scope.add_symbol(name, visibility, symbol)
+    }
+
+    pub fn add_subenum(&self, subenum: EnumRef) -> Option<SymbolWrapper> {
+        // Add the substruct to the list of substructs
+        self.inner.borrow_mut().subenums.push(subenum.clone());
+
+        // Add the substructs symbol, returning another symbol if it exists
+        let visibility = subenum.visibility();
+        let name = subenum.name().to_string();
+
+        let symbol = Symbol::Type(subenum.get_type());
 
         self.borrow().scope.add_symbol(name, visibility, symbol)
     }

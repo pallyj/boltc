@@ -24,6 +24,7 @@ ast!(struct StructDef(StructDef));
 ast!(
     enum StructItem {
         StructDef,
+        EnumDef,
         FuncDef,
         VariableDef,
         LetDef,
@@ -40,10 +41,12 @@ ast!(struct EnumDef(EnumDef));
 ast!(
     enum EnumItem {
         StructDef,
+        EnumDef,
         FuncDef,
-        VariableDef,
-        LetDef,
+        //VariableDef,
+        //LetDef,
         CaseDef,
+        TypeAlias,
     }
 );
 
@@ -51,6 +54,7 @@ impl Debug for StructItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::StructDef(arg0) => write!(f, "{arg0:?}"),
+            Self::EnumDef(arg0) => write!(f, "{arg0:?}"),
             Self::FuncDef(arg0) => write!(f, "{arg0:?}"),
             Self::VariableDef(arg0) => write!(f, "{arg0:?}"),
             Self::LetDef(arg0) => write!(f, "{arg0:?}"),
@@ -163,10 +167,12 @@ impl Debug for EnumItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::StructDef(arg0) => write!(f, "{arg0:?}"),
+            Self::EnumDef(arg0) => write!(f, "{arg0:?}"),
             Self::FuncDef(arg0) => write!(f, "{arg0:?}"),
-            Self::VariableDef(arg0) => write!(f, "{arg0:?}"),
-            Self::LetDef(arg0) => write!(f, "{arg0:?}"),
+            //Self::VariableDef(arg0) => write!(f, "{arg0:?}"),
+            //Self::LetDef(arg0) => write!(f, "{arg0:?}"),
             Self::CaseDef(arg0) => write!(f, "{arg0:?}"),
+            Self::TypeAlias(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "Error"),
         }
     }

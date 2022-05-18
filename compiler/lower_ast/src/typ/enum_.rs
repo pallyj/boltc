@@ -45,9 +45,27 @@ impl AstLowerer {
 					enum_def.add_cases(cases);
 				}
 
-				EnumItem::Error => panic!(),
+				EnumItem::StructDef(struct_def) => {
+                    let lowered_struct = self.lower_struct(struct_def, &parent, &enum_path);
 
-				_ => panic!(),
+                    enum_def.add_substruct(lowered_struct);
+                }
+
+				EnumItem::EnumDef(subenum) => {
+                    let lowered_enum = self.lower_enum(subenum, &parent, &enum_path);
+
+                    enum_def.add_subenum(lowered_enum);
+                }
+
+				EnumItem::TypeAlias(type_alias) => {
+                    let visibility = self.lower_visibility(type_alias.visibility());
+                    let name = type_alias.name();
+                    let aliased = self.lower_type(type_alias.aliased_type());
+
+                    r#enum_def.add_type(name, visibility, aliased.kind);
+                }
+
+				EnumItem::Error => panic!(),
 			}
 		}
 

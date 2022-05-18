@@ -2,9 +2,9 @@ use std::{cell::{RefCell, Ref, RefMut}, sync::{Arc, Weak}, ops::Deref, collectio
 
 use mangle::{Path, MangledEnum};
 
-use crate::{attributes::{Attributes}, Visibility, scope::ScopeRef, code::MethodRef, Symbol};
+use crate::{attributes::{Attributes}, Visibility, scope::ScopeRef, code::MethodRef, Symbol, SymbolWrapper};
 
-use super::{TypeKind, CaseRef, Type};
+use super::{TypeKind, CaseRef, Type, StructRef};
 
 pub struct Enum {
 	inner: RefCell<EnumInner>,
@@ -23,15 +23,17 @@ impl Enum {
 			let enum_inner = EnumInner {
 				attributes,
 				visibility,
-				link_name: name.clone(),
-				scope: parent.clone(),
-				path: parent_path.clone().append(&name),
+				link_name: 		name.clone(),
+				scope: 			parent.clone(),
+				path: 			parent_path.clone().append(&name),
 				name,
-				methods: Vec::new(),
-				cases: 	 Vec::new(),
+				methods:    	Vec::new(),
+				cases: 	    	Vec::new(),
+				substructs: 	Vec::new(),
+				subenums:   	Vec::new(),
 				named_variants: HashMap::new(),
 				repr_type,
-				self_ref: enum_arc.clone() };
+				self_ref: 		enum_arc.clone() };
 
 			Enum { inner: RefCell::new(enum_inner) }
 		});
@@ -98,6 +100,12 @@ impl Enum {
         self.inner.borrow().scope.add_method(name, method);
 	}
 
+	pub fn methods(
+		&self) -> Ref<Vec<MethodRef>>
+	{
+		Ref::map(self.inner.borrow(), |inner| &inner.methods)
+	}
+
 	pub fn add_cases(
 		&self,
 		cases: Vec<CaseRef>)
@@ -120,6 +128,50 @@ impl Enum {
 
 		// TODO: Add a case value
 	}
+
+	pub fn add_substruct(&self, substruct: StructRef) -> Option<SymbolWrapper> {
+        // Add the substruct to the list of substructs
+        self.inner.borrow_mut().substructs.push(substruct.clone());
+
+        // Add the substructs symbol, returning another symbol if it exists
+        let visibility = substruct.visibility();
+        let name = substruct.name();
+
+        let symbol = Symbol::Type(TypeKind::Struct(substruct));
+
+        self.inner.borrow().scope.add_symbol(name, visibility, symbol)
+    }
+
+	pub fn substructs(
+		&self) -> Ref<Vec<StructRef>>
+	{
+		Ref::map(self.inner.borrow(), |inner| &inner.substructs)
+	}
+
+    pub fn add_subenum(&self, subenum: EnumRef) -> Option<SymbolWrapper> {
+        // Add the substruct to the list of substructs
+        self.inner.borrow_mut().subenums.push(subenum.clone());
+
+        // Add the substructs symbol, returning another symbol if it exists
+        let visibility = subenum.visibility();
+        let name = subenum.name().to_string();
+
+        let symbol = Symbol::Type(subenum.get_type());
+
+        self.inner.borrow().scope.add_symbol(name, visibility, symbol)
+    }
+
+	pub fn subenums(
+		&self) -> Ref<Vec<EnumRef>>
+	{
+		Ref::map(self.inner.borrow(), |inner| &inner.subenums)
+	}
+
+	pub fn add_type(&self, name: String, visibility: Visibility, typ: TypeKind) -> Option<SymbolWrapper> {
+        let sym = Symbol::Type(typ);
+
+        self.inner.borrow().scope.add_symbol(name, visibility, sym)
+    }
 
 	pub fn get_variant(
 		&self,
@@ -169,6 +221,8 @@ struct EnumInner {
 
 	methods:		Vec<MethodRef>,
 	cases:			Vec<CaseRef>,
+	substructs:		Vec<StructRef>,
+	subenums:		Vec<EnumRef>,
 
 	named_variants: HashMap<String, CaseRef>,
 

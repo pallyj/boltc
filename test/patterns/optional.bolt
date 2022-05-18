@@ -23,7 +23,7 @@ func positive(x: Int): Optional_Int {
 
 func doSomething(x: Optional_Int) {
 	match x {
-		.some => print("Positive"),
+		.some(_) => print("Positive"),
 		.none => print("Negative"),
 		_ => print("ERROR")
 	}

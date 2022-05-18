@@ -54,6 +54,10 @@ pub enum ValueKind {
         of_enum: EnumRef,
         variant: CaseRef,
     },
+    CastEnumToVariant {
+        enum_value: Box<Value>,
+        variant: CaseRef,
+    },
 
     // Variable Values
     Metatype(TypeKind),
@@ -203,6 +207,7 @@ impl Debug for Value {
             ValueKind::BoolLiteral(b) => write!(f, "{b}"),
             ValueKind::VariantLiteral(name) => write!(f, ".{name}"),
             ValueKind::EnumVariant { of_enum, variant } => write!(f, "{}.{}", of_enum.name(), variant.name()),
+            ValueKind::CastEnumToVariant { enum_value, variant } => write!(f, "{enum_value:?} as {}", variant.name()),
             ValueKind::Uninit => write!(f, "uninit<{:?}>", self.typ),
             ValueKind::Assign(ptr, value) => write!(f, "{ptr:?} = {value:?}"),
             // ValueKind::Deref(value) => write!(f, "*{value:?}"),

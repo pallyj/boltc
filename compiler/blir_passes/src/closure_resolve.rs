@@ -1,7 +1,7 @@
 use blir::{attributes::AttributeFactory,
            code::{CodeBlock, StatementKind},
            scope::ScopeRef,
-           typ::StructRef,
+           typ::{StructRef, EnumRef},
            value::{IfBranch, IfValue, Value, ValueKind},
            BlirContext, Library};
 use errors::debugger::Debugger;
@@ -40,6 +40,26 @@ impl<'a, 'l> ClosureResolvePass<'a, 'l> {
         for r#struct in &library.structs {
             self.resolve_struct(r#struct);
         }
+
+        for r#enum in &library.enums {
+            self.resolve_enum(r#enum);
+        }
+    }
+
+    fn resolve_enum(&mut self, r#enum: &EnumRef) {
+        for method in r#enum.methods().iter() {
+            let scope = method.borrow().scope().clone();
+
+            self.resolve_code_block(&mut method.borrow_mut().code, &scope)
+        }
+
+        for substruct in r#enum.substructs().iter() {
+            self.resolve_struct(substruct);
+        }
+
+        for subenum in r#enum.subenums().iter() {
+            self.resolve_enum(subenum);
+        }
     }
 
     fn resolve_struct(&mut self, r#struct: &StructRef) {
@@ -47,6 +67,10 @@ impl<'a, 'l> ClosureResolvePass<'a, 'l> {
 
         for r#struct in &r#struct.borrow().substructs {
             self.resolve_struct(r#struct);
+        }
+
+        for r#enum in &r#struct.borrow().subenums {
+            self.resolve_enum(r#enum);
         }
 
         for constant in &r#struct.borrow().constants {
@@ -103,12 +127,13 @@ impl<'a, 'l> ClosureResolvePass<'a, 'l> {
                 }
             }
 
-            // TODO: Fill this out
             ValueKind::If(if_statement) => self.resolve_if_statement(if_statement, scope),
 
             ValueKind::InstanceMethod { reciever, .. } => self.resolve_value(reciever, scope),
 
             ValueKind::InstanceVariable { reciever, .. } => self.resolve_value(reciever, scope),
+
+            // TODO: The rest should have something
 
             _ => {}
         }

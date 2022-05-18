@@ -36,6 +36,7 @@ impl BlirLowerer {
 
         let decision_tree = pattern_matrix.solve::<Maranget>();
 
+
         self.lower_decision_tree(decision_tree, &code_blocks, assign_val_ptr.as_ref(), &before_block);
 
         /*let mut candidate_tree = self.generate_candidates(&value.discriminant, &value.branches);
@@ -62,7 +63,12 @@ impl BlirLowerer {
     {
         match tree {
             DecisionTree::Fail => panic!(),
-            DecisionTree::Leaf(end) => {
+            DecisionTree::Leaf(end, bindings) => {
+                for (bind_name, bind_value) in bindings {
+                    let bound_value = self.lower_value(&bind_value);
+                    self.context.define_var(&bind_name, bound_value);
+                }
+
                 let leaf = &leaves[end.index() as usize];
 
                 let code_value = self.lower_code_block(leaf);
@@ -77,37 +83,93 @@ impl BlirLowerer {
                                    patterns,
                                    default } =>
             {
-                let scrutinee = self.lower_value(&scrutinee);
+                let lowered_scrutinee = self.lower_value(&scrutinee);
+
+                let default_block = self.context.function().append_block("default");
+
+                let switch_branches = match scrutinee.typ.kind() {
+                    TypeKind::Integer { .. } => self.switch_integer(&lowered_scrutinee, &patterns, &default_block),
+                    TypeKind::Struct(struct_ref) if struct_ref.integer_repr() => self.switch_integer(&lowered_scrutinee, &patterns, &default_block),
+                    TypeKind::Enum(_) => self.switch_enum(&lowered_scrutinee, &patterns, &default_block),
+                    TypeKind::Struct(struct_ref) => todo!(),
+                    _ => todo!(),
+                };
+
+                self.builder().position_at_end(&default_block);
 
                 if let Some(default) = default {
-                    let default_block = self.context.function().append_block("default");
-
-                    let switch_branches = patterns.iter()
-                                                  .map(|(pat, _)| {
-                                                      let block = self.context.function().append_block("case");
-                                                      let value = match &pat.kind {
-                                                          PatternKind::Literal { value } => self.lower_value(value),
-                                                          _ => unreachable!(),
-                                                      };
- 
-                                                     (value, block)
-                                                  })
-                                                  .collect::<Vec<_>>();
-
-                    self.builder().build_select_integer(scrutinee, switch_branches.clone(), default_block.clone());
-
-                    self.builder().position_at_end(&default_block);
                     self.lower_decision_tree(*default, leaves, pointer, sink);
-
-                    for ((_, block), (_, tree)) in switch_branches.iter().zip(patterns) {
-                        self.builder().position_at_end(&block);
-                        self.lower_decision_tree(tree, leaves, pointer, sink);
-                    }
                 } else {
-                    panic!()
+                    // Check for exhaustiveness
+                    let is_exhaustive = true;
+
+                    if is_exhaustive {
+                        // Emit a panic
+                    } else {
+                        // Throw an error
+                    }
+                    self.builder().build_always_branch(sink);
+                }
+
+                for (block, (_, tree)) in switch_branches.iter().zip(patterns) {
+                    self.builder().position_at_end(&block);
+                    self.lower_decision_tree(tree, leaves, pointer, sink);
                 }
             }
         }
+    }
+
+    fn switch_integer(
+        &mut self,
+        lowered_scrutinee: &LabelValue,
+        patterns: &Vec<(Pattern, DecisionTree)>,
+        default_block: &BlockRef) -> Vec<BlockRef>
+    {
+        let switch_branches = patterns.iter()
+                                      .map(|(pat, _)| {
+                                          let block = self.context.function().append_block("case");
+                                          let value = match &pat.kind {
+                                              PatternKind::Literal { value } => self.lower_value(value),
+                                              _ => unreachable!(),
+                                          };
+                                      
+                                          (value, block)
+                                      })
+                                      .collect::<Vec<_>>();
+
+        self.builder().build_select_integer(lowered_scrutinee.clone(), switch_branches.clone(), default_block.clone());
+
+        switch_branches.into_iter()
+                       .map(|branch| branch.1)
+                       .collect()
+    }
+
+    fn switch_enum(
+        &mut self,
+        lowered_scrutinee: &LabelValue,
+        patterns: &Vec<(Pattern, DecisionTree)>,
+        default_block: &BlockRef) -> Vec<BlockRef>
+    {
+        let switch_branches = patterns.iter()
+                                      .map(|(pat, _)| {
+                                          let block = self.context.function().append_block("case");
+                                          let value = match &pat.kind {
+                                              PatternKind::Literal { value } => match &value.kind {
+                                                  ValueKind::EnumVariant { variant, .. } => variant.name().to_string(),
+                                                  _ => unreachable!(),
+                                              }
+                                              _ => unreachable!(),
+                                          };
+                                      
+                                          (value, block)
+                                      })
+                                      .collect::<Vec<_>>();
+
+        self.builder().build_select_enum(lowered_scrutinee.clone(), switch_branches.clone(), default_block.clone());
+
+        switch_branches.into_iter()
+                       .map(|branch| branch.1)
+                       .collect()
     }
 
     fn optimize_candidate(
@@ -226,31 +288,6 @@ impl BlirLowerer {
             },
             MatchType::None => {}
         }
-        
-        // Codegen for the candidate tree
-
-
-
-		/*match value.typ.kind() {
-			TypeKind::Integer { .. } => {
-				let lowered_value = self.lower_value(value);
-				self.lower_integer_layer(lowered_value, branches, before_branch, output_pointer)
-			}
-			TypeKind::Struct(struct_ref) if struct_ref.integer_repr() => {
-				// TODO: Get the value
-				let lowered_value = self.lower_value(value);
-				self.lower_integer_layer(lowered_value, branches, before_branch, output_pointer)
-			}
-            TypeKind::Enum(_) => {
-                let lowered_value = self.lower_value(value);
-				self.lower_enum_layer(lowered_value, branches, before_branch, output_pointer)
-            }
-            TypeKind::Struct(struct_ref) => {
-                let lowered_value = self.lower_value(value);
-                self.lower_equality_layer(lowered_value, branches, before_branch, struct_ref, output_pointer)
-            }
-			_ => panic!()
-		}*/
 	}
 
 	fn lower_integer_layer(

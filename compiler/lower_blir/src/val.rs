@@ -63,6 +63,13 @@ impl BlirLowerer {
 
             ValueKind::Match(match_value) => self.lower_match(match_value, &value.typ),
 
+            ValueKind::CastEnumToVariant { enum_value, variant } => {
+                let value = self.lower_value(enum_value);
+                let variant = variant.name();
+
+                self.builder().build_cast_enum_variant(value, variant)
+            }
+
             _ => {
                 if let ValueKind::Polymorphic(pmf) = &value.kind {
                     for possibility in pmf.open_possibilities() {

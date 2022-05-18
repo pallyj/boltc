@@ -1,6 +1,6 @@
 use blir::{code::{FunctionRef, MethodRef},
            scope::ScopeRef,
-           typ::{StructRef, Type, TypeKind},
+           typ::{StructRef, Type, TypeKind, EnumRef},
            value::{Closure, Value},
            BlirContext, Library};
 use errors::debugger::Debugger;
@@ -17,6 +17,10 @@ impl<'a, 'l> TypeInferPass<'a, 'l> {
     pub fn run_pass(&mut self, library: &mut Library) {
         for r#struct in library.structs.iter() {
             self.infer_struct(r#struct);
+        }
+
+        for r#enum in library.enums.iter() {
+            self.infer_enum(r#enum);
         }
 
         for func in library.functions.iter() {
@@ -37,6 +41,10 @@ impl<'a, 'l> TypeInferPass<'a, 'l> {
             self.infer_struct(r#struct);
         }
 
+        for r#enum in &r#struct.borrow().subenums {
+            self.infer_enum(r#enum);
+        }
+
         for method in &r#struct.borrow().methods {
             self.infer_method(method);
         }
@@ -55,6 +63,20 @@ impl<'a, 'l> TypeInferPass<'a, 'l> {
             if let Some(value) = &mut borrow.default_value {
                 self.infer_variable(&mut borrow.typ, value, &scope);
             }
+        }
+    }
+
+    fn infer_enum(&mut self, r#enum: &EnumRef) {
+        for r#struct in r#enum.substructs().iter() {
+            self.infer_struct(r#struct);
+        }
+
+        for r#enum in r#enum.subenums().iter() {
+            self.infer_enum(r#enum);
+        }
+
+        for method in r#enum.methods().iter() {
+            self.infer_method(method);
         }
     }
 

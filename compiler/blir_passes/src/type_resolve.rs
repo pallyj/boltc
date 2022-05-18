@@ -65,7 +65,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
         }
 
         for r#enum in &library.enums {
-            self.resolve_enum_types(r#enum, library.scope());
+            self.resolve_enum_types(r#enum);
         }
 
         for r#struct in &library.structs {
@@ -76,6 +76,10 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
         // Resolve code in each struct
         for r#struct in &library.structs {
             self.resolve_struct_code(r#struct);
+        }
+
+        for r#struct in &library.enums {
+            self.resolve_enum_code(r#struct);
         }
 
         // Run the pass on each function
@@ -113,7 +117,8 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
         }
     }
 
-    fn resolve_enum_types(&mut self, r#enum: &EnumRef, scope: &ScopeRef) {
+    fn resolve_enum_types(&mut self, r#enum: &EnumRef) {
+        let scope = r#enum.scope();
         let mut tag_counter = 0;
 
         for variant in r#enum.variants().iter() {
@@ -123,10 +128,10 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
             variant.associated_types_mut()
                    .iter_mut()
-                   .for_each(|typ| self.resolve_type(typ, scope))
+                   .for_each(|typ| self.resolve_type(typ, &scope))
         }
 
-        self.resolve_type(&mut *r#enum.repr_type_mut(), scope);
+        self.resolve_type(&mut *r#enum.repr_type_mut(), &scope);
 
         let ty = r#enum.repr_type().clone().kind;
 
@@ -140,7 +145,30 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
             _ => {
                 println!("error: type `{:?}` cannot be used as an enum backing", r#enum.repr_type())
             }
-        } 
+        }
+
+        for substruct in r#enum.substructs().iter() {
+            self.resolve_struct_types(substruct);
+        }
+
+        for subenum in r#enum.subenums().iter() {
+            self.resolve_enum_types(subenum);
+        }
+
+        for method in r#enum.methods().iter() {
+            // Resolve method types
+            self.resolve_method_types(method);
+
+            // Set link name
+            let mangled_name = method.borrow().mangle();
+            method.borrow_mut().info.set_link_name(mangled_name);
+
+            // Apply function attributes
+            let mut method = method.borrow_mut();
+            let attributes = method.attributes.clone();
+            self.factory
+                .apply_func_attributes(&attributes, &mut method.info, self.context, self.debugger)
+        }
     }
 
     fn resolve_struct_types(&mut self, r#struct: &StructRef) {
@@ -152,6 +180,10 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
         for substruct in &r#struct.substructs {
             self.resolve_struct_types(substruct);
+        }
+
+        for subenum in &r#struct.subenums {
+            self.resolve_enum_types(subenum);
         }
 
         for constant in &r#struct.constants {
@@ -185,7 +217,25 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
             self.resolve_struct_code(substruct);
         }
 
+        for subenum in &r#struct.subenums {
+            self.resolve_enum_code(subenum);
+        }
+
         for method in &r#struct.methods {
+            self.resolve_method_code(method);
+        }
+    }
+
+    fn resolve_enum_code(&mut self, r#enum: &EnumRef) {
+        for substruct in r#enum.substructs().iter() {
+            self.resolve_struct_code(substruct);
+        }
+
+        for subenum in r#enum.subenums().iter() {
+            self.resolve_enum_code(subenum);
+        }
+
+        for method in r#enum.methods().iter() {
             self.resolve_method_code(method);
         }
     }

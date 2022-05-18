@@ -1,4 +1,5 @@
 #![feature(type_alias_impl_trait)]
+#![feature(let_else)]
 #![feature(drain_filter)]
 
 mod solver;

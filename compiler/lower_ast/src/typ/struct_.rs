@@ -87,6 +87,12 @@ impl AstLowerer {
                     r#struct.add_substruct(lowered_struct);
                 }
 
+                StructItem::EnumDef(enum_def) => {
+                    let lowered_enum = self.lower_enum(enum_def, &parent, &struct_mangled);
+
+                    r#struct.add_subenum(lowered_enum);
+                }
+
                 StructItem::LetDef(let_def) => {
                     if let_def.is_static() {
                         r#struct.add_constant(self.lower_struct_static_let(let_def));
@@ -107,6 +113,10 @@ impl AstLowerer {
                     let aliased = self.lower_type(type_alias.aliased_type());
 
                     r#struct.add_type(name, visibility, aliased.kind);
+                }
+
+                StructItem::EnumDef(enum_def) => {
+
                 }
 
                 StructItem::NoOp(_) => {}
