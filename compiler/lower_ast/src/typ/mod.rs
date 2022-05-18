@@ -6,7 +6,7 @@ use parser::ast::typ::Type as AstType;
 
 use crate::AstLowerer;
 
-impl AstLowerer {
+impl<'a, 'b> AstLowerer<'a, 'b> {
     pub(crate) fn lower_type(&self, typ: AstType) -> Type {
         let range = typ.range();
         let span = self.span(range);

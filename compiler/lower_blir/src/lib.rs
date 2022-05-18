@@ -13,22 +13,25 @@ use std::collections::HashMap;
 
 use blir::{value::Closure, Library};
 use blirssa::{code::FunctionRef, value::LabelValue, Builder, Library as SsaLibrary};
+use errors::debugger::Debugger;
 
-pub struct BlirLowerer {
+pub struct BlirLowerer<'a, 'b> {
     ssa_lib:  SsaLibrary,
     builder:  Builder,
     lib:      Library,
     context:  FunctionLowerContext,
     closures: Vec<(String, Closure)>,
+    debugger: &'a mut Debugger<'b>
 }
 
-impl BlirLowerer {
-    pub fn new(lib: Library) -> BlirLowerer {
+impl<'a, 'b> BlirLowerer<'a, 'b> {
+    pub fn new(lib: Library, debugger: &'a mut Debugger<'b>) -> Self {
         BlirLowerer { ssa_lib: SsaLibrary::new(lib.name()),
                       builder: Builder::new(),
                       lib,
                       context: FunctionLowerContext::new(),
-                      closures: Vec::new() }
+                      closures: Vec::new(),
+                      debugger }
     }
 
     fn builder(&mut self) -> &mut Builder { &mut self.builder }

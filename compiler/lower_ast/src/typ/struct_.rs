@@ -7,8 +7,8 @@ use parser::ast::{containers::{StructDef, StructItem},
 
 use crate::AstLowerer;
 
-impl AstLowerer {
-    pub fn lower_struct_static_let(&self, var: LetDef) -> ConstantRef {
+impl<'a, 'b> AstLowerer<'a, 'b> {
+    pub fn lower_struct_static_let(&mut self, var: LetDef) -> ConstantRef {
         let visibility = self.lower_visibility(var.visibility());
         let name = var.label();
         let typ = var.typ()
@@ -26,7 +26,7 @@ impl AstLowerer {
         Constant::new(attributes, visibility, name, typ, value, span)
     }
 
-    pub fn lower_struct_let(&self, var: LetDef) -> VarRef {
+    pub fn lower_struct_let(&mut self, var: LetDef) -> VarRef {
         let visibility = self.lower_visibility(var.visibility());
         let name = var.label();
         let typ = var.typ()
@@ -40,7 +40,7 @@ impl AstLowerer {
         Var::new(attributes, visibility, name, typ, default_value, true, span)
     }
 
-    pub fn lower_struct_var(&self, var: VariableDef) -> VarRef {
+    pub fn lower_struct_var(&mut self, var: VariableDef) -> VarRef {
         let visibility = self.lower_visibility(var.visibility());
         let name = var.label();
         let typ = var.typ()
@@ -60,7 +60,7 @@ impl AstLowerer {
                  span)
     }
 
-    pub fn lower_struct(&self, def: StructDef, parent: &ScopeRef, parent_mangle: &Path) -> StructRef {
+    pub fn lower_struct(&mut self, def: StructDef, parent: &ScopeRef, parent_mangle: &Path) -> StructRef {
         let visibility = self.lower_visibility(def.visibility());
         let name = def.name();
 

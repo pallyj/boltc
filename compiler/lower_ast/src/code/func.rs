@@ -7,8 +7,8 @@ use parser::{ast::func::FuncDef, lexer::SyntaxKind};
 
 use crate::AstLowerer;
 
-impl AstLowerer {
-    pub fn lower_func(&self, func: FuncDef, parent: &ScopeRef, parent_mangled: &Path) -> FunctionRef {
+impl<'a, 'b> AstLowerer<'a, 'b> {
+    pub fn lower_func(&mut self, func: FuncDef, parent: &ScopeRef, parent_mangled: &Path) -> FunctionRef {
         let range = func.range();
         let span = self.span(range);
 
@@ -81,7 +81,7 @@ impl AstLowerer {
                             parent)
     }
 
-    pub fn lower_method(&self, func: FuncDef, reciever: Type, parent: &ScopeRef, parent_mangled: &Path) -> MethodRef {
+    pub fn lower_method(&mut self, func: FuncDef, reciever: Type, parent: &ScopeRef, parent_mangled: &Path) -> MethodRef {
         let range = func.range();
         let span = self.span(range);
 

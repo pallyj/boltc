@@ -2,7 +2,7 @@ use blir::attributes::{Attribute, Attributes};
 
 use crate::AstLowerer;
 
-impl AstLowerer {
+impl<'a, 'b> AstLowerer<'a, 'b> {
     pub fn lower_attribute(&self, attribute: &parser::ast::attribute::Attribute) -> Attribute {
         let span = self.span(attribute.range());
 

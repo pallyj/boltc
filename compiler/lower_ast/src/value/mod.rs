@@ -1,3 +1,5 @@
+mod unescape;
+
 use blir::{typ::{Type, TypeKind},
            value::{Closure, ClosureParam, FunctionArgs, IfBranch, IfValue, Value, ValueKind, match_::MatchValue, MatchBranch}, code::{CodeBlock, StatementKind}};
 use errors::Span;
@@ -6,8 +8,10 @@ use unindent::unindent;
 
 use crate::AstLowerer;
 
-impl AstLowerer {
-    pub(crate) fn lower_expr(&self, expr: AstExpr) -> Value {
+use self::unescape::unescape;
+
+impl<'a, 'b> AstLowerer<'a, 'b> {
+    pub(crate) fn lower_expr(&mut self, expr: AstExpr) -> Value {
         let range = expr.range();
         let span = self.span(range);
 
@@ -87,13 +91,41 @@ impl AstLowerer {
                     let text = literal.text();
                     let text_range = 1..(text.len() - 1);
 
-                    ValueKind::StringLiteral(text[text_range].to_string()).spanned_infer(span)
+                    match unescape(&text[text_range]) {
+                        Ok(unescaped) => ValueKind::StringLiteral(unescaped).spanned_infer(span),
+                        Err(errs) => {
+                            for err in errs {
+                                let start =  usize::from(span.range().start());
+                                let range = (start + err.1, start + err.1 + 1);
+                                let span = (self.file as usize, range);
+
+                                self.debugger
+                                    .throw_parse(err.0, span);
+                            }
+
+                            ValueKind::Error.spanned_infer(span)
+                        }
+                    }
                 } else if let LiteralKind::LongString = kind {
                     let text = literal.text();
                     let text_range = 3..(text.len() - 3);
                     let unindent = unindent(&text[text_range]);
 
-                    ValueKind::StringLiteral(unindent).spanned_infer(span)
+                    match unescape(&unindent) {
+                        Ok(unescaped) => ValueKind::StringLiteral(unescaped).spanned_infer(span),
+                        Err(errs) => {
+                            for err in errs {
+                                let start =  usize::from(span.range().start());
+                                let range = (start + err.1, start + err.1 + 1);
+                                let span = (self.file as usize, range);
+
+                                self.debugger
+                                    .throw_parse(err.0, span);
+                            }
+
+                            ValueKind::Error.spanned_infer(span)
+                        }
+                    }
                 } else {
                     let text = literal.text().replace("_", "");
 
@@ -208,7 +240,7 @@ impl AstLowerer {
         }
     }
 
-    fn lower_closure_expr(&self, closure: ClosureExpr, span: Span) -> Value {
+    fn lower_closure_expr(&mut self, closure: ClosureExpr, span: Span) -> Value {
         if let Some(parameters) = closure.parameters() {
             // Set the type to a function of the parameters
             let blir_params: Vec<_> = parameters.map(|closure_param| {
@@ -244,7 +276,7 @@ impl AstLowerer {
         }
     }
 
-    pub(crate) fn lower_if_expr(&self, expr: IfExpr) -> IfValue {
+    pub(crate) fn lower_if_expr(&mut self, expr: IfExpr) -> IfValue {
         let condition = Box::new(self.lower_expr(expr.condition()));
         let positive = self.lower_code_block(expr.positive());
         let negative = match expr.negative() {

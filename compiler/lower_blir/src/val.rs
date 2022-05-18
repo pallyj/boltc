@@ -7,7 +7,7 @@ use blirssa::{value::{BinaryIntrinsicFn as SsaBinaryIntrinsicFn, LabelValue, Una
 
 use crate::BlirLowerer;
 
-impl BlirLowerer {
+impl<'a, 'b> BlirLowerer<'a, 'b> {
     pub(super) fn lower_value(&mut self, value: &Value) -> LabelValue {
         // println!("{:?}", &value);
         match &value.kind {

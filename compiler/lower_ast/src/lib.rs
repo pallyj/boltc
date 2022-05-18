@@ -1,7 +1,7 @@
 #![feature(let_else)]
 
 use blir::intrinsics::Intrinsics;
-use errors::Span;
+use errors::{Span, debugger::Debugger};
 use parser::{ast::{file::FileItem, Parse, Root},
              operators::OperatorFactory};
 use rowan::TextRange;
@@ -15,26 +15,28 @@ mod attributes;
 #[cfg(test)]
 mod tests;
 
-pub struct AstLowerer {
+pub struct AstLowerer<'a, 'b> {
     file:    u32,
     parse:   Root,
     factory: OperatorFactory,
+    debugger:&'a mut Debugger<'b>
 }
 
-impl AstLowerer {
-    pub fn new(parse: Parse) -> AstLowerer {
+impl<'a, 'b> AstLowerer<'a, 'b> {
+    pub fn new(parse: Parse, debugger: &'a mut Debugger<'b>) -> Self {
         let mut factory = OperatorFactory::new();
 
         factory.register_intrinsics();
 
         AstLowerer { file: parse.file as u32,
                      parse: Root::cast(parse.root).unwrap(),
-                     factory }
+                     factory,
+                    debugger }
     }
 
     fn span(&self, range: TextRange) -> Span { Span::new(range, self.file) }
 
-    pub fn lower_file(self, library: &mut blir::Library) {
+    pub fn lower_file(mut self, library: &mut blir::Library) {
         let intrinsics = Intrinsics::new();
 
         intrinsics.populate();

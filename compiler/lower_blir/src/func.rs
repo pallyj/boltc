@@ -5,7 +5,7 @@ use blirssa::value::LabelValue;
 
 use crate::BlirLowerer;
 
-impl BlirLowerer {
+impl<'a, 'b> BlirLowerer<'a, 'b> {
     pub(super) fn lower_func_signature(&mut self, func: FunctionRef) {
         let function_type = self.lower_type(&func.take_typ());
 

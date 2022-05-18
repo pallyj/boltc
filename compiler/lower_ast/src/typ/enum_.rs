@@ -4,9 +4,9 @@ use parser::ast::containers::{EnumDef, EnumItem, CaseDef};
 
 use crate::AstLowerer;
 
-impl AstLowerer {
+impl<'a, 'b> AstLowerer<'a, 'b> {
 	pub fn lower_enum(
-		&self,
+		&mut self,
 		def: EnumDef,
 		parent: &ScopeRef,
 		parent_path: &Path) -> EnumRef

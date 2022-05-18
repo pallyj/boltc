@@ -3,8 +3,8 @@ use parser::ast::pattern::Pattern as AstPattern;
 
 use crate::AstLowerer;
 
-impl AstLowerer {
-    pub(crate) fn lower_pattern(&self, expr: AstPattern) -> Pattern {
+impl<'a, 'b> AstLowerer<'a, 'b> {
+    pub(crate) fn lower_pattern(&mut self, expr: AstPattern) -> Pattern {
 		let span = self.span(expr.range());
 
 		match expr {

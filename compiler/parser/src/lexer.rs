@@ -156,7 +156,7 @@ pub enum SyntaxKind {
     #[regex(r"[ \n\r\f\t]")]
     Whitespace,
 
-    #[regex(r#""[^"]*""#)]
+    #[regex(r#"""#, lex_string)]
     StringLiteral,
 
     #[regex(r#"""""#, lex_long_string, priority = 2)]
@@ -246,6 +246,29 @@ pub enum SyntaxKind {
     TypeAlias,
 
     _Invalid,
+}
+
+fn lex_string(lexer: &mut logos::Lexer<SyntaxKind>) -> Result<(), ()> {
+    let remaining = lexer.remainder();
+
+    let mut look_behind = [' '; 3];
+
+    for (i, next_c) in remaining.chars().enumerate() {
+        if look_behind[2] == '\"' {
+            if !(look_behind[1] == '\\' && look_behind[0] != '\\') {
+                // The string is over
+                lexer.bump(i);
+                return Ok(());
+            }
+        }
+
+        look_behind[0] = look_behind[1];
+        look_behind[1] = look_behind[2];
+        look_behind[2] = next_c;
+    }
+
+    // Throw an error
+    return Err(())
 }
 
 fn lex_long_string(lexer: &mut logos::Lexer<SyntaxKind>) -> Result<(), ()> {

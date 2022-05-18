@@ -2,19 +2,16 @@
 
 @entryPoint
 func main() {
-	let hello_world = """
-		Hello, World!"""
+	let hello_world = "Hello, World!"
 
-	let hello = hello_world[0..<5]
-
-	print(withLength: hello)
+	print(withLength: hello_world)
 
 	let json = """
 		{
 			"name": "John Smith",
 			"age": "25"
 		}
-	"""
+	    """
 
 	print(withLength: json)
 }

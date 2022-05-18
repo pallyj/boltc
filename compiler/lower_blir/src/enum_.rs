@@ -3,7 +3,7 @@ use blirssa::typ::EnumVariant;
 
 use crate::BlirLowerer;
 
-impl BlirLowerer {
+impl<'a, 'b> BlirLowerer<'a, 'b> {
 	pub(super) fn lower_enum_definition(&mut self, enum_def: EnumRef) {
 		let ssa_lib = self.ssa_library_mut();
 

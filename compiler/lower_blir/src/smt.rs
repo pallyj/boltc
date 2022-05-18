@@ -3,7 +3,7 @@ use blirssa::value::LabelValue;
 
 use crate::BlirLowerer;
 
-impl BlirLowerer {
+impl<'a, 'b> BlirLowerer<'a, 'b> {
     pub(super) fn lower_code_block(&mut self, codeblock: &CodeBlock) -> Option<LabelValue> {
         let mut yield_value = None;
 

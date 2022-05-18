@@ -5,7 +5,7 @@ use blirssa::typ::Type as SsaType;
 
 use crate::BlirLowerer;
 
-impl BlirLowerer {
+impl<'a, 'b> BlirLowerer<'a, 'b> {
     pub(super) fn lower_type(&self, typ: &Type) -> SsaType {
         match &typ.kind() {
             TypeKind::Void => SsaType::Void,

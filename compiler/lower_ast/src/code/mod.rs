@@ -6,8 +6,8 @@ use parser::ast::smt::{CodeBlock as AstCodeBlock, Smt as AstSmt};
 
 use crate::AstLowerer;
 
-impl AstLowerer {
-    pub(crate) fn lower_smt(&self, smt: AstSmt) -> Option<Statement> {
+impl<'a, 'b> AstLowerer<'a, 'b> {
+    pub(crate) fn lower_smt(&mut self, smt: AstSmt) -> Option<Statement> {
         let range = smt.range();
         let span = self.span(range);
 
@@ -42,7 +42,7 @@ impl AstLowerer {
              }.spanned(span))
     }
 
-    pub(crate) fn lower_code_block(&self, code_block: AstCodeBlock) -> CodeBlock {
+    pub(crate) fn lower_code_block(&mut self, code_block: AstCodeBlock) -> CodeBlock {
         let range = code_block.range();
         let span = self.span(range);
 

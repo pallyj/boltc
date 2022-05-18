@@ -89,7 +89,7 @@ impl Project {
                 continue;
             }
 
-            AstLowerer::new(parse).lower_file(self.library.as_mut().unwrap());
+            AstLowerer::new(parse, &mut debugger).lower_file(self.library.as_mut().unwrap());
         }
 
         if debugger.has_errors() {
@@ -134,7 +134,7 @@ impl Project {
             return (false, None);
         }
 
-        let mut lowerer = BlirLowerer::new(self.library.take().unwrap());
+        let mut lowerer = BlirLowerer::new(self.library.take().unwrap(), &mut debugger);
         lowerer.lower();
 
         let library = lowerer.finish();

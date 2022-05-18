@@ -10,3 +10,4 @@ blir = { path = "../blir" }
 patmat = { path = "../patmat" }
 blirssa = { path = "../blirssa" }
 rand = "0.8.4"
+errors = { path = "../errors" }

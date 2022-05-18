@@ -4,7 +4,7 @@ use blirssa::{typ::StructField, value::LabelValue};
 
 use crate::BlirLowerer;
 
-impl BlirLowerer {
+impl<'a, 'b> BlirLowerer<'a, 'b> {
     pub(super) fn lower_struct_definition(&mut self, r#struct: StructRef) {
         let ssa_lib = self.ssa_library_mut();
 
