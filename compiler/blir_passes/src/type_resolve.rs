@@ -393,11 +393,11 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
             StatementKind::Bind { name, typ, value } => {
                 self.resolve_type(typ, scope);
 
-                *name = scope.define_variable(name, typ.clone());
-
                 if let Some(value) = value {
                     self.resolve_value(value, scope)
                 }
+
+                *name = scope.define_variable(name, typ.clone());
             }
 
             StatementKind::Eval { value, .. } => {
@@ -522,7 +522,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
                 for branch in &mut match_value.branches {
                     // Create a new scope
-                    let branch_scope = ScopeRef::new(Some(scope), ScopeRelation::Scope, ScopeType::Code, false, false);
+                    let branch_scope = &Self::new_scope(scope);
                     self.define_pattern_in_scope(&mut branch.pattern, &branch_scope);
                     self.resolve_code_block(&mut branch.code, &branch_scope);
                 }
@@ -605,13 +605,17 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
     fn resolve_if_value(&mut self, if_value: &mut IfValue, scope: &ScopeRef) {
         self.resolve_value(&mut if_value.condition, scope);
 
-        self.resolve_code_block(&mut if_value.positive, scope);
+        self.resolve_code_block(&mut if_value.positive, &Self::new_scope(scope));
 
         if let Some(negative_block) = &mut if_value.negative {
             match negative_block {
-                IfBranch::CodeBlock(codeblock) => self.resolve_code_block(codeblock, scope),
+                IfBranch::CodeBlock(codeblock) => self.resolve_code_block(codeblock, &Self::new_scope(scope)),
                 IfBranch::Else(else_if_value) => self.resolve_if_value(else_if_value, scope),
             }
         }
+    }
+
+    fn new_scope(outer: &ScopeRef) -> ScopeRef {
+        ScopeRef::new(Some(outer), ScopeRelation::Code, ScopeType::Code, false, false)
     }
 }

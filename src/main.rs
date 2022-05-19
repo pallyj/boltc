@@ -127,7 +127,7 @@ impl Project {
                                              &mut context,
                                              &mut debugger).run_pass(self.library.as_mut().unwrap());
 
-        //println!("{:?}", self.library.as_ref().unwrap());
+        println!("{:?}", self.library.as_ref().unwrap());
 
         if debugger.has_errors() {
             return (false, None);

@@ -134,9 +134,9 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                     self.replace_type(param, &span);
 
                     // if matches!(param.kind(), TypeKind::Infer { .. }) {
-                    // param.set_kind(arg.typ.kind().clone());
+                    //     param.set_kind(arg.typ.kind().clone());
                     // } else if matches!(arg.typ.kind(), TypeKind::Infer { .. }) {
-                    // arg.typ.set_kind(param.kind().clone());
+                    //     arg.typ.set_kind(param.kind().clone());
                     // }
                 }
 
@@ -202,7 +202,9 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 self.replace_value(reciever, scope);
             }
 
-            ValueKind::If(if_value) => self.replace_if_value(if_value, scope),
+            ValueKind::If(if_value) => if let Some(ty) = self.replace_if_value(if_value, scope, 0) {
+                value.typ.set_kind(ty);
+            }
 
             ValueKind::Closure(closure) => {
                 self.replace_codeblock(&mut closure.code, scope);
@@ -263,7 +265,7 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
         }
     }
 
-    fn replace_if_value(&mut self, if_value: &mut IfValue, scope: &ScopeRef) {
+    fn replace_if_value(&mut self, if_value: &mut IfValue, scope: &ScopeRef, n: usize) -> Option<TypeKind> {
         self.replace_value(&mut if_value.condition, scope);
 
         self.replace_codeblock(&mut if_value.positive, scope);
@@ -273,10 +275,21 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 self.replace_codeblock(else_block, scope);
             }
             Some(IfBranch::Else(else_if_block)) => {
-                self.replace_if_value(else_if_block, scope);
+                self.replace_if_value(else_if_block, scope, n + 1);
             }
-            None => {}
+            None => if n == 0 {
+                // Set the type to 0 or diverges
+                let ty = if if_value.positive.escapes() {
+                    TypeKind::Divergent
+                } else {
+                    TypeKind::Void
+                };
+
+                return Some(ty)
+            }
         }
+
+        None
     }
 
     fn replace_function(&mut self, value: &mut Value, function: SomeFunction) {

@@ -118,6 +118,16 @@ impl<'a, 'l> TypeInferPass<'a, 'l> {
 
         infer_context.finish()
                      .replace_codeblock(function_block, &function_scope);
+
+        infer_context.infer_codeblock(function_block, &function_type, &function_scope);
+
+        infer_context.finish()
+                    .replace_codeblock(function_block, &function_scope);
+
+        infer_context.infer_codeblock(function_block, &function_type, &function_scope);
+
+        infer_context.finish()
+                    .replace_codeblock(function_block, &function_scope);
     }
 
     fn infer_method(&mut self, method: &MethodRef) {

@@ -7,9 +7,10 @@ use crate::{code::{ExternFunctionRef, FunctionRef, MethodRef},
             value::ValueKind,
             Monomorphizer, Symbol, SymbolWrapper, Visibility};
 
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub enum ScopeRelation {
     Scope,
+    Code,
     None,
     SameLibrary,
     SameFile,
@@ -26,6 +27,9 @@ pub enum ScopeType {
 
 impl ScopeRelation {
     pub fn can_access(self, visibility: Visibility) -> bool {
+        if self == ScopeRelation::Code {
+            return true
+        }
         match visibility {
             Visibility::Public => true,
             Visibility::Internal => self != ScopeRelation::None,

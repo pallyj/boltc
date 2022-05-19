@@ -56,10 +56,10 @@ impl<'a> Debugger<'a> {
                  format!("[{}] {}", code.error_code().red(), description).bold());
 
         for span in spans.iter() {
-            let (start, end): (u32, u32) = unsafe { std::mem::transmute(span.range) };
+            let (mut start, end): (u32, u32) = unsafe { std::mem::transmute(span.range) };
 
-            let line_info = self.interner
-                                .get_line_info(span.file as usize, start as usize);
+            let mut line_info = self.interner
+                                    .get_line_info(span.file as usize, start as usize);
 
             println!("    {} {}:{}:{}",
                      "-->".bold().blue(),
@@ -68,22 +68,34 @@ impl<'a> Debugger<'a> {
                      line_info.col + 1);
 
             println!("     {} ", "|".bold().blue());
-            println!("{:>4} {} {}",
-                     line_info.line.to_string().bold().blue(),
-                     "|".bold().blue(),
-                     line_info.text.replace("\t", "    ").trim_end());
+            while start < end {
+                println!("{:>4} {} {}",
+                         line_info.line.to_string().bold().blue(),
+                         "|".bold().blue(),
+                         line_info.text.replace("\t", "    ").trim_end());
+    
+                let ntabs = (&line_info.text[0..line_info.col]).rmatches("\t").count();
+    
+                let width = line_info.col + (3 * ntabs);
+                let width = usize::min(width, line_info.text.len());
 
-            let ntabs = (&line_info.text[0..line_info.col]).rmatches("\t").count();
+                let nwidth = u32::min(end - start, line_info.text.len() as u32);
+    
+                let sep = (0..(nwidth)).map(|_| '^')
+                                            .collect::<String>()
+                                            .red()
+                                            .bold();
+                println!("     {} {space:width$}{sep}", "|".bold().blue(), space = "");
 
-            let width = line_info.col + (3 * ntabs);
-
-            let sep = (0..(end - start)).map(|_| '^')
-                                        .collect::<String>()
-                                        .red()
-                                        .bold();
-            println!("     {} {space:width$}{sep}", "|".bold().blue(), space = "");
-
-            println!("     {} ", "|".bold().blue());
+                start += line_info.text.len() as u32;
+                let old_line = line_info.line;
+                line_info = self.interner
+                                .get_line_info(span.file as usize, start as usize + 1);
+                if old_line == line_info.line {
+                    break;
+                }
+            }
+            println!();
         }
 
         self.errors.push(Error::new(code, spans));

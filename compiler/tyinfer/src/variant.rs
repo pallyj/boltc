@@ -44,9 +44,9 @@ impl Variant for TypeVariant {
 
     fn meet(lhs: rusttyc::Partial<Self>, rhs: rusttyc::Partial<Self>) -> Result<rusttyc::Partial<Self>, Self::Err> {
         let variant = match (lhs.variant, rhs.variant) {
-            (Self::Unconstrained, x) | (x, Self::Unconstrained) => Ok(x),
-
             (Self::Diverges, x) | (x, Self::Diverges) => Ok(x),
+            
+            (Self::Unconstrained, x) | (x, Self::Unconstrained) => Ok(x),
 
             (Self::SomeInteger, Self::LlvmInt { bits }) | (Self::LlvmInt { bits }, Self::SomeInteger) => Ok(Self::LlvmInt { bits }),
 

@@ -94,7 +94,7 @@ impl Debug for Expr {
             Self::IndexExpr(arg0) => write!(f, "{arg0:?}"),
             Self::VariantLiteral(arg0) => write!(f, "{arg0:?}"),
             Self::MatchExpr(arg0) => write!(f, "{arg0:?}"),
-            Self::Error => write!(f, "Error"),
+            Self::Error => write!(f, "error"),
         }
     }
 }
@@ -174,7 +174,17 @@ impl Debug for LiteralExpr {
 }
 
 impl ParenthesizedExpr {
-    pub fn expr(&self) -> Expr { self.0.first_child().map(Expr::cast).unwrap_or(Expr::Error) }
+    pub fn tuple_label(&self) -> Option<String> {
+        find_token(&self.0.first_child().unwrap().first_child().unwrap(), SyntaxKind::Ident).map(|tok| tok.text().to_string())
+    }
+
+    pub fn expr(&self) -> Expr {
+        self.0.first_child().unwrap()
+              .first_child().unwrap()
+              .first_child()
+              .map(Expr::cast)
+              .unwrap_or(Expr::Error)
+    }
 }
 
 impl Debug for ParenthesizedExpr {

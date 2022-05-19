@@ -17,34 +17,92 @@ public struct StringSlice {
 		strslice_neq(self.slice, other.slice)
 	}
 
-	public operator func index(range: IntRange): StringSlice {
+	public operator func index(range: IntRange): Optional_StringSlice {
 		let len = self.length();
 
-		//if range.top() >= len || range.top() < 0 { /* return nil */ }
-		//if (range.top() < range.bottom()) || range.bottom() < 0 { /* return nil */ }
+		if (range.top() >= len) || (range.bottom() < 0) { return .none; }
+		if range.top() < range.bottom() { return .none; }
 
-		Self(slice: strslice_slice(self.slice, range.bottom(), range.top()))
+		let slice = strslice_slice(self.slice, range.bottom(), range.top())
+		let self_slice: Self = Self(slice: slice)
+
+		return .some(slice)
 	}
 
 	public operator func index(unchecked range: IntRange): StringSlice {
-		let len = self.length();
+		strslice_slice(self.slice, range.bottom(), range.top())
+	}
 
-		//if range.top() >= len || range.top() < 0 { /* return nil */ }
-		//if (range.top() < range.bottom()) || range.bottom() < 0 { /* return nil */ }
+	public operator func index(wrapped range: IntRange): Optional_StringSlice {
+		// todo: any type should undiverge
+		let bottom = match self.indexOf(wrapped: range.bottom()) {
+			.some(bottom) => bottom,
+			// Why is the return part of the pattern?
+			.none => { return .none }
+		};
 
-		Self(slice: strslice_slice(self.slice, range.bottom(), range.top()))
+		let top = match self.indexOf(wrapped: range.top()) {
+			.some(top) => top,
+			.none => { return .none }
+		};
+
+		let range: IntRange = bottom..<top;
+
+		.some(self[unchecked: range])
+	}
+
+	public operator func index(index: Int): Optional_Char {
+		if index >= self.length() {
+			return .none
+		}
+
+		return .some(strslice_index(self.slice, index))
+	}
+
+	public operator func index(unchecked index: Int): Char {
+		strslice_index(self.slice, index)
+	}
+
+	public operator func index(wrapped index: Int): Optional_Char {
+		match self.indexOf(wrapped: index) {
+			.some(index) => .some(strslice_index(self.slice, index)),
+			.none => .none
+		}
+	}
+
+	private func indexOf(wrapped index: Int): Optional_Int {
+		let index = if index < 0 {
+			self.length() + index
+		} else {
+			index
+		}
+
+		if index >= self.length() {
+			return .none
+		}
+
+		return .some(index)
 	}
 }
 
-/*
-enum OptionalStringSlice {
+enum Optional_StringSlice {
 	case some(StringSlice)
 	case none
 }
-*/
+
+enum Optional_Char {
+	case some(Char)
+	case none
+}
+
+enum Optional_Int {
+	case some(Int)
+	case none
+}
 
 fileprivate func strslice_eq(one: strslice, two: strslice): Bool
 fileprivate func strslice_neq(one: strslice, two: strslice): Bool
-fileprivate func strslice_slice(slice: strslice, start: Int, end: Int): strslice
-fileprivate func strslice_extend(slice: strslice, delta: Int): strslice
-fileprivate func strslice_head_slice(slice: strslice, delta: Int): strslice
+fileprivate func strslice_index(slice: strslice, idx: Int): Char
+fileprivate func strslice_slice(slice: strslice, start: Int, end: Int): StringSlice
+fileprivate func strslice_extend(slice: strslice, delta: Int): StringSlice
+fileprivate func strslice_head_slice(slice: strslice, delta: Int): StringSlice

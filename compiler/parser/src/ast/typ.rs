@@ -111,8 +111,14 @@ impl Debug for FuncType {
 }
 
 impl ParenthesizedType {
+    pub fn tuple_label(&self) -> Option<String> {
+        find_token(&self.0.first_child().unwrap().first_child().unwrap(), SyntaxKind::Ident).map(|tok| tok.text().to_string())
+    }
+
     pub fn typ(&self) -> Type {
         self.0
+            .first_child()
+            .unwrap()
             .first_child()
             .unwrap()
             .first_child()

@@ -46,6 +46,16 @@ impl CodeBlock {
 
         TypeKind::Void.anon()
     }
+
+    pub fn escapes(&self) -> bool {
+        for smt in self.statements.iter() {
+            if smt.diverges() {
+                return true
+            }
+        }
+
+        return false
+    }
 }
 
 impl Debug for CodeBlock {

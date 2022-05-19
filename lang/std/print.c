@@ -61,6 +61,10 @@ void printString(strslice_t slice) {
 	printf("%.*s", slice.len, slice.string);
 }
 
+void printChar(int c) {
+	printf("%lc", c);
+}
+
 void printLine() {
 	printf("\n");
 }

@@ -224,10 +224,14 @@ impl<'input, 'l> Parser<'input, 'l> {
         || self.check(SyntaxKind::LiteralDecFloat)
         || self.check(SyntaxKind::StringLiteral)
         || self.check(SyntaxKind::LongStringLiteral)
+        || self.check(SyntaxKind::LiteralTrue)
+        || self.check(SyntaxKind::LiteralFalse)
         || self.check(SyntaxKind::Operator)
         || self.check(SyntaxKind::OpenParen)
         || self.check(SyntaxKind::OpenBrace)
         || self.check(SyntaxKind::IfKw)
+        || self.check(SyntaxKind::MatchKw)
+        || self.check(SyntaxKind::Period)
     }
 
     pub fn parse_expr_atom(&mut self, is_before_brace: bool) -> CompletedMarker {

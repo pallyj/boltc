@@ -19,6 +19,8 @@ fileprivate func printBool(n: i1)
 
 fileprivate func printString(string: strslice)
 
+fileprivate func printChar(c: i32);
+
 internal func readInternalInt(): i64
 internal func readInternalUInt(): i64
 //internal func readInternalDouble(): f64
@@ -129,6 +131,13 @@ public func print(s: StringSlice, newline newline: Bool) {
 	}
 }
 
+public func print(c: Char, newline newline: Bool) {
+	printChar(c.repr)
+	if newline {
+		printLine()
+	}
+}
+
 
 public func print(b: Bool) {
 	printBool(b.repr)
@@ -200,5 +209,10 @@ public func print(i: UInt8) {
 
 public func print(s: StringSlice) {
 	printString(s.slice)
+	printLine()
+}
+
+public func print(c: Char) {
+	printChar(c.repr)
 	printLine()
 }

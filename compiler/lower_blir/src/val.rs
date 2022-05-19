@@ -399,10 +399,13 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
                         self.builder()
                             .build_assign_ptr(yield_pointer, value_to_assign);
                     }
+
+                    if !codeblock.escapes() {
+                        self.builder().build_always_branch(&finally_block);
+                    }
                 }
                 IfBranch::Else(else_branch) => self.lower_if_value_inner(else_branch.as_ref(), yield_pointer.clone()),
             };
-            self.builder().build_always_branch(&finally_block);
 
             finally_block
         } else {
@@ -422,7 +425,10 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
             self.builder()
                 .build_assign_ptr(yield_pointer, value_to_assign);
         }
-        self.builder().build_always_branch(&finally_block);
+        if !value.positive.escapes() {
+            self.builder().build_always_branch(&finally_block);
+        }
+        
 
         // Position at the end of the if block
         self.builder().position_at_end(&finally_block);

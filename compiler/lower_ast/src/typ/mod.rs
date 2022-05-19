@@ -33,7 +33,15 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                                      labels: vec![] }
             }
 
-            AstType::ParenthesizedType(paren_type) => return self.lower_type(paren_type.typ()),
+            AstType::ParenthesizedType(paren_type) => {
+                let typ = self.lower_type(paren_type.typ());
+
+                if let Some(label) = paren_type.tuple_label() {
+                    TypeKind::Tuple(vec![typ], vec![Some(label)])
+                } else {
+                    return typ
+                }
+            },
 
             AstType::TupleType(tuple_type) => {
                 let (tuple_types, labels) =

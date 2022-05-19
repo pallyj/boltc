@@ -152,8 +152,18 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
             AstExpr::ParenthesizedExpr(paren) => {
                 // TODO: Add old span
+                let expr = self.lower_expr(paren.expr());
 
-                self.lower_expr(paren.expr())
+                if let Some(label) = paren.tuple_label() {
+                    let (tuple_items, labels) = (vec![expr], vec![Some(label)]);
+
+                    let infer_items = vec! [Type::infer()];
+                    let tuple_type = TypeKind::Tuple(infer_items, labels).anon();
+
+                    ValueKind::Tuple(tuple_items).spanned(tuple_type, span)
+                } else {
+                    expr
+                }
             }
 
             AstExpr::FuncCallExpr(call) => {
@@ -239,7 +249,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                 ValueKind::Match(MatchValue { discriminant, branches }).spanned_infer(span)
             }
 
-            AstExpr::Error => panic!("{expr:?}"),
+            AstExpr::Error => panic!("error")
         }
     }
 

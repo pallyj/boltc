@@ -1,6 +1,14 @@
 @entryPoint
 func main() {
-	let c: Char = "H"
+	let str: StringSlice = "Hello, World"
 
-	if c == "W" { print("Yup") }
+	//let first = str[unchecked: 0];
+	let last = str[wrapped: -1];
+
+	//print(first);
+
+	match last {
+		.some(_) => print("xc"),
+		.none => print("none")
+	}
 }

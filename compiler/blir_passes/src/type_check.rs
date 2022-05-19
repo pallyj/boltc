@@ -230,8 +230,10 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
             ValueKind::Operator(name) => {
                 self.debugger.throw_single(ErrorCode::OperatorDNE(name.clone()), &value.span);
             }
-            ValueKind::Polymorphic(polymorphic) => self.check_polymorphic(polymorphic, &value.span),
-            ValueKind::PolymorphicMethod { polymorphic, .. } => self.check_polymorphic(polymorphic, &value.span),
+            ValueKind::Polymorphic(polymorphic) | 
+            ValueKind::PolymorphicMethod { polymorphic, .. } => {
+                self.check_polymorphic(polymorphic, &value.span)
+            }
 
             _ => { /* Do nothing */ }
         }
@@ -404,6 +406,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
     fn type_to_string(&self, ty: &Type) -> String {
         match ty.kind() {
             TypeKind::Struct(r#struct) => format!("struct `{}`", r#struct.name()),
+            TypeKind::Enum(r#enum) => format!("enum `{}`", r#enum.name()),
 
             TypeKind::Void => "()".to_string(),
             TypeKind::Divergent => "!".to_string(),

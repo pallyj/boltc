@@ -57,3 +57,9 @@ strslice_t strslice_head_slice(strslice_t slice, long amount) {
 
 	return new_slice;
 }
+
+unsigned int strslice_index(strslice_t slice, long index) {
+	char char_at_index = slice.ptr[index];
+
+	return (unsigned int)char_at_index;
+}
