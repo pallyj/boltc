@@ -227,7 +227,9 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                                                                   &value.span),
             ValueKind::Named(name) => self.debugger
                                           .throw_single(ErrorCode::SymNotAValue { name: name.clone() }, &value.span),
-            ValueKind::Operator(name) => panic!("Compiler Error: operator {name} couldn't be found"),
+            ValueKind::Operator(name) => {
+                self.debugger.throw_single(ErrorCode::OperatorDNE(name.clone()), &value.span);
+            }
             ValueKind::Polymorphic(polymorphic) => self.check_polymorphic(polymorphic, &value.span),
             ValueKind::PolymorphicMethod { polymorphic, .. } => self.check_polymorphic(polymorphic, &value.span),
 
@@ -286,6 +288,31 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
             (ty1, ty2) if ty1 == ty2 => Ok(()),
             (_, TypeKind::Divergent) => Ok(()),
 
+            (TypeKind::Tuple(types1, labels1), TypeKind::Tuple(types2, labels2)) => {
+                if types1.len() != labels1.len() ||
+                   types2.len() != labels2.len() ||
+                   types1.len() != labels1.len() {
+                    return Err(TypeCheckError::MismatchedTypes(place.clone(), value.clone()))
+                }
+
+                for ((ty1, label1), (ty2, label2)) in
+                    types1.iter()
+                      .zip(labels1.iter())
+                      .zip(types2.iter().zip(labels2.iter()))
+                {
+                    self.check_type(ty1, ty2)?;
+
+                    if let (Some(label1), Some(label2)) = (label1, label2) {
+                        if label1 != label2 {
+                            // There is an error
+                            return Err(TypeCheckError::MismatchedLabel(label1.clone(), label2.clone()))
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+
             _ => Err(TypeCheckError::MismatchedTypes(place.clone(), value.clone())),
         }
     }
@@ -297,6 +324,11 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
             TypeCheckError::MismatchedTypes(t1, t2) => {
                 self.debugger
                     .throw_single(ErrorCode::ExpectedFound(self.type_to_string(&t1), self.type_to_string(&t2)),
+                                  &statement.span);
+            }
+            TypeCheckError::MismatchedLabel(l1, l2) => {
+                self.debugger
+                    .throw_single(ErrorCode::ExpectedFound(l1, l2),
                                   &statement.span);
             }
         }
@@ -311,6 +343,11 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                     .throw(ErrorCode::ExpectedFound(self.type_to_string(&t1), self.type_to_string(&t2)),
                            vec![*span]);
             }
+            TypeCheckError::MismatchedLabel(l1, l2) => {
+                self.debugger
+                    .throw(ErrorCode::ExpectedFound(l1, l2),
+                    vec![*span]);
+            }
         }
     }
 
@@ -321,6 +358,11 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
             TypeCheckError::MismatchedTypes(t1, t2) => {
                 self.debugger
                     .throw_single(ErrorCode::ExpectedFound(self.type_to_string(&t1), self.type_to_string(&t2)),
+                                  &statement.span);
+            }
+            TypeCheckError::MismatchedLabel(l1, l2) => {
+                self.debugger
+                    .throw_single(ErrorCode::ExpectedFound(l1, l2),
                                   &statement.span);
             }
         }
@@ -334,6 +376,11 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                     .throw_single(ErrorCode::ExpectedFound(self.type_to_string(&t1), self.type_to_string(&t2)),
                                   span);
             }
+            TypeCheckError::MismatchedLabel(l1, l2) => {
+                self.debugger
+                    .throw_single(ErrorCode::ExpectedFound(l1, l2),
+                                  span);
+            }
         }
     }
 
@@ -344,6 +391,11 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
             TypeCheckError::MismatchedTypes(t1, t2) => {
                 self.debugger
                     .throw_single(ErrorCode::ExpectedFound(self.type_to_string(&t1), self.type_to_string(&t2)),
+                                  &arg.span);
+            }
+            TypeCheckError::MismatchedLabel(l1, l2) => {
+                self.debugger
+                    .throw_single(ErrorCode::ExpectedFound(l1, l2),
                                   &arg.span);
             }
         }
@@ -359,6 +411,21 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
             TypeKind::Integer { bits } => format!("intrinsics.i{bits}"),
             TypeKind::Float { bits } => format!("intrinsics.f{bits}"),
 
+            TypeKind::Tuple(types, labels) => {
+                let types =
+                    types.iter()
+                        .zip(labels)
+                        .map(|(ty, lab)| if let Some(label) = lab {
+                            format!("{label}: {ty:?}")
+                        } else {
+                            format!("{ty:?}")
+                        })
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    
+                format!("({})", types)
+            }
+
             _ => "unknown".to_string(),
         }
     }
@@ -367,4 +434,5 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
 enum TypeCheckError {
     CouldNotInfer,
     MismatchedTypes(Type, Type),
+    MismatchedLabel(String, String)
 }

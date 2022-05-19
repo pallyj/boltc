@@ -56,7 +56,7 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
             ValueKind::EnumVariant { of_enum, variant } => {
                 let enum_type = self.lower_type(&TypeKind::Enum(of_enum.clone()).anon());
             
-                let tuple = self.lower_tuple(&[], &TypeKind::Tuple(vec![]).anon());
+                let tuple = self.lower_tuple(&[], &TypeKind::Tuple(vec![], vec![]).anon());
 
                 self.builder().build_create_enum_variant(enum_type, variant.name(), tuple)
             }
@@ -228,17 +228,25 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
             TypeKind::StrSlice => self.builder()
                                       .build_string_literal(s),
             TypeKind::Struct(r#struct) => {
-                // TODO: Do this by insert value
-                if !r#struct.string_repr() {
-                    panic!()
+                if r#struct.string_repr() {
+                    let borrowed_struct = r#struct.borrow();
+                    let borrowed_var = borrowed_struct.instance_vars[0].borrow();
+
+                    let literal = self.lower_string_literal(s, &borrowed_var.typ);
+
+                    self.lower_init(ty, vec![literal])
+                } else if r#struct.char_repr() {
+                    let borrowed_struct = r#struct.borrow();
+                    let borrowed_var = borrowed_struct.instance_vars[0].borrow();
+
+                    let value = s.chars().next().unwrap() as u32;
+
+                    let literal = self.lower_int_literal(value as u64, &borrowed_var.typ);
+
+                    self.lower_init(ty, vec![literal])
+                } else {
+                    unreachable!()
                 }
-
-                let borrowed_struct = r#struct.borrow();
-                let borrowed_var = borrowed_struct.instance_vars[0].borrow();
-
-                let literal = self.lower_string_literal(s, &borrowed_var.typ);
-
-                self.lower_init(ty, vec![literal])
             }
             _ => panic!("{ty:?} is not a string"),
         }
@@ -312,7 +320,7 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
                 let enum_type = self.lower_type(&TypeKind::Enum(of_enum.clone()).anon());
 
                 // Create the enum tuple
-                let self_type = self.lower_type(&TypeKind::Tuple(variant.associated_types().clone()).anon());
+                let self_type = self.lower_type(&TypeKind::Tuple(variant.associated_types().clone(), variant.labels().clone()).anon());
                 let tuple_value = self.builder().build_stack_alloc_undef(self_type);
 
                 for (i, value) in args.into_iter().enumerate() {

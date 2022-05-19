@@ -19,18 +19,21 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 					.spanned_infer(span);
 
 				if let Some(assoc) = variant.associated_patterns() {
-					PatternKind::Variant { variant: value, items: assoc.map(|pat| self.lower_pattern(pat)).collect() }
+					let (items, labels) = assoc.map(|pat| (self.lower_pattern(pat.pattern()), pat.label()))
+											   .unzip();
+					
+					PatternKind::Variant { variant: value, items, labels }
 				} else {
 					PatternKind::Literal { value }
 				}
 			}
 			AstPattern::TuplePattern(tuple_pat) => {
-				let sub_patterns = tuple_pat
+				let (sub_patterns, labels) = tuple_pat
 					.tuple_items()
-					.map(|tuple_item| self.lower_pattern(tuple_item))
-					.collect();
+					.map(|tuple_item| (self.lower_pattern(tuple_item.pattern()), tuple_item.label()) )
+					.unzip();
 
-				PatternKind::Tuple { items: sub_patterns }
+				PatternKind::Tuple { items: sub_patterns, labels }
 			}
 			AstPattern::BindPattern(bind_pattern) => {
 				PatternKind::Bind(bind_pattern.bind_name())

@@ -146,6 +146,13 @@ public struct Int /*: IntegerLiteralRepr */ {
 	public init(bitcast i: UInt) {
 		Int (repr: i.repr )
 	}
+
+	// Read
+
+	public func prompt(prompt: StringSlice): Self {
+		print(prompt, newline: false)
+		Self(repr: readInternalInt())
+	}
 }
 
 public struct IntRange {

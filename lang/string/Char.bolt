@@ -1,0 +1,56 @@
+import intrinsics
+
+@transparent
+@defaultCharRepr
+@charExpressible
+public struct Char {
+	fileprivate var repr: i32
+
+	public func isBinDigit(): Bool {
+		self == "0" || self == "1"
+	}
+
+	public func isDigit(): Bool {
+		self >= "0" && self <= "9"
+	}
+
+	public func isOctDigit(): Bool {
+		self >= "0" && self <= "7"
+	}
+
+	public func isHexDigit(): Bool {
+		let isDecimal: Bool = self >= "0" && self <= "9";
+		let isHex: Bool = self >= "a" && self <= "f";
+		let isUpperHex: Bool = self >= "A" && self <= "F";
+		
+		isDecimal || isHex || isUpperHex
+	}
+
+	public init (raw repr: UInt32) {
+		Self(repr: repr.repr)
+	}
+
+	operator func equal(other: Char): Bool {
+		Bool(repr: integer32CmpEq(self.repr, other.repr))
+	}
+
+	operator func notEqual(other: Char): Bool {
+		Bool(repr: integer32CmpNeq(self.repr, other.repr))
+	}
+
+	operator func greaterThan(other: Char): Bool {
+		Bool(repr: integer32CmpGt(self.repr, other.repr))
+	}
+
+	operator func greaterThanEq(other: Char): Bool {
+		Bool(repr: integer32CmpGte(self.repr, other.repr))
+	}
+
+	operator func lessThan(other: Char): Bool {
+		Bool(repr: integer32CmpLt(self.repr, other.repr))
+	}
+
+	operator func lessThanEq(other: Char): Bool {
+		Bool(repr: integer32CmpLte(self.repr, other.repr))
+	}
+}

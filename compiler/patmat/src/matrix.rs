@@ -178,7 +178,8 @@ impl PatternMatrix {
 
 fn split_scrutinee(scrutinee: &Value) -> Vec<Value> {
 	match scrutinee.typ.kind() {
-		TypeKind::Tuple(tuple_types) => {
+		// TODO: Split by label
+		TypeKind::Tuple(tuple_types, _) => {
 			tuple_types.iter()
 					   .enumerate()
 					   .map(|(i, ty)| ValueKind::TupleField(Box::new(scrutinee.clone()), i).anon(ty.clone()))
@@ -197,7 +198,7 @@ fn split_scrutinee(scrutinee: &Value) -> Vec<Value> {
 }
 
 fn cast_enum_to_variant(value: &Value, variant: &CaseRef) -> Value {
-	let tuple_type = TypeKind::Tuple(variant.associated_types().clone()).anon();
+	let tuple_type = TypeKind::Tuple(variant.associated_types().clone(), variant.labels().clone()).anon();
 
 	ValueKind::CastEnumToVariant { enum_value: Box::new(value.clone()),
 								   variant: variant.clone() }.anon(tuple_type)
@@ -211,8 +212,8 @@ fn split_pattern(pattern: Pattern, tuple_types: &[Type]) -> Vec<Pattern> {
 	}
 
 	match pattern.kind {
-		PatternKind::Tuple { items } => items,
-		PatternKind::Variant { variant: Value { kind: ValueKind::EnumVariant { variant, .. }, ..}, mut items } => {
+		PatternKind::Tuple { items, .. } => items,
+		PatternKind::Variant { variant: Value { kind: ValueKind::EnumVariant { variant, .. }, ..}, mut items, mut labels } => {
 			let TypeKind::Enum(enum_ref) = pattern.match_type.clone().kind else {
 				unreachable!()
 			};
@@ -234,7 +235,8 @@ fn split_pattern(pattern: Pattern, tuple_types: &[Type]) -> Vec<Pattern> {
 					.map(|(test_variant, variant_ty)| {
 						if test_variant == &variant {
 							let items = std::mem::take(&mut items);
-							PatternKind::Tuple { items: items }
+							let labels = std::mem::take(&mut labels);
+							PatternKind::Tuple { items: items, labels }
 						} else {
 							PatternKind::Wildcard
 						}.with_type(variant_ty.clone())

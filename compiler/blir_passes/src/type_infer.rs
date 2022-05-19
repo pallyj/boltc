@@ -101,7 +101,10 @@ impl<'a, 'l> TypeInferPass<'a, 'l> {
         let function_type = borrowed_function.info.return_type().clone();
         let function_block = &mut borrowed_function.code;
 
-        for _ in 0..2 {
+        // This is going to need to change
+        // We do only one step from 0.6 on
+
+        for _ in 0..3 {
             infer_context.replace()
                          .replace_codeblock(function_block, &function_scope);
 

@@ -36,9 +36,12 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
             AstType::ParenthesizedType(paren_type) => return self.lower_type(paren_type.typ()),
 
             AstType::TupleType(tuple_type) => {
-                let tuple_types = tuple_type.types().map(|ty| self.lower_type(ty)).collect();
+                let (tuple_types, labels) =
+                    tuple_type.types()
+                              .map(|ty| (self.lower_type(ty.typ()), ty.label()))
+                              .unzip();
 
-                TypeKind::Tuple(tuple_types)
+                TypeKind::Tuple(tuple_types, labels)
             }
 
             AstType::InferType(_) => Type::infer().kind,

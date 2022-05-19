@@ -37,6 +37,7 @@ ast!(struct CaseDef(CaseDef));
 ast!(struct CaseItem(CaseItem));
 ast!(struct EnumBody(EnumBody));
 ast!(struct EnumDef(EnumDef));
+ast!(struct TupleMember(FuncArg));
 
 ast!(
     enum EnumItem {
@@ -146,13 +147,13 @@ impl CaseItem {
             .to_string()
     }
 
-    pub fn associated_types(&self) -> Option<impl Iterator<Item = Type>> {
+    pub fn associated_types(&self) -> Option<impl Iterator<Item = TupleMember>> {
         Some(
             self.0
                 .children()
                 .find(|child| child.kind() == SyntaxKind::CommaSeparatedList)?
                 .children()
-                .map(Type::cast)
+                .filter_map(TupleMember::cast)
         )
     }
 }
@@ -160,6 +161,29 @@ impl CaseItem {
 impl Debug for CaseItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.name())
+    }
+}
+
+impl TupleMember {
+    pub fn label(&self) -> Option<String> {
+        find_token(&self.0, SyntaxKind::Ident)
+            .map(|token| token.text().to_string())
+    }
+
+    pub fn typ(&self) -> Type {
+        self.0.first_child()
+            .map(Type::cast)
+            .unwrap()
+    }
+}
+
+impl Debug for TupleMember {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(label) = self.label() {
+            write!(f, "{label}: {:?}", self.typ())
+        } else {
+            write!(f, "{:?}", self.typ())
+        }
     }
 }
 

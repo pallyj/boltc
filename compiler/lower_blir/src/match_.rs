@@ -1,8 +1,6 @@
-use std::{fmt::Debug};
-
 use blir::{
     pattern::{PatternKind, Pattern},
-    value::{match_::MatchValue, MatchBranch, Value, ValueKind},
+    value::{match_::MatchValue, ValueKind},
     typ::{TypeKind, Type, StructRef},
     Symbol,
     SomeFunction, code::CodeBlock};

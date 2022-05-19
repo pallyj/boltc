@@ -31,8 +31,22 @@ impl<'input, 'l> Parser<'input, 'l> {
         }
     }
 
+    pub fn parse_ty_tuple(&mut self) {
+        let marker = self.start();
+
+        if self.check(SyntaxKind::Ident) && self.check_ahead(1, SyntaxKind::Colon) {
+            self.eat(SyntaxKind::Ident);
+            self.eat(SyntaxKind::Colon);
+        }
+
+        self.parse_ty();
+
+        marker.complete(self, SyntaxKind::FuncArg);
+    }
+
+    // parenthesized type CAN lower to tuple type
     pub fn parse_ty_unit(&mut self, marker: Marker) {
-        let tuple_types_len = self.parse_paren_comma_seq(Self::parse_ty);
+        let tuple_types_len = self.parse_paren_comma_seq(Self::parse_ty_tuple);
 
         match tuple_types_len {
             0 => marker.complete(self, SyntaxKind::UnitType),

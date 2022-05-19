@@ -44,6 +44,7 @@ ast!(struct InfixExpr(InfixExpr));
 ast!(struct ClosureExpr(Closure));
 ast!(struct TrailingClosureExpr(TrailingClosure));
 ast!(struct TupleExpr(Tuple));
+ast!(struct TupleMember(FuncArg));
 ast!(struct IndexExpr(IndexExpr));
 ast!(struct VariantLiteral(VariantLiteral));
 ast!(struct MatchExpr(MatchExpr));
@@ -384,12 +385,12 @@ impl Debug for InfixExpr {
 
 
 impl TupleExpr {
-    pub fn items(&self) -> impl Iterator<Item = Expr> {
+    pub fn items(&self) -> impl Iterator<Item = TupleMember> {
         self.0
             .first_child()
             .unwrap()
             .children()
-            .map(Expr::cast)
+            .filter_map(TupleMember::cast)
     }
 }
 
@@ -402,6 +403,29 @@ impl Debug for TupleExpr {
             .join(", ");
 
         write!(f, "({tuple_items})")
+    }
+}
+
+impl TupleMember {
+    pub fn label(&self) -> Option<String> {
+        find_token(&self.0, SyntaxKind::Ident)
+            .map(|token| token.text().to_string())
+    }
+
+    pub fn expr(&self) -> Expr {
+        self.0.first_child()
+            .map(Expr::cast)
+            .unwrap()
+    }
+}
+
+impl Debug for TupleMember {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(label) = self.label() {
+            write!(f, "{label}: {:?}", self.expr())
+        } else {
+            write!(f, "{:?}", self.expr())
+        }
     }
 }
 

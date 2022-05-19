@@ -1,0 +1,6 @@
+@entryPoint
+func main() {
+	let c: Char = "H"
+
+	if c == "W" { print("Yup") }
+}

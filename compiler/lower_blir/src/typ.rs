@@ -36,7 +36,7 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
                                                                                                            .map(|par| self.lower_type(par))
                                                                                                            .collect(), },
 
-            TypeKind::Tuple(tuple_items) => SsaType::Tuple(tuple_items.iter().map(|item| self.lower_type(item)).collect()),
+            TypeKind::Tuple(tuple_items, _) => SsaType::Tuple(tuple_items.iter().map(|item| self.lower_type(item)).collect()),
 
             _ => panic!("{typ:?}"),
         }

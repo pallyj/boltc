@@ -22,6 +22,7 @@ pub struct BlirContext {
     pub default_float_repr:   Option<StructRef>,
     pub default_bool_repr:    Option<StructRef>,
     pub default_string_repr:  Option<StructRef>,
+    pub default_char_repr:    Option<StructRef>,
 
     pub entry_point: Option<String>,
 }
@@ -32,6 +33,7 @@ impl BlirContext {
                default_float_repr:   None,
                default_bool_repr:    None,
                default_string_repr:  None,
+               default_char_repr:    None,
 
                entry_point: None, }
     }

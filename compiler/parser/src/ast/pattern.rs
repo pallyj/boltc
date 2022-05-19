@@ -8,6 +8,7 @@ ast!(struct WildcardPattern(WildcardPattern));
 ast!(struct LiteralPattern(LiteralPattern));
 ast!(struct VariantPattern(VariantPattern));
 ast!(struct TuplePattern(TuplePattern));
+ast!(struct TupleMember(FuncArg));
 ast!(struct BindPattern(BindPattern));
 
 ast!(enum Pattern {
@@ -56,10 +57,10 @@ impl VariantPattern {
         find_token(&self.0, SyntaxKind::Ident).unwrap().text().to_string()
     }
 
-    pub fn associated_patterns(&self) -> Option<impl Iterator<Item = Pattern>> {
+    pub fn associated_patterns(&self) -> Option<impl Iterator<Item = TupleMember>> {
         Some(self.0.last_child()?
             .children()
-            .map(Pattern::cast))
+            .filter_map(TupleMember::cast))
     }
 }
 
@@ -70,11 +71,11 @@ impl Debug for VariantPattern {
 }
 
 impl TuplePattern {
-    pub fn tuple_items(&self) -> impl Iterator<Item = Pattern> {
+    pub fn tuple_items(&self) -> impl Iterator<Item = TupleMember> {
         self.0.first_child()
             .unwrap()
             .children()
-            .map(Pattern::cast)
+            .filter_map(TupleMember::cast)
     }
 }
 
@@ -87,6 +88,29 @@ impl Debug for TuplePattern {
                 .join(", ");
         
         write!(f, "({items})")
+    }
+}
+
+impl TupleMember {
+    pub fn label(&self) -> Option<String> {
+        find_token(&self.0, SyntaxKind::Ident)
+            .map(|token| token.text().to_string())
+    }
+
+    pub fn pattern(&self) -> Pattern {
+        self.0.first_child()
+            .map(Pattern::cast)
+            .unwrap()
+    }
+}
+
+impl Debug for TupleMember {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(label) = self.label() {
+            write!(f, "{label}: {:?}", self.pattern())
+        } else {
+            write!(f, "{:?}", self.pattern())
+        }
     }
 }
 

@@ -92,6 +92,8 @@ pub fn default_attributes() -> AttributeFactory {
     factory.register_struct_attribute(DefaultFloatReprAttribute {});
     factory.register_struct_attribute(DefaultBoolReprAttribute {});
     factory.register_struct_attribute(DefaultStringReprAttribute {});
+    factory.register_struct_attribute(DefaultCharReprAttribute {});
+    factory.register_struct_attribute(CharExpressibleAttribute {});
 
     factory
 }
@@ -115,6 +117,10 @@ struct TransparentAttribute;
 struct DefaultIntegerReprAttribute;
 struct DefaultFloatReprAttribute;
 struct DefaultBoolReprAttribute;
+
+struct DefaultCharReprAttribute;
+
+struct CharExpressibleAttribute;
 
 struct DefaultStringReprAttribute;
 
@@ -186,5 +192,28 @@ impl StructAttribute for DefaultStringReprAttribute {
         }
 
         context.default_string_repr = Some(struct_ref.clone());
+    }
+}
+
+impl StructAttribute for DefaultCharReprAttribute {
+    fn name(&self) -> &'static str { "defaultCharRepr" }
+
+    fn apply(&self, struct_ref: &StructRef, context: &mut BlirContext, _debugger: &mut Debugger) {
+        if !struct_ref.string_repr() {
+            // Throw an error
+        }
+
+        context.default_char_repr = Some(struct_ref.clone());
+    }
+}
+
+impl StructAttribute for CharExpressibleAttribute {
+    fn name(&self) -> &'static str { "charExpressible" }
+
+    fn apply(&self, struct_ref: &StructRef, _context: &mut BlirContext, _debugger: &mut Debugger) {
+        if struct_ref.borrow().instance_vars.len() != 1 {
+            // Throw an error
+        }
+        struct_ref.borrow_mut().is_char_repr = true;
     }
 }

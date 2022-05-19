@@ -11,11 +11,13 @@ pub enum PatternKind {
 	Bind(String),
 
 	Variant { variant: Value,
-			  items: Vec<Pattern> },
+			  items: Vec<Pattern>,
+			  labels: Vec<Option<String>> },
 
 	Literal { value: Value },
 
-	Tuple { items: Vec<Pattern> }
+	Tuple { items:  Vec<Pattern>,
+			labels: Vec<Option<String>> }
 }
 
 impl PatternKind {
@@ -41,8 +43,17 @@ impl Debug for Pattern {
 			PatternKind::Wildcard => write!(f, "_"),
 			PatternKind::Bind(name) => write!(f, "{name}"),
 			PatternKind::Literal { value } => write!(f, "{value:?}"),
-			PatternKind::Tuple { items } => write!(f, "({})", items.iter().map(|item| format!("{item:?}")).collect::<Vec<_>>().join(", ") ),
-			PatternKind::Variant { variant, items } => write!(f, "{variant:?}({})", items.iter().map(|item| format!("{item:?}")).collect::<Vec<_>>().join(", ") )
+			PatternKind::Tuple { items, labels } => write!(f, "({})", items.iter().zip(labels).map(|(item, label)| if let Some(label) = label { format!("{label}: {item:?}") } else { format!("{item:?}") }).collect::<Vec<_>>().join(", ") ),
+			PatternKind::Variant { variant, items, labels } =>
+				write!(f, "{variant:?}({})", items.iter()
+												  .zip(labels)
+												  .map(|(item, label)| if let Some(label) = label {
+													  format!("{label}: {item:?}")
+												  } else {
+													  format!("{item:?}")
+												  } )
+												  .collect::<Vec<_>>()
+												  .join(", ") )
 		}
     }
 }

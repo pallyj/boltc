@@ -11,6 +11,8 @@ use std::fmt::Debug;
 
 use crate::lexer::SyntaxKind;
 
+use super::find_token;
+
 ast!(struct NamedType(NamedType));
 ast!(struct MemberType(MemberType));
 ast!(struct UnitType(UnitType));
@@ -18,6 +20,7 @@ ast!(struct FuncType(FuncType));
 ast!(struct InferType(InferType));
 ast!(struct ParenthesizedType(ParenthesizedType));
 ast!(struct TupleType(TupleType));
+ast!(struct TupleMember(FuncArg));
 
 ast!(
     enum Type {
@@ -125,12 +128,12 @@ impl Debug for ParenthesizedType {
 }
 
 impl TupleType {
-    pub fn types(&self) -> impl Iterator<Item = Type> {
+    pub fn types(&self) -> impl Iterator<Item = TupleMember> {
         self.0
             .first_child()
             .unwrap()
             .children()
-            .map(Type::cast)
+            .filter_map(TupleMember::cast)
     }
 }
 
@@ -143,5 +146,28 @@ impl Debug for TupleType {
             .join(", ");
 
         write!(f, "({tuple_types})")
+    }
+}
+
+impl TupleMember {
+    pub fn label(&self) -> Option<String> {
+        find_token(&self.0, SyntaxKind::Ident)
+            .map(|token| token.text().to_string())
+    }
+
+    pub fn typ(&self) -> Type {
+        self.0.first_child()
+            .map(Type::cast)
+            .unwrap()
+    }
+}
+
+impl Debug for TupleMember {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(label) = self.label() {
+            write!(f, "{label}: {:?}", self.typ())
+        } else {
+            write!(f, "{:?}", self.typ())
+        }
     }
 }

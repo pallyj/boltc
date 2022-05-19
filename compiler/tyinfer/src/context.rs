@@ -60,11 +60,11 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
             ValueKind::BoolLiteral(_) => self.constrain_bool(value),
             ValueKind::IntLiteral(_) => self.constrain_int(value),
             ValueKind::FloatLiteral(_) => self.constrain_float(value),
-            ValueKind::StringLiteral(_) => self.constrain_string(value),
+            ValueKind::StringLiteral(lit) => self.constrain_string(value, lit.len()),
 
             ValueKind::Tuple(tuple_items) => {
                 match &value.typ.kind() {
-                    TypeKind::Tuple(tuple_items_type) => {
+                    TypeKind::Tuple(tuple_items_type, ..) => {
                         for (item, typ) in tuple_items.iter().zip(tuple_items_type) {
                             self.constrain_value(item, scope);
                             self.constrain_two_way(typ, &item.typ);
@@ -207,14 +207,14 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                 self.constrain_value(&value, scope);
                 self.constrain_two_way(&value.typ, typ);
             },
-            PatternKind::Tuple { items } => {
-                if let TypeKind::Tuple(tuple) = typ.kind() {
+            PatternKind::Tuple { items, .. } => {
+                if let TypeKind::Tuple(tuple, _) = typ.kind() {
                     for (item, tuple_item) in items.iter().zip(tuple) {
                         self.constrain_pattern(item, tuple_item, scope)
                     }
                 }
             }
-            PatternKind::Variant { variant, items } => {
+            PatternKind::Variant { variant, items, .. } => {
                 self.constrain_value(&variant, scope);
                 self.constrain_two_way(&variant.typ, typ);
 
@@ -274,11 +274,14 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
         }
     }
 
-    fn constrain_string(&mut self, value: &Value) {
+    fn constrain_string(&mut self, value: &Value, len: usize) {
         //println!("{value:?} <- some String");
+
         if let Some(infer_key) = self.infer_key(&value.typ) {
+            let variant = if len == 1 { TypeVariant::SomeChar } else { TypeVariant::SomeString };
+            
             let _constraint = self.checker
-                                  .impose(infer_key.concretizes_explicit(TypeVariant::SomeString));
+                                  .impose(infer_key.concretizes_explicit(variant));
 
             // Match constraint for errors
         }
@@ -309,8 +312,8 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
             for (param1, param2) in params_1.iter().zip(params_2) {
                 self.constrain_one_way(param1, param2);
             }
-        }  else if let (TypeKind::Tuple(tuple_items_1), 
-                        TypeKind::Tuple(tuple_items_2)) = (constrain.kind(), absolute.kind())
+        }  else if let (TypeKind::Tuple(tuple_items_1, ..), 
+                        TypeKind::Tuple(tuple_items_2, ..)) = (constrain.kind(), absolute.kind())
         {
             for (tuple_item_1, tuple_item_2) in tuple_items_1.iter().zip(tuple_items_2) {
                 self.constrain_one_way(tuple_item_1, tuple_item_2);
@@ -358,8 +361,8 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                     for (param1, param2) in params_1.iter().zip(params_2) {
                         self.constrain_two_way(param1, param2);
                     }
-                } else if let (TypeKind::Tuple(tuple_items_1), 
-                               TypeKind::Tuple(tuple_items_2)) = (ty1.kind(), ty2.kind())
+                } else if let (TypeKind::Tuple(tuple_items_1, ..), 
+                               TypeKind::Tuple(tuple_items_2, ..)) = (ty1.kind(), ty2.kind())
                 {
                     for (tuple_item_1, tuple_item_2) in tuple_items_1.iter().zip(tuple_items_2) {
                         self.constrain_two_way(tuple_item_1, tuple_item_2);
@@ -397,7 +400,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                                                                       labels:      labels.clone(),
                                                                       return_type: return_type.clone(), },
 
-            TypeKind::Tuple(tuple_items) => TypeVariant::Tuple(tuple_items.clone()),
+            TypeKind::Tuple(tuple_items, labels) => TypeVariant::Tuple(tuple_items.clone(), labels.clone()),
 
             TypeKind::Error => TypeVariant::Error,
 

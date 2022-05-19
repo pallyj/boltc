@@ -6,15 +6,17 @@ use super::Type;
 pub struct Case {
 	name: String,
 	tag: Cell<Option<usize>>,
-	associated: RefCell<Vec<Type>>
+	associated: RefCell<Vec<Type>>,
+	labels: Vec<Option<String>>
 }
 
 impl Case {
-	pub fn new(name: String, associated: Vec<Type>) -> CaseRef {
+	pub fn new(name: String, associated: Vec<Type>, labels: Vec<Option<String>>) -> CaseRef {
 		CaseRef {
 			case_ref: Arc::new(Case { name,
 							   tag: Cell::new(None),
-							   associated: RefCell::new(associated) })
+							   associated: RefCell::new(associated),
+							   labels })
 		}
 	}
 
@@ -36,6 +38,10 @@ impl Case {
 
 	pub fn associated_types_mut(&self) -> RefMut<Vec<Type>> {
 		self.associated.borrow_mut()
+	}
+
+	pub fn labels(&self) -> &Vec<Option<String>> {
+		&self.labels
 	}
 }
 

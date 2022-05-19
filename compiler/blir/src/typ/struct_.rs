@@ -35,6 +35,7 @@ pub struct StructInner {
     pub subenums:      Vec<EnumRef>,
 
     pub is_transparent: bool,
+    pub is_char_repr: bool,
 
     path: Path,
 }
@@ -64,7 +65,8 @@ impl Struct {
                                      path: parent_path.append(&name),
                                      name,
                                      constants: Vec::new(),
-                                     is_transparent: false };
+                                     is_transparent: false,
+                                     is_char_repr: false };
 
         let struct_ref = StructRef { r#struct: Arc::new(Struct { inner: RefCell::new(r#struct), }), };
 
@@ -204,6 +206,8 @@ impl StructRef {
     pub fn integer_repr(&self) -> bool {
         let struct_ptr = unsafe { &*self.inner.as_ptr() };
 
+        if struct_ptr.is_char_repr { return false }
+
         let vars = &struct_ptr.instance_vars;
 
         if vars.len() != 1 {
@@ -257,6 +261,23 @@ impl StructRef {
 
         match vars[0].borrow().typ.kind() {
             TypeKind::StrSlice => true,
+            _ => false,
+        }
+    }
+
+    pub fn char_repr(&self) -> bool {
+        let struct_ptr = unsafe { &*self.inner.as_ptr() };
+
+        if !struct_ptr.is_char_repr { return false }
+
+        let vars = &struct_ptr.instance_vars;
+
+        if vars.len() != 1 {
+            return false;
+        }
+
+        match vars[0].borrow().typ.kind() {
+            TypeKind::Integer { bits: 32 } => true,
             _ => false,
         }
     }

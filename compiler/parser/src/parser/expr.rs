@@ -247,7 +247,7 @@ impl<'input, 'l> Parser<'input, 'l> {
         {
             marker.complete(self, SyntaxKind::Literal)
         } else if self.check(SyntaxKind::OpenParen) {
-            let tuple_types_len = self.parse_paren_comma_seq(Self::parse_expr);
+            let tuple_types_len = self.parse_paren_comma_seq(Self::parse_func_arg);
 
             match tuple_types_len {
                 0 => marker.complete(self, SyntaxKind::UnitExpr),

@@ -144,6 +144,13 @@ public struct UInt /*: IntegerLiteralRepresentable */ {
 	public static func bitcastInt(i: Int): Self {
 		Self (repr: i.repr )
 	}
+
+	// Read
+
+	public func prompt(prompt: StringSlice): Self {
+		print(prompt, newline: false)
+		Self(repr: readInternalUInt())
+	}
 }
 
 public struct UIntRange {

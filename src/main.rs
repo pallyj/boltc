@@ -33,7 +33,8 @@ fn main() {
                 "int/UInt16.bolt",
                 "int/UInt32.bolt",
                 "int/UInt64.bolt",
-                "string/StringSlice.bolt"];
+                "string/StringSlice.bolt",
+                "string/Char.bolt"];
 
     for file in lang {
         project.open_file(&format!("lang/{file}"));
@@ -49,6 +50,7 @@ fn main() {
 
     if let Some(entry_point) = compiled.1 {
         // Link with the c standard library
+        let stderr =
         Command::new("clang").args(["bin/print.o",
                                     "bin/str.o",
                                     &format!("bin/lib{}.o", args.lib),
@@ -57,7 +59,10 @@ fn main() {
                                     "-o",
                                     &format!("bin/{}", args.lib)])
                              .output()
-                             .unwrap();
+                             .unwrap()
+                             .stderr;
+
+        println!("{}", unsafe { String::from_utf8_unchecked(stderr) });
 
         Command::new(&format!("bin/{}", args.lib)).spawn().unwrap();
     }

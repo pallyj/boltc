@@ -19,6 +19,11 @@ fileprivate func printBool(n: i1)
 
 fileprivate func printString(string: strslice)
 
+internal func readInternalInt(): i64
+internal func readInternalUInt(): i64
+//internal func readInternalDouble(): f64
+internal func readInternalChar(): i32
+
 public func printLine()
 
 public func print(b: Bool, newline newline: Bool) {

@@ -78,15 +78,15 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 	{
 		cases.items()
 			 .map(|item| {
-				      let associated_types = if let Some(associated_types) = item.associated_types() {
+				      let (associated_types, labels) = if let Some(associated_types) = item.associated_types() {
 					      associated_types
-						      .map(|typ| self.lower_type(typ))
-						      .collect()
+						      .map(|typ| (self.lower_type(typ.typ()), typ.label()))
+						      .unzip()
 					  } else {
-						  vec![]
+						  (vec![], vec![])
 					  };
 					      
-				      Case::new(item.name(), associated_types)
+				      Case::new(item.name(), associated_types, labels)
 				  })
 			 .collect()
 	}

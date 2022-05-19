@@ -115,10 +115,6 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                     r#struct.add_type(name, visibility, aliased.kind);
                 }
 
-                StructItem::EnumDef(enum_def) => {
-
-                }
-
                 StructItem::NoOp(_) => {}
 
                 StructItem::Error => panic!(),

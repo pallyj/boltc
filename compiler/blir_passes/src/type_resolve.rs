@@ -370,7 +370,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 }
             }
 
-            TypeKind::Tuple(tuple_items) => {
+            TypeKind::Tuple(tuple_items, _) => {
                 for item in tuple_items {
                     self.resolve_type(item, scope);
                 }
@@ -547,7 +547,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 let mangled_bind_name = scope.define_variable(name, pattern.match_type.clone());
                 *name = mangled_bind_name;
             }
-            PatternKind::Tuple { items } |
+            PatternKind::Tuple { items, .. } |
             PatternKind::Variant { items, .. } => {
                 items
                     .iter_mut()

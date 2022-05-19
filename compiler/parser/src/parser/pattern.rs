@@ -48,13 +48,13 @@ impl<'input, 'l> Parser<'input, 'l> {
 			}
 
 			if self.check(SyntaxKind::OpenParen) {
-				self.parse_paren_comma_seq(Self::parse_pattern);
+				self.parse_paren_comma_seq(Self::parse_pattern_tuple);
 			}
 
 			pattern.complete(self, SyntaxKind::VariantPattern);
 		}
 		else if self.check(SyntaxKind::OpenParen) {
-			self.parse_paren_comma_seq(Self::parse_pattern);
+			self.parse_paren_comma_seq(Self::parse_pattern_tuple);
 
 			pattern.complete(self, SyntaxKind::TuplePattern);
 		}
@@ -63,4 +63,17 @@ impl<'input, 'l> Parser<'input, 'l> {
 			pattern.complete(self, SyntaxKind::Error);
 		}
 	}
+
+	fn parse_pattern_tuple(&mut self) {
+        let marker = self.start();
+
+        if self.check(SyntaxKind::Ident) && self.check_ahead(1, SyntaxKind::Colon) {
+            self.eat(SyntaxKind::Ident);
+            self.eat(SyntaxKind::Colon);
+        }
+
+        self.parse_pattern();
+
+        marker.complete(self, SyntaxKind::FuncArg);
+    }
 }

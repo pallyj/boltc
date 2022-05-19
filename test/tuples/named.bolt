@@ -1,0 +1,25 @@
+@entryPoint
+func main() {
+	let $0 = (5, 5)
+	let $1 = (a: 5, 5)
+	let $2 = (5, b: 5)
+	let $3: (a: Int, b: Int) = (5, 5)
+	let $4: (a: Int, b: Int) = (a: 5, 5)
+	let $5: (a: Int, b: Int) = (a: 5, b: 5)
+	let $6: (Int, Int) = (a: 5, b: 5)
+	// let $7: (left: Int, right: Int) = (a: 5, b: 5)
+
+	match (left: 10, right: 20) {
+		(right: 20, left: _) => print("Right!"),
+		n => {
+			print("Wrong")
+			print(n.left)
+			print(n.right)
+		}
+	}
+}
+
+func printInts(ints: (a: Int, b: Int)) {
+	print(ints.a)
+	print(ints.b)
+}

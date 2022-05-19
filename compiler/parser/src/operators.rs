@@ -25,9 +25,9 @@ pub enum OperatorPrecedence {
     Multiplicative = 700,
     Additive       = 600,
     Secondary      = 500,
-    And            = 400,
-    Or             = 300,
-    Comparison     = 200,
+    Comparison     = 400,
+    And            = 300,
+    Or             = 200,
     Assignment     = 100,
     None           = 0,
 }

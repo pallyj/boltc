@@ -64,3 +64,24 @@ void printString(strslice_t slice) {
 void printLine() {
 	printf("\n");
 }
+
+long readInternalInt() {
+	long integerRead;
+	scanf("%ld", &integerRead);
+
+	return integerRead;
+}
+
+unsigned long readInternalUInt() {
+	long integerRead;
+	scanf("%lu", &integerRead);
+
+	return integerRead;
+}
+
+unsigned int readInternalChar() {
+	unsigned int readChar;
+	scanf("%c", (char*)&readChar);
+
+	return readChar;
+}

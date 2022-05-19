@@ -48,7 +48,7 @@ pub enum TypeKind {
     },
     Struct(StructRef),
     Enum(EnumRef),
-    Tuple(Vec<Type>),
+    Tuple(Vec<Type>, Vec<Option<String>>),
 
     SomeInteger,
     SomeFloat,
@@ -121,7 +121,15 @@ impl Type {
         match &self.kind {
             TypeKind::Metatype(ty) => ty.clone().lookup_static_item(named),
             TypeKind::Struct(r#struct) => r#struct.lookup_instance_item(named, scope),
-            TypeKind::Tuple(items) => {
+            TypeKind::Tuple(items, labels) => {
+                for (i, label) in labels.iter().enumerate() {
+                    if let Some(label) = label {
+                        if label == named {
+                            return Some(Symbol::TupleField(items[i].clone(), i))
+                        }
+                    }
+                }
+
                 if !named.starts_with("item") {
                     return None
                 }
@@ -187,7 +195,7 @@ impl Type {
 
             TypeKind::StrSlice => MangledType::StringSlice,
 
-            TypeKind::Tuple(types) => MangledType::Tuple(types.iter().map(Self::mangle).collect()),
+            TypeKind::Tuple(types, _) => MangledType::Tuple(types.iter().map(Self::mangle).collect()),
 
             _ => panic!(),
         }
@@ -233,9 +241,9 @@ impl Debug for Type {
 
                 write!(f, "func ({params}): {return_type:?}")
             }
-            TypeKind::Tuple(tuple_items) => {
-                let tuple_items = tuple_items.iter()
-                                .map(|par| format!("{par:?}"))
+            TypeKind::Tuple(tuple_items, labels) => {
+                let tuple_items = tuple_items.iter().zip(labels)
+                                .map(|(par, label)| if let Some(label) = label { format!("{label}: {par:?}") } else { format!("{par:?}") } )
                                 .collect::<Vec<_>>()
                                 .join(", ");
 

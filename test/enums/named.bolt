@@ -1,0 +1,21 @@
+enum Shape {
+	case circle(radius: Double)
+	case rectangle(width: Double, height: Double)
+}
+
+@entryPoint
+func main() {
+	let _circle: Shape = .circle(radius: 1.0)
+	let _rect: Shape = .rectangle(width: 2.0, height: 2.0)
+
+	match _rect {
+		.circle(radius) => {
+			let a: Double = radius * radius;
+			print(a * 3.14)
+		}
+		.rectangle(width, height) => {
+			print(width * height)
+		}
+		_ => {}
+	}
+}

@@ -116,8 +116,8 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                     function.set_kind(enum_variant_value);
 
                     let function_type = TypeKind::Function { return_type: Box::new(value.typ.clone()),
-                                                            params: variant.associated_types().clone(),
-                                                            labels: vec![] };
+                                                             params: variant.associated_types().clone(),
+                                                             labels: variant.labels().clone() };
 
                     function.set_type(function_type.anon());
                 }
@@ -248,12 +248,12 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
         self.replace_type(pattern.match_type_mut(), &Some(span));
         match &mut pattern.kind {
             PatternKind::Literal { value } => self.replace_value(value, scope),
-            PatternKind::Tuple { items } => {
+            PatternKind::Tuple { items, .. } => {
                 for i in items {
                     self.replace_pattern(i, scope);
                 }
             }
-            PatternKind::Variant { variant, items } => {
+            PatternKind::Variant { variant, items, .. } => {
                 self.replace_value(variant, scope);
                 for i in items {
                     self.replace_pattern(i, scope);
@@ -407,7 +407,7 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 }
             }
 
-            TypeKind::Tuple(tuple_items) => {
+            TypeKind::Tuple(tuple_items, ..) => {
                 for tuple_item in tuple_items {
                     self.replace_type(tuple_item, span);
                 }
@@ -449,7 +449,7 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                                                                                 params:      params.clone(),
                                                                                 labels:      labels.clone(), }),
 
-            TypeVariant::Tuple(tuple_items) => Some(TypeKind::Tuple(tuple_items.clone())),
+            TypeVariant::Tuple(tuple_items, labels) => Some(TypeKind::Tuple(tuple_items.clone(), labels.clone())),
 
             _ => None,
         }

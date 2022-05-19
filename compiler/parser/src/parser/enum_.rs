@@ -71,7 +71,7 @@ impl<'input, 'l> Parser<'input, 'l> {
         self.eat(SyntaxKind::Ident);
 
         if self.check(SyntaxKind::OpenParen) {
-            self.parse_paren_comma_seq(Self::parse_ty);
+            self.parse_paren_comma_seq(Self::parse_ty_tuple);
         }
 
 		marker.complete(self, SyntaxKind::CaseItem);

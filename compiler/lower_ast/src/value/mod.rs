@@ -22,10 +22,13 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                                                                     member: member_expr.child().unwrap(), }.spanned_infer(span),
 
             AstExpr::TupleExpr(tuple_expr) => {
-                let tuple_items = tuple_expr.items().map(|item| self.lower_expr(item)).collect::<Vec<_>>();
+                let (tuple_items, labels): (Vec<_>, Vec<_>) =
+                    tuple_expr.items()
+                              .map(|item| (self.lower_expr(item.expr()), item.label()))
+                              .unzip();
 
                 let infer_items = (0..tuple_items.len()).map(|_| Type::infer()).collect();
-                let tuple_type = TypeKind::Tuple(infer_items).anon();
+                let tuple_type = TypeKind::Tuple(infer_items, labels).anon();
 
                 ValueKind::Tuple(tuple_items).spanned(tuple_type, span)
             }
