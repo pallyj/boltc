@@ -4,7 +4,7 @@ use super::{attribute::Attributes,
             alias::TypeAlias,
             file::NoOp,
             func::FuncDef,
-            var::{LetDef, VariableDef}, find_token, typ::Type};
+            var::{LetDef, VariableDef}, find_token, typ::Type, expr::Expr};
 use crate::lexer::SyntaxKind;
 
 // Struct 0.3
@@ -156,11 +156,30 @@ impl CaseItem {
                 .filter_map(TupleMember::cast)
         )
     }
+
+    pub fn value(&self) -> Option<Expr> {
+        self.0
+            .children()
+            .find(|child| child.kind() == SyntaxKind::AssignValue)
+            .unwrap()
+            .first_child()
+            .map(Expr::cast)
+    }
 }
 
 impl Debug for CaseItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.name())
+        write!(f, "{}", self.name())?;
+        if let Some(assoc) = self.associated_types() {
+            let items = assoc.map(|item| format!("{item:?}")).collect::<Vec<_>>().join(", ");
+
+            write!(f, "({items})")?;
+        }
+        if let Some(value) = self.value() {
+            write!(f, " = {value:?}")?;
+        }
+
+        Ok(())
     }
 }
 

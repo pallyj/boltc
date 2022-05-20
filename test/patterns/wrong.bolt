@@ -1,0 +1,16 @@
+enum Test {
+	case circle(radius: Float)
+	case square(side: Float)
+}
+
+@entryPoint
+func main() {
+	let circle: Test = .circle(radius: 5.0)
+	let square = Test.square(side: 1.0)
+
+	match circle {
+		.circle(n) => print(n),
+		.square(n) => print(n),
+		_ => print("Exhaustive")
+	}
+}

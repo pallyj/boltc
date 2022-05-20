@@ -24,7 +24,7 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
 
             ValueKind::LocalVariable(local_var_name) => {
                 if self.context.lookup_var(local_var_name).is_none() {
-                    println!("{local_var_name}");
+                    println!("compiler error: {local_var_name} not found");
                 }
                 self.context.lookup_var(local_var_name).cloned().unwrap()
             }
@@ -71,11 +71,6 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
             }
 
             _ => {
-                if let ValueKind::Polymorphic(pmf) = &value.kind {
-                    for possibility in pmf.open_possibilities() {
-                        println!("{possibility:?}");
-                    }
-                }
                 panic!("{value:?}")
             }
         }
@@ -114,8 +109,7 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
 
     fn lower_assign(&mut self, ptr: &Value, val: &Value) -> LabelValue {
         let Some(ptr) = self.lower_pvalue(ptr) else {
-            println!("Can't assign to {ptr:?}");
-            return LabelValue::void()
+            panic!("compiler error: can't assign to {ptr:?}");
         };
         let val = self.lower_value(val);
         self.builder().build_assign_ptr(ptr, val);

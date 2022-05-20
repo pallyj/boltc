@@ -6,12 +6,14 @@ Bolt is a powerful coding language designed for expressiveness and speed. Bolt c
 
 - immutable variables
 - integer, float, and string types
-- functions-as-values
+- first-class functions
 - algebraic data structures
 - overridable operators
-- pattern matching expression
+- pattern matching
 - closures
 - tuples
+
+Check out the [wiki](https://github.com/pallyj/boltc/wiki) for more details!
 
 The Bolt Language focuses on
 
@@ -53,23 +55,25 @@ First, compile the standard library. Run std/compile.sh and libprint.o will be a
 With the standard library compiled, a test program can be run with
 
 ```
-cargo run -- examples/factorial/bolt/main.bolt --lib=test
+cargo run -- examples/factorial/bolt/main.bolt --lib=factorial
 ```
 
 ## Development
 
-### Bolt 0.5
+### Bolt 0.5 [ Current Version ]
 
 - Patterns
 - Match
 - Enums
 - Strings
+- Chars
 - Tuples
+- Type Aliases
 - Compiler plugins
 - Documentation
 - Web Playground
 
-### Bolt 0.4 [Current Version]
+### Bolt 0.4
 
 - Operators
 - Polymorphism

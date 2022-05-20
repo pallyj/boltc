@@ -68,11 +68,19 @@ impl<'input, 'l> Parser<'input, 'l> {
 		debug_assert!(self.check(SyntaxKind::Ident));
 
 		let marker = self.start();
-        self.eat(SyntaxKind::Ident);
+        if !self.eat(SyntaxKind::Ident) {
+            self.error("Expected ident")
+        }
 
         if self.check(SyntaxKind::OpenParen) {
             self.parse_paren_comma_seq(Self::parse_ty_tuple);
         }
+
+        let marker2 = self.start();
+        if self.eat(SyntaxKind::Equals) {
+            self.parse_expr();
+        }
+        marker2.complete(self, SyntaxKind::AssignValue);
 
 		marker.complete(self, SyntaxKind::CaseItem);
 	}

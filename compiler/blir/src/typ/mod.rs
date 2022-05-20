@@ -233,9 +233,13 @@ impl Debug for Type {
             TypeKind::Void => write!(f, "()"),
             TypeKind::Function { return_type,
                                  params,
-                                 labels: _, } => {
-                let params = params.iter()
-                                   .map(|par| format!("{par:?}"))
+                                 labels, } => {
+                let params = params.iter().zip(labels)
+                                   .map(|(par, label)| if let Some(label) = label {
+                                       format!("{label}: {par:?}")
+                                   } else {
+                                       format!("{par:?}")
+                                   })
                                    .collect::<Vec<_>>()
                                    .join(", ");
 

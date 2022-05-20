@@ -1,5 +1,7 @@
 import intrinsics
 
+public typealias String = StringSlice
+
 @defaultStringRepr
 @transparent
 public struct StringSlice {

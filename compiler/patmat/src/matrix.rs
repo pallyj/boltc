@@ -205,9 +205,11 @@ fn cast_enum_to_variant(value: &Value, variant: &CaseRef) -> Value {
 }
 
 fn split_pattern(pattern: Pattern, tuple_types: &[Type]) -> Vec<Pattern> {
+	let span = pattern.span;
+
 	if pattern.matches_any() {
 		return tuple_types.iter()
-				   		  .map(|ty| PatternKind::Wildcard.with_type(ty.clone()))
+				   		  .map(|ty| PatternKind::Wildcard.with(span, ty.clone()))
 						  .collect()
 	}
 
@@ -227,7 +229,7 @@ fn split_pattern(pattern: Pattern, tuple_types: &[Type]) -> Vec<Pattern> {
 			
 			let variant_value = ValueKind::EnumVariant { of_enum: enum_ref.clone(),
 														 variant: variant.clone() }.anon(pattern.match_type.clone());
-			let variant_pattern = PatternKind::Literal { value: variant_value }.with_type(pattern.match_type.clone());
+			let variant_pattern = PatternKind::Literal { value: variant_value }.with(pattern.span, pattern.match_type.clone());
 
 			std::iter::once(variant_pattern).chain(
 				filtered_variants
@@ -239,7 +241,7 @@ fn split_pattern(pattern: Pattern, tuple_types: &[Type]) -> Vec<Pattern> {
 							PatternKind::Tuple { items: items, labels }
 						} else {
 							PatternKind::Wildcard
-						}.with_type(variant_ty.clone())
+						}.with(pattern.span, variant_ty.clone())
 					}))
 				.collect()
 		},
@@ -250,12 +252,12 @@ fn split_pattern(pattern: Pattern, tuple_types: &[Type]) -> Vec<Pattern> {
 				tuple_types
 					.iter()
 					.skip(1)
-					   .map(|ty| PatternKind::Wildcard.with_type(ty.clone())))
+					   .map(|ty| PatternKind::Wildcard.with(span, ty.clone())))
 				.collect()
 		}
 		_ => {
 			tuple_types.iter()
-				   	   .map(|ty| PatternKind::Wildcard.with_type(ty.clone()))
+				   	   .map(|ty| PatternKind::Wildcard.with(pattern.span, ty.clone()))
 					   .collect()
 		}
 	}

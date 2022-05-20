@@ -1,6 +1,7 @@
-use blir::{scope::ScopeRef, typ::{Enum, EnumRef, Case, CaseRef, TypeKind}};
+use blir::{scope::ScopeRef, typ::{Enum, EnumRef, Case, CaseRef, TypeKind}, value::{Value, ValueKind}};
+use errors::error::ErrorCode;
 use mangle::Path;
-use parser::ast::containers::{EnumDef, EnumItem, CaseDef};
+use parser::ast::{containers::{EnumDef, EnumItem, CaseDef}};
 
 use crate::AstLowerer;
 
@@ -73,7 +74,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 	}
 
 	pub fn lower_cases(
-		&self,
+		&mut self,
 		cases: CaseDef) -> Vec<CaseRef>
 	{
 		cases.items()
@@ -85,9 +86,56 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 					  } else {
 						  (vec![], vec![])
 					  };
+
+					  let span = self.span(item.range());
 					      
-				      Case::new(item.name(), associated_types, labels)
+				      let case = Case::new(item.name(), associated_types, labels, span);
+
+					  if let Some(const_value) = item.value() {
+						  let value = self.lower_expr(const_value);
+
+						  let integer_value = Self::change_to_u64(self.lower_integer(&value));
+
+						  case.set_tag(integer_value as usize);
+					  }
+
+					  case
 				  })
 			 .collect()
+	}
+
+	fn change_to_u64(value: (bool, u64)) -> u64 {
+		if value.0 {
+			0 - value.1
+		} else {
+			value.1
+		}
+	}
+
+	fn lower_integer(
+		&mut self,
+		value: &Value) -> (bool, u64)
+	{
+		match &value.kind {
+			ValueKind::IntLiteral(value) => (false, *value),
+			ValueKind::FuncCall { function, args } => match &function.kind {
+				ValueKind::Operator(op_name) if op_name == "negate" => {
+					let inner = self.lower_integer(&args.args[0]);
+
+					(!inner.0, inner.1)
+				}
+				ValueKind::Operator(op_name) if op_name == "unit" => {
+					self.lower_integer(&args.args[0])
+				}
+				_ => {
+					self.debugger.throw_single(ErrorCode::WrongIntegerLiteral, &value.span);
+					(false, 0)
+				}
+			}
+			_ => {
+				self.debugger.throw_single(ErrorCode::WrongIntegerLiteral, &value.span);
+				(false, 0)
+			}
+		}
 	}
 }

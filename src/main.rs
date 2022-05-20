@@ -6,6 +6,7 @@ use args::Args;
 use blir::{BlirContext, Library};
 use clap::StructOpt;
 use codegen::config::{BuildConfig, BuildOutput, BuildProfile};
+use colored::Colorize;
 use errors::{debugger::Debugger, fileinterner::FileInterner};
 use lower_ast::AstLowerer;
 use lower_blir::BlirLowerer;
@@ -62,9 +63,11 @@ fn main() {
                              .unwrap()
                              .stderr;
 
-        println!("{}", unsafe { String::from_utf8_unchecked(stderr) });
-
-        Command::new(&format!("bin/{}", args.lib)).spawn().unwrap();
+        if stderr.is_empty() {
+            Command::new(&format!("bin/{}", args.lib)).spawn().unwrap();
+        } else {
+            println!("{} {}", "error:".red().bold(), unsafe { String::from_utf8_unchecked(stderr) });
+        }
     }
 }
 
@@ -127,7 +130,7 @@ impl Project {
                                              &mut context,
                                              &mut debugger).run_pass(self.library.as_mut().unwrap());
 
-        println!("{:?}", self.library.as_ref().unwrap());
+        //println!("{:?}", self.library.as_ref().unwrap());
 
         if debugger.has_errors() {
             return (false, None);

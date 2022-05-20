@@ -62,7 +62,7 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                     _ => return,
                 };
 
-                println!("Polymorph with {}", monomorphizer.degrees());
+                //println!("Polymorph with {}", monomorphizer.degrees());
 
                 if let Some(resolved_function) = monomorphizer.resolve() {
                     self.replace_function(value, resolved_function);
@@ -142,6 +142,20 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 }
 
                 self.replace_value(function, scope);
+
+                let params = match function.typ.kind_mut() {
+                    TypeKind::Function { params, .. } => params,
+                    TypeKind::Method { params, .. } => params,
+                    _ => return,
+                };
+
+                for (arg, param) in args.args.iter_mut().zip(params) {
+                    self.meet_types(param, &mut arg.typ);
+
+                    self.replace_value(arg, scope);
+                    let span = param.span;
+                    self.replace_type(param, &span);
+                }
 
                 let return_type = match function.typ.kind() {
                                       TypeKind::Function { return_type, .. } => return_type,
@@ -385,7 +399,7 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 
                     let function_type = TypeKind::Function { return_type: Box::new(enum_type),
                                                              params: case_ref.associated_types().clone(),
-                                                             labels: vec![] };
+                                                             labels: case_ref.labels().clone() };
 
                     value.set_type(function_type.anon());
                     value.set_kind(ValueKind::EnumVariant { of_enum: enum_ref.clone(), variant: case_ref });

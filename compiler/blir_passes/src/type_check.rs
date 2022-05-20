@@ -3,14 +3,13 @@ use std::cmp::Ordering;
 use blir::{code::{CodeBlock, FunctionRef, MethodRef, Statement, StatementKind},
            typ::{StructRef, Type, TypeKind, EnumRef},
            value::{ConstantRef, IfBranch, IfValue, Value, ValueKind, VarRef},
-           Library, Monomorphizer};
+           Library, Monomorphizer, pattern::{Pattern, PatternKind}};
 use errors::{debugger::Debugger, error::ErrorCode, Span};
 
 pub struct TypeCheckPass<'a, 'b> {
     debugger: &'a mut Debugger<'b>,
 }
 
-// TODO: Error for non-existant attributes
 impl<'a, 'b> TypeCheckPass<'a, 'b> {
     pub fn new(debugger: &'a mut Debugger<'b>) -> Self { Self { debugger } }
 
@@ -122,6 +121,8 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
             StatementKind::Eval { value, .. } => self.check_value(value, return_type),
             StatementKind::Bind { typ, value, .. } => {
                 let Some(value) = value else { return };
+                
+                self.check_value(value, return_type);
 
                 if let Err(error) = self.check_type(typ, &value.typ) {
                     self.handle_let_error(error, statement);
@@ -129,6 +130,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
             }
             StatementKind::Return { value } => {
                 let check_result = if let Some(value) = value {
+                    self.check_value(value, return_type);
                     self.check_type(return_type, &value.typ)
                 } else {
                     self.check_type(return_type, &TypeKind::Void.anon())
@@ -182,8 +184,20 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 self.check_value(function, return_type);
 
                 let params = match &function.typ.kind {
-                    TypeKind::Function { params, .. } => params,
-                    TypeKind::Method { params, .. } => params,
+                    TypeKind::Function { params, labels, .. } => {
+                        for (i, (label1, label2)) in labels.iter().zip(&args.labels).enumerate() {
+                            if label1 != label2 {
+                                let label1 = label1.clone().unwrap_or_else(|| "_".to_string());
+                                let label2 = label2.clone().unwrap_or_else(|| "_".to_string());
+                                // Throw an error
+                                self.debugger.throw_single(ErrorCode::ExpectedFound(label1, label2), &args.args[i].span);
+                            }
+                        }
+                        params
+                    },
+                    TypeKind::Method { params, .. } => {
+                        params
+                    },
                     _ => {
                         self.debugger
                             .throw_single(ErrorCode::IsNotAFunc, &value.span);
@@ -241,18 +255,69 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 let scrut_ty = &match_value.discriminant.typ;
 
                 // Check that scrut_ty can be matched
-                // TODO: Throw an error for this
                 for arm in &match_value.branches {
-                    let _ = self.check_codeblock(&arm.code, &value.typ, return_type);
-
-                    match self.check_type(scrut_ty, &arm.pattern.match_type) {
-                        Err(e) => self.handle_var_error(e, &arm.pattern.span),
+                    match self.check_codeblock(&arm.code, &value.typ, return_type) {
+                        Err(e) => self.handle_return_yield_error(e, &arm.code.typ().span),
                         _ => {}
-                    }
+                    };
+
+                    self.check_pattern(scrut_ty, &arm.pattern);
                 }
             }
 
             _ => { /* Do nothing */ }
+        }
+    }
+
+    fn check_pattern(&mut self, ty: &Type, pattern: &Pattern) {
+        match &pattern.kind {
+            PatternKind::Variant { variant: Value { kind: ValueKind::EnumVariant { variant, .. }, .. }, items, labels } => {
+                let assoc = variant.associated_types();
+                let variant_labels = variant.labels();
+
+                // Test the lengths
+                // Test the labels
+                // Check each pattern
+                if assoc.len() != variant_labels.len() ||
+                    items.len() != labels.len() ||
+                    assoc.len() != items.len() {
+                    self.debugger
+                        .throw(ErrorCode::AmbiguousTy, vec![ pattern.span ]);
+                }
+
+                for ((ty1, label1), (pat, pat_label)) in
+                    assoc.iter()
+                         .zip(variant_labels.iter())
+                         .zip(items.iter().zip(labels.iter()))
+                {
+                    self.check_pattern(ty1, pat);
+
+                    if let (Some(label1), Some(label2)) = (label1, pat_label) {
+                        if label1 != label2 {
+                            self.debugger.throw_single(ErrorCode::ExpectedFound(label1.clone(), label2.clone()), &Some(pat.span));
+                        }
+                    }
+                }
+            }
+            PatternKind::Literal { value } => {
+                match value.typ.kind() {
+                    TypeKind::Float { .. } => {
+                        self.debugger.throw_single(ErrorCode::CantMatchFloat, &value.span);
+                    }
+                    TypeKind::Struct(struct_ref) => {
+                        if struct_ref.float_repr() {
+                            self.debugger.throw_single(ErrorCode::CantMatchFloat, &value.span);
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            _ => {}
+        }
+
+        match self.check_type(&ty, &pattern.match_type) {
+            Err(e) => self.handle_var_error(e, &pattern.span),
+            _ => {}
         }
     }
 
@@ -310,7 +375,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
             (TypeKind::Tuple(types1, labels1), TypeKind::Tuple(types2, labels2)) => {
                 if types1.len() != labels1.len() ||
                    types2.len() != labels2.len() ||
-                   types1.len() != labels1.len() {
+                   types1.len() != types2.len() {
                     return Err(TypeCheckError::MismatchedTypes(place.clone(), value.clone()))
                 }
 

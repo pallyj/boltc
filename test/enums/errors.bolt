@@ -1,0 +1,5 @@
+enum Animal: StringSlice {
+	case dog
+	case cat
+	case bird = 1
+}

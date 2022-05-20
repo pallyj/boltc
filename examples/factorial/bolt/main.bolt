@@ -1,9 +1,6 @@
-let base = 0
-let iterations = 10
-
 @entryPoint
 func main() {
-	for (0..<iterations) {
+	for (0..<5) {
         print(factorial(it % 20))
 	}
 }

@@ -22,11 +22,15 @@ pub enum PatternKind {
 
 impl PatternKind {
 	pub fn with_span(self, span: Span) -> Pattern {
-		Pattern { kind: self, span, match_type: Type::infer() }
+		Pattern { kind: self, span, match_type: Type::infer().kind.spanned(span) }
 	}
 
-	pub fn with_type(self, ty: Type) -> Pattern {
+	/*pub fn with_type(self, ty: Type) -> Pattern {
 		Pattern { kind: self, span: Span::empty(), match_type: ty }
+	}*/
+
+	pub fn with(self, span: Span, ty: Type) -> Pattern {
+		Pattern { kind: self, span, match_type: ty.kind.spanned(span) }
 	}
 }
 

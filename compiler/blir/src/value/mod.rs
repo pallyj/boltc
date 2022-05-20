@@ -107,16 +107,18 @@ impl ValueKind {
                 typ:  Type::infer(), }
     }
 
-    pub fn spanned(self, typ: Type, span: Span) -> Value {
+    pub fn spanned(self, mut typ: Type, span: Span) -> Value {
+        typ.span = Some(span);
         Value { kind: self,
                 span: Some(span),
                 typ }
     }
 
     pub fn spanned_infer(self, span: Span) -> Value {
+        let infer = Type::infer().kind;
         Value { kind: self,
                 span: Some(span),
-                typ:  Type::infer(), }
+                typ:  infer.spanned(span), }
     }
 }
 
@@ -140,7 +142,7 @@ impl DerefMut for Value {
 impl Value {
     pub fn set_kind(&mut self, kind: ValueKind) { self.kind = kind; }
 
-    pub fn set_type(&mut self, typ: Type) { self.typ = typ; }
+    pub fn set_type(&mut self, mut typ: Type) { typ.span = self.span; self.typ = typ; }
 }
 
 #[derive(Clone)]

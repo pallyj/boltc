@@ -1,5 +1,7 @@
 use std::{sync::Arc, ops::Deref, cell::{Cell, RefCell, Ref, RefMut}};
 
+use errors::Span;
+
 use super::Type;
 
 #[derive(Clone)]
@@ -7,16 +9,18 @@ pub struct Case {
 	name: String,
 	tag: Cell<Option<usize>>,
 	associated: RefCell<Vec<Type>>,
-	labels: Vec<Option<String>>
+	labels: Vec<Option<String>>,
+	span: Span
 }
 
 impl Case {
-	pub fn new(name: String, associated: Vec<Type>, labels: Vec<Option<String>>) -> CaseRef {
+	pub fn new(name: String, associated: Vec<Type>, labels: Vec<Option<String>>, span: Span) -> CaseRef {
 		CaseRef {
 			case_ref: Arc::new(Case { name,
 							   tag: Cell::new(None),
 							   associated: RefCell::new(associated),
-							   labels })
+							   labels,
+							   span })
 		}
 	}
 
@@ -26,6 +30,10 @@ impl Case {
 
 	pub fn tag(&self) -> usize {
 		self.tag.get().unwrap()
+	}
+
+	pub fn has_tag(&self) -> bool {
+		self.tag.get().is_some()
 	}
 
 	pub fn set_tag(&self, val: usize) {
@@ -42,6 +50,10 @@ impl Case {
 
 	pub fn labels(&self) -> &Vec<Option<String>> {
 		&self.labels
+	}
+
+	pub fn span(&self) -> Span {
+		self.span
 	}
 }
 
@@ -63,9 +75,12 @@ impl std::fmt::Debug for CaseRef {
 		if self.associated_types().len() == 0 {
         	write!(f, "case {} = {}", self.name(), self.tag())
 		} else {
-			let assoc_ty = self.associated_types()
-				.iter()
-				.map(|ty| format!("{ty:?}"))
+			let assoc_ty = self.labels().iter().zip(self.associated_types().iter())
+				.map(|(label, ty)| if let Some(label) = label {
+					format!("{label}: {ty:?}")
+				} else {
+					format!("{ty:?}")
+				})
 				.collect::<Vec<_>>()
 				.join(", ");
 			write!(f, "case {}({assoc_ty}) = {}", self.name(), self.tag())

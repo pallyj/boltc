@@ -35,6 +35,13 @@ pub enum ErrorCode {
     OperatorNotDefined(String, String),
 
     OperatorExpectedParams(String, usize),
+
+    WrongIntegerLiteral,
+
+    TagAlreadyUsed(usize),
+
+    TypeCannotBackEnum(String),
+    CantMatchFloat,
 }
 
 impl ErrorCode {
@@ -63,6 +70,10 @@ impl ErrorCode {
             ErrorCode::OperatorDNE(name) => format!("operator `{name}` is not defined"),
             ErrorCode::OperatorNotDefined(operator, typ) => format!("operator `{operator}` is not defined on {typ}",),
             ErrorCode::OperatorExpectedParams(name, n_params) => format!("operator {name} takes {n_params} parameter"),
+            ErrorCode::WrongIntegerLiteral => format!("only integer literals and operators (+/-) are allowed in constants"),
+            ErrorCode::TagAlreadyUsed(tag) => format!("tag {tag} has already been used"),
+            ErrorCode::TypeCannotBackEnum(typ) => format!("type {typ} cannot be used to back an enum"),
+            ErrorCode::CantMatchFloat => format!("can't match against float"),
         }
     }
 }

@@ -1,4 +1,4 @@
-use blir::{pattern::{Pattern, PatternKind}, value::ValueKind};
+use blir::{pattern::{Pattern, PatternKind}, value::ValueKind, typ::TypeKind};
 use parser::ast::pattern::Pattern as AstPattern;
 
 use crate::AstLowerer;
@@ -19,7 +19,8 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 					.spanned_infer(span);
 
 				if let Some(assoc) = variant.associated_patterns() {
-					let (items, labels) = assoc.map(|pat| (self.lower_pattern(pat.pattern()), pat.label()))
+					let (items, labels) = assoc.map(|pat| (self.
+						lower_pattern(pat.pattern()), pat.label()))
 											   .unzip();
 					
 					PatternKind::Variant { variant: value, items, labels }
@@ -28,12 +29,21 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 				}
 			}
 			AstPattern::TuplePattern(tuple_pat) => {
-				let (sub_patterns, labels) = tuple_pat
+				let (sub_patterns, labels): (Vec<_>, Vec<_>) = tuple_pat
 					.tuple_items()
-					.map(|tuple_item| (self.lower_pattern(tuple_item.pattern()), tuple_item.label()) )
+					.map(|tuple_item| {
+						let pattern = self.lower_pattern(tuple_item.pattern());
+						(pattern, tuple_item.label())
+					})
 					.unzip();
 
-				PatternKind::Tuple { items: sub_patterns, labels }
+				let types = sub_patterns.iter()
+									    .map(|pat| pat.match_type().clone())
+										.collect::<Vec<_>>();
+
+				let tuple_type = TypeKind::Tuple(types, labels.clone()).spanned(span);
+
+				return PatternKind::Tuple { items: sub_patterns, labels }.with(span, tuple_type);
 			}
 			AstPattern::BindPattern(bind_pattern) => {
 				PatternKind::Bind(bind_pattern.bind_name())

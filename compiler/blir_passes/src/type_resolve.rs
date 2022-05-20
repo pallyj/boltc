@@ -1,3 +1,5 @@
+use std::collections::{HashMap};
+
 use blir::{attributes::AttributeFactory,
            code::{CodeBlock, ExternFunctionRef, FunctionRef, MethodRef, Statement, StatementKind},
            scope::{ScopeRef, ScopeRelation, ScopeType},
@@ -121,14 +123,34 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
         let scope = r#enum.scope();
         let mut tag_counter = 0;
 
+        let mut used_tags: HashMap<usize, Vec<errors::Span>> = HashMap::new();
+
         for variant in r#enum.variants().iter() {
+            if variant.has_tag() {
+                tag_counter = variant.tag();
+            }
+
             variant.set_tag(tag_counter);
+
+            if used_tags.contains_key(&tag_counter) {
+                used_tags.get_mut(&tag_counter)
+                         .unwrap()
+                         .push(variant.span());
+            } else {
+                let _ = used_tags.insert(tag_counter, vec![variant.span()]);
+            }
 
             tag_counter += 1;
 
             variant.associated_types_mut()
                    .iter_mut()
                    .for_each(|typ| self.resolve_type(typ, &scope))
+        }
+
+        for (tag, spans) in used_tags {
+            if spans.len() > 1 {
+                self.debugger.throw(ErrorCode::TagAlreadyUsed(tag), spans);
+            }
         }
 
         self.resolve_type(&mut *r#enum.repr_type_mut(), &scope);
@@ -143,7 +165,8 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 r#enum.repr_type_mut().set_kind(integer_type.kind);
             }
             _ => {
-                println!("error: type `{:?}` cannot be used as an enum backing", r#enum.repr_type())
+                let typ = format!("`{:?}`", r#enum.repr_type());
+                self.debugger.throw_single(ErrorCode::TypeCannotBackEnum(typ), &r#enum.repr_type().span());
             }
         }
 
@@ -449,8 +472,8 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                     Symbol::Constant(constant) => {
                         let constant_value = constant.borrow().value.clone();
 
-                        value.set_kind(constant_value.kind);
-                        value.typ = constant_value.typ;
+                        value.set_kind(constant_value.kind); 
+                        value.set_type(constant_value.typ);
                     }
                     
                     Symbol::TupleField(..) => unreachable!(),
