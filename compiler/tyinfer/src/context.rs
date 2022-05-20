@@ -26,24 +26,40 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
     }
 
     pub fn replace<'c>(&'c mut self) -> TypeReplaceContext<'c, 'b> {
-        let Ok(constraint_table) = self.checker.clone().type_check_preliminary() else {
+        let Ok(mut constraint_table) = self.checker.clone().type_check_preliminary() else {
 			panic!()
 		};
 
-        TypeReplaceContext { constraint_table,
-                             infer_keys: &self.infer_keys,
+        let mut infer_table = HashMap::new();
+
+        for (infer_key, tc_key) in &self.infer_keys {
+            if let Some(resolved_type_ptr) = constraint_table.get_mut(&tc_key) {
+                let resolved_type = std::mem::take(&mut resolved_type_ptr.variant);
+                infer_table.insert(*infer_key, resolved_type);
+            }
+        }
+
+        TypeReplaceContext { infer_table,
                              context: self.context,
                              debugger: self.debugger,
                              is_final_run: false }
     }
 
     pub fn finish<'c>(&'c mut self) -> TypeReplaceContext<'c, 'b> {
-        let Ok(constraint_table) = self.checker.clone().type_check_preliminary() else {
+        let Ok(mut constraint_table) = self.checker.clone().type_check_preliminary() else {
 			panic!()
 		};
 
-        TypeReplaceContext { constraint_table,
-                             infer_keys: &self.infer_keys,
+        let mut infer_table = HashMap::new();
+
+        for (infer_key, tc_key) in &self.infer_keys {
+            if let Some(resolved_type_ptr) = constraint_table.get_mut(&tc_key) {
+                let resolved_type = std::mem::take(&mut resolved_type_ptr.variant);
+                infer_table.insert(*infer_key, resolved_type);
+            }
+        }
+
+        TypeReplaceContext { infer_table,
                              context: self.context,
                              debugger: self.debugger,
                              is_final_run: true }
@@ -327,7 +343,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
         let _constraint = if let Some(absolute_key) = self.infer_key(absolute) {
             self.checker.impose(constrain_key.concretizes(absolute_key))
         } else {
-            let bound = self.variant(absolute);
+            let bound = Self::variant(absolute);
 
             self.checker
                 .impose(constrain_key.concretizes_explicit(bound))
@@ -341,11 +357,11 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
         let _constraint = match (self.infer_key(ty1), self.infer_key(ty2)) {
             (Some(key1), Some(key2)) if key1 != key2 => self.checker.impose(key1.equate_with(key2)),
             (Some(key1), None) => {
-                let variant = self.variant(ty2);
+                let variant = Self::variant(ty2);
                 self.checker.impose(key1.concretizes_explicit(variant))
             }
             (None, Some(key2)) => {
-                let variant = self.variant(ty1);
+                let variant = Self::variant(ty1);
                 self.checker.impose(key2.concretizes_explicit(variant))
             }
             (None, None) => {
@@ -381,7 +397,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
         }*/
     }
 
-    fn variant(&self, ty: &Type) -> TypeVariant {
+    pub fn variant(ty: &Type) -> TypeVariant {
         match ty.kind() {
             TypeKind::Divergent => TypeVariant::Diverges,
             TypeKind::Void => TypeVariant::Void,

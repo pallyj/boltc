@@ -123,3 +123,10 @@ impl Constructable for TypeVariant {
 
     fn construct(&self, _children: &[Self::Type]) -> Result<Self::Type, <Self as rusttyc::ContextSensitiveVariant>::Err> { todo!() }
 }
+
+
+impl Default for TypeVariant {
+    fn default() -> Self {
+        Self::Void
+    }
+}

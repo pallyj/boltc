@@ -6,14 +6,12 @@ use blir::{code::{CodeBlock, Statement, StatementKind},
            value::{IfBranch, IfValue, Value, ValueKind},
            BlirContext, SomeFunction, Symbol, pattern::{PatternKind, Pattern}};
 use errors::{debugger::Debugger, error::ErrorCode, Span};
-use rusttyc::{Preliminary, PreliminaryTypeTable, TcKey};
 
-use crate::variant::TypeVariant;
+use crate::{variant::TypeVariant, context::TypeInferContext};
 
 pub struct TypeReplaceContext<'a, 'b> {
-    pub(crate) constraint_table: PreliminaryTypeTable<TypeVariant>,
+    pub(crate) infer_table:      HashMap<u64, TypeVariant>,
     pub(crate) context:          &'a BlirContext,
-    pub(crate) infer_keys:       &'a HashMap<u64, TcKey>,
     pub(crate) debugger:         &'a mut Debugger<'b>,
     pub(crate) is_final_run:     bool,
 }
@@ -38,7 +36,9 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 let span = typ.span();
                 self.replace_type(typ, &span);
                 if let Some(value) = value {
-                    self.replace_value(value, scope)
+                    self.replace_value(value, scope);
+                    self.meet_types(typ, &mut value.typ);
+                    self.replace_type(typ, &span);
                 }
             }
             StatementKind::Return { value } => {
@@ -61,6 +61,8 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                     TypeKind::Method { params, .. } => params,
                     _ => return,
                 };
+
+                println!("Polymorph with {}", monomorphizer.degrees());
 
                 if let Some(resolved_function) = monomorphizer.resolve() {
                     self.replace_function(value, resolved_function);
@@ -115,12 +117,15 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
     
                     function.set_kind(enum_variant_value);
 
+                    // TODO: Add a check for the labels being the same
                     let function_type = TypeKind::Function { return_type: Box::new(value.typ.clone()),
                                                              params: variant.associated_types().clone(),
                                                              labels: variant.labels().clone() };
 
                     function.set_type(function_type.anon());
                 }
+
+                self.replace_value(function, scope);
 
                 let params = match function.typ.kind_mut() {
                     TypeKind::Function { params, .. } => params,
@@ -129,15 +134,11 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 };
 
                 for (arg, param) in args.args.iter_mut().zip(params) {
+                    self.meet_types(param, &mut arg.typ);
+
                     self.replace_value(arg, scope);
                     let span = param.span;
                     self.replace_type(param, &span);
-
-                    // if matches!(param.kind(), TypeKind::Infer { .. }) {
-                    //     param.set_kind(arg.typ.kind().clone());
-                    // } else if matches!(arg.typ.kind(), TypeKind::Infer { .. }) {
-                    //     arg.typ.set_kind(param.kind().clone());
-                    // }
                 }
 
                 self.replace_value(function, scope);
@@ -231,12 +232,31 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 self.replace_value(&mut match_value.discriminant, scope);
 
                 for branch in &mut match_value.branches {
+                    self.meet_types(&mut branch.pattern.match_type, &mut match_value.discriminant.typ);
+
                     self.replace_pattern(&mut branch.pattern, scope);
 
                     self.replace_codeblock(&mut branch.code, scope);
                 }
             }
 
+            _ => {}
+        }
+    }
+
+    fn meet_types(
+        &mut self,
+        ty1: &mut Type,
+        ty2: &mut Type)
+    {
+        match (&ty1.kind, &ty2.kind) {
+            (TypeKind::Infer { .. }, TypeKind::Infer { .. }) => {},
+            (TypeKind::Infer { key }, _) => {
+                self.infer_table.insert(*key, TypeInferContext::variant(&ty2));
+            },
+            (_, TypeKind::Infer { key }) => {
+                self.infer_table.insert(*key, TypeInferContext::variant(&ty1));
+            },
             _ => {}
         }
     }
@@ -398,17 +418,14 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
     pub fn replace_type(&mut self, typ: &mut Type, span: &Option<Span>) {
         match typ.kind_mut() {
             TypeKind::Infer { key } => {
-                let Some(tc_key) = self.infer_keys.get(key) else {
+                let Some(variant) = self.infer_table.get(key) else {
 					// Throw an error
-					return;
-				};
-
-                let Some(Preliminary { variant, .. }) = self.constraint_table.get(tc_key) else {
 					return;
 				};
 
                 if let Some(concrete_type) = self.type_for_variant(variant) {
                     typ.set_kind(concrete_type);
+                    self.replace_type(typ, span);
                 }
             }
 
@@ -472,6 +489,7 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 fn type_to_string(ty: &Type) -> String {
     match ty.kind() {
         TypeKind::Struct(r#struct) => format!("struct `{}`", r#struct.name()),
+        TypeKind::Enum(r#enum) => format!("enum `{}`", r#enum.name()),
 
         TypeKind::Void => "()".to_string(),
         TypeKind::Divergent => "!".to_string(),

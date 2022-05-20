@@ -235,6 +235,23 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 self.check_polymorphic(polymorphic, &value.span)
             }
 
+            ValueKind::Match(match_value) => {
+                self.check_value(&*match_value.discriminant, return_type);
+
+                let scrut_ty = &match_value.discriminant.typ;
+
+                // Check that scrut_ty can be matched
+                // TODO: Throw an error for this
+                for arm in &match_value.branches {
+                    let _ = self.check_codeblock(&arm.code, &value.typ, return_type);
+
+                    match self.check_type(scrut_ty, &arm.pattern.match_type) {
+                        Err(e) => self.handle_var_error(e, &arm.pattern.span),
+                        _ => {}
+                    }
+                }
+            }
+
             _ => { /* Do nothing */ }
         }
     }
