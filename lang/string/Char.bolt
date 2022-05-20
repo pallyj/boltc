@@ -53,4 +53,9 @@ public struct Char {
 	operator func lessThanEq(other: Char): Bool {
 		Bool(repr: integer32CmpLte(self.repr, other.repr))
 	}
+
+	public static func prompt(prompt: StringSlice): Self {
+		print(prompt)
+		Self(repr: readInternalChar())
+	}
 }

@@ -1,6 +1,8 @@
+use std::collections::HashSet;
+
 use blir::{
     pattern::{PatternKind, Pattern},
-    value::{match_::MatchValue, ValueKind},
+    value::{match_::MatchValue, ValueKind, Value},
     typ::{TypeKind, Type, StructRef},
     Symbol,
     SomeFunction, code::CodeBlock};
@@ -8,7 +10,7 @@ use blirssa::{value::LabelValue, code::{BlockRef}};
 use errors::{error::ErrorCode, Span};
 use patmat::{PatternMatrix, Maranget, DecisionTree};
 
-use crate::BlirLowerer;
+use crate::{BlirLowerer};
 
 impl<'a, 'b> BlirLowerer<'a, 'b> {
 	pub (crate) fn lower_match(&mut self, value: &MatchValue, ty: &Type) -> LabelValue {
@@ -35,7 +37,7 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
 
         let decision_tree = pattern_matrix.solve::<Maranget>();
 
-        self.lower_decision_tree(decision_tree, &code_blocks, assign_val_ptr.as_ref(), &before_block);
+        self.lower_decision_tree(decision_tree, &code_blocks, assign_val_ptr.as_ref(), &before_block, value.discriminant.span);
 
 		let after_block = self.context.function().append_block("afterMatch");
 		self.builder().position_at_end(&before_block);
@@ -51,7 +53,8 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
         tree: DecisionTree,
         leaves: &[CodeBlock],
         pointer: Option<&LabelValue>,
-        sink: &BlockRef)
+        sink: &BlockRef,
+        span: Option<Span>)
     {
         match tree {
             DecisionTree::Fail => panic!(),
@@ -90,25 +93,58 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
                 self.builder().position_at_end(&default_block);
 
                 if let Some(default) = default {
-                    self.lower_decision_tree(*default, leaves, pointer, sink);
+                    self.lower_decision_tree(*default, leaves, pointer, sink, span);
                 } else {
                     // Check for exhaustiveness
-                    let is_exhaustive = true;
+                    self.exhaustiveness_check(&scrutinee.typ, &patterns, &span);
 
-                    if is_exhaustive {
-                        // Emit a panic
-                    } else {
-                        // Throw an error
-                    }
+                    // TODO: Build unreachable
                     self.builder().build_always_branch(sink);
                 }
 
                 for (block, (_, tree)) in switch_branches.iter().zip(patterns) {
                     self.builder().position_at_end(&block);
-                    self.lower_decision_tree(tree, leaves, pointer, sink);
+                    self.lower_decision_tree(tree, leaves, pointer, sink, span);
                 }
             }
         }
+    }
+
+    fn exhaustiveness_check(
+        &mut self,
+        typ: &Type,
+        patterns: &Vec<(Pattern, DecisionTree)>,
+        span: &Option<Span>)
+    {
+        let TypeKind::Enum(enum_ref) = typ.kind() else {
+            // Add default case
+            self.debugger
+                .throw_single(ErrorCode::NonExhaustiveMatch(vec!["default".to_string()]), span);
+            return
+        };
+
+        if enum_ref.variants().len() == patterns.len() {
+            return
+        }
+
+        let mut variants = HashSet::new();
+
+        for var in enum_ref.variants().iter() {
+            variants.insert(var.name().clone());
+        }
+
+        for pat in patterns.iter() {
+            match &pat.0.kind {
+                PatternKind::Variant { variant: Value { kind: ValueKind::EnumVariant { variant, .. }, .. }, .. } |
+                PatternKind::Literal { value: Value { kind: ValueKind::EnumVariant { variant, .. }, .. }, .. } => {
+                    variants.remove(variant.name());
+                }
+                _ => {}
+            }
+        }
+
+        self.debugger
+            .throw_single(ErrorCode::NonExhaustiveMatch(variants.iter().map(|var| format!(".{var}")).collect()), span);
     }
 
     fn switch_integer(
@@ -217,46 +253,3 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
         case_branches
     }
 }
-
-/*
-fn lower_equality_layer(
-		&mut self,
-		value: LabelValue,
-		candidate: Candidate,
-		before_branch: &BlockRef,
-        last_default_branch: Option<&BlockRef>,
-        struct_ref: &StructRef,
-		output_pointer: Option<&LabelValue>)
-	{
-
-        for (pattern, next_branch) in candidate.next_candidates {
-            let positive_branch = self.context.function().append_block("positive");
-            let negative_branch = self.context.function().append_block("negative");
-
-            // Get the equality constraint
-            let equal_to = match &pattern.kind {
-                PatternKind::Literal { value } => self.lower_value(&value),
-                _ => panic!(),
-            };
-            
-            let is_equal = self.builder().build_call(lowered_function.clone(), vec![ value.clone(), equal_to ]);
-
-            self.builder().build_branch(is_equal, &positive_branch, &negative_branch);
-            self.builder().position_at_end(&positive_branch);
-
-            self.lower_some_candidate(next_branch, before_branch, last_default_branch, output_pointer);
-
-            self.builder().build_always_branch(&before_branch);
-
-            self.builder().position_at_end(&negative_branch);
-        }
-
-        if let Some(default_branch) = candidate.default_branch {
-            if let Some((yielded_value, assign_val_ptr)) = self.lower_code_block(&default_branch).zip(output_pointer) {
-                self.builder.build_assign_ptr(assign_val_ptr.clone(), yielded_value);
-            };
-
-            self.builder().build_always_branch(&before_branch);
-        }
-	} */
-    

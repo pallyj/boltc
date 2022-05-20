@@ -42,6 +42,7 @@ pub enum ErrorCode {
 
     TypeCannotBackEnum(String),
     CantMatchFloat,
+    NonExhaustiveMatch(Vec<String>),
 }
 
 impl ErrorCode {
@@ -74,6 +75,7 @@ impl ErrorCode {
             ErrorCode::TagAlreadyUsed(tag) => format!("tag {tag} has already been used"),
             ErrorCode::TypeCannotBackEnum(typ) => format!("type {typ} cannot be used to back an enum"),
             ErrorCode::CantMatchFloat => format!("can't match against float"),
+            ErrorCode::NonExhaustiveMatch(missing) => format!("non-exhaustive pattern, missing {}", missing.join(", ")),
         }
     }
 }

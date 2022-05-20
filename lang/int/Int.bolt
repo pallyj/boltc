@@ -149,7 +149,7 @@ public struct Int /*: IntegerLiteralRepr */ {
 
 	// Read
 
-	public func prompt(prompt: StringSlice): Self {
+	public static func prompt(prompt: StringSlice): Self {
 		print(prompt, newline: false)
 		Self(repr: readInternalInt())
 	}

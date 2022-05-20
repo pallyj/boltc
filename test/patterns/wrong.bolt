@@ -1,6 +1,7 @@
-enum Test {
+enum Test: String {
 	case circle(radius: Float)
 	case square(side: Float)
+	case rect = 1
 }
 
 @entryPoint
@@ -9,8 +10,7 @@ func main() {
 	let square = Test.square(side: 1.0)
 
 	match circle {
-		.circle(n) => print(n),
-		.square(n) => print(n),
-		_ => print("Exhaustive")
+		.circle(n) => print("circle ", n),
+		.square(n) => print("square ", n),
 	}
 }

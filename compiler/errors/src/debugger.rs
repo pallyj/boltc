@@ -77,9 +77,8 @@ impl<'a> Debugger<'a> {
                 let ntabs = (&line_info.text[0..line_info.col]).rmatches("\t").count();
     
                 let width = line_info.col + (3 * ntabs);
-                let width = usize::min(width, line_info.text.len());
 
-                let nwidth = u32::min(end - start, line_info.text.len() as u32);
+                let nwidth = u32::min(end - start, (line_info.text.len() - line_info.col) as u32);
     
                 let sep = (0..(nwidth)).map(|_| '^')
                                             .collect::<String>()

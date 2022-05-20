@@ -1,0 +1,52 @@
+@entryPoint
+func guessingGame() {
+	print("Welcome to my game!");
+	print("I just chose a number between 0 and 100");
+	print("Make a guess and I will tell you if you are low, high, or right!");
+	print("You have 6 tries!");
+
+	startGame()
+}
+
+func gameLoop(number: Int, n: Int) {
+	if n == 0 {
+		return
+	}
+
+	let userGuess = Int.prompt("Guess a number: ");
+
+	print("Guess was ", userGuess);
+
+	if userGuess == number {
+		endGame();
+		return
+	}
+
+	if userGuess > number {
+		print("Try a little bit smaller")
+	} else {
+		print("Too big")
+	}
+
+	gameLoop(number, n - 1)
+}
+
+func endGame() {
+	print("You got it!");
+
+	let playAgainChar = Char.prompt("Play again? (Y/n) ");
+
+	if playAgainChar == "Y" {
+		startGame()
+	}
+}
+
+func startGame() {
+	let randomNumber = rand()
+
+	gameLoop(randomNumber, 6)
+}
+
+func rand(): Int {
+	31
+}

@@ -490,11 +490,13 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
             TypeKind::Struct(r#struct) => format!("struct `{}`", r#struct.name()),
             TypeKind::Enum(r#enum) => format!("enum `{}`", r#enum.name()),
 
-            TypeKind::Void => "()".to_string(),
+            TypeKind::Void => "void".to_string(),
             TypeKind::Divergent => "!".to_string(),
 
             TypeKind::Integer { bits } => format!("intrinsics.i{bits}"),
             TypeKind::Float { bits } => format!("intrinsics.f{bits}"),
+            TypeKind::StrSlice => format!("intrinsic.strslice"),
+            TypeKind::Infer { .. } => format!("{{}}"),
 
             TypeKind::Tuple(types, labels) => {
                 let types =
@@ -509,6 +511,21 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                         .join(", ");
                     
                 format!("({})", types)
+            }
+
+            TypeKind::Function { return_type, params, labels } => {
+                let types =
+                    params.iter()
+                        .zip(labels)
+                        .map(|(ty, lab)| if let Some(label) = lab {
+                            format!("{label}: {}", self.type_to_string(ty))
+                        } else {
+                            format!("{}", self.type_to_string(ty))
+                        })
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    
+                format!("({}): {}", types, self.type_to_string(return_type))
             }
 
             _ => "unknown".to_string(),

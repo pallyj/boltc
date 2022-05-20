@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 
 void printInt(long i) {
 	printf("%li", i);
@@ -58,7 +59,7 @@ typedef struct {
 } strslice_t;
 
 void printString(strslice_t slice) {
-	printf("%.*s", slice.len, slice.string);
+	printf("%.*s", (int)slice.len, slice.string);
 }
 
 void printChar(int c) {
@@ -70,22 +71,30 @@ void printLine() {
 }
 
 long readInternalInt() {
+	char buffer[20] = { 0 };
+	size_t len = 20;
+	read(0, buffer, 20);
 	long integerRead;
-	scanf("%ld", &integerRead);
+
+	sscanf(buffer, "%ld", &integerRead);
 
 	return integerRead;
 }
 
 unsigned long readInternalUInt() {
-	long integerRead;
-	scanf("%lu", &integerRead);
+	char buffer[20];
+	read(0, buffer, 20);
+	unsigned long integerRead;
+
+	sscanf(buffer, "%lu", &integerRead);
 
 	return integerRead;
 }
 
 unsigned int readInternalChar() {
-	unsigned int readChar;
-	scanf("%c", (char*)&readChar);
+	char c = 0;
 
-	return readChar;
+	read(0, &c, 1);
+
+	return c;
 }

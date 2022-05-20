@@ -312,12 +312,12 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 self.replace_if_value(else_if_block, scope, n + 1);
             }
             None => if n == 0 {
-                // Set the type to 0 or diverges
-                let ty = if if_value.positive.escapes() {
+                // Set the type to 
+                let ty = TypeKind::Void; /*if if_value.positive.escapes() {
                     TypeKind::Divergent
                 } else {
                     TypeKind::Void
-                };
+                };*/
 
                 return Some(ty)
             }

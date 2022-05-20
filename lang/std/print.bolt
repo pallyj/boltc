@@ -216,3 +216,15 @@ public func print(c: Char) {
 	printChar(c.repr)
 	printLine()
 }
+
+public func print(label: StringSlice, n: Int) {
+	printString(label.slice)
+	printInt64(n.repr)
+	printLine()
+}
+
+public func print(label: StringSlice, n: Float) {
+	printString(label.slice)
+	printFloat(n.repr)
+	printLine()
+}

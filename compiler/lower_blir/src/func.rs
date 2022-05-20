@@ -46,7 +46,7 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
         self.builder().position_at_end(&start_block);
 
         let yield_value = self.lower_code_block(&func.borrow().code);
-        if func.borrow().code.typ().kind() != &TypeKind::Divergent {
+        if !func.borrow().code.escapes() {
             self.builder().build_return(yield_value);
         }
     }
