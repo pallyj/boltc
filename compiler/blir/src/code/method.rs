@@ -119,7 +119,7 @@ impl Method {
                                  is_static,
                                  is_operator,
                                  path: parent_path.clone().append(&name),
-                                 info: FunctionInfo::new(name, params, return_type, true),
+                                 info: FunctionInfo::new(name, params, return_type, true, span),
                                  code,
                                  span,
                                  scope: ScopeRef::new(Some(parent),

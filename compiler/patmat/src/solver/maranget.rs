@@ -195,6 +195,8 @@ impl Maranget {
             (PatternKind::Bind(_), PatternKind::Wildcard) |
             (PatternKind::Wildcard, PatternKind::Bind(_)) => true,
 
+			(PatternKind::Integer { value: v1 }, PatternKind::Integer { value: v2 }) => v1 == v2,
+
             (PatternKind::Literal { value: value1 }, PatternKind::Literal { value: value2 }) => {
                 // Check if the values match
                 match (&value1.kind, &value2.kind) {

@@ -35,5 +35,31 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
 
 			self_enum.add_variant(ssa_variant);
 		}
+
+		for substruct in enum_def.substructs().clone() {
+            self.lower_struct_signatures(substruct);
+        }
+
+        for subenum in enum_def.subenums().clone() {
+            self.lower_enum_signature(subenum);
+        }
+
+		for method in enum_def.methods().iter() {
+			self.lower_method_signature(method);
+		}
 	}
+
+	pub(super) fn lower_enum_code(&mut self, r#enum: EnumRef) {
+        for substruct in r#enum.substructs().clone() {
+            self.lower_struct_code(substruct);
+        }
+
+        for subenum in r#enum.subenums().clone() {
+            self.lower_enum_code(subenum);
+        }
+
+        for method in r#enum.methods().iter() {
+            self.lower_method(method);
+        }
+    }
 }

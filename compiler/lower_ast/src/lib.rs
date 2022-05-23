@@ -18,16 +18,12 @@ mod tests;
 pub struct AstLowerer<'a, 'b> {
     file:    u32,
     parse:   Root,
-    factory: OperatorFactory,
+    factory: &'a OperatorFactory,
     debugger:&'a mut Debugger<'b>
 }
 
 impl<'a, 'b> AstLowerer<'a, 'b> {
-    pub fn new(parse: Parse, debugger: &'a mut Debugger<'b>) -> Self {
-        let mut factory = OperatorFactory::new();
-
-        factory.register_intrinsics();
-
+    pub fn new(parse: Parse, debugger: &'a mut Debugger<'b>, factory: &'a OperatorFactory) -> Self {
         AstLowerer { file: parse.file as u32,
                      parse: Root::cast(parse.root).unwrap(),
                      factory,

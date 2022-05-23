@@ -104,7 +104,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 			 .collect()
 	}
 
-	fn change_to_u64(value: (bool, u64)) -> u64 {
+	pub fn change_to_u64(value: (bool, u64)) -> u64 {
 		if value.0 {
 			0 - value.1
 		} else {
@@ -112,7 +112,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 		}
 	}
 
-	fn lower_integer(
+	pub fn lower_integer(
 		&mut self,
 		value: &Value) -> (bool, u64)
 	{

@@ -10,9 +10,20 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 		match expr {
 			AstPattern::WildcardPattern(_) => PatternKind::Wildcard,
 			AstPattern::LiteralPattern(literal) => {
-				let value = self.lower_expr(literal.value());
+				let lowered = self.lower_expr(literal.value());
 
-				PatternKind::Literal { value }
+				match &lowered.kind {
+					ValueKind::StringLiteral(_) => {
+						PatternKind::Literal { value: lowered }
+					}
+
+					_ => {
+						let value = Self::change_to_u64(self.lower_integer(&lowered));
+
+						PatternKind::Integer { value }
+					}
+				}
+				
 			}
 			AstPattern::VariantPattern(variant) => {
 				let value = ValueKind::VariantLiteral(variant.variant_name())

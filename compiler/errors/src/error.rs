@@ -43,6 +43,10 @@ pub enum ErrorCode {
     TypeCannotBackEnum(String),
     CantMatchFloat,
     NonExhaustiveMatch(Vec<String>),
+
+    ExtensionLoadFailed(String),
+
+    Other(String)
 }
 
 impl ErrorCode {
@@ -76,6 +80,8 @@ impl ErrorCode {
             ErrorCode::TypeCannotBackEnum(typ) => format!("type {typ} cannot be used to back an enum"),
             ErrorCode::CantMatchFloat => format!("can't match against float"),
             ErrorCode::NonExhaustiveMatch(missing) => format!("non-exhaustive pattern, missing {}", missing.join(", ")),
+            ErrorCode::ExtensionLoadFailed(extension) => format!("extension `{extension}` failed to load"),
+            ErrorCode::Other(other) => format!("{other}"),
         }
     }
 }

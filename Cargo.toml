@@ -16,9 +16,14 @@ blir_passes = { path = "compiler/blir_passes" }
 lower_blir = { path = "compiler/lower_blir" }
 blirssa = { path = "compiler/blirssa" }
 codegen = { path = "compiler/codegen" }
+errors = { path = "compiler/errors" }
+bolt-ext = { path = "compiler/bolt-ext" }
 logos = "0.12.0"
 proc-macro2 = "1.0.36"
-errors = { path = "compiler/errors" }
+etcetera = "0.4.0"
+fs_extra = "1.2.0"
+libloading = "0.7.3"
+
 
 [workspace]
 
@@ -36,10 +41,12 @@ members = [
 	"compiler/codegen",
 	"compiler/tyinfer",
 	"compiler/patmat",
+	"compiler/bolt-ext"
 ]
 
 exclude = [
-	"examples/factorial/rust"
+	"examples/factorial/rust",
+	"examples/extension_template"
 ]
 
 [profile.release]

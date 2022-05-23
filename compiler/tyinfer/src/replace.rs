@@ -217,7 +217,7 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 self.replace_value(reciever, scope);
             }
 
-            ValueKind::If(if_value) => if let Some(ty) = self.replace_if_value(if_value, scope, 0) {
+            ValueKind::If(if_value) => if let Some(ty) = self.replace_if_value(if_value, scope) {
                 value.typ.set_kind(ty);
             }
 
@@ -295,11 +295,13 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                     self.replace_pattern(i, scope);
                 }
             }
-            _ => {}
+            _ => {
+                
+            }
         }
     }
 
-    fn replace_if_value(&mut self, if_value: &mut IfValue, scope: &ScopeRef, n: usize) -> Option<TypeKind> {
+    fn replace_if_value(&mut self, if_value: &mut IfValue, scope: &ScopeRef) -> Option<TypeKind> {
         self.replace_value(&mut if_value.condition, scope);
 
         self.replace_codeblock(&mut if_value.positive, scope);
@@ -309,17 +311,10 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 self.replace_codeblock(else_block, scope);
             }
             Some(IfBranch::Else(else_if_block)) => {
-                self.replace_if_value(else_if_block, scope, n + 1);
+                return self.replace_if_value(else_if_block, scope)
             }
-            None => if n == 0 {
-                // Set the type to 
-                let ty = TypeKind::Void; /*if if_value.positive.escapes() {
-                    TypeKind::Divergent
-                } else {
-                    TypeKind::Void
-                };*/
-
-                return Some(ty)
+            None => {
+                return Some(TypeKind::Void)
             }
         }
 
@@ -510,6 +505,7 @@ fn type_to_string(ty: &Type) -> String {
 
         TypeKind::Integer { bits } => format!("intrinsics.i{bits}"),
         TypeKind::Float { bits } => format!("intrinsics.f{bits}"),
+        TypeKind::StrSlice => format!("intrinsics.strslice"),
 
         _ => "unknown".to_string(),
     }

@@ -16,6 +16,8 @@ pub enum PatternKind {
 
 	Literal { value: Value },
 
+	Integer { value: u64 },
+
 	Tuple { items:  Vec<Pattern>,
 			labels: Vec<Option<String>> }
 }
@@ -46,6 +48,7 @@ impl Debug for Pattern {
         match &self.kind {
 			PatternKind::Wildcard => write!(f, "_"),
 			PatternKind::Bind(name) => write!(f, "{name}"),
+			PatternKind::Integer { value } => write!(f, "{value}"),
 			PatternKind::Literal { value } => write!(f, "{value:?}"),
 			PatternKind::Tuple { items, labels } => write!(f, "({})", items.iter().zip(labels).map(|(item, label)| if let Some(label) = label { format!("{label}: {item:?}") } else { format!("{item:?}") }).collect::<Vec<_>>().join(", ") ),
 			PatternKind::Variant { variant, items, labels } =>

@@ -1,0 +1,22 @@
+// Only compiles with a ?? plugin
+
+enum Optional_Int {
+	case some(Int)
+	case none
+
+	operator func nilCoalesce(orElse: Int): Int {
+		match self {
+			.some(n) => n,
+			.none => orElse
+		}
+	}
+}
+
+@entryPoint
+func main() {
+	let num = Optional_Int.some(5);
+	let none = Optional_Int.none;
+
+	print(num ?? 10)
+	print(none ?? 10)
+}

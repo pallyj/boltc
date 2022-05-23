@@ -1,0 +1,11 @@
+[package]
+name = "extension_template"
+version = "0.5.0"
+edition = "2021"
+
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+bolt-ext = { path = "../../compiler/bolt-ext" }

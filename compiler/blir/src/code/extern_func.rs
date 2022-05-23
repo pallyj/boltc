@@ -42,7 +42,7 @@ impl ExternFunction {
     pub fn new(attributes: Attributes, visibility: Visibility, name: String, params: Vec<FuncParam>, return_type: Type, span: Span, parent: &ScopeRef) -> ExternFunctionRef {
         let func = ExternFunctionInner { attributes,
                                          visibility,
-                                         info: FunctionInfo::new(name, params, return_type, false),
+                                         info: FunctionInfo::new(name, params, return_type, false, span),
                                          span,
                                          parent: parent.clone() };
 

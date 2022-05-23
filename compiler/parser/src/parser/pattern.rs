@@ -26,20 +26,6 @@ impl<'input, 'l> Parser<'input, 'l> {
 
 			pattern.complete(self, SyntaxKind::BindPattern);
 		}
-		else if self.check(SyntaxKind::LiteralDecInt)
-			 || self.check(SyntaxKind::LiteralBinInt)
-			 || self.check(SyntaxKind::LiteralOctInt)
-			 || self.check(SyntaxKind::LiteralHexInt)
-			 || self.check(SyntaxKind::LiteralDecFloat)
-			 || self.check(SyntaxKind::LiteralTrue)
-			 || self.check(SyntaxKind::LiteralFalse)
-			 || self.check(SyntaxKind::StringLiteral)
-			 || self.check(SyntaxKind::LongStringLiteral)
-		{
-			self.node(SyntaxKind::Literal, Parser::bump);
-			
-			pattern.complete(self, SyntaxKind::LiteralPattern);
-		}
 		else if self.check(SyntaxKind::Period) {
 			// Variant pat
 			self.bump();
@@ -57,6 +43,12 @@ impl<'input, 'l> Parser<'input, 'l> {
 			self.parse_paren_comma_seq(Self::parse_pattern_tuple);
 
 			pattern.complete(self, SyntaxKind::TuplePattern);
+		}
+		else if self.check_expr()
+		{
+			self.node(SyntaxKind::Literal, Self::parse_expr);
+			
+			pattern.complete(self, SyntaxKind::LiteralPattern);
 		}
 		else {
 			self.error_recover("expected pattern", EXPR_RECOVERY_SET);

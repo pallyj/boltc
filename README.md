@@ -12,6 +12,12 @@ Bolt is a powerful coding language designed for expressiveness and speed. Bolt c
 - pattern matching
 - closures
 - tuples
+- compiler extensions
+
+Bolt eventually wants to be usable in any domain, but the first areas we are targeting are:
+
+- Scripting
+- Fast webpages
 
 Check out the [wiki](https://github.com/pallyj/boltc/wiki) for more details!
 
@@ -35,7 +41,7 @@ Bolt code is easily accessible for beginners and the experienced alike. Beginner
 
 ## Speed
 
-The Bolt compiler is optimized for speed. Pure, raw speed. Quick building, quick execution, and quick development. Bolt uses the LLVM framework to output the fastest code possible. In CPU-bound workloads, Bolt approaches the speed of C. The lack of a garbage collector makes bolt faster than Java and .NET in memoy bound tasks.
+The Bolt compiler is optimized for speed. Pure, raw speed. Quick building, quick execution, and quick development. Bolt uses the LLVM framework to output the fastest code possible. In CPU-bound workloads, Bolt approaches the speed of C, while in memory-bound tasks it beats C# and Java.
 
 ## Benchmarks
 
@@ -50,12 +56,30 @@ Bolt will be as fast C in CPU-bound tasks, faster than Rust and Javascript in IO
 
 ## Using
 
-First, compile the standard library. Run std/compile.sh and libprint.o will be added to /bin.
-
-With the standard library compiled, a test program can be run with
+First, we need to download the Bolt source code. Open a command prompt and type
 
 ```
-cargo run -- examples/factorial/bolt/main.bolt --lib=factorial
+> cd ~/Documents
+> git clone https://github.com/pallyj/boltc
+> cd boltc
+```
+
+Now, the Bolt compiler needs to be installed to the system. Run the command
+
+```
+> cargo install .
+```
+
+and `boltc` will be available in the PATH. However, it needs to be run in the source code directory to install the standard library.
+
+```
+> boltc install
+```
+
+And your done! boltc can be run from any directory on your computer. To get started, run
+
+```
+boltc examples/guessing_game/game.bolt --lib=game
 ```
 
 ## Development

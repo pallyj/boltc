@@ -76,6 +76,11 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
             self.lower_struct_code(r#struct);
         }
 
+        // Lower enum code
+        for r#enum in self.lib.enums.clone() {
+            self.lower_enum_code(r#enum);
+        }
+
         // Lower function code
         for func in self.lib.functions.clone() {
             self.lower_func(func);

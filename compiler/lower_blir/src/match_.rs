@@ -157,6 +157,9 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
                                       .map(|(pat, _)| {
                                           let block = self.context.function().append_block("case");
                                           let value = match &pat.kind {
+                                              PatternKind::Integer { value } => {
+                                                  self.lower_value(&ValueKind::IntLiteral(*value).anon(pat.match_type.clone()))
+                                              }
                                               PatternKind::Literal { value } => self.lower_value(value),
                                               _ => unreachable!(),
                                           };

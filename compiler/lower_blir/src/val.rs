@@ -3,7 +3,7 @@ use std::panic;
 use blir::{intrinsics::{BinaryIntrinsicFn, UnaryIntrinsicFn},
            typ::{Type, TypeKind},
            value::{Closure, IfBranch, IfValue, Value, ValueKind}};
-use blirssa::{value::{BinaryIntrinsicFn as SsaBinaryIntrinsicFn, LabelValue, UnaryIntrinsicFn as SsaUnaryIntrinsicFn}, };
+use blirssa::{value::{BinaryIntrinsicFn as SsaBinaryIntrinsicFn, LabelValue, UnaryIntrinsicFn as SsaUnaryIntrinsicFn}, code::BlockRef, };
 
 use crate::BlirLowerer;
 
@@ -348,8 +348,9 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
     }
     
     fn lower_if_value(&mut self, value: &IfValue, ty: &Type) -> LabelValue {
-        if value.negative.is_none() {
-            self.lower_if_value_inner(value, None);
+        let before_block = self.context.function().append_block("before");
+        let value = if !self.has_else_covered(&value.negative) {
+            self.lower_if_value_inner(value, None, &before_block);
             LabelValue::void()
         } else {
             let assign_val_ptr = match ty.kind() {
@@ -360,24 +361,37 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
                 }
             };
 
-            self.lower_if_value_inner(value, assign_val_ptr.clone());
+            self.lower_if_value_inner(value, assign_val_ptr.clone(), &before_block);
 
             if let Some(assign_val_ptr) = assign_val_ptr {
                 self.builder().build_deref(assign_val_ptr)
             } else {
                 LabelValue::void()
             }
+        };
+        let finally_block = self.context.function().append_block("finally");
+
+        self.builder().build_always_branch(&finally_block);
+        self.builder().position_at_end(&finally_block);
+        
+        value
+    }
+
+    fn has_else_covered(&self, negative: &Option<IfBranch>) -> bool {
+        match negative {
+            Some(IfBranch::CodeBlock(_)) => true,
+            Some(IfBranch::Else(else_branch)) => self.has_else_covered(&else_branch.negative),
+            None => false,
         }
     }
 
-    fn lower_if_value_inner(&mut self, value: &IfValue, yield_pointer: Option<LabelValue>) {
+    fn lower_if_value_inner(&mut self, value: &IfValue, yield_pointer: Option<LabelValue>, finally_block: &BlockRef) {
         let condition = self.lower_value(value.condition.as_ref());
 
         let positive_block = self.context.function().append_block("positive");
 
-        let finally_block = if let Some(negative) = value.negative.as_ref() {
+        if let Some(negative) = value.negative.as_ref() {
             let negative_block = self.context.function().append_block("negative");
-            let finally_block = self.context.function().append_block("finally");
 
             // Branch to the positive branch if the condition is true
             self.builder()
@@ -398,19 +412,13 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
                         self.builder().build_always_branch(&finally_block);
                     }
                 }
-                IfBranch::Else(else_branch) => self.lower_if_value_inner(else_branch.as_ref(), yield_pointer.clone()),
-            };
-
-            finally_block
+                IfBranch::Else(else_branch) => self.lower_if_value_inner(else_branch.as_ref(), yield_pointer.clone(), finally_block),
+            }
         } else {
-            let finally_block = self.context.function().append_block("finally");
-
             // Branch to the positive branch if the condition is true
             self.builder()
-                .build_branch(condition, &positive_block, &finally_block);
-
-            finally_block
-        };
+                .build_branch(condition, &positive_block, finally_block);
+        }
 
         // Lower the positive branch
         self.builder().position_at_end(&positive_block);

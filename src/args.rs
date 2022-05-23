@@ -7,5 +7,8 @@ pub struct Args {
 
     /// Library name
     #[clap(long)]
-    pub lib: String,
+    pub lib: Option<String>,
+
+    #[clap(short('x'))]
+    pub extensions: Vec<String>,
 }

@@ -20,6 +20,10 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
         for substruct in r#struct.borrow().substructs.clone() {
             self.lower_struct_definition(substruct);
         }
+
+        for subenum in r#struct.borrow().subenums.clone() {
+            self.lower_enum_definition(subenum);
+        }
     }
 
     pub(super) fn lower_struct_signatures(&mut self, r#struct: StructRef) {
@@ -32,6 +36,10 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
 
         for substruct in borrowed_struct.substructs.clone() {
             self.lower_struct_signatures(substruct);
+        }
+
+        for subenum in borrowed_struct.subenums.clone() {
+            self.lower_enum_signature(subenum);
         }
 
         for var in &borrowed_struct.instance_vars {
@@ -51,12 +59,20 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
     pub(super) fn lower_struct_code(&mut self, r#struct: StructRef) {
         let borrowed_struct = r#struct.borrow();
 
+        for substruct in borrowed_struct.substructs.clone() {
+            self.lower_struct_code(substruct);
+        }
+
+        for subenum in borrowed_struct.subenums.clone() {
+            self.lower_enum_code(subenum);
+        }
+
         for method in &borrowed_struct.methods {
             self.lower_method(method);
         }
     }
 
-    fn lower_method_signature(&mut self, method: &MethodRef) {
+    pub(crate) fn lower_method_signature(&mut self, method: &MethodRef) {
         let function_type = self.lower_type(&method.take_typ());
 
         self.ssa_library_mut()

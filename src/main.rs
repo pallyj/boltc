@@ -1,4 +1,6 @@
 mod args;
+mod cstd;
+mod extension_host;
 
 use std::process::Command;
 
@@ -7,15 +9,34 @@ use blir::{BlirContext, Library};
 use clap::StructOpt;
 use codegen::config::{BuildConfig, BuildOutput, BuildProfile};
 use colored::Colorize;
-use errors::{debugger::Debugger, fileinterner::FileInterner};
+use errors::{debugger::Debugger, fileinterner::FileInterner, error::ErrorCode};
+use extension_host::ExtensionHost;
 use lower_ast::AstLowerer;
 use lower_blir::BlirLowerer;
-use parser::{operators::OperatorFactory, parser::parse};
+use parser::{parser::parse};
 
 fn main() {
     let args = Args::parse();
 
-    let mut project = Project::new(&args.lib);
+    let standard = cstd::StandardLib::default();
+
+    if args.file == "install" {
+        standard.install();
+        return;
+    }
+
+    if !standard.is_installed() {
+        standard.install();
+    }
+
+    let lib_name = if let Some(lib) = args.lib {
+        lib
+    } else {
+        println!("error: no lib specified");
+        return
+    };
+
+    let mut project = Project::new(&lib_name, args.extensions);
 
     // Add standard library
     let lang = [//"test/test.bolt"
@@ -37,8 +58,11 @@ fn main() {
                 "string/StringSlice.bolt",
                 "string/Char.bolt"];
 
+    let lib_path = standard.get_source_path();
+    let lib_path_str = lib_path.as_os_str().to_string_lossy();
+
     for file in lang {
-        project.open_file(&format!("lang/{file}"));
+        project.open_file(&format!("{}/{file}", lib_path_str));
     }
 
     project.open_file(&args.file);
@@ -50,21 +74,24 @@ fn main() {
     }
 
     if let Some(entry_point) = compiled.1 {
+        let lib = standard.get_lib_path();
+        let lib_str = lib.as_os_str().to_string_lossy();
         // Link with the c standard library
         let stderr =
-        Command::new("clang").args(["bin/print.o",
-                                    "bin/str.o",
-                                    &format!("bin/lib{}.o", args.lib),
+        Command::new("clang").args(["-L",
+                                    &lib_str,
+                                    "-lstd",
+                                    &format!("bin/lib{}.o", lib_name),
                                     "-e",
                                     &format!("_{}", entry_point),
                                     "-o",
-                                    &format!("bin/{}", args.lib)])
+                                    &format!("bin/{}", lib_name)])
                              .output()
                              .unwrap()
                              .stderr;
 
         if stderr.is_empty() {
-            Command::new(&format!("bin/{}", args.lib)).spawn().unwrap();
+            Command::new(&format!("bin/{}", lib_name)).spawn().unwrap();
         } else {
             println!("{} {}", "error:".red().bold(), unsafe { String::from_utf8_unchecked(stderr) });
         }
@@ -74,12 +101,14 @@ fn main() {
 pub struct Project {
     library:  Option<Library>,
     interner: FileInterner,
+    extensions: Vec<String>,
 }
 
 impl Project {
-    pub fn new(name: &str) -> Project {
+    pub fn new(name: &str, extensions: Vec<String>) -> Project {
         Project { library:  Some(Library::new(name)),
-                  interner: FileInterner::new(), }
+                  interner: FileInterner::new(),
+                  extensions }
     }
 
     pub fn open_file(&mut self, file: &str) { self.interner.open_file(file); }
@@ -87,17 +116,22 @@ impl Project {
     pub fn compile(&mut self) -> (bool, Option<String>) {
         let mut debugger = Debugger::new(&self.interner);
 
-        let mut operator_factory = OperatorFactory::new();
-        operator_factory.register_intrinsics();
+        let mut host = ExtensionHost::new();
+
+        for extension in &self.extensions {
+            if let Err(_) = unsafe { host.load_extension(extension) } {
+                debugger.throw(ErrorCode::ExtensionLoadFailed(extension.clone()), vec![]);
+            }
+        }
 
         for file in self.interner.iter() {
-            let parse = parse(file.1.text(), &mut debugger, file.0, &operator_factory);
+            let parse = parse(file.1.text(), &mut debugger, file.0, &host.operator_factory);
 
             if debugger.has_errors() {
                 continue;
             }
 
-            AstLowerer::new(parse, &mut debugger).lower_file(self.library.as_mut().unwrap());
+            AstLowerer::new(parse, &mut debugger, &host.operator_factory).lower_file(self.library.as_mut().unwrap());
         }
 
         if debugger.has_errors() {
@@ -106,10 +140,8 @@ impl Project {
 
         let mut context = BlirContext::new();
 
-        let attribute_factory = blir::attributes::default_attributes();
-
-        blir_passes::TypeResolvePass::new(&attribute_factory,
-                                          &operator_factory,
+        blir_passes::TypeResolvePass::new(&host.attribute_factory,
+                                          &host.operator_factory,
                                           &mut context,
                                           &mut debugger).run_pass(self.library.as_mut().unwrap());
 
@@ -125,12 +157,12 @@ impl Project {
             return (false, None);
         }
 
-        blir_passes::ClosureResolvePass::new(&attribute_factory,
-                                             &operator_factory,
+        blir_passes::ClosureResolvePass::new(&host.attribute_factory,
+                                             &host.operator_factory,
                                              &mut context,
                                              &mut debugger).run_pass(self.library.as_mut().unwrap());
 
-        println!("{:?}", self.library.as_ref().unwrap());
+        //println!("{:?}", self.library.as_ref().unwrap());
 
         if debugger.has_errors() {
             return (false, None);
@@ -147,7 +179,7 @@ impl Project {
 
         let library = lowerer.finish();
 
-        println!("{library}");
+        //println!("{library}");
 
         let config = BuildConfig::new(BuildProfile::Release, BuildOutput::Object, None);
 

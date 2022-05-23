@@ -107,7 +107,7 @@ impl Function {
         let func = FunctionInner { attributes,
                                    visibility,
                                    path: parent_path.append(&name),
-                                   info: FunctionInfo::new(name, params, return_type, false),
+                                   info: FunctionInfo::new(name, params, return_type, false, span),
                                    code,
                                    span,
                                    scope: ScopeRef::new(Some(parent),
@@ -172,10 +172,12 @@ pub struct FunctionInfo {
 
     always_link: bool,
     is_method:   bool,
+
+    span: Span,
 }
 
 impl FunctionInfo {
-    pub fn new(name: String, params: Vec<FuncParam>, return_type: Type, is_method: bool) -> Self {
+    pub fn new(name: String, params: Vec<FuncParam>, return_type: Type, is_method: bool, span: Span) -> Self {
         Self { link_name: name.clone(),
                name,
 
@@ -183,7 +185,9 @@ impl FunctionInfo {
                return_type,
 
                always_link: false,
-               is_method }
+               is_method,
+            
+               span}
     }
 
     pub fn name(&self) -> &String { &self.name }
@@ -205,4 +209,6 @@ impl FunctionInfo {
     pub fn always_link(&mut self) { self.always_link = true; }
 
     pub fn is_method(&self) -> bool { self.is_method }
+
+    pub fn span(&self) -> Span { self.span }
 }
