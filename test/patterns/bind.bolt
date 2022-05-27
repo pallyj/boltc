@@ -28,3 +28,7 @@ func matchInts(x: Int, y: Int, z: Int): Int {
 		_ => 5
 	}
 }
+
+/*
+testing long comments at the end
+*/

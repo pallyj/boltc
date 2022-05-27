@@ -254,17 +254,17 @@ fn lex_string(lexer: &mut logos::Lexer<SyntaxKind>) -> Result<(), ()> {
     let mut look_behind = [' '; 3];
 
     for (i, next_c) in remaining.chars().enumerate() {
-        if look_behind[2] == '\"' {
-            if !(look_behind[1] == '\\' && look_behind[0] != '\\') {
-                // The string is over
-                lexer.bump(i);
-                return Ok(());
-            }
-        }
-
         look_behind[0] = look_behind[1];
         look_behind[1] = look_behind[2];
         look_behind[2] = next_c;
+
+        if look_behind[2] == '\"' {
+            if !(look_behind[1] == '\\' && look_behind[0] != '\\') {
+                // The string is over
+                lexer.bump(i + 1);
+                return Ok(());
+            }
+        }
     }
 
     // Throw an error
@@ -277,16 +277,18 @@ fn lex_long_string(lexer: &mut logos::Lexer<SyntaxKind>) -> Result<(), ()> {
     let mut look_behind = [' '; 3];
 
     for (i, next_c) in remaining.chars().enumerate() {
-        if look_behind == ['"', '"', '"'] {
-            // The string is over
-            lexer.bump(i);
-            return Ok(());
-        }
-
         look_behind[0] = look_behind[1];
         look_behind[1] = look_behind[2];
         look_behind[2] = next_c;
+
+        if look_behind == ['"', '"', '"'] {
+            // The string is over
+            lexer.bump(i + 1);
+            return Ok(());
+        }
     }
+
+
 
     // Throw an error
     return Err(())
@@ -299,19 +301,19 @@ fn lex_long_comment(lexer: &mut logos::Lexer<SyntaxKind>) -> Result<(), ()> {
     let mut levels = 0;
 
     for (i, next_c) in remaining.chars().enumerate() {
+        look_behind[0] = look_behind[1];
+        look_behind[1] = next_c;
+
         if look_behind == ['*', '/'] {
             // The string is over
             if levels <= 0 {
-                lexer.bump(i);
+                lexer.bump(i + 1);
                 return Ok(());
             }
             levels -= 1;
         } else if look_behind == ['/', '*'] {
             levels += 1
         }
-
-        look_behind[0] = look_behind[1];
-        look_behind[1] = next_c;
     }
 
     // Throw an error

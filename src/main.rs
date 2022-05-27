@@ -15,12 +15,23 @@ use lower_ast::AstLowerer;
 use lower_blir::BlirLowerer;
 use parser::{parser::parse};
 
+/*
+
+parse: 59ms
+lower ast: 76ms
+resolve: 26ms
+check: 0ms
+closures: 0ms
+lower blir: 27ms
+codegen: 307ms
+
+*/
 fn main() {
     let args = Args::parse();
 
     let standard = cstd::StandardLib::default();
 
-    if args.file == "install" {
+    if args.files.first().map(|first| first == "install").unwrap_or(false) {
         standard.install();
         return;
     }
@@ -65,7 +76,9 @@ fn main() {
         project.open_file(&format!("{}/{file}", lib_path_str));
     }
 
-    project.open_file(&args.file);
+    for file in &args.files {
+        project.open_file(file);
+    }
 
     let compiled = project.compile();
 
@@ -124,15 +137,26 @@ impl Project {
             }
         }
 
+        //let mut parse_time = std::time::Duration::ZERO;
+        //let mut lower_time = std::time::Duration::ZERO;
+
         for file in self.interner.iter() {
+            //let start = std::time::Instant::now();
             let parse = parse(file.1.text(), &mut debugger, file.0, &host.operator_factory);
+            //let post_parse = std::time::Instant::now();
 
             if debugger.has_errors() {
                 continue;
             }
 
             AstLowerer::new(parse, &mut debugger, &host.operator_factory).lower_file(self.library.as_mut().unwrap());
+            //let post_lower = std::time::Instant::now();
+
+            //lower_time += post_lower - post_parse;
+            //parse_time += post_parse - start;
         }
+
+        //let post_parse = std::time::Instant::now();
 
         if debugger.has_errors() {
             return (false, None);
@@ -149,6 +173,8 @@ impl Project {
             return (false, None);
         }
 
+        //let post_type_resolve = std::time::Instant::now();
+
         //println!("{:?}", self.library);
 
         blir_passes::TypeInferPass::new(&mut context, &mut debugger).run_pass(self.library.as_mut().unwrap());
@@ -156,6 +182,8 @@ impl Project {
         if debugger.has_errors() {
             return (false, None);
         }
+
+        //let post_type_infer = std::time::Instant::now();
 
         blir_passes::ClosureResolvePass::new(&host.attribute_factory,
                                              &host.operator_factory,
@@ -168,22 +196,48 @@ impl Project {
             return (false, None);
         }
 
+        //let post_closure_resolve = std::time::Instant::now();
+
         blir_passes::TypeCheckPass::new(&mut debugger).run_pass(self.library.as_mut().unwrap());
 
         if debugger.has_errors() {
             return (false, None);
         }
 
+        //let post_type_check = std::time::Instant::now();
+
         let mut lowerer = BlirLowerer::new(self.library.take().unwrap(), &mut debugger);
         lowerer.lower();
 
         let library = lowerer.finish();
+
+        //let post_lower_blir = std::time::Instant::now();
 
         //println!("{library}");
 
         let config = BuildConfig::new(BuildProfile::Release, BuildOutput::Object, None);
 
         codegen::compile(library, config);
+
+        //let post_llvm = std::time::Instant::now();
+
+        /*println!(r#"
+    parse took {} ms
+    blir took {} ms
+    resolve took {} ms
+    infer took {} ms
+    check took {} ms
+    closures took {} ms
+    blirsssa took {} ms
+    llvm took {} ms"#,
+    parse_time.as_millis(),
+    lower_time.as_millis(),
+    (post_type_resolve - post_parse).as_millis(),
+    (post_type_infer - post_type_resolve).as_millis(),
+    (post_closure_resolve - post_type_infer).as_millis(),
+    (post_type_check - post_closure_resolve).as_millis(),
+    (post_lower_blir - post_closure_resolve).as_millis(),
+    (post_llvm - post_lower_blir).as_millis());*/
 
         (!debugger.has_errors(), context.entry_point)
     }

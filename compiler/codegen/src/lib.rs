@@ -70,7 +70,7 @@ pub fn build_pass_manager<'a>(is_release: bool) -> PassManager<Module<'a>> {
     let optimization_level = if is_release {
         OptimizationLevel::Aggressive
     } else {
-        OptimizationLevel::Less
+        OptimizationLevel::None
     };
 
     builder.set_optimization_level(optimization_level);

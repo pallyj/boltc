@@ -56,6 +56,7 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
         sink: &BlockRef,
         span: Option<Span>)
     {
+
         match tree {
             DecisionTree::Fail => panic!(),
             DecisionTree::Leaf(end, bindings) => {
@@ -116,35 +117,57 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
         patterns: &Vec<(Pattern, DecisionTree)>,
         span: &Option<Span>)
     {
-        let TypeKind::Enum(enum_ref) = typ.kind() else {
-            // Add default case
-            self.debugger
-                .throw_single(ErrorCode::NonExhaustiveMatch(vec!["default".to_string()]), span);
-            return
-        };
-
-        if enum_ref.variants().len() == patterns.len() {
-            return
-        }
-
-        let mut variants = HashSet::new();
-
-        for var in enum_ref.variants().iter() {
-            variants.insert(var.name().clone());
-        }
-
-        for pat in patterns.iter() {
-            match &pat.0.kind {
-                PatternKind::Variant { variant: Value { kind: ValueKind::EnumVariant { variant, .. }, .. }, .. } |
-                PatternKind::Literal { value: Value { kind: ValueKind::EnumVariant { variant, .. }, .. }, .. } => {
-                    variants.remove(variant.name());
+        match typ.kind() {
+            TypeKind::Enum(enum_ref) => {
+                if enum_ref.variants().len() == patterns.len() {
+                    return
                 }
-                _ => {}
+        
+                let mut variants = HashSet::new();
+        
+                for var in enum_ref.variants().iter() {
+                    variants.insert(var.name().clone());
+                }
+        
+                for pat in patterns.iter() {
+                    match &pat.0.kind {
+                        PatternKind::Variant { variant: Value { kind: ValueKind::EnumVariant { variant, .. }, .. }, .. } |
+                        PatternKind::Literal { value: Value { kind: ValueKind::EnumVariant { variant, .. }, .. }, .. } => {
+                            variants.remove(variant.name());
+                        }
+                        _ => {}
+                    }
+                }
+        
+                self.debugger
+                    .throw_single(ErrorCode::NonExhaustiveMatch(variants.iter().map(|var| format!(".{var}")).collect()), span);
             }
-        }
 
-        self.debugger
-            .throw_single(ErrorCode::NonExhaustiveMatch(variants.iter().map(|var| format!(".{var}")).collect()), span);
+            TypeKind::Struct(struct_ref) if struct_ref.bool_repr() => {
+                if patterns.len() >= 2 {
+                    return
+                }
+
+                let mut variants = HashSet::new();
+
+                variants.insert(true);
+                variants.insert(false);
+
+                for pat in patterns.iter() {
+                    match &pat.0.kind {
+                        PatternKind::Literal { value: Value { kind: ValueKind::BoolLiteral(b), .. }, .. } => {
+                            variants.remove(b);
+                        },
+                        _ => {}
+                    }
+                }
+
+                self.debugger
+                    .throw_single(ErrorCode::NonExhaustiveMatch(variants.iter().map(|var| format!("{var}")).collect()), span);
+            }
+
+            _ => self.debugger.throw_single(ErrorCode::NonExhaustiveMatch(vec!["default".to_string()]), span)
+        }
     }
 
     fn switch_integer(

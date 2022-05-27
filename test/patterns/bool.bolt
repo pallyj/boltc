@@ -1,0 +1,18 @@
+@entryPoint
+func main() {
+	let isTrue = true
+	
+	match isTrue {
+		true => print("true"),
+		false => print("false")
+	}
+
+	let helloWorld = "FooBiz"
+
+	match helloWorld {
+		"FooBiz" => print("15"),
+		"Foo" => print(3),
+		"Biz" => print(5),
+		_ => {}
+	}
+}

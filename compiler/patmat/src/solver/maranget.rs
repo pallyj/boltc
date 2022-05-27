@@ -201,6 +201,7 @@ impl Maranget {
                 // Check if the values match
                 match (&value1.kind, &value2.kind) {
                     (ValueKind::IntLiteral(n), ValueKind::IntLiteral(n2)) => n == n2,
+					(ValueKind::BoolLiteral(b1), ValueKind::BoolLiteral(b2)) => b1 == b2,
                     (ValueKind::StringLiteral(s), ValueKind::StringLiteral(s2)) => s == s2,
                     (ValueKind::EnumVariant { variant: v1, .. }, ValueKind::EnumVariant { variant: v2, .. }) => v1.name() == v2.name(),
 

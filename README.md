@@ -92,6 +92,8 @@ boltc examples/guessing_game/game.bolt --lib=game
 - Strings
 - Chars
 - Tuples
+- Index operator
+- Input API
 - Type Aliases
 - Compiler plugins
 - Documentation
