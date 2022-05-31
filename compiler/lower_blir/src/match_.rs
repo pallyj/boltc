@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, sync::atomic::{AtomicUsize, Ordering}};
 
 use blir::{
     pattern::{PatternKind, Pattern},
@@ -12,6 +12,8 @@ use patmat::{PatternMatrix, Maranget, DecisionTree};
 
 use crate::{BlirLowerer};
 
+static COUNTER: AtomicUsize = AtomicUsize::new(0);
+
 impl<'a, 'b> BlirLowerer<'a, 'b> {
 	pub (crate) fn lower_match(&mut self, value: &MatchValue, ty: &Type) -> LabelValue {
         let assign_val_ptr = match ty.kind() {
@@ -24,7 +26,15 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
 
 		let before_block = self.context.function().append_block("beforeMatch");
 
-        let scrutinee = (*value.discriminant).clone();
+        let scrut = self.lower_value(&*value.discriminant);
+
+        let idx = COUNTER.fetch_add(1, Ordering::Relaxed);
+        let match_name = format!("match{}", idx);
+        self.context.define_var(&match_name, scrut);
+
+        let scrutinee = ValueKind::LocalVariable(match_name)
+            .spanned(value.discriminant.typ.clone(), value.discriminant.span.unwrap());
+
         let patterns = value.branches.iter()
                                      .map(|branch| branch.pattern.clone() )
                                      .collect();

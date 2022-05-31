@@ -17,6 +17,7 @@ func main() {
 	print(matchInts(0, 1, 1))
 	print(matchInts(1, 1, 0))
 	print(matchInts(1, 1, 1))
+
 }
 
 func matchInts(x: Int, y: Int, z: Int): Int {

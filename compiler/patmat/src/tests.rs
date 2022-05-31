@@ -1,4 +1,5 @@
 use blir::{value::ValueKind, typ::TypeKind, pattern::PatternKind};
+use errors::Span;
 
 use crate::{matrix::{PatternMatrix}, solver::Maranget};
 
@@ -47,16 +48,16 @@ fn test_basic_example() {
 	]).anon(tuple_type.clone());
 
 	let pat1 = PatternKind::Tuple { items: vec![
-		PatternKind::Wildcard.with_type(integer_type.clone()),
-		PatternKind::Literal { value: ValueKind::IntLiteral(1).anon(integer_type.clone()) }.with_type(integer_type.clone()),
+		PatternKind::Wildcard.with(Span::empty(), integer_type.clone()),
+		PatternKind::Literal { value: ValueKind::IntLiteral(1).anon(integer_type.clone()) }.with(Span::empty(), integer_type.clone()),
 	],
-	labels: vec![None, None] }.with_type(tuple_type.clone());
+	labels: vec![None, None] }.with(Span::empty(), tuple_type.clone());
 	let pat2 = PatternKind::Tuple { items: vec![
-		PatternKind::Literal { value: ValueKind::IntLiteral(1).anon(integer_type.clone()) }.with_type(integer_type.clone()),
-		PatternKind::Wildcard.with_type(integer_type.clone()),
+		PatternKind::Literal { value: ValueKind::IntLiteral(1).anon(integer_type.clone()) }.with(Span::empty(), integer_type.clone()),
+		PatternKind::Wildcard.with(Span::empty(), integer_type.clone()),
 	],
-	labels: vec![None, None] }.with_type(tuple_type.clone());
-	let pat3 = PatternKind::Bind("x".to_string()).with_type(tuple_type.clone());
+	labels: vec![None, None] }.with(Span::empty(), tuple_type.clone());
+	let pat3 = PatternKind::Bind("x".to_string()).with(Span::empty(), tuple_type.clone());
 
 	let matrix = PatternMatrix::construct(
 		match_value,
@@ -95,44 +96,44 @@ fn test_complex_example() {
 
 	let pat1 = PatternKind::Tuple { items: vec![
 		PatternKind::Tuple { items: vec![
-			PatternKind::Literal { value: ValueKind::IntLiteral(1).anon(integer_type.clone()) }.with_type(integer_type.clone()),
-			PatternKind::Bind("n".to_string()).with_type(integer_type.clone()),
-		] }.with_type(tuple_type.clone()),
-		PatternKind::Bind("m".to_string()).with_type(tuple_type.clone()),
-	] }.with_type(super_tuple_type.clone());
+			PatternKind::Literal { value: ValueKind::IntLiteral(1).anon(integer_type.clone()) }.with(Span::empty(), integer_type.clone()),
+			PatternKind::Bind("n".to_string()).with(Span::empty(), integer_type.clone()),
+		] }.with(Span::empty(), tuple_type.clone()),
+		PatternKind::Bind("m".to_string()).with(Span::empty(), tuple_type.clone()),
+	] }.with(Span::empty(), super_tuple_type.clone());
 	let pat2 = PatternKind::Tuple { items: vec![
-		PatternKind::Bind("m".to_string()).with_type(tuple_type.clone()),
+		PatternKind::Bind("m".to_string()).with(Span::empty(), tuple_type.clone()),
 		PatternKind::Tuple { items: vec![
-			PatternKind::Literal { value: ValueKind::IntLiteral(1).anon(integer_type.clone()) }.with_type(integer_type.clone()),
-			PatternKind::Bind("n".to_string()).with_type(integer_type.clone()),
-		] }.with_type(tuple_type.clone())
-	] }.with_type(super_tuple_type.clone());
+			PatternKind::Literal { value: ValueKind::IntLiteral(1).anon(integer_type.clone()) }.with(Span::empty(), integer_type.clone()),
+			PatternKind::Bind("n".to_string()).with(Span::empty(), integer_type.clone()),
+		] }.with(Span::empty(), tuple_type.clone())
+	] }.with(Span::empty(), super_tuple_type.clone());
 	// ((1, 2), (n, m)) => {}
 	// (n, m) => {}
 	let pat3 = PatternKind::Tuple { items: vec![
 		PatternKind::Tuple { items: vec![
-			PatternKind::Bind("n".to_string()).with_type(integer_type.clone()),
-			PatternKind::Bind("m".to_string()).with_type(integer_type.clone()),
-		] }.with_type(tuple_type.clone()),
+			PatternKind::Bind("n".to_string()).with(Span::empty(), integer_type.clone()),
+			PatternKind::Bind("m".to_string()).with(Span::empty(), integer_type.clone()),
+		] }.with(Span::empty(), tuple_type.clone()),
 		PatternKind::Tuple { items: vec![
-			PatternKind::Literal { value: ValueKind::IntLiteral(1).anon(integer_type.clone()) }.with_type(integer_type.clone()),
-			PatternKind::Literal { value: ValueKind::IntLiteral(2).anon(integer_type.clone()) }.with_type(integer_type.clone()),
-		] }.with_type(tuple_type.clone()),
-	] }.with_type(super_tuple_type.clone());
+			PatternKind::Literal { value: ValueKind::IntLiteral(1).anon(integer_type.clone()) }.with(Span::empty(), integer_type.clone()),
+			PatternKind::Literal { value: ValueKind::IntLiteral(2).anon(integer_type.clone()) }.with(Span::empty(), integer_type.clone()),
+		] }.with(Span::empty(), tuple_type.clone()),
+	] }.with(Span::empty(), super_tuple_type.clone());
 	let pat4 = PatternKind::Tuple { items: vec![
 		PatternKind::Tuple { items: vec![
-			PatternKind::Literal { value: ValueKind::IntLiteral(1).anon(integer_type.clone()) }.with_type(integer_type.clone()),
-			PatternKind::Literal { value: ValueKind::IntLiteral(2).anon(integer_type.clone()) }.with_type(integer_type.clone()),
-		] }.with_type(tuple_type.clone()),
+			PatternKind::Literal { value: ValueKind::IntLiteral(1).anon(integer_type.clone()) }.with(Span::empty(), integer_type.clone()),
+			PatternKind::Literal { value: ValueKind::IntLiteral(2).anon(integer_type.clone()) }.with(Span::empty(), integer_type.clone()),
+		] }.with(Span::empty(), tuple_type.clone()),
 		PatternKind::Tuple { items: vec![
-			PatternKind::Bind("n".to_string()).with_type(integer_type.clone()),
-			PatternKind::Bind("m".to_string()).with_type(integer_type.clone()),
-		] }.with_type(tuple_type.clone()),
-	] }.with_type(super_tuple_type.clone());
+			PatternKind::Bind("n".to_string()).with(Span::empty(), integer_type.clone()),
+			PatternKind::Bind("m".to_string()).with(Span::empty(), integer_type.clone()),
+		] }.with(Span::empty(), tuple_type.clone()),
+	] }.with(Span::empty(), super_tuple_type.clone());
 	let pat5 = PatternKind::Tuple { items: vec![
-		PatternKind::Bind("n".to_string()).with_type(tuple_type.clone()),
-		PatternKind::Bind("m".to_string()).with_type(tuple_type.clone()),
-	] }.with_type(super_tuple_type.clone());
+		PatternKind::Bind("n".to_string()).with(Span::empty(), tuple_type.clone()),
+		PatternKind::Bind("m".to_string()).with(Span::empty(), tuple_type.clone()),
+	] }.with(Span::empty(), super_tuple_type.clone());
 
 	let matrix = PatternMatrix::construct(
 		match_value,

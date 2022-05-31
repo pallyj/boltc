@@ -1,4 +1,5 @@
 use clap::{Parser, ArgEnum};
+use colored::Colorize;
 
 #[derive(Parser)]
 pub struct Args {
@@ -17,11 +18,25 @@ pub struct Args {
     #[clap(short = 'O', default_value = "0")]
     pub optimization_level: usize,
 
-    #[clap(short = 'o', default_value = "a.out")]
-    pub output_file: String,
+    /*
+    #[clap(short = 'o')]
+    pub output_file: Option<String>,*/
 
     #[clap(long, arg_enum, default_value = "object")]
     pub emit: Emit
+}
+
+impl Args {
+    pub fn validate(&self) -> bool {
+        let mut is_valid = true;
+
+        if self.optimization_level > 3 {
+            println!("{} optimization level {} is too high, use 0, 1, 2 or 3", "error:".red().bold(), self.optimization_level);
+            is_valid = false;
+        }
+
+        return is_valid
+    }
 }
 
 /// (object, llvm, asm)

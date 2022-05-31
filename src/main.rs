@@ -4,7 +4,7 @@ mod extension_host;
 
 use std::process::Command;
 
-use args::Args;
+use args::{Args, Emit};
 use blir::{BlirContext, Library};
 use clap::StructOpt;
 use codegen::config::{BuildConfig, BuildOutput, BuildProfile};
@@ -29,6 +29,8 @@ codegen: 307ms
 fn main() {
     let args = Args::parse();
 
+    if !args.validate() { return; }
+
     let standard = cstd::StandardLib::default();
 
     if args.files.first().map(|first| first == "install").unwrap_or(false) {
@@ -40,14 +42,14 @@ fn main() {
         standard.install();
     }
 
-    let lib_name = if let Some(lib) = args.lib {
+    let lib_name = if let Some(lib) = args.lib.clone() {
         lib
     } else {
-        println!("error: no lib specified");
+        println!("{} no project name specified", "error:".red().bold());
         return
     };
 
-    let mut project = Project::new(&lib_name, args.extensions);
+    let mut project = Project::new(&lib_name, args.extensions.clone());
 
     // Add standard library
     let lang = [//"test/test.bolt"
@@ -80,7 +82,7 @@ fn main() {
         project.open_file(file);
     }
 
-    let compiled = project.compile();
+    let compiled = project.compile(&args);
 
     if !compiled.0 {
         return;
@@ -126,7 +128,7 @@ impl Project {
 
     pub fn open_file(&mut self, file: &str) { self.interner.open_file(file); }
 
-    pub fn compile(&mut self) -> (bool, Option<String>) {
+    pub fn compile(&mut self, args: &Args) -> (bool, Option<String>) {
         let mut debugger = Debugger::new(&self.interner);
 
         let mut host = ExtensionHost::new();
@@ -215,7 +217,21 @@ impl Project {
 
         //println!("{library}");
 
-        let config = BuildConfig::new(BuildProfile::Release, BuildOutput::Object, None);
+        let build_profile = match args.optimization_level {
+            0 => BuildProfile::Debug,
+            1 => BuildProfile::Less,
+            2 => BuildProfile::Normal,
+            3 => BuildProfile::Aggressive,
+            _ => unreachable!(),
+        };
+
+        let output = match args.emit {
+            Emit::Asm => BuildOutput::ASM,
+            Emit::Llvm => BuildOutput::LLVM,
+            Emit::Object => BuildOutput::Object,
+        };
+
+        let config = BuildConfig::new(build_profile, output, None);
 
         codegen::compile(library, config);
 
@@ -242,37 +258,3 @@ impl Project {
         (!debugger.has_errors(), context.entry_point)
     }
 }
-
-// fn print_error(e: &(dyn BoltMessage), source: Source) {
-// if e.level() == MessageLevel::Warning {
-// println!("{}:", "warning".yellow().bold())
-// } else {
-// println!("{}: {}", format!("error[{}]",  e.code()).red().bold(), e.description().bold());
-// }
-// println!(" {} {}:{}:{}", "-->".blue().bold(), source.file_name(), source.line(), source.col());
-// println!("  {}", "|".blue().bold());
-//
-// for line in source.line_slice().split('\n') {
-// println!("  {} {}", "|".blue().bold(), line);
-// }
-//
-// let offset = source.index_of_line();
-//
-// e.suggestion()
-// .map(|suggestion| {
-// println!("  {}{}{} {}", "|".blue().bold(), " ".repeat(offset), "^".repeat(source.len()).red().bold(), suggestion.red().bold() );
-// });
-//
-// println!("  {}", "|".blue().bold());
-// println!();
-// }
-//
-// fn print_anon_error(e: &(dyn BoltMessage)) {
-// if e.level() == MessageLevel::Warning {
-// println!("{}:", "warning".yellow().bold())
-// } else {
-// println!("{}: {}", format!("error[{}]",  e.code()).red().bold(), e.description().bold());
-// }
-//
-// println!();
-// }

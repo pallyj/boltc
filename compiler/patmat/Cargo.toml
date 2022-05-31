@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 blir = { path = "../blir" }
+errors = { path = "../errors" }

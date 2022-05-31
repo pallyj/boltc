@@ -1,7 +1,9 @@
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub enum BuildProfile {
     Debug,
-    Release,
+    Less,
+    Normal,
+    Aggressive
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]

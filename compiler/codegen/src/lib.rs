@@ -18,7 +18,7 @@ pub fn compile(library: Library, config: BuildConfig) {
 
     let module = lower_blirssa_library(library, &context).unwrap();
 
-    let pass_manager = build_pass_manager(config.profile == BuildProfile::Release);
+    let pass_manager = build_pass_manager(config.profile);
 
     pass_manager.run_on(&module);
 
@@ -31,7 +31,9 @@ pub fn compile(library: Library, config: BuildConfig) {
 
     let optimization_level = match config.profile {
         BuildProfile::Debug => OptimizationLevel::Less,
-        BuildProfile::Release => OptimizationLevel::Aggressive,
+        BuildProfile::Less => OptimizationLevel::Less,
+        BuildProfile::Normal => OptimizationLevel::Default,
+        BuildProfile::Aggressive => OptimizationLevel::Aggressive,
     };
 
     let target_triple = match config.target {
@@ -64,13 +66,14 @@ pub fn compile(library: Library, config: BuildConfig) {
     let _ = target_machine.write_to_file(&module, file_type, Path::new(&file_name));
 }
 
-pub fn build_pass_manager<'a>(is_release: bool) -> PassManager<Module<'a>> {
+pub fn build_pass_manager<'a>(profile: BuildProfile) -> PassManager<Module<'a>> {
     let builder = PassManagerBuilder::create();
 
-    let optimization_level = if is_release {
-        OptimizationLevel::Aggressive
-    } else {
-        OptimizationLevel::None
+    let optimization_level = match profile {
+        BuildProfile::Debug => OptimizationLevel::Less,
+        BuildProfile::Less => OptimizationLevel::Less,
+        BuildProfile::Normal => OptimizationLevel::Default,
+        BuildProfile::Aggressive => OptimizationLevel::Aggressive,
     };
 
     builder.set_optimization_level(optimization_level);
