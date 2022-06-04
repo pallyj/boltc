@@ -23,7 +23,10 @@ pub struct Args {
     pub output_file: Option<String>,*/
 
     #[clap(long, arg_enum, default_value = "object")]
-    pub emit: Emit
+    pub emit: Emit,
+
+    #[clap(long)]
+    pub feature: Vec<String>
 }
 
 impl Args {

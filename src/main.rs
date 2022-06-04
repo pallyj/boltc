@@ -42,6 +42,10 @@ fn main() {
         standard.install();
     }
 
+    for feature in &args.feature {
+        feature_gate::enable_feature(feature);
+    }
+
     let lib_name = if let Some(lib) = args.lib.clone() {
         lib
     } else {
