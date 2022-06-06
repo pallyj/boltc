@@ -1,6 +1,9 @@
 pub mod debugger;
 pub mod error;
 pub mod fileinterner;
+mod diag;
+#[cfg(test)]
+mod tests;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Span {

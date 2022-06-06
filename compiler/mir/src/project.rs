@@ -15,6 +15,7 @@ pub struct Project {
 	structs: Vec<Struct>,
 
 	function_names: HashMap<String, FunctionId>,
+	struct_names: HashMap<String, StructId>,
 }
 
 impl Project {
@@ -28,10 +29,11 @@ impl Project {
 			name: name.to_string(),
 
 			basic_blocks: vec![],
-			functions: vec![],
-			structs: vec![],
+			functions:    vec![],
+			structs:      vec![],
 
 			function_names: HashMap::new(),
+			struct_names:   HashMap::new()
 		}
 	}
 
@@ -67,12 +69,30 @@ impl Project {
 	///
 	/// 
 	/// 
+	pub (crate) fn get_function_id(&self, name: &str) -> Option<FunctionId> {
+		self.function_names.get(name).cloned()
+	}
+
+	///
+	/// 
+	/// 
 	pub (crate) fn add_struct(&mut self, name: &str, fields: Vec<(String, Type)>, is_transparent: bool, is_packed: bool) -> StructId {
 		let struct_id = StructId::new(self.structs.len());
 		let struct_val = Struct::new(struct_id, name.to_string(), fields, is_transparent, is_packed);
 
 		self.structs.push(struct_val);
+		self.struct_names.insert(name.to_string(), struct_id);
 		struct_id
+	}
+
+	pub (crate) fn get_struct_mut_named(&mut self, name: &str) -> Option<&mut Struct> {
+		let struct_id = self.struct_names.get(name)?;
+
+		self.structs.get_mut(struct_id.unique_idx())
+	}
+
+	pub (crate) fn get_struct_id(&self, name: &str) -> Option<StructId> {
+		self.struct_names.get(name).cloned()
 	}
 
 	///

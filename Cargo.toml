@@ -13,9 +13,8 @@ parser = { path = "compiler/parser" }
 lower_ast = { path = "compiler/lower_ast" }
 blir = { path = "compiler/blir" }
 blir_passes = { path = "compiler/blir_passes" }
-lower_blir = { path = "compiler/lower_blir" }
-blirssa = { path = "compiler/blirssa" }
-codegen = { path = "compiler/codegen" }
+blir_lowering = { path = "compiler/blir_lowering" }
+mir = { path = "compiler/mir" }
 errors = { path = "compiler/errors" }
 bolt-ext = { path = "compiler/bolt-ext" }
 feature-gate = {path = "compiler/feature-gate"}
@@ -35,6 +34,7 @@ members = [
 	"compiler/lower_ast",
 	"compiler/blir",
 	"compiler/blir_passes",
+	"compiler/blir_lowering",
 	"compiler/mangle",
 	"compiler/lower_blir",
 	"compiler/blirssa",
@@ -44,7 +44,8 @@ members = [
 	"compiler/patmat",
 	"compiler/bolt-ext",
 	"compiler/feature-gate",
-	"compiler/mir"
+	"compiler/mir",
+	"compiler/mir_lowering"
 ]
 
 exclude = [

@@ -28,10 +28,39 @@ impl<'a> Builder<'a> {
 	}
 
 	///
+	/// 
+	/// 
+	pub fn get_function_id(&self, name: &str) -> FunctionId {
+		self.project.get_function_id(name).expect("Function doesn't exist")
+	}
+
+	///
+	/// 
+	/// 
+	pub fn get_function_by_id(&self, id: FunctionId) -> &Function {
+		self.project.function(id).expect("Function doesn't exist")
+	}
+
+	///
 	/// Adds a struct to the underlying project, returning its `StructId`
 	/// 
-	pub fn add_struct(&mut self, name: &str, fields: Vec<(String, Type)>, is_transparent: bool, is_packed: bool) -> StructId {
-		self.project.add_struct(name, fields, is_transparent, is_packed)
+	pub fn add_struct(&mut self, name: &str, is_transparent: bool, is_packed: bool) -> StructId {
+		self.project.add_struct(name, vec![], is_transparent, is_packed)
+	}
+
+	///
+	/// 
+	/// 
+	pub fn add_struct_fields(&mut self, name: &str, fields: Vec<(String, Type)>) {
+		self.project.get_struct_mut_named(name).unwrap()
+			.insert_fields(fields);
+	}
+
+	///
+	/// 
+	/// 
+	pub fn get_struct_id(&self, name: &str) -> StructId {
+		self.project.get_struct_id(name).expect("struct name doesn't exist")
 	}
 
 	///

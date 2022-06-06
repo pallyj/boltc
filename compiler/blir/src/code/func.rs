@@ -75,6 +75,7 @@ pub struct FuncParam {
     pub label:     Option<String>,
     pub bind_name: String,
     pub typ:       Type,
+    pub is_shared:    bool,
 }
 
 impl Debug for FuncParam {

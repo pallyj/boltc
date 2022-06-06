@@ -20,11 +20,7 @@ pub(crate) fn add_default_initializer(r#struct: &StructRef) {
     let mut init_statements = vec![];
 
     // Create a value for self
-    let uninit = ValueKind::Uninit.anon(self_type.clone());
-    init_statements.push(StatementKind::Bind { name:  "self".to_string(),
-                                               typ:   self_type.clone(),
-                                               value: Some(uninit), }.anon());
-    let self_value = ValueKind::LocalVariable("var1_self".to_string()).anon(self_type.clone());
+    let self_value = ValueKind::FunctionParam(String::from("self")).anon(self_type.clone());
 
     // Loop through the variables
     for variable in struct_variables {
@@ -55,15 +51,14 @@ pub(crate) fn add_default_initializer(r#struct: &StructRef) {
                                                    escaped: true, }.anon());
     }
 
-    init_statements.push(StatementKind::Eval { value:   self_value,
-                                               escaped: false, }.anon());
-
     let code = CodeBlock::new(init_statements, Span::empty());
     let func_params = parameter_types.into_iter()
                                      .zip(parameter_labels)
-                                     .map(|(typ, label)| FuncParam { label: Some(label.clone()),
-                                                                     bind_name: label,
-                                                                     typ })
+                                     .enumerate()
+                                     .map(|(i, (typ, label))| FuncParam { label: Some(label.clone()),
+                                                                          bind_name: label,
+                                                                          typ,
+                                                                          is_shared: i == 0 })
                                      .collect();
 
     let method = {
@@ -73,12 +68,13 @@ pub(crate) fn add_default_initializer(r#struct: &StructRef) {
 
         Method::new(Attributes::new(std::iter::empty()),
                     self_type.clone(),
-                    true,
                     false,
+                    false,
+                    true,
                     Visibility::Public,
                     "init".to_string(),
                     func_params,
-                    self_type,
+                    TypeKind::Void.anon(),
                     code,
                     Span::empty(),
                     scope,

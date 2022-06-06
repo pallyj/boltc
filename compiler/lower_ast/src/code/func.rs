@@ -25,7 +25,8 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
                              FuncParam { label,
                                          bind_name,
-                                         typ: self.lower_type(param.typ()) }
+                                         typ: self.lower_type(param.typ()),
+                                         is_shared: false }
                          })
                          .collect();
         let return_type = func.return_type()
@@ -63,7 +64,8 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
                              FuncParam { label,
                                          bind_name,
-                                         typ: self.lower_type(param.typ()) }
+                                         typ: self.lower_type(param.typ()),
+                                         is_shared: false }
                          })
                          .collect();
         let return_type = func.return_type()
@@ -105,7 +107,8 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
                              FuncParam { label,
                                          bind_name,
-                                         typ: self.lower_type(param.typ()) }
+                                         typ: self.lower_type(param.typ()),
+                                         is_shared: false }
                          })
                          .collect();
         let return_type = if is_init {
@@ -123,6 +126,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                     reciever,
                     is_static,
                     is_operator,
+                    false, // todo: check if it mutates
                     visibility,
                     name,
                     params,

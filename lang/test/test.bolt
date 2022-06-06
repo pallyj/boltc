@@ -7,9 +7,9 @@ public struct Int {
 }
 
 public func print(i: Int) {
-	printInt64(i.repr)
-	printLine()
+	//printInt64(i.repr)
+	//printLine()
 }
 
-public func printLine()
-fileprivate func printInt64(i: i64)
+//public func printLine()
+//fileprivate func printInt64(i: i64)

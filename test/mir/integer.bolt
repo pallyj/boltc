@@ -1,0 +1,35 @@
+import intrinsics
+
+@defaultIntegerRepr
+public struct Int {
+	var repr: i64
+}
+
+@entryPoint
+public func main(i: Int) {
+	let n: Int = 100;
+}
+
+func returnFive(): i64 { 5 }
+
+func letDecl(): i64 {
+	let meaningOfLife: i64 = 42
+	meaningOfLife
+}
+
+func mul(byTwo n: i64): i64 {
+	let multiplied = integer64Mul(n, 2)
+
+	multiplied
+}
+
+func ma(n: i64): i64 {
+	integer64Add(mul(byTwo: n), 1)
+}
+
+func test_tuples() {
+	let tuple = (left: 404, right: 600)
+
+	let n = tuple.left
+	let m = tuple.right
+}

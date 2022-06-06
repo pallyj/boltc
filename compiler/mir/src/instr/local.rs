@@ -74,8 +74,7 @@ impl Local {
 	#[allow(unstable_name_collisions)]
 	pub (crate) fn write(&self, f: &mut std::fmt::Formatter, project: &Project) -> std::fmt::Result {
 		write!(f, "let var {}: ", self.id)?;
-		self.ty.write(f, project)?;
-		writeln!(f)
+		self.ty.write(f, project)
 	}
 }
 

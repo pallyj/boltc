@@ -102,6 +102,13 @@ impl Place {
 	}
 
 	///
+	/// A place for a function param
+	/// 
+	pub fn function_param(n: usize, ty: Type) -> Place {
+		Place::new(PlaceKind::Local(LocalId::new(n)), ty)
+	}
+
+	///
 	/// 
 	/// 
 	pub fn kind(&self) -> &PlaceKind {

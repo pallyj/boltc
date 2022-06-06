@@ -25,11 +25,17 @@ pub enum TypeKind {
 	}
 }
 
+impl Default for TypeKind {
+    fn default() -> Self {
+        Self::Integer { bits: 0 }
+    }
+}
+
 
 ///
 /// A `Type` incorporates a `TypeKind` and a `Span` where it comes from
 /// 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Type {
 	kind: TypeKind,
 	// span: Span
@@ -71,7 +77,7 @@ impl Type {
 	/// 
 	/// A pointer to the type
 	/// 
-	pub fn pointer(self) -> Type {
+	pub fn shared_pointer(self) -> Type {
 		Type { kind: TypeKind::Pointer(Box::new(self)) }
 	}
 
@@ -105,6 +111,13 @@ impl Type {
 	}
 
 	///
+	/// What type this is
+	/// 
+	pub fn into_kind(self) -> TypeKind {
+		self.kind
+	}
+
+	///
 	/// 
 	/// 
 	#[allow(unstable_name_collisions)]
@@ -113,10 +126,10 @@ impl Type {
 			TypeKind::Integer { bits } => write!(f, "i{bits}"),
 			TypeKind::Float { bits } => write!(f, "f{bits}"),
 
-			TypeKind::Struct { .. } => write!(f, "any struct"),
+			TypeKind::Struct { id } => write!(f, "{}", project.get_struct(*id).expect("struct doesn't exist").name()),
 
 			TypeKind::Pointer(resolving) => {
-				write!(f, "&")?;
+				write!(f, "shared ")?;
 				resolving.write(f, project)
 			}
 			TypeKind::Tuple(items) => {

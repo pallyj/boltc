@@ -6,13 +6,14 @@ use std::process::Command;
 
 use args::{Args, Emit};
 use blir::{BlirContext, Library};
+use blir_lowering::BlirLowerer;
 use clap::StructOpt;
-use codegen::config::{BuildConfig, BuildOutput, BuildProfile};
+//use codegen::config::{BuildConfig, BuildOutput, BuildProfile};
 use colored::Colorize;
 use errors::{debugger::Debugger, fileinterner::FileInterner, error::ErrorCode};
 use extension_host::ExtensionHost;
 use lower_ast::AstLowerer;
-use lower_blir::BlirLowerer;
+//use lower_blir::BlirLowerer;
 use parser::{parser::parse};
 
 /*
@@ -56,8 +57,8 @@ fn main() {
     let mut project = Project::new(&lib_name, args.extensions.clone());
 
     // Add standard library
-    let lang = [//"test/test.bolt"
-                "std/print.bolt",
+    /*let lang = ["test/test.bolt"
+                /*"std/print.bolt",
                 "bool/Bool.bolt",
                 "float/Half.bolt",
                 "float/Float.bolt",
@@ -73,14 +74,14 @@ fn main() {
                 "int/UInt32.bolt",
                 "int/UInt64.bolt",
                 "string/StringSlice.bolt",
-                "string/Char.bolt"];
+                "string/Char.bolt"*/];
 
     let lib_path = standard.get_source_path();
     let lib_path_str = lib_path.as_os_str().to_string_lossy();
 
     for file in lang {
         project.open_file(&format!("{}/{file}", lib_path_str));
-    }
+    }*/
 
     for file in &args.files {
         project.open_file(file);
@@ -210,9 +211,15 @@ impl Project {
             return (false, None);
         }
 
+        let mut project = mir::Project::new("test");
+
+        BlirLowerer::new(&mut project, vec![ self.library.take().unwrap() ]).lower();
+
+        println!("{project}");
+
         //let post_type_check = std::time::Instant::now();
 
-        let mut lowerer = BlirLowerer::new(self.library.take().unwrap(), &mut debugger);
+        /*let mut lowerer = BlirLowerer::new(self.library.take().unwrap(), &mut debugger);
         lowerer.lower();
 
         let library = lowerer.finish();
@@ -259,6 +266,7 @@ impl Project {
     (post_lower_blir - post_closure_resolve).as_millis(),
     (post_llvm - post_lower_blir).as_millis());*/
 
-        (!debugger.has_errors(), context.entry_point)
+        (!debugger.has_errors(), context.entry_point)*/
+        (false, None)
     }
 }

@@ -24,6 +24,8 @@ pub struct Function {
 	basic_blocks: Vec<BasicBlockId>,
 
 	locals: Vec<Local>,
+
+	n_locals: usize,
 }
 
 impl Function {
@@ -31,13 +33,15 @@ impl Function {
 	/// Creates a new function
 	/// 
 	pub (crate) fn new(id: FunctionId, name: &str, params: Vec<Type>, return_type: Type) -> Function {
+		let n_locals = params.len();
 		Function {
 			id,
 			name: name.to_string(),
 			params,
 			return_type,
 			basic_blocks: vec![],
-			locals: vec![] }
+			locals: vec![],
+			n_locals }
 	}
 
 	///
@@ -100,9 +104,10 @@ impl Function {
 	/// Returns the index of the next local id, incrementing it
 	/// 
 	pub (crate) fn add_local(&mut self, ty: Type) -> LocalId {
-		let local_id = LocalId::new(self.locals.len());
+		let local_id = LocalId::new(self.n_locals);
 
 		self.locals.push(Local::new(local_id, ty));
+		self.n_locals += 1;
 
 		return local_id
 	}
@@ -125,10 +130,11 @@ impl Function {
 		write!(f, "func {} (", self.name())?;
 
 		self.params().iter()
-					 .map(|item| { item.write(f, project)?; write!(f, ", ")})	
+					 .enumerate()
+					 .map(|(i, item)| { write!(f, "_{i}: ")?; item.write(f, project)?; write!(f, ", ")})	
 					 .collect::<std::fmt::Result>()?;
 
-		write!(f, ") -> ")?;
+		write!(f, ") -> ")?; 
 
 		self.return_type.write(f, project)?;
 

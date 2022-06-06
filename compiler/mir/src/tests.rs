@@ -57,7 +57,7 @@ fn type_to_string() {
 fn val_to_string() {
 	assert_eq!("const 42", format!("{}", RValue::const_int(42, Type::int(32)) ));
 	assert_eq!("const 3.14", format!("{}", RValue::const_float(3.14, Type::float(32)) ));
-	assert_eq!("const \"Hello, World!\"", format!("{}", RValue::const_string("Hello, World!", Type::int(8).pointer()) ));
+	assert_eq!("const \"Hello, World!\"", format!("{}", RValue::const_string("Hello, World!", Type::int(8).shared_pointer()) ));
 
 
 }
@@ -212,7 +212,9 @@ fn int_struct() {
 	let mut project = Project::new("int_struct");
 	let mut builder = Builder::new(&mut project);
 
-	let int = builder.add_struct("Int", vec![(String::from("repr"), Type::int(64))], true, false);
+	let int = builder.add_struct("Int", true, false);
+
+	builder.add_struct_fields("Int", vec![(String::from("repr"), Type::int(64))]);
 
 	func! { builder; hello_world() -> (Type::void()) {
 		let var acc: int.ty();

@@ -8,7 +8,7 @@ use mangle::{MangledStruct, Path};
 
 use super::{Type, TypeKind, EnumRef};
 use crate::{attributes::Attributes,
-            code::MethodRef,
+            code::{MethodRef, Method},
             scope::{ScopeRef, ScopeRelation, ScopeType},
             value::{ConstantRef, VarRef},
             Symbol, SymbolWrapper, Visibility};
@@ -185,6 +185,28 @@ impl Struct {
 
     pub fn scope(&self) -> Ref<ScopeRef> {
         Ref::map(self.inner.borrow(), |inner| &inner.scope)
+    }
+
+    pub fn initializer(&self, labels: Vec<Option<String>>, types: Vec<Type> ) -> Option<MethodRef> {
+        let borrow = self.inner.borrow();
+
+        let symbol = borrow.scope.lookup_instance_member("init")?.resolve();
+
+        let Symbol::Function(mut monomorphizer) = symbol else {
+            panic!("{symbol:?} is not an initializer")
+        };
+
+        monomorphizer.filter_labels(&labels);
+        monomorphizer.filter_types(&types);
+
+        use crate::SomeFunction::*;
+
+        match monomorphizer.resolve()? {
+            InstanceMethod(method) => Some(method),
+            Function(_) => unreachable!(),
+            StaticMethod(_) => unreachable!(),
+            ExternFunction(_) => unreachable!(),
+        }
     }
 }
 

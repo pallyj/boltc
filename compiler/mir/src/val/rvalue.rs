@@ -209,6 +209,13 @@ impl RValue {
 	pub fn kind(&self) -> &RValueKind {
 		&self.kind
 	}
+
+	///
+	/// The type of the RValue
+	/// 
+	pub fn ty(&self) -> Type {
+		self.ty.clone()
+	}
 }
 
 impl Display for ConstValue {
@@ -228,7 +235,7 @@ impl Display for RValueKind {
 
 			Self::Move(place) => write!(f, "move {place}"),
 			Self::Copy(place) => write!(f, "copy {place}"),
-			Self::Ref(place) => write!(f, "ref {place}"),
+			Self::Ref(place) => write!(f, "shared {place}"),
 
 			Self::Call { function, params } => write!(f, "call {function} ({params})", params = params.iter().format(", ")),
 

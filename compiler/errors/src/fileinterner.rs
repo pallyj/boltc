@@ -61,7 +61,7 @@ impl File {
                              .unwrap_or(0);
 
         let next_break = self.line_breaks
-                             .range(n..)
+                             .range((n+1)..)
                              .next()
                              .cloned()
                              .unwrap_or_else(|| self.text.len());

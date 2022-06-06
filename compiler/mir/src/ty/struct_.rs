@@ -46,20 +46,12 @@ impl Struct {
 	/// 
 	/// 
 	pub (crate) fn new(id: StructId, name: String, fields: Vec<(String, Type)>, is_transparent: bool, is_packed: bool) -> Struct {
-		let mut enumerated_types = vec![];
-		let mut field_indices = HashMap::new();
-
-		for field in fields {
-			field_indices.insert(field.0, enumerated_types.len());
-			enumerated_types.push(field.1);
-		}
-
 		Struct { id,
 				 is_transparent,
 				 is_packed,
 				 name,
-				 fields: enumerated_types,
-				 field_indices }
+				 fields: vec![],
+				 field_indices: HashMap::new() }
 	}
 
 	pub fn id(&self) -> StructId {
@@ -87,6 +79,16 @@ impl Struct {
 	}
 
 	///
+	/// 
+	/// 
+	pub fn insert_fields(&mut self, fields: Vec<(String, Type)>) {
+		for field in fields {
+			self.field_indices.insert(field.0, self.fields.len());
+			self.fields.push(field.1);
+		}
+	}
+
+	///
 	/// Writes a struct to a formatter
 	/// 
 	pub (crate) fn write(&self, f: &mut std::fmt::Formatter, project: &Project) -> std::fmt::Result {
@@ -97,8 +99,9 @@ impl Struct {
 
 		for field in self.field_indices.keys() {
 			let ty = self.field_type(field).expect("");
-			writeln!(f, "\t{}: ", field)?;
+			write!(f, "\t{}: ", field)?;
 			ty.write(f, project)?;
+			writeln!(f)?;
 		}
 
 		writeln!(f, "}}")
