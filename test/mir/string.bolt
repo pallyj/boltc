@@ -1,0 +1,18 @@
+import intrinsics
+
+@transparent
+@charExpressible
+public struct Char {
+	var c: i32
+}
+
+public struct String {
+	var ptr: RawPointer<i8>
+	var len: i64
+}
+
+@entryPoint
+func main() {
+	let c: Char = "J"
+	let s: String = ""
+}

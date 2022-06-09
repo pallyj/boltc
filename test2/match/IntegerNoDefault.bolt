@@ -1,0 +1,10 @@
+@entryPoint
+func main() {
+	let n = 3
+
+	match n {
+		0 => print("zero"),
+		1 => print("one"),
+		2 => print("two")
+	}
+}

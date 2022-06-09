@@ -36,6 +36,11 @@ pub enum UnaryIntrinsicFn {
     Float64FromIntegerSig,
 
     StrSliceLen,
+
+    RawPointerDeref,
+    RawPointerRef,
+    RawPointerToAddr,
+    RawPointerFromAddr,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -79,6 +84,8 @@ pub enum BinaryIntrinsicFn {
     FloatCmpGte,
     FloatCmpLt,
     FloatCmpLte,
+
+    RawPointerAdd,
 }
 
 pub struct Intrinsics {
@@ -100,6 +107,43 @@ impl Intrinsics {
 
         self.add_bool_type();
         self.add_strslice_type();
+
+        self.add_rawptr_type();
+    }
+
+    pub fn add_rawptr_type(&self) {
+        let hk_rawptr = TypeKind::HKRawPointer;
+
+        self.scope.add_symbol(String::from("RawPointer"),
+                              Visibility::Public,
+                              Symbol::Type(hk_rawptr.clone()));
+
+        // rawPointerCopy
+        // rawPointerDeref
+        // rawPointerRef
+        // rawPointerAdd
+        // rawPointerToAddr
+        // rawPointerFromAddr
+
+        let generic_param = TypeKind::GenericParam(String::from("T")).anon();
+        let generic_pointer = TypeKind::RawPointer { pointer_type: Box::new(generic_param.clone()) }.anon();
+        let address = TypeKind::Integer { bits: 64 }.anon();
+
+        self.add_unary_func_generic(String::from("rawPointerDeref"), UnaryIntrinsicFn::RawPointerDeref, &generic_pointer, &generic_param);
+        self.add_unary_func_generic(String::from("rawPointerRef"), UnaryIntrinsicFn::RawPointerRef, &generic_param, &generic_pointer);
+        self.add_unary_func_generic(String::from("rawPointerToAddr"), UnaryIntrinsicFn::RawPointerToAddr, &generic_pointer, &address);
+        self.add_unary_func_generic(String::from("rawPointerFromAddr"), UnaryIntrinsicFn::RawPointerFromAddr, &address, &generic_pointer);
+        
+        let func_ty = TypeKind::Function { return_type: Box::new(generic_pointer.clone()),
+                                           params:      vec![generic_pointer.clone(), address.clone()],
+                                           labels:      vec![None, None], }.anon();
+
+        let func = ValueKind::BinaryIntrinsicFn(BinaryIntrinsicFn::RawPointerAdd).anon(func_ty);
+        let genericized_func = func.monomorph_infer(vec![String::from("T")]);
+
+        let sym = Symbol::Value(genericized_func);
+
+        self.scope.add_symbol(String::from("rawPointerAdd"), Visibility::Public, sym);
     }
 
     pub fn add_strslice_type(&self) {
@@ -454,6 +498,19 @@ impl Intrinsics {
         let func = ValueKind::UnaryIntrinsicFn(intrinsic).anon(func_ty);
 
         let sym = Symbol::Value(func);
+
+        self.scope.add_symbol(named, Visibility::Public, sym);
+    }
+
+    pub fn add_unary_func_generic(&self, named: String, intrinsic: UnaryIntrinsicFn, param: &TypeKind, return_ty: &TypeKind) {
+        let func_ty = TypeKind::Function { return_type: Box::new(return_ty.clone().anon()),
+                                           params:      vec![param.clone().anon()],
+                                           labels:      vec![None], }.anon();
+
+        let func = ValueKind::UnaryIntrinsicFn(intrinsic).anon(func_ty);
+        let generic_function = func.monomorph_infer(vec![String::from("T")]);
+
+        let sym = Symbol::Value(generic_function);
 
         self.scope.add_symbol(named, Visibility::Public, sym);
     }

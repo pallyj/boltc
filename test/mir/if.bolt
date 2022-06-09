@@ -1,0 +1,23 @@
+import intrinsics
+
+@defaultIntegerRepr
+struct Int {
+	var repr: i64
+
+	operator func add(other: Self): Self {
+		return Self(repr: integer64Add(self.repr, other.repr))
+	}
+}
+
+struct Bool {
+	var repr: i1
+}
+
+@entryPoint
+func main() {
+	let i = 420
+
+	if Bool(repr: true) {
+		print(i)
+	}
+}

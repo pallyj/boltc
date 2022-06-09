@@ -39,7 +39,7 @@ impl<'input, 'l> Parser<'input, 'l> {
                 self.parse_paren_comma_seq(Self::parse_func_arg);
 
                 completed = marker.complete(self, SyntaxKind::FuncCallExpr);
-            } else if self.check(SyntaxKind::Operator) {
+            } else if self.check(SyntaxKind::Operator) || self.check(SyntaxKind::Equals) {
                 if let Some(next) = self.parse_expr_postfix(in_precedence, is_before_brace, completed) {
                     completed = next;
                 } else {
@@ -77,7 +77,7 @@ impl<'input, 'l> Parser<'input, 'l> {
     }
 
     pub fn parse_expr_postfix(&mut self, in_precedence: OperatorPrecedence, is_before_brace: bool, completed: CompletedMarker) -> Option<CompletedMarker> {
-        assert!(self.check(SyntaxKind::Operator));
+        assert!(self.check(SyntaxKind::Operator) || self.check(SyntaxKind::Equals));
 
         let operator_symbol = self.lexemes[self.cursor].source;
 
@@ -240,14 +240,14 @@ impl<'input, 'l> Parser<'input, 'l> {
         if self.eat(SyntaxKind::Ident) {
             marker.complete(self, SyntaxKind::NamedExpr)
         } else if self.eat(SyntaxKind::LiteralDecInt)
-                  || self.eat(SyntaxKind::LiteralBinInt)
-                  || self.eat(SyntaxKind::LiteralOctInt)
-                  || self.eat(SyntaxKind::LiteralHexInt)
-                  || self.eat(SyntaxKind::LiteralDecFloat)
-                  || self.eat(SyntaxKind::LiteralTrue)
-                  || self.eat(SyntaxKind::LiteralFalse)
-                  || self.eat(SyntaxKind::StringLiteral)
-                  || self.eat(SyntaxKind::LongStringLiteral)
+               || self.eat(SyntaxKind::LiteralBinInt)
+               || self.eat(SyntaxKind::LiteralOctInt)
+               || self.eat(SyntaxKind::LiteralHexInt)
+               || self.eat(SyntaxKind::LiteralDecFloat)
+               || self.eat(SyntaxKind::LiteralTrue)
+               || self.eat(SyntaxKind::LiteralFalse)
+               || self.eat(SyntaxKind::StringLiteral)
+               || self.eat(SyntaxKind::LongStringLiteral)
         {
             marker.complete(self, SyntaxKind::Literal)
         } else if self.check(SyntaxKind::OpenParen) {

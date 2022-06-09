@@ -327,6 +327,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 self.debugger
                     .throw_single(ErrorCode::FunctionSigNotFound, span);
             }
+            1 => panic!("compiler error: polymorphism"),
             _ => {
                 let mut spans = polymorphic.open_possibilities()
                                            .iter()

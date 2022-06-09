@@ -72,6 +72,12 @@ impl Debug for ReturnSmt {
 }
 
 impl LetSmt {
+    pub fn varying(&self) -> bool {
+        self.0
+            .children_with_tokens()
+            .find(|element| element.kind() == SyntaxKind::VarKw)
+            .is_some()
+    }
     pub fn label(&self) -> String {
         self.0
             .children_with_tokens()
@@ -107,8 +113,9 @@ impl Debug for LetSmt {
         let value = self.value()
                         .map(|value| format!(" = {value:?}"))
                         .unwrap_or_else(|| "".to_string());
+        let varying = if self.varying() { "var " } else { "" };
 
-        write!(f, "let {label}{typ}{value}")
+        write!(f, "let {varying}{label}{typ}{value}")
     }
 }
 

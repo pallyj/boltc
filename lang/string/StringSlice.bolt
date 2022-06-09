@@ -5,18 +5,47 @@ public typealias String = StringSlice
 @defaultStringRepr
 @transparent
 public struct StringSlice {
-	internal var slice: strslice
+	internal var ptr: rawpointer
+	internal var len: UInt
 
 	public func length(): Int {
-		Int(repr: strslice_len(self.slice))
+		Int(self.len)
 	}
 
 	public operator func equal(other: StringSlice): Bool {
-		strslice_eq(self.slice, other.slice)
+		if self.len != other.len {
+			return false
+		}
+
+		let var i = 0;
+
+		while i < self.len {
+			if ptr.offset(i) != other.offset(i) {
+				return false
+			}
+
+			i += 1
+		}
+
+		return true
 	}
 
 	public operator func notEqual(other: StringSlice): Bool {
-		strslice_neq(self.slice, other.slice)
+		if self.len == other.len {
+			return false
+		}
+
+		let var i = 0;
+
+		while i < self.len {
+			if ptr.offset(i) == ptr.offset.offset(i) {
+				return false
+			}
+
+			i += 1
+		}
+
+		return true
 	}
 
 	public operator func index(range: IntRange): Optional_StringSlice {
@@ -32,7 +61,7 @@ public struct StringSlice {
 	}
 
 	public operator func index(unchecked range: IntRange): StringSlice {
-		strslice_slice(self.slice, range.bottom(), range.top())
+		StringSlice(raw_pointer.add(range.bottom()), len: range.top() - range.bottom() )
 	}
 
 	public operator func index(wrapped range: IntRange): Optional_StringSlice {
@@ -108,3 +137,47 @@ fileprivate func strslice_index(slice: strslice, idx: Int): Char
 fileprivate func strslice_slice(slice: strslice, start: Int, end: Int): StringSlice
 fileprivate func strslice_extend(slice: strslice, delta: Int): StringSlice
 fileprivate func strslice_head_slice(slice: strslice, delta: Int): StringSlice
+
+
+/*
+
+StringSlice
+	subscript(IntRange) -> StringSlice?
+	subscript(wrapped: IntRange) -> StringSlice?
+	subscript(unchecked: IntRange) -> StringSlice
+
+	subscript(Int) -> Char?
+	subscript(wrapped: Int) -> Char?
+	subscript(unchecked: Int) -> Char
+
+	equals
+	notEquals
+
+	chars() -> Char
+	charIndices()
+	utf16()
+	utf16Indices()
+	utf8()
+
+	firstIndex(of: Char)
+	endIndex()
+
+	length
+	isEmpty
+
+	lines()
+
+	split(by: Char)
+	split(once: Char)
+
+	strip(prefix: StringSlice)
+	strip(suffix: StringSlice)
+
+	trim(end: Char)
+	trim(start: Char)
+
+
+
+
+
+*/

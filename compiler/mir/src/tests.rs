@@ -1,3 +1,5 @@
+use errors::Span;
+
 use crate::instr::Terminator;
 use crate::{Project, Builder};
 use crate::ty::Type;
@@ -55,9 +57,9 @@ fn type_to_string() {
 
 #[test]
 fn val_to_string() {
-	assert_eq!("const 42", format!("{}", RValue::const_int(42, Type::int(32)) ));
-	assert_eq!("const 3.14", format!("{}", RValue::const_float(3.14, Type::float(32)) ));
-	assert_eq!("const \"Hello, World!\"", format!("{}", RValue::const_string("Hello, World!", Type::int(8).shared_pointer()) ));
+	assert_eq!("const 42", format!("{}", RValue::const_int(42, Type::int(32), Span::empty()) ));
+	assert_eq!("const 3.14", format!("{}", RValue::const_float(3.14, Type::float(32), Span::empty()) ));
+	assert_eq!("const \"Hello, World!\"", format!("{}", RValue::const_string("Hello, World!", Type::int(8).shared_pointer(), Span::empty()) ));
 
 
 }

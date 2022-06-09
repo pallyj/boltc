@@ -1,6 +1,7 @@
-use blir::code::{FunctionRef, MethodRef, FuncParam};
+use blir::{code::{FunctionRef, MethodRef, FuncParam, ExternFunctionRef}, value::Closure, typ::TypeKind};
+use errors::Span;
 use itertools::Itertools;
-use mir::{instr::Terminator, val::Place};
+use mir::{instr::Terminator, val::{Place, RValue}};
 
 use crate::BlirLowerer;
 
@@ -52,6 +53,27 @@ impl<'a> BlirLowerer<'a> {
 	}
 
 	///
+	/// Adds the signature of an extern function to a project
+	/// 
+	pub fn lower_extern_function(&mut self, func: &ExternFunctionRef) {
+		let borrowed_func = func.borrow();
+
+		let func_name = borrowed_func.info.link_name();
+		let parameters = borrowed_func.info.params()
+										   .iter()
+										   .map(|it| {
+												let ty = self.lower_ty(&it.typ);
+
+												if it.is_shared { ty.shared_pointer() }
+												else { ty }
+											})
+											.collect_vec();
+		let return_type = self.lower_ty(borrowed_func.info.return_type());
+
+		self.builder.add_extern_function(func_name, parameters, return_type);
+	}
+
+	///
 	/// Lower function code
 	/// 
 	pub (crate) fn lower_function_code(
@@ -69,9 +91,12 @@ impl<'a> BlirLowerer<'a> {
 		// Add parameters to the local context
 		for (i, parameter) in borrowed_function.info.params().iter().enumerate() {
 			let ty = self.lower_ty(&parameter.typ);
-			let place = Place::function_param(i, ty);
-
-			self.function_ctx.insert(parameter.bind_name.clone(), place);
+			let place = Place::function_param(i, ty, Self::span_of(parameter.typ.span())); // Use the span of the name
+			if let mir::ty::TypeKind::Pointer(_) = place.ty().kind() {
+				self.function_ctx.insert(parameter.bind_name.clone(), place.copy(Span::empty()).deref(Span::empty()));
+			} else {
+				self.function_ctx.insert(parameter.bind_name.clone(), place);
+			}
 		}
 
 		// Push a block onto the function and position the builder on it
@@ -116,9 +141,13 @@ impl<'a> BlirLowerer<'a> {
 
 		// Add parameters to function
 		for (i, (bind_name, param_type)) in params.zip(function.params()).enumerate() {
-			let param = Place::function_param(i, param_type.clone());
+			let param = Place::function_param(i, param_type.clone(), Span::empty());
 
-			self.function_ctx.insert(bind_name.to_string(), param);
+			if let mir::ty::TypeKind::Pointer(_) = param.ty().kind() {
+				self.function_ctx.insert(bind_name.to_string(), param.copy(Span::empty()).deref(Span::empty()));
+			} else {
+				self.function_ctx.insert(bind_name.to_string(), param);
+			}
 		}
 
 		// Push a block onto the function and position the builder on it
@@ -131,6 +160,43 @@ impl<'a> BlirLowerer<'a> {
 		// Check if the function has an explicit return
 		// If it does, it would cause a segfault to return here
         if !borrowed_method.code.escapes() {
+			// If we have a yielded value, return it
+			if let Some(return_val) = yield_value {
+				self.builder.build_terminator(Terminator::returns(return_val))
+			} else {
+				self.builder.build_terminator(Terminator::return_void())
+			}
+        }
+	}
+
+	pub(crate) fn lower_closure_code(&mut self, name: &str, closure: &Closure) {
+        let function_id = self.builder.get_function_id(name);
+
+        self.builder.position_on_func(function_id);
+
+		// Enter a new function
+		self.function_ctx.clear();
+
+        for (i, param) in closure.params.iter().enumerate() {
+            if let TypeKind::Void = param.typ.kind() {
+                // self.context.define_var(&param.name, LabelValue::void());
+                // continue;
+            }
+			let param_ty = self.lower_ty(&param.typ);
+            let arg_value = Place::function_param(i, param_ty, Self::span_of(param.typ.span()));
+			self.function_ctx.insert(param.name.clone(), arg_value);
+        }
+
+        // Push a block onto the function and position the builder on it
+		let start_block = self.builder.append_block();
+		self.builder.position_at_end(start_block);
+
+		// Lower the code
+        let yield_value = self.lower_code_block(&closure.code);
+
+		// Check if the function has an explicit return
+		// If it does, it would cause a segfault to return here
+        if !closure.code.escapes() {
 			// If we have a yielded value, return it
 			if let Some(return_val) = yield_value {
 				self.builder.build_terminator(Terminator::returns(return_val))

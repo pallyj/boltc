@@ -1,5 +1,5 @@
 use super::{marker::{CompletedMarker, Marker},
-            Parser};
+            Parser, expr::EXPR_RECOVERY_SET};
 use crate::lexer::SyntaxKind;
 
 const TYPE_RECOVERY_SET: &[SyntaxKind] = &[SyntaxKind::LetKw,
@@ -69,8 +69,24 @@ impl<'input, 'l> Parser<'input, 'l> {
     pub fn parse_ty_return(&mut self) {
         let marker = self.start();
 
-        if self.eat(SyntaxKind::Colon) {
-            self.parse_ty()
+        let colon = self.check(SyntaxKind::Colon);
+        let arrow = self.check(SyntaxKind::Arrow);
+
+        let use_arrow_returns = feature_gate::has_feature("arrow_function");
+
+        if arrow || colon {
+            // todo: change it to a warning
+            if arrow != use_arrow_returns {
+                if use_arrow_returns {
+                    self.error("expected `->`");
+                } else {
+                    self.error("bolt uses the colon symbol for return types");
+                }
+            }
+
+            self.bump();
+
+            self.parse_ty();
         }
 
         marker.complete(self, SyntaxKind::FuncReturn);
@@ -87,6 +103,34 @@ impl<'input, 'l> Parser<'input, 'l> {
             let completed_marker = marker.complete(self, SyntaxKind::MemberType);
 
             self.parse_ty_postfix(completed_marker);
+        } else if self.check(SyntaxKind::Operator) {
+            if self.lexemes[self.cursor].source == "<" {
+                let generic = parent.precede(self);
+
+                self.bump();
+
+                let list = self.start();
+
+                loop {
+                    self.parse_ty();
+
+                    if !self.eat(SyntaxKind::Comma) {
+                        break
+                    }
+                }
+
+                if self.check(SyntaxKind::Operator) {
+                    if self.lexemes[self.cursor].source == ">" {
+                        list.complete(self, SyntaxKind::CommaSeparatedList);
+                        self.bump();
+
+                        let completed_marker = generic.complete(self, SyntaxKind::GenericType);
+                        return self.parse_ty_postfix(completed_marker);
+                    }
+                }
+
+                self.error_recover("expected closing bracket `>`", EXPR_RECOVERY_SET);
+            }
         }
     }
 }

@@ -1,3 +1,5 @@
+#![feature(let_else)]
+
 pub mod ty;
 pub mod val;
 pub mod instr;
@@ -14,7 +16,6 @@ pub use project::Project;
 todo list:
 
 - finish execution engine
-- function types
 - add enums
 - add dropping
 - add tests

@@ -29,10 +29,14 @@ pub enum TypeKind {
         member: String,
     },
 
+    ///
     /// Signifies the type must be inferred. This type is created by the parser
+    /// 
     Infer {
         key: u64,
     },
+
+    UnknownInfer,
 
     // First-class types
     Void,
@@ -67,6 +71,20 @@ pub enum TypeKind {
     // Second-class types
     Divergent,
     Metatype(Box<Type>),
+
+    // Generic types
+    GenericParam(String),
+    GenericOf {
+        higher_kind: Box<Type>,
+        params: Vec<Type>,
+    },
+
+    HKRawPointer,
+
+    ///
+    /// A raw pointer to a value
+    /// 
+    RawPointer { pointer_type: Box<Type> },
 
     Error,
 }
@@ -197,6 +215,8 @@ impl Type {
 
             TypeKind::Tuple(types, _) => MangledType::Tuple(types.iter().map(Self::mangle).collect()),
 
+            TypeKind::RawPointer { pointer_type: _ } => MangledType::Pointer, // todo: add arg
+
             _ => panic!(),
         }
     }
@@ -230,6 +250,7 @@ impl Debug for Type {
             TypeKind::Named(name) => write!(f, "#{name}"),
             TypeKind::Member { parent, member } => write!(f, "{parent:?}.{member}"),
             TypeKind::Infer { key } => write!(f, "_{key}"),
+            TypeKind::UnknownInfer => write!(f, "_"),
             TypeKind::Void => write!(f, "()"),
             TypeKind::Function { return_type,
                                  params,
@@ -275,6 +296,11 @@ impl Debug for Type {
             TypeKind::SomeFloat => write!(f, "some Float"),
             TypeKind::SomeBool => write!(f, "some Bool"),
             TypeKind::SomeFunction => write!(f, "some func"),
+
+            TypeKind::GenericParam(name) => write!(f, "{name}"),
+            TypeKind::GenericOf { higher_kind, params } => write!(f, "{higher_kind:?}<{}>", params.iter().map(|p| format!("{p:?}")).collect::<Vec<_>>().join(", ")),
+            TypeKind::HKRawPointer => write!(f, "RawPointer<_>"),
+            TypeKind::RawPointer { pointer_type: ptr } => write!(f, "RawPointer<{ptr:?}>"),
         }
     }
 }

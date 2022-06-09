@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::{Project, code::BasicBlockId, instr::{Terminator, Instruction}, val::{RValue, DuoIntrinsic, Place, SoloIntrinsic}};
+use crate::{Project, code::BasicBlockId, instr::{Terminator, Instruction}, val::{RValue, DuoIntrinsic, Place, SoloIntrinsic, ConstValue}, ty::{Type, TypeKind}};
 
 use self::{val::Value, frame::StackFrame};
 
@@ -25,14 +25,15 @@ impl<'a> ExecutionEngine<'a> {
 	}
 
 	pub fn run_function(&self, name: &str, params: Vec<Value>) -> Value {
+		println!("Running {name}");
 		let function = self.project.get_function_named(name).expect("Function does not exist");
 
 		if function.params().len() != params.len() {
-			panic!("Wrong number of params passed");
+			panic!("Wrong number of params passed in {name}");
 		}
 
 		// Extract all mutable state into a StackFrame
-		let mut stack_frame = StackFrame::new(function.locals(), self.project);
+		let mut stack_frame = StackFrame::new(function.params(), function.locals(), self.project);
 		stack_frame.use_parameters(params);
 
 		let mut basic_block_id = function.first_basic_block();
@@ -45,23 +46,32 @@ impl<'a> ExecutionEngine<'a> {
 				self.run_instruction(instruction, &mut stack_frame);
 			}
 
-			match self.next_after_terminator(basic_block.terminator(), &stack_frame) {
+			match self.next_after_terminator(basic_block.terminator(), &mut stack_frame) {
 				Action::JumpTo(next_basic_block) => basic_block_id = next_basic_block,
 				Action::Return(value) => return value
 			}
 		}
 	}
 
-	pub fn eval(&self, value: &RValue, frame: &StackFrame) -> Value {
+	pub fn eval(&self, value: &RValue, frame: &mut StackFrame) -> Value {
 		use crate::val::RValueKind::*;
 
 		match value.kind() {
+			Const(ConstValue::String(s)) => {
+				let bytes = s.bytes().map(|byte| Value::Int(byte as u64)).collect_vec().leak();
+
+				Value::Ref(bytes.as_mut_ptr())
+			}
 			Const(const_value) => Value::from_const(const_value.clone()),
 			Copy(place) => self.copy(&place, frame),
 			Move(place) => self.move_value(&place, frame),
 			DuoIntrinsic { intrinsic, left, right } => self.duo_intrinsic(*intrinsic, self.eval(&left, frame), self.eval(&right, frame)),
 			SoloIntrinsic { intrinsic, operand } => self.solo_intrinsic(*intrinsic, self.eval(operand, frame)),
-			Ref(_) => todo!(),
+			Ref(place) => {
+				let ptr_self = self.get_mut_ptr(place, frame) as *mut Value;
+
+				Value::Ref(ptr_self)
+			},
 			Call { function, params } => {
 				let function = self.eval(function, frame);
 				let params = params.iter().map(|param| self.eval(param, frame)).collect_vec();
@@ -76,8 +86,7 @@ impl<'a> ExecutionEngine<'a> {
 				}
 			}
 			Tuple { items } => Value::Tuple(items.iter().map(|param| self.eval(param, frame)).collect_vec()),
-			Function { is_extern, name } => if *is_extern { Value::ExternFunction(name.clone()) } else { Value::Function(name.clone()) },
-			Discriminant(_) => todo!(),
+			Function { is_extern, name } => if *is_extern { Value::ExternFunction(name.clone()) } else { Value::Function(name.clone()) }
 		}
 	}
 
@@ -92,7 +101,7 @@ impl<'a> ExecutionEngine<'a> {
 		}
 	}
 
-	pub fn next_after_terminator(&self, terminator: &Terminator, frame: &StackFrame) -> Action {
+	pub fn next_after_terminator(&self, terminator: &Terminator, frame: &mut StackFrame) -> Action {
 		use crate::instr::TerminatorKind::*;
 
 		match terminator.kind() {
@@ -123,11 +132,11 @@ impl<'a> ExecutionEngine<'a> {
 		}
 	}
 
-	pub fn move_value(&self, place: &Place, frame: &StackFrame) -> Value {
+	pub fn move_value(&self, place: &Place, frame: &mut StackFrame) -> Value {
 		self.copy(place, frame)
 	}
 
-	pub fn copy(&self, place: &Place, frame: &StackFrame) -> Value {
+	pub fn copy(&self, place: &Place, frame: &mut StackFrame) -> Value {
 		self.get_ptr(place, frame).clone()
 	}
 
@@ -135,7 +144,7 @@ impl<'a> ExecutionEngine<'a> {
 		*self.get_mut_ptr(place, frame) = value;
 	}
 
-	fn get_ptr<'b>(&self, place: &Place, frame: &'b StackFrame) -> &'b Value {
+	fn get_ptr<'b>(&self, place: &Place, frame: &'b mut StackFrame) -> &'b Value {
 		use crate::val::PlaceKind::*;
 
 		match place.kind() {
@@ -144,7 +153,23 @@ impl<'a> ExecutionEngine<'a> {
 				Value::Struct(fields) => fields.get(field).expect("struct doesn't have field"),
 				v => panic!("Can't get a struct fiend of {v:?}")
 			},
-			CastEnumVariant(_, _) => todo!(),
+			CastEnumVariant(enum_place, _, _) => {
+				let ptr = match self.get_mut_ptr(enum_place, frame) {
+					Value::Enum(_, associated) => associated,
+					_ => panic!()
+				};
+
+				if let Value::Undef = &**ptr {
+					// Set pointer to the new type
+					if let TypeKind::Tuple(items) = place.ty().kind() {
+						*ptr.as_mut() = Value::Tuple(items.iter().map(|_| Value::Undef).collect_vec());
+					} else {
+						panic!("{:?}", place.ty())
+					}
+				}
+
+				ptr.as_mut()
+			}
 			TupleItem(place, index) => {
 				let value_ptr = self.get_ptr(place, frame);
 
@@ -153,7 +178,14 @@ impl<'a> ExecutionEngine<'a> {
 					_ => panic!()
 				}
 			},
-			Deref(_) => todo!(),
+			Deref(rvalue) => match self.eval(rvalue, frame) {
+				Value::Ref(place) => unsafe { & *place },
+				_ => panic!()
+			},
+			Discriminant(place) => match self.get_ptr(place, frame) {
+				Value::Enum(discriminant, _) => discriminant,
+				_ => panic!()
+			}
 		}
 	}
 
@@ -166,7 +198,23 @@ impl<'a> ExecutionEngine<'a> {
 				Value::Struct(fields) => fields.get_mut(field).expect("struct doesn't have field"),
 				v => panic!("Can't get a struct fiend of {v:?}")
 			},
-			CastEnumVariant(_, _) => todo!(),
+			CastEnumVariant(enum_place, _, _) => {
+				let ptr = match self.get_mut_ptr(enum_place, frame) {
+					Value::Enum(_, associated) => associated,
+					_ => panic!()
+				};
+
+				if let Value::Undef = &**ptr {
+					// Set pointer to the new type
+					if let TypeKind::Tuple(items) = place.ty().kind() {
+						*ptr.as_mut() = Value::Tuple(items.iter().map(|_| Value::Undef).collect_vec());
+					} else {
+						panic!("{:?}", place.ty())
+					}
+				}
+
+				ptr.as_mut()
+			}
 			TupleItem(place, index) => {
 				let value_ptr = self.get_mut_ptr(place, frame);
 
@@ -175,7 +223,14 @@ impl<'a> ExecutionEngine<'a> {
 					t => panic!("Value {t:?} is not a tuple")
 				}
 			},
-			Deref(_) => todo!(),
+			Deref(rvalue) => match self.eval(rvalue, frame) {
+				Value::Ref(place) => unsafe { &mut *place },
+				_ => panic!()
+			},
+			Discriminant(place) => match self.get_mut_ptr(place, frame) {
+				Value::Enum(discriminant, _) => discriminant,
+				_ => panic!()
+			}
 		}
 	}
 
@@ -201,6 +256,7 @@ impl<'a> ExecutionEngine<'a> {
 				ICnvF16Sig => Value::Float((operand as i64) as f64),
 				ICnvF32Sig => Value::Float((operand as i64) as f64),
 				ICnvF64Sig => Value::Float((operand as i64) as f64),
+				AddrCnvPtr => Value::Ref(operand as *mut Value),
 				_ => unreachable!()
 			}
 
@@ -211,6 +267,11 @@ impl<'a> ExecutionEngine<'a> {
 				FTrunc16 => Value::Float(operand),
 				FTrunc32 => Value::Float(operand),
 				FCnvI => Value::Int((operand as i64) as u64),
+				_ => unreachable!()
+			}
+
+			Value::Ref(value) => match intrinsic {
+				PtrCnvAddr => Value::Int(value as u64),
 				_ => unreachable!()
 			}
 
@@ -304,6 +365,7 @@ impl<'a> ExecutionEngine<'a> {
 			"printDouble" => if let Value::Float(n) = params[0] {
 				print!("{}", n)
 			}
+			"printLine" => println!(),
 
 			_ => panic!("Function {name} isn't defined")
 		}

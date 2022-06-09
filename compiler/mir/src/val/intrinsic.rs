@@ -21,6 +21,9 @@ pub enum SoloIntrinsic {
 	FTrunc16, FTrunc32,
 
 	FCnvI,
+
+    AddrCnvPtr,
+    PtrCnvAddr,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -112,6 +115,8 @@ impl Display for SoloIntrinsic {
             SoloIntrinsic::FTrunc16 => write!(f, "float.trunc.16"),
             SoloIntrinsic::FTrunc32 => write!(f, "float.trunc.32"),
             SoloIntrinsic::FCnvI => write!(f, "float.icnv.64"),
+            SoloIntrinsic::AddrCnvPtr => write!(f, "addr.ptrconv"),
+            SoloIntrinsic::PtrCnvAddr => write!(f, "ptr.addrconv"),
         }
     }
 }

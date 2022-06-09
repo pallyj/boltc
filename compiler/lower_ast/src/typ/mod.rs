@@ -53,6 +53,12 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
             }
 
             AstType::InferType(_) => Type::infer().kind,
+            AstType::GenericType(generic) => {
+                let hk = self.lower_type(generic.polymorphic_type());
+                let parameters = generic.type_arguments().into_iter().map(|ty| self.lower_type(ty)).collect::<Vec<_>>();
+
+                TypeKind::GenericOf { higher_kind: Box::new(hk), params: parameters }
+            }
             AstType::Error => panic!(),
         }.spanned(span)
     }

@@ -58,17 +58,46 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                                                                labels: vec![None], }, }.spanned(Type::infer(), span)
             }
             AstExpr::InfixExpr(infix) => {
-                let operator_symbol = infix.operator();
-                let operator = self.factory.get_postfix_op(&operator_symbol).unwrap();
+                let mut operator_symbol = infix.operator();
 
-                let function = TypeKind::Function { return_type: Box::new(Type::infer()),
-                                                    params:      vec![Type::infer(), Type::infer()],
-                                                    labels:      vec![None, None], }.anon();
+                if operator_symbol == "=" {
+                    let left = self.lower_expr(infix.left());
+                    let right = self.lower_expr(infix.right());
 
-                ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
-                                      args:     FunctionArgs { args:   vec![self.lower_expr(infix.left()),
-                                                                            self.lower_expr(infix.right())],
-                                                               labels: vec![None, None], }, }.spanned(Type::infer(), span)
+                    return ValueKind::Assign(Box::new(left), Box::new(right))
+                                    .spanned(TypeKind::Void.spanned(span), span)
+                }
+                
+                if let Some(operator_symbol) = operator_symbol.strip_suffix('=') {
+                    let operator = self.factory.get_postfix_op(operator_symbol).unwrap();
+
+                    let function = TypeKind::Function { return_type: Box::new(Type::infer()),
+                                                        params:      vec![Type::infer(), Type::infer()],
+                                                        labels:      vec![None, None], }.anon();
+
+                    let left = self.lower_expr(infix.left());
+                    let right = self.lower_expr(infix.right());
+    
+                    let assign_val = ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
+                                                           args:     FunctionArgs { args:   vec![left.clone(), right],
+                                                                                    labels: vec![None, None] } }.spanned(Type::infer(), span);
+
+                    return ValueKind::Assign(Box::new(left), Box::new(assign_val))
+                                    .spanned(TypeKind::Void.spanned(span), span)                                   
+                } else {
+                    let operator = self.factory.get_postfix_op(&operator_symbol).unwrap();
+
+                    let function = TypeKind::Function { return_type: Box::new(Type::infer()),
+                                                        params:      vec![Type::infer(), Type::infer()],
+                                                        labels:      vec![None, None], }.anon();
+    
+                    ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
+                                          args:     FunctionArgs { args:   vec![self.lower_expr(infix.left()),
+                                                                                self.lower_expr(infix.right())],
+                                                                   labels: vec![None, None], }, }.spanned(Type::infer(), span)
+                }
+
+                
             }
             AstExpr::IndexExpr(index) => {
                 let operator = "index".to_string();

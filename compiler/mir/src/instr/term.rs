@@ -132,9 +132,9 @@ impl Display for TerminatorKind {
 			TerminatorKind::Switch { scrutinee, arms, default } => {
 				writeln!(f, "switch {scrutinee} else {default} {{")?;
 				for branch in arms {
-					write!(f, "{value} => {branch}", value = branch.match_value, branch = branch.arm_block)?;
+					writeln!(f, "\t\t{value} => {branch}", value = branch.match_value, branch = branch.arm_block)?;
 				}
-				write!(f, "}}")
+				write!(f, "\t}}")
 			}
             TerminatorKind::ReturnVoid => write!(f, "return"),
             TerminatorKind::Return { value } => write!(f, "return {value}"),

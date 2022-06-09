@@ -21,6 +21,7 @@ ast!(struct InferType(InferType));
 ast!(struct ParenthesizedType(ParenthesizedType));
 ast!(struct TupleType(TupleType));
 ast!(struct TupleMember(FuncArg));
+ast!(struct GenericType(GenericType));
 
 ast!(
     enum Type {
@@ -31,6 +32,7 @@ ast!(
         ParenthesizedType,
         TupleType,
         InferType,
+        GenericType,
     }
 );
 
@@ -45,6 +47,7 @@ impl Debug for Type {
             Self::TupleType(arg0) => write!(f, "{arg0:?}"),
             Self::InferType(_) => write!(f, "_"),
             Self::Error => write!(f, "Error"),
+            Self::GenericType(arg0) => write!(f, "{arg0:?}")
         }
     }
 }
@@ -175,5 +178,24 @@ impl Debug for TupleMember {
         } else {
             write!(f, "{:?}", self.typ())
         }
+    }
+}
+
+impl GenericType {
+    pub fn polymorphic_type(&self) -> Type {
+        Type::cast(self.0.first_child().unwrap())
+    }
+
+    pub fn type_arguments(&self) -> Vec<Type> {
+        self.0.last_child().unwrap()
+            .children()
+            .map(Type::cast)
+            .collect()
+    }
+}
+
+impl Debug for GenericType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}<{}>", self.polymorphic_type(), self.type_arguments().iter().map(|ty| format!("{ty:?}")).collect::<Vec<_>>().join(", "))
     }
 }

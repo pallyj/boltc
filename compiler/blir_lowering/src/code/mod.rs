@@ -30,12 +30,15 @@ impl<'a> BlirLowerer<'a> {
 			Eval { value, escaped } => (!escaped).then_some(self.lower_rvalue(value)),
 			Bind { name, value, typ } => {
 				// Assign a value, if we can
+				// todo: check if these are mutable
 				if let Some(value) = value {
-					let place = self.lower_place(value);
+					let ty = self.lower_ty(&typ);
+					let place = self.builder.build_local(ty, false, Self::span_of(smt.span().cloned()));
+					self.lower_assign(&place, &value);
 					self.function_ctx.insert(name.clone(), place);
 				} else {
 					let ty = self.lower_ty(&typ);
-					let place = self.builder.build_local(ty);
+					let place = self.builder.build_local(ty, false, Self::span_of(smt.span().cloned()));
 					self.function_ctx.insert(name.clone(), place);
 				}
 

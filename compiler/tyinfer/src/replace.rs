@@ -50,8 +50,6 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
     }
 
     pub fn replace_value(&mut self, value: &mut Value, scope: &ScopeRef) {
-        // println!("Replacing {value:?}");
-
         self.replace_type(&mut value.typ, &value.span);
 
         match &mut value.kind {
@@ -61,8 +59,6 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                     TypeKind::Method { params, .. } => params,
                     _ => return,
                 };
-
-                //println!("Polymorph with {}", monomorphizer.degrees());
 
                 if let Some(resolved_function) = monomorphizer.resolve() {
                     self.replace_function(value, resolved_function);
@@ -253,6 +249,11 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                     self.replace_codeblock(&mut branch.code, scope);
                 }
             }
+            
+            ValueKind::Assign(left, right) => {
+                self.replace_value(left.as_mut(), scope);
+                self.replace_value(right.as_mut(), scope);
+            }
 
             _ => {}
         }
@@ -344,6 +345,20 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 value.set_kind(ValueKind::ExternFunc(func_ref))
             }
 
+            SomeFunction::Initializer(method_ref) => {
+                let method_type = method_ref.take_typ();
+                if let TypeKind::Method { reciever, params, .. } = method_type.kind() {
+                    let method_type_virt = TypeKind::Function { return_type: reciever.clone(),
+                                                                params: params.clone(),
+                                                                labels: method_ref.borrow().info.params().iter().map(|p| p.label.clone()).collect() }.anon();
+                    
+                    value.set_type(method_type_virt);
+                    value.set_kind(ValueKind::Initializer(method_ref, method_type));
+                } else {
+                    panic!()
+                }
+            }
+
             _ => {}
         }
     }
@@ -432,6 +447,8 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 					return;
 				};
 
+                println!("{typ:?} = {variant:?}");
+
                 if let Some(concrete_type) = self.type_for_variant(variant) {
                     typ.set_kind(concrete_type);
                     self.replace_type(typ, span);
@@ -455,6 +472,8 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
             TypeKind::Member { parent, .. } => self.replace_type(parent, span),
 
             TypeKind::Method { reciever, .. } => self.replace_type(reciever, span),
+
+            TypeKind::RawPointer { pointer_type } => self.replace_type(pointer_type.as_mut(), span),
 
             _ => {}
         }

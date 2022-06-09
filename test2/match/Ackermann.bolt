@@ -1,0 +1,12 @@
+@entryPoint
+func main() {
+	print(ackermann(3, 3))
+}
+
+func ackermann(m: Int, n: Int): Int {
+	match (m, n) {
+		(0, _) => n + 1,
+		(_, 0) => ackermann(m - 1, 1),
+		_ => ackermann(m - 1, ackermann(m, n - 1))
+	}
+}

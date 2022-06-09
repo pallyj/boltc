@@ -71,5 +71,5 @@ impl ExternFunction {
 }
 
 impl Display for ExternFunction {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { writeln!(f, "func {name}{type};", name = self.name, type = self.func_type) }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { writeln!(f, "func {name}{typ};", name = self.name, typ = self.func_type) }
 }

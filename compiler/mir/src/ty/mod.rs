@@ -1,6 +1,8 @@
 mod struct_;
+mod enum_;
 
 pub use struct_::{Struct, StructId};
+pub use enum_::{Enum, EnumId};
 
 use crate::Project;
 
@@ -12,7 +14,7 @@ pub enum TypeKind {
 	Integer { bits: u32 },
 	Float { bits: u32 },
 	Struct { id: StructId },
-	// Enum { id: EnumId },
+	Enum { id: EnumId },
 	Pointer(Box<Type>),
 	Tuple (Vec<Type>),
 	Array {
@@ -102,6 +104,13 @@ impl Type {
 		Type { kind: TypeKind::Struct { id } }
 	}
 
+	///
+	/// 
+	/// 
+	pub fn c_enum(id: EnumId) -> Type {
+		Type { kind: TypeKind::Enum { id } }
+	}
+
 
 	///
 	/// What type this is
@@ -127,6 +136,7 @@ impl Type {
 			TypeKind::Float { bits } => write!(f, "f{bits}"),
 
 			TypeKind::Struct { id } => write!(f, "{}", project.get_struct(*id).expect("struct doesn't exist").name()),
+			TypeKind::Enum { id } => write!(f, "{}", project.get_enum(*id).expect("enum doesn't exist").name()),
 
 			TypeKind::Pointer(resolving) => {
 				write!(f, "shared ")?;

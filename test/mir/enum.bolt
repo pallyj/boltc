@@ -1,0 +1,15 @@
+enum Optional_Int {
+	case none
+	case some(Int)
+}
+
+@entryPoint
+func main() {
+	let x: Optional_Int = .none
+	let x: Optional_Int = .some(100)
+
+	match x {
+		.some(n) => print(n),
+		.none => {}
+	}
+}

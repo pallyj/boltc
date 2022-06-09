@@ -115,19 +115,21 @@ impl OperatorFactory {
         //
         self.register_infix("openRange", "..=", OperatorPrecedence::Secondary);
         self.register_infix("closedRange", "..<", OperatorPrecedence::Secondary);
-        // self.register_infix("addAssign", "+=", OperatorPrecedence::Assignment);
-        // self.register_infix("subAssign", "-=", OperatorPrecedence::Assignment);
-        // self.register_infix("mulAssign", "*=", OperatorPrecedence::Assignment);
-        // self.register_infix("divAssign", "/=", OperatorPrecedence::Assignment);
-        // self.register_infix("modAssign", "%=", OperatorPrecedence::Assignment);
-        //
-        // self.register_infix("shiftLeftAssign", "<<=", OperatorPrecedence::Assignment);
-        // self.register_infix("shiftRightAssign", ">>=", OperatorPrecedence::Assignment);
-        // self.register_infix("bitAndAssign", "&=", OperatorPrecedence::Assignment);
-        // self.register_infix("bitOrAssign", "|=", OperatorPrecedence::Assignment);
-        // self.register_infix("bitXorAssign", "^=", OperatorPrecedence::Assignment);
-        //
-        // self.register_infix("assign", "=", OperatorPrecedence::Assignment);
+
+        self.register_infix("addAssign", "+=", OperatorPrecedence::Assignment);
+        self.register_infix("subAssign", "-=", OperatorPrecedence::Assignment);
+        self.register_infix("mulAssign", "*=", OperatorPrecedence::Assignment);
+        self.register_infix("divAssign", "/=", OperatorPrecedence::Assignment);
+        self.register_infix("modAssign", "%=", OperatorPrecedence::Assignment);
+        
+        self.register_infix("shiftLeftAssign", "<<=", OperatorPrecedence::Assignment);
+        self.register_infix("shiftRightAssign", ">>=", OperatorPrecedence::Assignment);
+        self.register_infix("bitAndAssign", "&=", OperatorPrecedence::Assignment);
+        self.register_infix("bitOrAssign", "|=", OperatorPrecedence::Assignment);
+        self.register_infix("bitXorAssign", "^=", OperatorPrecedence::Assignment);
+
+        self.register_infix("assign", "=", OperatorPrecedence::Assignment);
+        
         self.register_postfix("upperRange", "..");
         self.register_prefix("unit", "+");
         self.register_prefix("negate", "-");

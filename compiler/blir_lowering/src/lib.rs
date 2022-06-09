@@ -3,6 +3,8 @@
 
 use std::collections::HashMap;
 
+use blir::value::Closure;
+use errors::Span;
 use mir::val::Place;
 
 mod ty;
@@ -15,6 +17,7 @@ mod code;
 pub struct BlirLowerer<'a> {
     builder: mir::Builder<'a>,
     libraries: Vec<blir::Library>,
+    closures: Vec<(String, Closure)>,
     // todo: move these to another struct
     function_ctx: HashMap<String, Place>,
 }
@@ -26,7 +29,7 @@ impl<'a> BlirLowerer<'a> {
     pub fn new(project: &'a mut mir::Project, libraries: Vec<blir::Library>) -> Self {
         let builder = project.builder();
 
-        Self { builder, libraries, function_ctx: HashMap::new() }
+        Self { builder, libraries, function_ctx: HashMap::new(), closures: Vec::new() }
     }
 
     ///
@@ -60,6 +63,7 @@ impl<'a> BlirLowerer<'a> {
 
             for enum_def in &library.enums {
                 // Lower the enum definition
+                self.lower_enum_definition(enum_def);
             }
         }
 
@@ -75,10 +79,12 @@ impl<'a> BlirLowerer<'a> {
 
             for enum_def in &library.enums {
                 // Lower the enum signature
+                self.lower_enum_signature(enum_def)
             }
 
             for func_def in &library.extern_functions {
                 // Lower the extern function
+                self.lower_extern_function(func_def);
             }
 
             for func_def in &library.functions {
@@ -106,6 +112,15 @@ impl<'a> BlirLowerer<'a> {
             }
         }
 
+        let closures = std::mem::take(&mut self.closures);
+
         // Lower each closure
+        for (closure_name, closure) in closures {
+            self.lower_closure_code(&closure_name, &closure)
+        }
+    }
+
+    pub (crate) fn span_of(span: Option<Span>) -> Span {
+        span.unwrap_or_else(|| Span::empty())
     }
 }

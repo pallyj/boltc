@@ -1,8 +1,9 @@
 use std::fmt::Display;
 
+use errors::Span;
 use itertools::Itertools;
 
-use crate::{ty::{Type, TypeKind}, code::Function};
+use crate::{ty::{Type, TypeKind}, code::{Function, ExternFunction}};
 
 use super::{place::Place, PlaceKind, SoloIntrinsic, DuoIntrinsic};
 
@@ -76,12 +77,6 @@ pub enum RValueKind {
 		name: 		String,
 	},
 
-	///
-	/// Gets the discriminant of an enum
-	/// 
-	// todo: is it a `Place` or a `RValue`
-	Discriminant(Box<RValue>),
-
 	/// 
 	/// A LLVM intrinsic with one operand
 	/// 
@@ -106,41 +101,43 @@ pub enum RValueKind {
 #[derive(Debug, Clone, PartialEq)]
 pub struct RValue {
 	pub (super) kind: RValueKind,
-	pub (super) ty: Type
+	pub (super) ty: Type,
+	pub (super) span: Span
 }
 
 impl RValue {
 	///
 	/// Returns a constant integer
 	/// 
-	pub fn const_int(n: u64, ty: Type) -> Self {
-		RValue { kind: RValueKind::Const(ConstValue::Integer(n)), ty }
+	pub fn const_int(n: u64, ty: Type, span: Span) -> Self {
+		RValue { kind: RValueKind::Const(ConstValue::Integer(n)), ty, span }
 	}
 
 	///
 	/// Returns a constant float
 	/// 
 
-	pub fn const_float(n: f64, ty: Type) -> Self {
-		RValue { kind: RValueKind::Const(ConstValue::Float(n)), ty }
+	pub fn const_float(n: f64, ty: Type, span: Span) -> Self {
+		RValue { kind: RValueKind::Const(ConstValue::Float(n)), ty, span }
 	}
 
 	///
 	/// Returns a constant string
 	/// 
-	pub fn const_string(s: &str, ty: Type) -> Self {
-		RValue { kind: RValueKind::Const(ConstValue::String(s.to_string())), ty }
+	pub fn const_string(s: &str, ty: Type, span: Span) -> Self {
+		RValue { kind: RValueKind::Const(ConstValue::String(s.to_string())), ty, span }
 	}
 
 	///
 	/// Calls this value as a functions, with `params` as parameters
 	/// 
-	pub fn call(self, params: Vec<RValue>) -> Self {
+	pub fn call(&self, params: Vec<RValue>, span: Span) -> Self {
 		if let TypeKind::Function { return_type, .. } = self.ty.kind() {
 			let return_type = (&**return_type).clone();
 
-			RValue { kind: RValueKind::Call { function: Box::new(self),
-				params }, ty: return_type }
+			RValue { kind: RValueKind::Call { function: Box::new(self.clone()), params },
+					 ty: return_type,
+					 span }
 
 		} else {
 			panic!()
@@ -150,54 +147,52 @@ impl RValue {
 	///
 	/// Creates a tuple with the items `items`
 	/// 
-	pub fn tuple(items: Vec<RValue>) -> Self {
+	pub fn tuple(items: Vec<RValue>, span: Span) -> Self {
 		let tuple_type = Type::tuple(items.iter().map(|item| item.ty.clone()).collect_vec());
-		RValue { kind: RValueKind::Tuple { items }, ty: tuple_type}
-	}
-
-
-	///
-	/// Get the discriminant of an enum value
-	/// 
-	pub fn discriminant(self, discrim_ty: Type) -> Self {
-		RValue { kind: RValueKind::Discriminant(Box::new(self)), ty: discrim_ty }
+		RValue { kind: RValueKind::Tuple { items }, ty: tuple_type, span }
 	}
 
 	///
 	/// Calls a single param intrinsic
 	/// 
-	pub fn intrinsic(intrinsic: SoloIntrinsic, operand: RValue) -> Self {
+	pub fn intrinsic(intrinsic: SoloIntrinsic, operand: RValue, span: Span) -> Self {
 		let ty = intrinsic.output_type(&operand.ty);
 		
-		RValue { kind: RValueKind::SoloIntrinsic { intrinsic,
-											  	   operand: Box::new(operand) }, ty }
+		RValue { kind: RValueKind::SoloIntrinsic { intrinsic, operand: Box::new(operand) }, ty, span }
 	}
 
 	/// 
 	/// Calls a double param intrinsic
 	/// 
-	pub fn intrinsic2(intrinsic: DuoIntrinsic, left: RValue, right: RValue) -> Self {
+	pub fn intrinsic2(intrinsic: DuoIntrinsic, left: RValue, right: RValue, span: Span) -> Self {
 		let ty = intrinsic.output_type(&left.ty);
 
 		RValue { kind: RValueKind::DuoIntrinsic { intrinsic,
 												  left: Box::new(left),
-												  right: Box::new(right) }, ty }
+												  right: Box::new(right) }, ty, span }
 	}
 
 	///
 	/// 
 	/// 
-	pub fn function(func: &Function) -> RValue {
-		RValue { kind: RValueKind::Function { is_extern: false, name: String::from(func.name()) }, ty: func.func_type() }
+	pub fn function(func: &Function, span: Span) -> RValue {
+		RValue { kind: RValueKind::Function { is_extern: false, name: String::from(func.name()) }, ty: func.func_type(), span }
+	}
+
+	///
+	/// 
+	/// 
+	pub fn extern_function(func: &ExternFunction, span: Span) -> RValue {
+		RValue { kind: RValueKind::Function { is_extern: true, name: String::from(func.name()) }, ty: func.func_type(), span }
 	}
 
 	///
 	/// Gets a place referring to the value of a pointer
 	/// 
-	pub fn deref(self) -> Place {
+	pub fn deref(self, span: Span) -> Place {
 		if let TypeKind::Pointer(ty) = self.ty.kind() {
 			let ty = (**ty).clone();
-			Place::new(PlaceKind::Deref(self), ty)
+			Place::new(PlaceKind::Deref(self), ty, true, span)
 		} else {
 			panic!("Can't deref a value of type")
 		}		
@@ -215,6 +210,13 @@ impl RValue {
 	/// 
 	pub fn ty(&self) -> Type {
 		self.ty.clone()
+	}
+
+	///
+	/// 
+	/// 
+	pub fn span(&self) -> Span {
+		self.span
 	}
 }
 
@@ -241,8 +243,6 @@ impl Display for RValueKind {
 
 			Self::Tuple { items } => write!(f, "tuple ({items})", items = items.iter().format(", ")),
 			Self::Function { is_extern, name } => write!(f, "{}function \"{name}\"", if *is_extern { "extern " } else { "" } ),
-
-			Self::Discriminant(place) => write!(f, "discriminant {place}"),
 
 			Self::SoloIntrinsic { intrinsic, operand } => write!(f, "llvm.{intrinsic} {operand}"),
 			Self::DuoIntrinsic { intrinsic, left, right } => write!(f, "llvm.{intrinsic} {left}, {right}"),

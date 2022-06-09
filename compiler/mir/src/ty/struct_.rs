@@ -45,7 +45,7 @@ impl Struct {
 	///
 	/// 
 	/// 
-	pub (crate) fn new(id: StructId, name: String, fields: Vec<(String, Type)>, is_transparent: bool, is_packed: bool) -> Struct {
+	pub (crate) fn new(id: StructId, name: String, is_transparent: bool, is_packed: bool) -> Struct {
 		Struct { id,
 				 is_transparent,
 				 is_packed,

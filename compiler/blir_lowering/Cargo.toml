@@ -9,4 +9,6 @@ edition = "2021"
 errors = { path = "../errors" }
 mir = { path = "../mir" }
 blir = { path = "../blir" }
+patmat = { path = "../patmat" }
 itertools = "0.10.3"
+rand = "0.8.4"

@@ -1,0 +1,13 @@
+import intrinsics
+
+struct Char {}
+
+@entryPoint
+func main() {
+
+	// TODO: Add test
+}
+
+func rawptrtoint(x: RawPointer<Int>): Int {
+	1
+}

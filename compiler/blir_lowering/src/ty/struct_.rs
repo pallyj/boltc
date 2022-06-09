@@ -28,7 +28,7 @@ impl<'a> BlirLowerer<'a> {
 		}
 
 		for subenum in &borrowed_struct.subenums {
-
+			self.lower_enum_definition(subenum)
 		}
 	}
 
@@ -66,7 +66,7 @@ impl<'a> BlirLowerer<'a> {
 
 		// And each child enum
 		for subenum in &borrowed_struct.subenums {
-
+			self.lower_enum_signature(subenum);
 		}
 	}
 
@@ -83,7 +83,7 @@ impl<'a> BlirLowerer<'a> {
 
 		// Lower each subenum
 		for subenum in &borrowed_struct.subenums {
-
+			self.lower_enum_code(subenum)
 		}
 
 		// Lower each method

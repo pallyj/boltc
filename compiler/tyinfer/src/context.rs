@@ -151,6 +151,12 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                 }
             }
 
+            ValueKind::Assign(left, right) => {
+                self.constrain_value(left, scope);
+                self.constrain_value(right, scope);
+                self.constrain_two_way(&left.typ, &right.typ);
+            }
+
             _ => {}
         }
     }
@@ -334,6 +340,10 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
             for (tuple_item_1, tuple_item_2) in tuple_items_1.iter().zip(tuple_items_2) {
                 self.constrain_one_way(tuple_item_1, tuple_item_2);
             }
+        } else if let (TypeKind::RawPointer { pointer_type: pointer_type_1 },
+            TypeKind::RawPointer { pointer_type: pointer_type_2 }) = (constrain.kind(), absolute.kind())
+        {
+            self.constrain_one_way(&pointer_type_1, &pointer_type_2);
         }
 
         let Some(constrain_key) = self.infer_key(constrain) else {
@@ -353,7 +363,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
     }
 
     fn constrain_two_way(&mut self, ty1: &Type, ty2: &Type) {
-        // println!("{ty1:?} <-> {ty2:?}");
+        println!("{ty1:?} <-> {ty2:?}");
         let _constraint = match (self.infer_key(ty1), self.infer_key(ty2)) {
             (Some(key1), Some(key2)) if key1 != key2 => self.checker.impose(key1.equate_with(key2)),
             (Some(key1), None) => {
@@ -383,6 +393,10 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                     for (tuple_item_1, tuple_item_2) in tuple_items_1.iter().zip(tuple_items_2) {
                         self.constrain_two_way(tuple_item_1, tuple_item_2);
                     }
+                } else if let (TypeKind::RawPointer { pointer_type: pointer_type_1 },
+                               TypeKind::RawPointer { pointer_type: pointer_type_2 }) = (ty1.kind(), ty2.kind())
+                {
+                    self.constrain_two_way(&pointer_type_1, &pointer_type_2);
                 }
 
                 return;
@@ -417,6 +431,8 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                                                                       return_type: return_type.clone(), },
 
             TypeKind::Tuple(tuple_items, labels) => TypeVariant::Tuple(tuple_items.clone(), labels.clone()),
+            TypeKind::RawPointer { pointer_type } => TypeVariant::RawPointer(pointer_type.as_ref().clone()),
+            TypeKind::GenericParam(param) => TypeVariant::GenericParam(param.to_string()),
 
             TypeKind::Error => TypeVariant::Error,
 

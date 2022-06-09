@@ -19,6 +19,8 @@ impl<'input, 'l> Parser<'input, 'l> {
 
             marker.complete(self, SyntaxKind::ReturnSmt);
         } else if self.eat(SyntaxKind::LetKw) {
+            self.eat(SyntaxKind::VarKw);
+
             if !self.eat(SyntaxKind::Ident) {
                 self.error_recover("expected name", LET_RECOVERY_SET);
             }

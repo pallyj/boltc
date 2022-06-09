@@ -8,7 +8,7 @@ use mangle::{MangledStruct, Path};
 
 use super::{Type, TypeKind, EnumRef};
 use crate::{attributes::Attributes,
-            code::{MethodRef, Method},
+            code::{MethodRef},
             scope::{ScopeRef, ScopeRelation, ScopeType},
             value::{ConstantRef, VarRef},
             Symbol, SymbolWrapper, Visibility};
@@ -202,6 +202,7 @@ impl Struct {
         use crate::SomeFunction::*;
 
         match monomorphizer.resolve()? {
+            Initializer(method) |
             InstanceMethod(method) => Some(method),
             Function(_) => unreachable!(),
             StaticMethod(_) => unreachable!(),
@@ -277,14 +278,15 @@ impl StructRef {
 
         let vars = &struct_ptr.instance_vars;
 
-        if vars.len() != 1 {
+        if vars.len() != 2 {
             return false;
         }
 
-        match vars[0].borrow().typ.kind() {
-            TypeKind::StrSlice => true,
-            _ => false,
+        match (vars[0].borrow().typ.kind(), vars[1].borrow().typ.kind()) {
+            (TypeKind::RawPointer { pointer_type }, TypeKind::Integer { bits: 64 }) => matches!(pointer_type.kind(), TypeKind::Integer { bits: 8 }),
+            _ => false
         }
+
     }
 
     pub fn char_repr(&self) -> bool {

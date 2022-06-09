@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::{instr::{Local, LocalId}, Project};
+use crate::{instr::{Local, LocalId}, Project, ty::Type};
 
 use super::{val::Value, var::Var};
 
@@ -12,9 +12,10 @@ impl StackFrame {
 	///
 	/// 
 	/// 
-	pub fn new(locals: &[Local], project: &Project) -> Self {
-		let vars = locals.into_iter()
-						 .map(|local| Var::new(local.ty().clone(), project))
+	pub fn new(params: &[Type], locals: &[Local], project: &Project) -> Self {
+		let vars = params.iter()
+						 .chain(locals.into_iter().map(|local| local.ty()))
+						 .map(|ty| Var::new(ty.clone(), project))
 						 .collect_vec();
 
 		StackFrame { locals: vars }

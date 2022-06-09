@@ -1,0 +1,8 @@
+@entryPoint
+func main() {
+	run { print(it) }
+}
+
+func run(withFive: func (Int)) {
+	withFive(5)
+}

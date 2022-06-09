@@ -1,4 +1,6 @@
-use crate::{project::Project, code::{BasicBlockId, BasicBlock, FunctionId, Function}, instr::{Terminator, Instruction}, ty::{Type, StructId, TypeKind}, val::{Place, RValue, PlaceKind}};
+use errors::Span;
+
+use crate::{project::Project, code::{BasicBlockId, BasicBlock, FunctionId, Function, ExternFunctionId}, instr::{Terminator, Instruction}, ty::{Type, StructId, TypeKind, EnumId}, val::{Place, RValue, PlaceKind}};
 
 ///
 /// A helper struct to build MIR code
@@ -28,6 +30,13 @@ impl<'a> Builder<'a> {
 	}
 
 	///
+	/// Adds a function to the underlying project, returning its `FunctionId`
+	/// 
+	pub fn add_extern_function(&mut self, name: &str, params: Vec<Type>, return_type: Type) -> ExternFunctionId {
+		self.project.add_extern_function(name, params, return_type)
+	}
+
+	///
 	/// 
 	/// 
 	pub fn get_function_id(&self, name: &str) -> FunctionId {
@@ -45,7 +54,7 @@ impl<'a> Builder<'a> {
 	/// Adds a struct to the underlying project, returning its `StructId`
 	/// 
 	pub fn add_struct(&mut self, name: &str, is_transparent: bool, is_packed: bool) -> StructId {
-		self.project.add_struct(name, vec![], is_transparent, is_packed)
+		self.project.add_struct(name, is_transparent, is_packed)
 	}
 
 	///
@@ -61,6 +70,28 @@ impl<'a> Builder<'a> {
 	/// 
 	pub fn get_struct_id(&self, name: &str) -> StructId {
 		self.project.get_struct_id(name).expect("struct name doesn't exist")
+	}
+
+	///
+	/// Adds a struct to the underlying project, returning its `StructId`
+	/// 
+	pub fn add_enum(&mut self, name: &str, repr_type: Type) -> EnumId {
+		self.project.add_enum(name, repr_type)
+	}
+
+	///
+	/// 
+	/// 
+	pub fn add_enum_variants(&mut self, name: &str, variants: Vec<(u64, Type)>) {
+		self.project.get_enum_mut_named(name).unwrap()
+			.insert_variants(variants)
+	}
+
+	///
+	/// 
+	/// 
+	pub fn get_enum_id(&self, name: &str) -> EnumId {
+		self.project.get_enum_id(name).expect("enum name doesn't exist")
 	}
 
 	///
@@ -82,12 +113,12 @@ impl<'a> Builder<'a> {
 	/// Appends a block to the current function
 	/// 
 	pub fn append_block(&mut self) -> BasicBlockId {
-		let block_id = BasicBlockId::new(self.project.next_basic_block(), self.current_function().next_basic_block(), self.current_function.unwrap());
+		let block_id = BasicBlockId::new(self.project.next_basic_block(), self.current_function_mut().next_basic_block(), self.current_function.unwrap());
 
 		let block = BasicBlock::new(block_id);
 		self.project.add_basic_block(block);
 
-		self.current_function().append_block_id(block_id);
+		self.current_function_mut().append_block_id(block_id);
 
 		block_id
 	}
@@ -95,10 +126,10 @@ impl<'a> Builder<'a> {
 	///
 	/// Build a local
 	/// 
-	pub fn build_local(&mut self, ty: Type) -> Place {
-		let local_id = self.current_function().add_local(ty.clone());
+	pub fn build_local(&mut self, ty: Type, is_mutable: bool, span: Span) -> Place {
+		let local_id = self.current_function_mut().add_local(ty.clone());
 
-		Place::new(PlaceKind::Local(local_id), ty)
+		Place::new(PlaceKind::Local(local_id), ty, is_mutable, span)
 	}
 
 	///
@@ -143,23 +174,60 @@ impl<'a> Builder<'a> {
 	///
 	/// 
 	/// 
-	pub fn build_function(&mut self, function_name: &str) -> RValue {
+	pub fn build_function(&mut self, function_name: &str, span: Span) -> RValue {
 		let function = self.project.get_function_named(function_name).expect("function doesn't exist");
 
-		RValue::function(&function)
+		RValue::function(&function, span)
 	}
 
 	///
 	/// 
 	/// 
-	pub fn build_field(&mut self, struct_val: &Place, field_name: &str) -> Place {
+	pub fn build_extern_function(&mut self, function_name: &str, span: Span) -> RValue {
+		let function = self.project.get_extern_function_named(function_name).expect("function doesn't exist");
+
+		RValue::extern_function(&function, span)
+	}
+
+	///
+	/// 
+	/// 
+	pub fn build_field(&mut self, struct_val: &Place, field_name: &str, span: Span) -> Place {
 		if let TypeKind::Struct { id } = struct_val.ty().kind() {
 			let struct_def = self.project.get_struct(*id).expect("");
 			let field_ty = struct_def.field_type(field_name).cloned().expect("");
-			struct_val.field(field_name, field_ty)
+			struct_val.field(field_name, field_ty, span)
 		} else {
 			panic!()
 		}
+	}
+
+	///
+	/// 
+	/// 
+	pub fn build_cast_variant(&mut self, enum_val: &Place, tag: u64, variant_name: &str, span: Span) -> Place {
+		let TypeKind::Enum { id } = enum_val.ty().kind() else {
+			panic!()
+		};
+
+		let enum_def = self.project.get_enum(*id).expect("");
+		let cast_ty = enum_def.get_variant_type(tag).expect("Variant doesn't exist");
+
+		enum_val.cast_variant(tag, variant_name, cast_ty, span)
+	}
+
+	///
+	/// 
+	/// 
+	pub fn build_discriminant(&mut self, enum_val: &Place, span: Span) -> Place {
+		let TypeKind::Enum { id } = enum_val.ty().kind() else {
+			panic!()
+		};
+
+		let enum_def = self.project.get_enum(*id).expect("");
+		let cast_ty = enum_def.tag_type();
+
+		enum_val.discriminant(cast_ty, span)
 	}
 }
 
@@ -177,8 +245,13 @@ impl<'a> Builder<'a> {
 	/// Internal use only
 	/// Gets the current function
 	/// 
-	fn current_function(&mut self) -> &mut Function {
+	pub fn current_function_mut(&mut self) -> &mut Function {
 		let current_func = self.current_function.expect("no function is set");
 		self.project.function_mut(current_func).expect("function out of range")
+	}
+
+	pub fn current_function(&self) -> &Function {
+		let current_func = self.current_function.expect("no function is set");
+		self.project.function(current_func).expect("function out of range")
 	}
 }

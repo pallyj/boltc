@@ -4,7 +4,7 @@ mod extension_host;
 
 use std::process::Command;
 
-use args::{Args, Emit};
+use args::{Args};
 use blir::{BlirContext, Library};
 use blir_lowering::BlirLowerer;
 use clap::StructOpt;
@@ -57,7 +57,7 @@ fn main() {
     let mut project = Project::new(&lib_name, args.extensions.clone());
 
     // Add standard library
-    /*let lang = ["test/test.bolt"
+    let lang = ["test/test.bolt"
                 /*"std/print.bolt",
                 "bool/Bool.bolt",
                 "float/Half.bolt",
@@ -81,7 +81,7 @@ fn main() {
 
     for file in lang {
         project.open_file(&format!("{}/{file}", lib_path_str));
-    }*/
+    }
 
     for file in &args.files {
         project.open_file(file);
@@ -197,7 +197,7 @@ impl Project {
                                              &mut context,
                                              &mut debugger).run_pass(self.library.as_mut().unwrap());
 
-        //println!("{:?}", self.library.as_ref().unwrap());
+        println!("{:?}", self.library.as_ref().unwrap());
 
         if debugger.has_errors() {
             return (false, None);
@@ -216,6 +216,10 @@ impl Project {
         BlirLowerer::new(&mut project, vec![ self.library.take().unwrap() ]).lower();
 
         println!("{project}");
+
+        let entry = context.entry_point;
+
+        project.execute().run_function(&entry.unwrap(), vec![]);
 
         //let post_type_check = std::time::Instant::now();
 

@@ -3,6 +3,10 @@ import intrinsics
 @defaultIntegerRepr
 public struct Int {
 	var repr: i64
+
+	public operator func add(b: Self): Self {
+		Self(repr: 0)
+	}
 }
 
 @entryPoint
@@ -30,6 +34,16 @@ func ma(n: i64): i64 {
 func test_tuples() {
 	let tuple = (left: 404, right: 600)
 
-	let n = tuple.left
-	let m = tuple.right
+	let tuple: (i64, i64) = (404, 606)
+}
+
+func varying() {
+	let var n = 0;
+
+	n = 5
+
+	let var m: Int
+
+	m = 10
+	m += 5;
 }

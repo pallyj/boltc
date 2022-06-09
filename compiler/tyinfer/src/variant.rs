@@ -30,6 +30,9 @@ pub enum TypeVariant {
         return_type: Box<Type>,
     },
     Tuple(Vec<Type>, Vec<Option<String>>),
+    RawPointer(Type),
+
+    GenericParam(String),
 
     Void,
     Diverges,

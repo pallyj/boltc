@@ -4,7 +4,7 @@ mod var;
 pub mod match_;
 
 use std::{fmt::Debug,
-          ops::{Deref, DerefMut}};
+          ops::{Deref, DerefMut}, collections::HashMap};
 
 pub use closure::*;
 pub use constant::*;
@@ -76,6 +76,7 @@ pub enum ValueKind {
         method:   MethodRef,
     },
     Init(Type),
+    Initializer(MethodRef, Type),
 
     // Variable Values
     InstanceVariable {
@@ -90,6 +91,12 @@ pub enum ValueKind {
 
     // Second-class Values
     Unit,
+
+    // Generic
+    MonomorphizeFn {
+        function: Box<Value>,
+        generics: HashMap<String, Type>,
+    },
 
     Error,
 }
@@ -143,6 +150,22 @@ impl Value {
     pub fn set_kind(&mut self, kind: ValueKind) { self.kind = kind; }
 
     pub fn set_type(&mut self, mut typ: Type) { typ.span = self.span; self.typ = typ; }
+
+    pub fn monomorph_infer(self, args: Vec<String>) -> Value {
+        let mut monomorph_params = HashMap::new();
+
+        for arg in args {
+            monomorph_params.insert(arg, Type::infer());
+        }
+
+        let passthrough_type = self.typ.clone();
+        let passthrough_span = self.span.clone();
+
+
+        let mut val = ValueKind::MonomorphizeFn { function: Box::new(self), generics: monomorph_params }.anon(passthrough_type);
+        val.span = passthrough_span;
+        val
+    }
 }
 
 #[derive(Clone)]
@@ -196,6 +219,9 @@ impl Debug for IfBranch {
 impl Debug for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self.deref() {
+            ValueKind::MonomorphizeFn { function, generics } => {
+                write!(f, "{function:?}<{}>", generics.iter().map(|(key, ty)| format!("{key} = {ty:?}")).collect::<Vec<_>>().join(","))
+            }
             ValueKind::Named(name) => write!(f, "%{name}"),
             ValueKind::Member { parent, member } => write!(f, "{parent:?}.{member}"),
             ValueKind::FuncCall { function, args } => write!(f, "{function:?}({args:?})"),
@@ -210,7 +236,7 @@ impl Debug for Value {
             ValueKind::VariantLiteral(name) => write!(f, ".{name}"),
             ValueKind::EnumVariant { of_enum, variant } => write!(f, "{}.{}", of_enum.name(), variant.name()),
             ValueKind::CastEnumToVariant { enum_value, variant } => write!(f, "{enum_value:?} as {}", variant.name()),
-            ValueKind::Uninit => write!(f, "uninit<{:?}>", self.typ),
+            ValueKind::Uninit => write!(f, "uninit"),
             ValueKind::Assign(ptr, value) => write!(f, "{ptr:?} = {value:?}"),
             // ValueKind::Deref(value) => write!(f, "*{value:?}"),
             ValueKind::Closure(c) => write!(f, "{{ {:?} }}", c.code),
@@ -224,6 +250,7 @@ impl Debug for Value {
             ValueKind::InstanceMethod { reciever, method } => write!(f, "{reciever:?}.{}", method.borrow().info.name()),
             ValueKind::ExternFunc(extern_func) => write!(f, "{}", extern_func.borrow().info.name()),
             ValueKind::Init(t) => write!(f, "{t:?}"),
+            ValueKind::Initializer(method, _) => write!(f, "{}", method.name()),
             ValueKind::InstanceVariable { reciever, var } => write!(f, "{reciever:?}.{}", var.borrow().name),
             ValueKind::If(if_value) => {
                 if let Some(neg) = &if_value.negative {
@@ -244,7 +271,7 @@ impl Debug for Value {
             }
             ValueKind::TupleField(value, n) => write!(f, "{value:?}.item{n}"),
             ValueKind::Unit => write!(f, "()"),
-            ValueKind::Error => write!(f, "Error"),
+            ValueKind::Error => write!(f, "Error")
         }?;
 
         write!(f, " <{:?}>", self.typ)

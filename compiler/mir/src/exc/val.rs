@@ -13,8 +13,11 @@ pub enum Value {
 	ExternFunction(String),
 
 	Struct(HashMap<String, Value>),
+	Enum(Box<Value>, Box<Value>),
 
 	Undef,
+
+	Ref(*mut Value)
 }
 
 impl Value {
@@ -24,7 +27,7 @@ impl Value {
 		match constant {
 			Integer(n) => Self::Int(n),
 			Float(n) => Self::Float(n),
-			String(_) => panic!()
+			_ => unreachable!()
 		}
 	}
 }

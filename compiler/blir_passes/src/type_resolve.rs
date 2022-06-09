@@ -399,6 +399,34 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 }
             }
 
+            TypeKind::GenericOf { higher_kind, params } => {
+                self.resolve_type(higher_kind, scope);
+
+                for param in params.iter_mut() {
+                    self.resolve_type(param, scope);
+                }
+
+                if let TypeKind::HKRawPointer = higher_kind.kind() {
+                    if params.len() != 1 {
+                        panic!("error: RawPointer<T> expects one generic parameter, found {}", params.len());
+                    }
+
+                    let ptr = Box::new(params.remove(0));
+
+                    typ.set_kind(TypeKind::RawPointer { pointer_type: ptr })
+                }
+            }
+
+            TypeKind::RawPointer { pointer_type } => {
+                self.resolve_type(pointer_type.as_mut(), scope);
+            }
+
+            TypeKind::GenericParam(param_name) => {
+                let ty = scope.scope_type(&format!("generic[{}]", param_name)).unwrap();
+
+                typ.set_kind(ty.kind);
+            }
+
             _ => {
                 // Do nothing
             }
@@ -479,6 +507,8 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                     Symbol::TupleField(..) => unreachable!(),
                     Symbol::EnumCase(..) => unreachable!(),
                 }
+
+                self.resolve_value(value, scope);
             }
 
             ValueKind::FuncCall { function, args } => {
@@ -487,7 +517,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 if let ValueKind::Metatype(t) = &mut function.kind {
                     let init_type = std::mem::replace(t, TypeKind::Void).anon();
 
-                    let initializer = init_type.lookup_static_item("init");
+                    let initializer = init_type.lookup_instance_item("init", scope);
 
                     match initializer {
                         Some(Symbol::Function(monomorphizer)) => {
@@ -495,12 +525,9 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                         }
 
                         _ => {
-                            panic!("{init_type:?}");
+                            panic!("{initializer:?}");
                         }
                     }
-
-                    // function.set_type(init_type.init_type().anon());
-                    // function.set_kind(ValueKind::Init(init_type));
                 }
 
                 for arg in &mut args.args {
@@ -549,6 +576,30 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                     self.define_pattern_in_scope(&mut branch.pattern, &branch_scope);
                     self.resolve_code_block(&mut branch.code, &branch_scope);
                 }
+            }
+
+            ValueKind::Assign(left, right) => {
+                self.resolve_value(left, scope);
+                self.resolve_value(right, scope);
+            }
+
+            ValueKind::MonomorphizeFn { function, generics } => {
+                let generic_scope = Self::new_scope(scope);
+
+                for generic in generics.iter() {
+                    scope.define_scope_type(&format!("generic[{}]", generic.0), generic.1.clone())
+                }
+
+                // Replace the type of this function using the generics
+                self.resolve_value(function, &generic_scope);
+
+                // Replace the types in the function using generics
+                self.resolve_type(&mut value.typ, &generic_scope);
+
+                let function_kind = std::mem::replace(&mut function.kind, ValueKind::Unit);
+                value.set_kind(function_kind);
+
+                println!("Monomorphized {value:?}");
             }
 
             _ => {}
@@ -638,7 +689,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
         }
     }
 
-    fn new_scope(outer: &ScopeRef) -> ScopeRef {
+    pub (crate) fn new_scope(outer: &ScopeRef) -> ScopeRef {
         ScopeRef::new(Some(outer), ScopeRelation::Code, ScopeType::Code, false, false)
     }
 }

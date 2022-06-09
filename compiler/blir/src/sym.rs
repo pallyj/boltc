@@ -53,6 +53,7 @@ pub enum SomeFunction {
     StaticMethod(MethodRef),
     InstanceMethod(MethodRef),
     ExternFunction(ExternFunctionRef),
+    Initializer(MethodRef),
 }
 
 impl SomeFunction {
@@ -62,6 +63,7 @@ impl SomeFunction {
             Self::ExternFunction(function) => function.borrow().visibility,
             Self::InstanceMethod(method) => method.borrow().visibility,
             Self::StaticMethod(method) => method.borrow().visibility,
+            Self::Initializer(method) => method.borrow().visibility,
         }
     }
 
@@ -71,6 +73,7 @@ impl SomeFunction {
             Self::ExternFunction(function) => function.info(),
             Self::InstanceMethod(method) => method.info(),
             Self::StaticMethod(method) => method.info(),
+            Self::Initializer(method) => method.info()
         }
     }
 
@@ -80,6 +83,7 @@ impl SomeFunction {
             Self::ExternFunction(function) => function.borrow().span.clone(),
             Self::InstanceMethod(method) => method.borrow().span.clone(),
             Self::StaticMethod(method) => method.borrow().span.clone(),
+            Self::Initializer(method) => method.borrow().span.clone(),
         }
     }
 }
@@ -95,6 +99,11 @@ impl Monomorphizer {
     pub fn add_function(&mut self, function: FunctionRef) { self.functions.push(SomeFunction::Function(function)) }
 
     pub fn add_method(&mut self, function: MethodRef) {
+        if function.borrow().info.name() == "init" {
+            self.functions.push(SomeFunction::Initializer(function));
+            return;
+        }
+
         let some_function = if function.is_static() {
             SomeFunction::StaticMethod(function)
         } else {

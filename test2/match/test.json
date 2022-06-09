@@ -1,0 +1,30 @@
+{
+	"name": "match",
+
+	"tests": [
+		{
+			"name": "match-integer-no-default",
+			"include": "IntegerNoDefault.bolt",
+			"expect": {
+				"error": "non_exhaustive_match"
+			}
+		},
+		"integer-with-default",
+		"match-enum-with-default",
+		"match-enum-without-variants",
+
+		"match-tuple-one-variant",
+		"match-tuple-fallthrough",
+
+		{
+			"name": "ackermann",
+			"include": "Ackermann.bolt",
+			"expect": {
+				"output": "61"
+			}
+		},
+
+		"match-enum-associated-types",
+		"match-strings"
+	]
+}

@@ -273,8 +273,10 @@ impl PostfixExpr {
 
 impl InfixExpr {
     pub fn operator(&self) -> String {
-        find_token(&self.0, SyntaxKind::Operator).map(|op| op.text().to_string())
-                                                 .unwrap()
+        find_token(&self.0, SyntaxKind::Operator)
+            .or_else(|| find_token(&self.0, SyntaxKind::Equals))
+            .map(|op| op.text().to_string())
+            .unwrap()
     }
 
     pub fn left(&self) -> Expr { self.0.first_child().map(Expr::cast).unwrap() }

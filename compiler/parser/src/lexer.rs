@@ -3,12 +3,6 @@ use logos::Logos;
 #[derive(Logos, Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[repr(u16)]
 pub enum SyntaxKind {
-    // 0.6
-    //
-    // mutating
-    // break continue
-    // while repeat
-    // guard
 
     // 0.7
     //
@@ -81,10 +75,25 @@ pub enum SyntaxKind {
     #[regex("typealias", priority = 3)]
     TypeAliasKw,
 
+    #[regex("mutating", priority = 3)]
+    MutatingKw,
+    #[regex("shared", priority = 3)]
+    SharedKw,
+    #[regex("break", priority = 3)]
+    BreakKw,
+    #[regex("continue", priority = 3)]
+    ContinueKw,
+    #[regex("while", priority = 3)]
+    WhileKw,
+    #[regex("repeat", priority = 3)]
+    RepeatKw,
+    #[regex("guard", priority = 3)]
+    GuardKw,
+
     #[regex("[a-zA-Z_$][a-zA-Z_$0-9]*", priority = 2)]
     Ident,
 
-    #[regex("[+|\\-|*|/|%|<|>|&|\\||^|=|!|?|\\.]+")]
+    #[regex("[+|\\-|*|/|%|<|>|&|\\||^|=|!|?|\\.|~]+")]
     Operator,
 
     #[regex("true")]
@@ -145,6 +154,8 @@ pub enum SyntaxKind {
     Equals,
     #[token("=>")]
     BigArrow,
+    #[token("->")]
+    Arrow,
 
     #[token("@")]
     At,
@@ -171,6 +182,7 @@ pub enum SyntaxKind {
     UnitType,
     InferType,
     FuncType,
+    GenericType,
 
     FuncReturn,
 
