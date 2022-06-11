@@ -10,6 +10,7 @@ ast!(struct VariantPattern(VariantPattern));
 ast!(struct TuplePattern(TuplePattern));
 ast!(struct TupleMember(FuncArg));
 ast!(struct BindPattern(BindPattern));
+ast!(struct VaryingPattern(VaryingPattern));
 
 ast!(enum Pattern {
 	WildcardPattern,
@@ -17,6 +18,7 @@ ast!(enum Pattern {
     VariantPattern,
     TuplePattern,
     BindPattern,
+    VaryingPattern,
 });
 
 impl LiteralPattern {
@@ -47,6 +49,7 @@ impl Debug for Pattern {
             Self::VariantPattern(arg0) => write!(f, "{arg0:?}"),
             Self::TuplePattern(arg0) => write!(f, "{arg0:?}"),
             Self::BindPattern(arg0) => write!(f, "{arg0:?}"),
+            Self::VaryingPattern(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "error"),
         }
     }
@@ -126,5 +129,19 @@ impl BindPattern {
 impl Debug for BindPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.bind_name())
+    }
+}
+
+impl VaryingPattern {
+    pub fn subpattern(&self) -> Pattern {
+        self.0.first_child()
+            .map(Pattern::cast)
+            .unwrap()
+    }
+}
+
+impl Debug for VaryingPattern {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "var {:?}", self.subpattern())
     }
 }

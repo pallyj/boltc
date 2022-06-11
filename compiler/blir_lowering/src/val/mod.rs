@@ -48,9 +48,9 @@ impl<'a> BlirLowerer<'a> {
 			Tuple(_) => LowerKind::Construct,
 			EnumVariant { .. } => LowerKind::Construct,
 
-			LocalVariable(_) => LowerKind::Access,
+			LocalVariable(_, _) => LowerKind::Access,
 			FunctionParam(_) => LowerKind::Access,
-			SelfVal => LowerKind::Access,
+			SelfVal(_) => LowerKind::Access,
  			InstanceVariable { .. } => LowerKind::Access,
 			TupleField(..) => LowerKind::Access,
 			CastEnumToVariant { .. } => LowerKind::Access,
@@ -180,6 +180,10 @@ impl<'a> BlirLowerer<'a> {
 			},
 
 			Assign(place, value) => {
+				if !place.is_mutable() {
+					println!("{place:?} is not mutable");
+				}
+
 				let place = self.lower_place(place);
 
 				// todo: check if the place is mutable
@@ -232,9 +236,9 @@ impl<'a> BlirLowerer<'a> {
 		use ValueKind::*;
 
 		match &value.kind {
-			LocalVariable(name) => self.function_ctx.get(name).unwrap().clone(),
+			LocalVariable(name, _) => self.function_ctx.get(name).unwrap().clone(),
 			FunctionParam(name) => self.function_ctx.get(name).unwrap().clone(),
-			SelfVal => self.function_ctx.get("self").unwrap().clone(),
+			SelfVal(_) => self.function_ctx.get("self").unwrap().clone(),
 
 			TupleField(place, index) => self.lower_place(&place).tuple_item(*index, Self::span_of(value.span)),
 			InstanceVariable { reciever, var } => {

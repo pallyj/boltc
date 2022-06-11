@@ -1,7 +1,10 @@
 @entryPoint
 func main() {
-	for (0..<5) {
-        print(factorial(it % 20))
+	let i = 0;
+	while i < 1_000_000 {
+		print(factorial_loop(i % 20))
+
+		i += 1;
 	}
 }
 
@@ -9,3 +12,18 @@ func factorial(n: Int): Int {
 	if n < 2 { 1 }
 	else { n * factorial(n - 1) }
 }
+
+func factorial_loop(n: Int): Int {
+	let acc = 1;
+	let i = 1;
+
+	while i < n {
+		acc *= i;
+
+		i += 1;
+	}
+
+	return acc;
+}
+
+// todo: why doesn't it infer the right value?

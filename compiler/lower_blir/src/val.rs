@@ -22,7 +22,7 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
                 self.lower_func_call(function.as_ref(), lowered_args)
             }
 
-            ValueKind::LocalVariable(local_var_name) => {
+            ValueKind::LocalVariable(local_var_name, _) => {
                 if self.context.lookup_var(local_var_name).is_none() {
                     println!("compiler error: {local_var_name} not found");
                 }
@@ -31,7 +31,7 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
 
             ValueKind::FunctionParam(param_name) => self.context.lookup_var(param_name).cloned().unwrap(),
 
-            ValueKind::SelfVal => self.context.lookup_var("self").cloned().unwrap(),
+            ValueKind::SelfVal(_) => self.context.lookup_var("self").cloned().unwrap(),
 
             ValueKind::If(if_value) => self.lower_if_value(if_value, &value.typ),
 

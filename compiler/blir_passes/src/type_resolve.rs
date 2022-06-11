@@ -448,7 +448,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                     self.resolve_value(value, scope)
                 }
 
-                *name = scope.define_variable(name, typ.clone());
+                *name = scope.define_variable(name, typ.clone(), false);
             }
 
             StatementKind::Eval { value, .. } => {
@@ -493,9 +493,12 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
                     Symbol::InstanceVariable(instance) => {
                         value.set_type(instance.borrow().typ.clone());
-                        let self_type = scope.scope_type("self")
-                                             .expect("Compiler Error: Expected self type when looking up instance variable");
-                        let myself = ValueKind::SelfVal.anon(self_type);
+                        let Symbol::Value(myself) =
+                            scope.lookup_symbol("self")
+                                 .expect("Compiler Error: Expected self type when looking up instance variable")
+                                 .resolve()
+                        else { panic!() };
+
                         value.set_kind(ValueKind::InstanceVariable { reciever: Box::new(myself),
                                                                      var:      instance, })
                     }
@@ -615,17 +618,18 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
     fn define_pattern_in_scope(&mut self, pattern: &mut Pattern, scope: &ScopeRef) {
         match &mut pattern.kind {
-            PatternKind::Bind(name) => {
-                if let Some(sym) = scope.lookup_symbol(name) {
-                    let sym = sym.resolve();
-                    if let Symbol::Constant(constant_ref) = sym {
-                        let span = pattern.span.clone();
-                        *pattern = PatternKind::Literal { value: constant_ref.borrow().value.clone() }.with_span(span);
-                        return;
+            PatternKind::Bind(name, varying) => {
+                if !*varying {
+                    if let Some(sym) = scope.lookup_symbol(name) {
+                        let sym = sym.resolve();
+                        if let Symbol::Constant(constant_ref) = sym {
+                            let span = pattern.span.clone();
+                            *pattern = PatternKind::Literal { value: constant_ref.borrow().value.clone() }.with_span(span);
+                            return;
+                        }
                     }
                 }
-                // We gotta 
-                let mangled_bind_name = scope.define_variable(name, pattern.match_type.clone());
+                let mangled_bind_name = scope.define_variable(name, pattern.match_type.clone(), *varying);
                 *name = mangled_bind_name;
             }
             PatternKind::Tuple { items, .. } |

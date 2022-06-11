@@ -1,0 +1,23 @@
+@entryPoint
+func main() {
+	let x = 0
+	let y = 0
+	let z = 0
+
+	//let var (a, b, c) = (x, y, z)
+
+	match (x, y, z) {
+		var (x, y, z) => {
+			x += 1
+			y += 1
+			z += 1
+
+			print(x)
+			print(y)
+			print(z)
+		}
+	}
+	print(x)
+	print(y)
+	print(z)
+}

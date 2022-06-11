@@ -98,7 +98,7 @@ impl PatternMatrix {
 						let mut taken_pat = mem::take(&mut old_row.patterns[i]); // mem::replace(&mut old_row.patterns[i], mem::zeroed())
 
 						// If the pattern we took is a bind, then add a bind to compare_value
-						if let PatternKind::Bind(bind_name) = &taken_pat.kind {
+						if let PatternKind::Bind(bind_name, varying) = &taken_pat.kind {
 							new_row.binds.push((bind_name.clone(), compare_value.clone()));
 							taken_pat.kind = PatternKind::Wildcard;
 						}
@@ -117,7 +117,7 @@ impl PatternMatrix {
 					for (old_row, new_row) in current_matrix.rows.iter_mut().zip(&mut rows) {
 						let mut taken_pat = mem::take(&mut old_row.patterns[i]); // mem::replace(&mut old_row.patterns[i], mem::zeroed())
 
-						if let PatternKind::Bind(bind_name) = &taken_pat.kind {
+						if let PatternKind::Bind(bind_name, varying) = &taken_pat.kind {
 							new_row.binds.push((bind_name.clone(), compare_value.clone()));
 							taken_pat.kind = PatternKind::Wildcard;
 						}

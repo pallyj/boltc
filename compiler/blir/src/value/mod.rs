@@ -31,7 +31,7 @@ pub enum ValueKind {
         function: Box<Value>,
         args:     FunctionArgs,
     },
-    SelfVal,
+    SelfVal(bool),
     Polymorphic(Monomorphizer),
     PolymorphicMethod {
         reciever:    Box<Value>,
@@ -61,7 +61,7 @@ pub enum ValueKind {
 
     // Variable Values
     Metatype(TypeKind),
-    LocalVariable(String),
+    LocalVariable(String, bool),
     FunctionParam(String),
     Assign(Box<Value>, Box<Value>),
 
@@ -170,6 +170,54 @@ impl Value {
         val.span = passthrough_span;
         val
     }
+
+    pub fn is_mutable(&self) -> bool {
+        match &self.kind {
+            ValueKind::FuncCall { .. } => false, // todo: maybe
+            ValueKind::SelfVal(mutating) => *mutating, // I Think?
+
+            ValueKind::CastEnumToVariant { enum_value, .. } => enum_value.is_mutable(),
+            ValueKind::InstanceVariable { reciever, var } => reciever.is_mutable() && !var.borrow().is_constant,
+            ValueKind::TupleField(tuple, _) => tuple.is_mutable(),
+
+            ValueKind::LocalVariable(_, mutating) => *mutating,
+            ValueKind::FunctionParam(_) => false, // todo: add mutating
+
+            ValueKind::Named(_) => false,
+            ValueKind::Member { .. } => false,
+            
+            ValueKind::Polymorphic(_) => false,
+            ValueKind::PolymorphicMethod { .. } => false,
+            ValueKind::Operator(_) => false,
+            ValueKind::IntLiteral(_) => false,
+            ValueKind::FloatLiteral(_) => false,
+            ValueKind::BoolLiteral(_) => false,
+            ValueKind::StringLiteral(_) => false,
+            ValueKind::VariantLiteral(_) => false,
+            ValueKind::Closure(_) => false,
+            ValueKind::Uninit => false,
+            ValueKind::Tuple(_) => false,
+            ValueKind::EnumVariant { .. } => false,
+            
+            ValueKind::Metatype(_) => false,
+            
+            ValueKind::Assign(_, _) => false,
+            ValueKind::UnaryIntrinsicFn(_) => false,
+            ValueKind::BinaryIntrinsicFn(_) => false,
+            ValueKind::StaticFunc(_) => false,
+            ValueKind::StaticMethod(_) => false,
+            ValueKind::ExternFunc(_) => false,
+            ValueKind::InstanceMethod { .. } => false,
+            ValueKind::Init(_) => false,
+            ValueKind::Initializer(_, _) => false,
+            ValueKind::If(_) => false,
+            ValueKind::Match(_) => false,
+            ValueKind::Loop { .. } => false,
+            ValueKind::Unit => false,
+            ValueKind::MonomorphizeFn { .. } => false,
+            ValueKind::Error => false,
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -229,7 +277,7 @@ impl Debug for Value {
             ValueKind::Named(name) => write!(f, "%{name}"),
             ValueKind::Member { parent, member } => write!(f, "{parent:?}.{member}"),
             ValueKind::FuncCall { function, args } => write!(f, "{function:?}({args:?})"),
-            ValueKind::SelfVal => write!(f, "self"),
+            ValueKind::SelfVal(_) => write!(f, "self"),
             ValueKind::Polymorphic(mono) => write!(f, "function ({} degrees)", mono.degrees()),
             ValueKind::PolymorphicMethod { reciever, polymorphic } => write!(f, "{:?}.method ({})", reciever, polymorphic.degrees()),
             ValueKind::Operator(operator) => write!(f, "{operator}"),
@@ -245,7 +293,11 @@ impl Debug for Value {
             // ValueKind::Deref(value) => write!(f, "*{value:?}"),
             ValueKind::Closure(c) => write!(f, "{{ {:?} }}", c.code),
             ValueKind::Metatype(t) => write!(f, "<{:?}>", t.clone().anon()),
-            ValueKind::LocalVariable(name) => write!(f, "{name}"),
+            ValueKind::LocalVariable(name, varying) => if *varying {
+                write!(f, "var {name}")
+            } else {
+                write!(f, "{name}")
+            },
             ValueKind::FunctionParam(name) => write!(f, "{name}"),
             ValueKind::UnaryIntrinsicFn(intrinsic) => write!(f, "{intrinsic:?}"),
             ValueKind::BinaryIntrinsicFn(intrinsic) => write!(f, "{intrinsic:?}"),

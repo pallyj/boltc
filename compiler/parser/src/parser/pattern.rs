@@ -26,6 +26,21 @@ impl<'input, 'l> Parser<'input, 'l> {
 
 			pattern.complete(self, SyntaxKind::BindPattern);
 		}
+		else if self.check(SyntaxKind::VarKw) || self.check(SyntaxKind::MutatingKw) {
+			if self.check(SyntaxKind::VarKw) {
+				if !feature_gate::has_feature("let_var_declare") {
+					panic!("feature let_var_declare is not enabled")
+				}
+			} else if self.check(SyntaxKind::MutatingKw) {
+				if !feature_gate::has_feature("let_mut_declare") {
+					panic!("feature let_mut_declare is not enabled")
+				}
+			}
+			self.bump();
+			self.parse_pattern();
+
+			pattern.complete(self, SyntaxKind::VaryingPattern);
+		}
 		else if self.check(SyntaxKind::Period) {
 			// Variant pat
 			self.bump();

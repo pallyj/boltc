@@ -84,6 +84,24 @@ boltc examples/guessing_game/game.bolt --lib=game
 
 ## Development
 
+### Bolt 0.6
+
+- Loops
+- Mutating functions
+- Mutable variables
+- RawPointers
+- Virtual Machine
+
+- Completeness checks
+- Global Variables
+- Guard
+- If and guard pattern matching
+- Arrays
+- Generate C Headers
+- Generate Bolt Headers
+- Boltdoc
+- Bolt playgroud
+
 ### Bolt 0.5 [ Current Version ]
 
 - Patterns

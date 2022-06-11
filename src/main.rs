@@ -31,6 +31,8 @@ codegen: 307ms
 
 */
 fn main() {
+    
+
     let args = Args::parse();
 
     if !args.validate() { return; }

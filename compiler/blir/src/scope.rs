@@ -85,7 +85,7 @@ impl ScopeRef {
 
     pub fn lookup_static_member(&self, name: &str) -> Option<SymbolWrapper> { self.inner.borrow().lookup_static_member(name) }
 
-    pub fn define_variable(&self, name: &str, typ: Type) -> String { self.inner.borrow_mut().define_variable(name, typ) }
+    pub fn define_variable(&self, name: &str, typ: Type, varying: bool) -> String { self.inner.borrow_mut().define_variable(name, typ, varying) }
 
     pub fn define_scope_type(&self, name: &str, ty: Type) { self.inner.borrow_mut().define_scope_type(name, ty) }
 
@@ -318,12 +318,12 @@ impl Scope {
         }
     }
 
-    fn define_variable(&mut self, name: &str, typ: Type) -> String {
+    fn define_variable(&mut self, name: &str, typ: Type, varying: bool) -> String {
         let idx = self.next_index();
 
         let mangled_name = format!("var{idx}_{name}");
 
-        let sym = Symbol::Value(ValueKind::LocalVariable(mangled_name.clone()).anon(typ));
+        let sym = Symbol::Value(ValueKind::LocalVariable(mangled_name.clone(), varying).anon(typ));
 
         self.add_symbol(name.to_string(), Visibility::Local, sym);
 

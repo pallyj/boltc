@@ -254,6 +254,7 @@ pub enum SyntaxKind {
     VariantPattern,
     TuplePattern,
     LiteralPattern,
+    VaryingPattern,
 
     TypeAlias,
 

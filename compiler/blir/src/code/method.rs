@@ -36,7 +36,7 @@ impl MethodInner {
     pub fn scope(&self) -> &ScopeRef { &self.scope }
 
     pub fn add_params(&mut self) {
-        let sym = Symbol::Value(ValueKind::SelfVal.anon(self.self_type.clone()));
+        let sym = Symbol::Value(ValueKind::SelfVal(self.is_mutating).anon(self.self_type.clone()));
         if !self.is_static {
             self.scope
                 .add_symbol("self".to_string(), Visibility::Local, sym);

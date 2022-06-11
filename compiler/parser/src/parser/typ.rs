@@ -78,7 +78,7 @@ impl<'input, 'l> Parser<'input, 'l> {
             // todo: change it to a warning
             if arrow != use_arrow_returns {
                 if use_arrow_returns {
-                    self.error("expected `->`");
+                    //self.error("expected `->`");
                 } else {
                     self.error("bolt uses the colon symbol for return types");
                 }

@@ -191,9 +191,9 @@ impl Maranget {
 
 	fn patterns_match(pattern1: &Pattern, pattern2: &Pattern) -> bool {
         match (&pattern1.kind, &pattern2.kind) {
-            (PatternKind::Bind(_), PatternKind::Bind(_)) |
-            (PatternKind::Bind(_), PatternKind::Wildcard) |
-            (PatternKind::Wildcard, PatternKind::Bind(_)) => true,
+            (PatternKind::Bind(..), PatternKind::Bind(..)) |
+            (PatternKind::Bind(..), PatternKind::Wildcard) |
+            (PatternKind::Wildcard, PatternKind::Bind(..)) => true,
 
 			(PatternKind::Integer { value: v1 }, PatternKind::Integer { value: v2 }) => v1 == v2,
 

@@ -8,7 +8,7 @@ use crate::{value::Value, typ::{Type, TypeKind}};
 pub enum PatternKind {
 	Wildcard,
 	
-	Bind(String),
+	Bind(String, bool),
 
 	Variant { variant: Value,
 			  items: Vec<Pattern>,
@@ -48,7 +48,11 @@ impl Debug for Pattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self.kind {
 			PatternKind::Wildcard => write!(f, "_"),
-			PatternKind::Bind(name) => write!(f, "{name}"),
+			PatternKind::Bind(name, varying) => if *varying {
+				write!(f, "var {name}")
+			} else {
+				write!(f, "{name}")
+			},
 			PatternKind::Integer { value } => write!(f, "{value}"),
 			PatternKind::Literal { value } => write!(f, "{value:?}"),
 			PatternKind::Tuple { items, labels } => write!(f, "({})", items.iter().zip(labels).map(|(item, label)| if let Some(label) = label { format!("{label}: {item:?}") } else { format!("{item:?}") }).collect::<Vec<_>>().join(", ") ),

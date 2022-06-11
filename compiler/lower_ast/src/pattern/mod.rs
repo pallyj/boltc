@@ -4,7 +4,11 @@ use parser::ast::pattern::Pattern as AstPattern;
 use crate::AstLowerer;
 
 impl<'a, 'b> AstLowerer<'a, 'b> {
-    pub(crate) fn lower_pattern(&mut self, expr: AstPattern) -> Pattern {
+
+	pub(crate) fn lower_pattern(&mut self, expr: AstPattern) -> Pattern {
+		self.lower_pattern_inner(expr, false)
+	}
+    fn lower_pattern_inner(&mut self, expr: AstPattern, varying: bool) -> Pattern {
 		let span = self.span(expr.range());
 
 		match expr {
@@ -34,8 +38,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 					.spanned_infer(span);
 
 				if let Some(assoc) = variant.associated_patterns() {
-					let (items, labels) = assoc.map(|pat| (self.
-						lower_pattern(pat.pattern()), pat.label()))
+					let (items, labels) = assoc.map(|pat| (self.lower_pattern_inner(pat.pattern(), varying), pat.label()))
 											   .unzip();
 					
 					PatternKind::Variant { variant: value, items, labels }
@@ -47,7 +50,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 				let (sub_patterns, labels): (Vec<_>, Vec<_>) = tuple_pat
 					.tuple_items()
 					.map(|tuple_item| {
-						let pattern = self.lower_pattern(tuple_item.pattern());
+						let pattern = self.lower_pattern_inner(tuple_item.pattern(), varying);
 						(pattern, tuple_item.label())
 					})
 					.unzip();
@@ -61,7 +64,10 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 				return PatternKind::Tuple { items: sub_patterns, labels }.with(span, tuple_type);
 			}
 			AstPattern::BindPattern(bind_pattern) => {
-				PatternKind::Bind(bind_pattern.bind_name())
+				PatternKind::Bind(bind_pattern.bind_name(), varying)
+			}
+			AstPattern::VaryingPattern(varying_pattern) => {
+				return self.lower_pattern_inner(varying_pattern.subpattern(), true)
 			}
 
 			AstPattern::Error => panic!(),

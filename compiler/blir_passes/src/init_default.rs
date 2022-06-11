@@ -20,7 +20,7 @@ pub(crate) fn add_default_initializer(r#struct: &StructRef) {
     let mut init_statements = vec![];
 
     // Create a value for self
-    let self_value = ValueKind::SelfVal.anon(self_type.clone());
+    let self_value = ValueKind::SelfVal(true).anon(self_type.clone());
 
     // Loop through the variables
     for variable in struct_variables {
