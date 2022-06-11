@@ -74,7 +74,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
         let func_return_type = borrowed.info.return_type();
         let func_code = &borrowed.code;
 
-        if let Err(error) = self.check_codeblock(func_code, func_return_type, func_return_type) {
+        if let Err(error) = self.check_codeblock(func_code, Some(func_return_type), func_return_type) {
             self.handle_return_yield_error(error, &func_return_type.span);
         }
     }
@@ -84,7 +84,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
         let func_return_type = borrowed.info.return_type();
         let func_code = &borrowed.code;
 
-        if let Err(error) = self.check_codeblock(func_code, func_return_type, func_return_type) {
+        if let Err(error) = self.check_codeblock(func_code, Some(func_return_type), func_return_type) {
             self.handle_return_yield_error(error, &func_return_type.span);
         }
     }
@@ -107,13 +107,17 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
         }
     }
 
-    fn check_codeblock(&mut self, code_block: &CodeBlock, code_block_type: &Type, return_type: &Type) -> Result<(), TypeCheckError> {
+    fn check_codeblock(&mut self, code_block: &CodeBlock, code_block_type: Option<&Type>, return_type: &Type) -> Result<(), TypeCheckError> {
         for smt in code_block.statements() {
             self.check_smt(smt, return_type);
         }
 
         // TODO: Handle the error
-        self.check_type(code_block_type, &code_block.typ())
+        if let Some(code_block_type) = code_block_type {
+            self.check_type(code_block_type, &code_block.typ())
+        } else {
+            Ok(())
+        }
     }
 
     fn check_smt(&mut self, statement: &Statement, return_type: &Type) {
@@ -140,6 +144,9 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                     self.handle_return_error(error, statement);
                 }
             }
+
+            StatementKind::Break(_) |
+            StatementKind::Continue(_) => {}
         }
     }
 
@@ -176,7 +183,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                     return
                 };
 
-                if let Err(error) = self.check_codeblock(&closure.code, return_type, return_type) {
+                if let Err(error) = self.check_codeblock(&closure.code, Some(return_type), return_type) {
                     self.handle_return_yield_error(error, &value.span);
                 }
             }
@@ -256,12 +263,21 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
 
                 // Check that scrut_ty can be matched
                 for arm in &match_value.branches {
-                    match self.check_codeblock(&arm.code, &value.typ, return_type) {
+                    match self.check_codeblock(&arm.code, Some(&value.typ), return_type) {
                         Err(e) => self.handle_return_yield_error(e, &arm.code.typ().span),
                         _ => {}
                     };
 
                     self.check_pattern(scrut_ty, &arm.pattern);
+                }
+            }
+
+            ValueKind::Loop { code: code_block, .. } => {
+                match self.check_codeblock(code_block, None, return_type) {
+                    Err(e) => {
+                        self.handle_return_yield_error(e, &value.span); // todo: handle the error
+                    }
+                    _ => {}
                 }
             }
 
@@ -345,14 +361,14 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
         self.check_value(if_value.condition.as_ref(), &if_value.condition.typ);
 
         // Get the value of the if
-        if self.check_codeblock(&if_value.positive, if_type, return_type).is_err() {
+        if self.check_codeblock(&if_value.positive, Some(if_type), return_type).is_err() {
             spans.extend(if_value.positive.span());
         }
 
         if let Some(negative) = &if_value.negative {
             match negative {
                 IfBranch::CodeBlock(negative_block) => {
-                    if self.check_codeblock(negative_block, if_type, return_type).is_err() {
+                    if self.check_codeblock(negative_block, Some(if_type), return_type).is_err() {
                         spans.extend(if_value.positive.span());
                     }
                 }

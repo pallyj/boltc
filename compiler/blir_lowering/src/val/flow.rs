@@ -159,7 +159,9 @@ impl<'a> BlirLowerer<'a> {
 					self.builder.build_assign(pointer, code_value);
                 }
 
-                self.builder.build_terminator(Terminator::goto(sink));
+                if !leaf.escapes() {
+                    self.builder.build_terminator(Terminator::goto(sink));
+                }
             },
             DecisionTree::Switch { scrutinee,
                                    patterns,
@@ -173,8 +175,10 @@ impl<'a> BlirLowerer<'a> {
 						self.switch_integer(rvalue, &patterns, default_block)
 					}
                     TypeKind::Struct(struct_ref) if struct_ref.integer_repr() => {
-						let rvalue = self.lower_rvalue(&scrutinee);
-						self.switch_integer(rvalue, &patterns, default_block)
+						// todo: Get the actual name
+                        let place = self.lower_place(&scrutinee);
+						let place = self.builder.build_field(&place, "repr", Span::empty());
+						self.switch_integer(place.copy(Span::empty()), &patterns, default_block)
 					}
                     TypeKind::Enum(_) => {
 						let place = self.lower_place(&scrutinee);
@@ -376,5 +380,34 @@ impl<'a> BlirLowerer<'a> {
         self.builder.build_terminator(Terminator::goto(default_block));
 
         case_branches
+    }
+
+    pub fn lower_loop(
+        &mut self,
+        loop_code_block: &CodeBlock,
+        label: &str)
+    {
+        // todo: have an after and before loop
+        let break_block = self.builder.append_block();
+        let loop_block = self.builder.append_block();
+        self.builder.build_terminator(Terminator::goto(loop_block));
+        self.builder.position_at_end(loop_block);
+
+        self.break_labels.insert(label.to_string(), break_block);
+        self.continue_labels.insert(label.to_string(), loop_block);
+
+        self.lower_code_block(loop_code_block);
+
+        self.break_labels.remove(label);
+        self.continue_labels.remove(label);
+
+        if !loop_code_block.escapes() {
+            self.builder.build_terminator(Terminator::goto(loop_block));
+        }
+        self.builder.position_at_end(break_block);
+
+        let after_block = self.builder.append_block();
+        self.builder.build_terminator(Terminator::goto(after_block));
+        self.builder.position_at_end(after_block);
     }
 }

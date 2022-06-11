@@ -459,7 +459,10 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 if let Some(value) = value {
                     self.resolve_value(value, scope);
                 }
-            }
+            },
+
+            StatementKind::Break(_) |
+            StatementKind::Continue(_) => {}
         }
     }
 
@@ -576,6 +579,10 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                     self.define_pattern_in_scope(&mut branch.pattern, &branch_scope);
                     self.resolve_code_block(&mut branch.code, &branch_scope);
                 }
+            }
+
+            ValueKind::Loop{ code: code_block, .. } => {
+                self.resolve_code_block(code_block, scope)
             }
 
             ValueKind::Assign(left, right) => {

@@ -32,7 +32,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
         let return_type = func.return_type()
                               .map(|rt| self.lower_type(rt))
                               .unwrap_or_else(|| TypeKind::Void.anon());
-        let code = self.lower_code_block(func.code().unwrap());
+        let code = self.lower_code_block(func.code().unwrap(), None);
 
         let attributes = self.lower_attributes(func.attributes());
 
@@ -88,8 +88,9 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
         let span = self.span(range);
 
         let visibility = self.lower_visibility(func.visibility());
-        let is_static = func.is_static() || func.is_operator() || func.is_init();
+        let is_static = func.is_static() || func.is_operator() || func.is_init(); // todo: is_init and is_operator are NOT static
         let is_operator = func.is_operator();
+        let is_mutating = func.is_mutating();
         let is_init = func.is_init();
         let name = if is_init {
             "init".to_string()
@@ -118,7 +119,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                 .map(|rt| self.lower_type(rt))
                 .unwrap_or_else(|| TypeKind::Void.anon())
         };
-        let code = self.lower_code_block(func.code().unwrap());
+        let code = self.lower_code_block(func.code().unwrap(), None);
 
         let attributes = self.lower_attributes(func.attributes());
 
@@ -126,7 +127,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                     reciever,
                     is_static,
                     is_operator,
-                    false, // todo: check if it mutates
+                    is_mutating, // todo: check if it mutates
                     visibility,
                     name,
                     params,

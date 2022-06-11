@@ -112,21 +112,33 @@ fn token_specific(token: Option<Token>) -> String {
 	};
 
     match &token.kind {
-        SyntaxKind::StructKw
-        | SyntaxKind::ImportKw
-        | SyntaxKind::FuncKw
-        | SyntaxKind::InitKw
-        | SyntaxKind::LetKw
-        | SyntaxKind::VarKw
-        | SyntaxKind::IfKw
-        | SyntaxKind::ElseKw
-        | SyntaxKind::ReturnKw
-        | SyntaxKind::StaticKw
-        | SyntaxKind::PublicKw
-        | SyntaxKind::InternalKw
-        | SyntaxKind::FilePrivateKw
-        | SyntaxKind::PrivateKw
-        | SyntaxKind::UnderscoreKw => format!("keyword `{}`", token.source),
+        SyntaxKind::StructKw |
+        SyntaxKind::EnumKw |
+        SyntaxKind::CaseKw |
+        SyntaxKind::ImportKw |
+        SyntaxKind::FuncKw |
+        SyntaxKind::InitKw |
+        SyntaxKind::LetKw |
+        SyntaxKind::VarKw |
+        SyntaxKind::IfKw |
+        SyntaxKind::ElseKw |
+        SyntaxKind::MatchKw |
+        SyntaxKind::ReturnKw |
+        SyntaxKind::StaticKw |
+        SyntaxKind::PublicKw |
+        SyntaxKind::InternalKw |
+        SyntaxKind::FilePrivateKw |
+        SyntaxKind::PrivateKw |
+        SyntaxKind::UnderscoreKw |
+        SyntaxKind::OperatorKw |
+        SyntaxKind::TypeAliasKw |
+        SyntaxKind::MutatingKw |
+        SyntaxKind::SharedKw |
+        SyntaxKind::BreakKw |
+        SyntaxKind::ContinueKw |
+        SyntaxKind::WhileKw |
+        SyntaxKind::RepeatKw |
+        SyntaxKind::GuardKw => format!("keyword `{}`", token.source),
 
         SyntaxKind::Comment => "comment".to_string(),
         SyntaxKind::Whitespace => "whitespace".to_string(),

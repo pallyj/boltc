@@ -4,12 +4,20 @@ import intrinsics
 @defaultIntegerRepr
 public struct Int {
 	internal var repr: i64
+
+	operator func add(other: Int): Int {
+		Int(repr: integer64Add(self.repr, other.repr))
+	}
+
+	operator func sub(other: Int): Int {
+		Int(repr: integer64Sub(self.repr, other.repr))
+	}
 }
 
 public func print(i: Int) {
-	//printInt64(i.repr)
-	//printLine()
+	printInt64(i.repr)
+	printLine()
 }
 
-//public func printLine()
-//fileprivate func printInt64(i: i64)
+public func printLine()
+fileprivate func printInt64(i: i64)

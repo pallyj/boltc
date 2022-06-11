@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use blir::value::Closure;
 use errors::Span;
-use mir::val::Place;
+use mir::{val::Place, code::BasicBlockId};
 
 mod ty;
 mod val;
@@ -20,6 +20,9 @@ pub struct BlirLowerer<'a> {
     closures: Vec<(String, Closure)>,
     // todo: move these to another struct
     function_ctx: HashMap<String, Place>,
+
+    break_labels: HashMap<String, BasicBlockId>,
+    continue_labels: HashMap<String, BasicBlockId>,
 }
 
 impl<'a> BlirLowerer<'a> {
@@ -29,7 +32,12 @@ impl<'a> BlirLowerer<'a> {
     pub fn new(project: &'a mut mir::Project, libraries: Vec<blir::Library>) -> Self {
         let builder = project.builder();
 
-        Self { builder, libraries, function_ctx: HashMap::new(), closures: Vec::new() }
+        Self { builder,
+               libraries,
+               function_ctx: HashMap::new(),
+               closures: Vec::new(),
+               break_labels: HashMap::new(),
+               continue_labels: HashMap::new() }
     }
 
     ///

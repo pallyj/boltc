@@ -56,7 +56,7 @@ impl<'input, 'l> Parser<'input, 'l> {
         self.parse_visibility();
 
         match self.peek() {
-            Some(SyntaxKind::FuncKw) => self.parse_func(marker),
+            Some(SyntaxKind::FuncKw) => self.parse_func(marker, false),
             Some(SyntaxKind::LetKw) => self.parse_let(marker),
             Some(SyntaxKind::StructKw) => self.parse_struct(marker),
             Some(SyntaxKind::ImportKw) => self.parse_import(marker),

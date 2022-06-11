@@ -257,6 +257,17 @@ pub enum SyntaxKind {
 
     TypeAlias,
 
+    RepeatLoop,
+    WhileLoop,
+    WhileLetLoop,
+
+    IfLet,
+    Guard,
+    GuardLet,
+
+    BreakSmt,
+    ContinueSmt,
+
     _Invalid,
 }
 

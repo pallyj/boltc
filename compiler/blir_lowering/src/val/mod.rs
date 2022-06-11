@@ -31,6 +31,8 @@ impl<'a> BlirLowerer<'a> {
 			Match(_) => if matches!(value.typ.kind(), TypeKind::Divergent | TypeKind::Void) {
 				LowerKind::Const
 			} else { LowerKind::Construct }
+
+			Loop { .. } => LowerKind::Const,
 			
 			Unit => LowerKind::Const,
 			StaticFunc(_) => LowerKind::Const,
@@ -195,6 +197,12 @@ impl<'a> BlirLowerer<'a> {
 
 			Match(match_value) => {
 				self.lower_match(&match_value, &value.typ, None);
+
+				RValue::tuple(vec![], Self::span_of(value.span))
+			}
+
+			Loop { code: loop_value, label } => {
+				self.lower_loop(loop_value, label);
 
 				RValue::tuple(vec![], Self::span_of(value.span))
 			}
@@ -437,7 +445,14 @@ impl<'a> BlirLowerer<'a> {
 			InstanceMethod { reciever, method } => {
 				let recv = self.lower_place(&reciever);
 
-				let all_args = std::iter::once(recv.get_ref(recv.span()))
+				// todo: if method takes self ref
+				let first_arg = if method.is_mutating() {
+					recv.get_ref(recv.span())
+				} else {
+					recv.copy(recv.span())
+				};
+
+				let all_args = std::iter::once(first_arg)
 					.chain(args)
 					.collect_vec();
 

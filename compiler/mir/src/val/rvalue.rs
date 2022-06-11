@@ -194,7 +194,7 @@ impl RValue {
 			let ty = (**ty).clone();
 			Place::new(PlaceKind::Deref(self), ty, true, span)
 		} else {
-			panic!("Can't deref a value of type")
+			panic!("Can't deref a value of type {:?}", self.ty)
 		}		
 	}
 

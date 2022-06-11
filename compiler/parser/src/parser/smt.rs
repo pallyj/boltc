@@ -39,6 +39,12 @@ impl<'input, 'l> Parser<'input, 'l> {
                 });
 
             marker.complete(self, SyntaxKind::LetSmt);
+        } else if self.eat(SyntaxKind::BreakKw) {
+            // todo: add break value, break `label
+            marker.complete(self, SyntaxKind::BreakSmt);
+        } else if self.eat(SyntaxKind::ContinueKw) {
+            // todo: add continue `label
+            marker.complete(self, SyntaxKind::ContinueSmt);
         } else if self.eat(SyntaxKind::Semicolon) {
             marker.complete(self, SyntaxKind::NoOp);
         } else {

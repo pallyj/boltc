@@ -151,6 +151,11 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                 }
             }
 
+            ValueKind::Loop { code: loop_value, .. } => {
+                self.constrain_one_way(&value.typ, &TypeKind::Void.anon());
+                self.infer_codeblock(loop_value, &TypeKind::Void.anon(), scope)
+            }
+
             ValueKind::Assign(left, right) => {
                 self.constrain_value(left, scope);
                 self.constrain_value(right, scope);
@@ -200,6 +205,9 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                     self.constrain_one_way(&return_value.typ, &function_return_type)
                 }
             }
+
+            StatementKind::Break(_) |
+            StatementKind::Continue(_) => {}
         }
     }
 
@@ -363,7 +371,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
     }
 
     fn constrain_two_way(&mut self, ty1: &Type, ty2: &Type) {
-        println!("{ty1:?} <-> {ty2:?}");
+        //println!("{ty1:?} <-> {ty2:?}");
         let _constraint = match (self.infer_key(ty1), self.infer_key(ty2)) {
             (Some(key1), Some(key2)) if key1 != key2 => self.checker.impose(key1.equate_with(key2)),
             (Some(key1), None) => {

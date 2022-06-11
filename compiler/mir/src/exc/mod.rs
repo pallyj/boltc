@@ -4,7 +4,7 @@ use crate::{Project, code::BasicBlockId, instr::{Terminator, Instruction}, val::
 
 use self::{val::Value, frame::StackFrame};
 
-mod val;
+pub mod val;
 mod var;
 mod frame;
 
@@ -25,7 +25,6 @@ impl<'a> ExecutionEngine<'a> {
 	}
 
 	pub fn run_function(&self, name: &str, params: Vec<Value>) -> Value {
-		println!("Running {name}");
 		let function = self.project.get_function_named(name).expect("Function does not exist");
 
 		if function.params().len() != params.len() {
@@ -58,7 +57,7 @@ impl<'a> ExecutionEngine<'a> {
 
 		match value.kind() {
 			Const(ConstValue::String(s)) => {
-				let bytes = s.bytes().map(|byte| Value::Int(byte as u64)).collect_vec().leak();
+				let bytes = s.bytes().map(|byte| Value::Int(byte as u64)).chain(std::iter::once(Value::Int(0))).collect_vec().leak();
 
 				Value::Ref(bytes.as_mut_ptr())
 			}
@@ -92,6 +91,8 @@ impl<'a> ExecutionEngine<'a> {
 
 	pub fn run_instruction(&self, instruction: &Instruction, frame: &mut StackFrame) {
 		use crate::instr::InstructionKind::*;
+
+		//println!("{instruction}");
 
 
 		match instruction.kind() {
@@ -151,6 +152,7 @@ impl<'a> ExecutionEngine<'a> {
 			Local(local_id) => frame.get_local(*local_id).get(),
 			StructField(place, field) => match self.get_ptr(place, frame) {
 				Value::Struct(fields) => fields.get(field).expect("struct doesn't have field"),
+				Value::Ref(value) => panic!("{:?}", unsafe { &**value }),
 				v => panic!("Can't get a struct fiend of {v:?}")
 			},
 			CastEnumVariant(enum_place, _, _) => {
@@ -365,6 +367,14 @@ impl<'a> ExecutionEngine<'a> {
 			"printDouble" => if let Value::Float(n) = params[0] {
 				print!("{}", n)
 			}
+			"printString" => if let (Value::Ref(ptr), Value::Int(len)) = (&params[0], &params[1]) {
+				for i in 0..*len {
+					if let Value::Int(c) = unsafe { &*ptr.add(i as usize) } {
+						print!("{}", *c as u8 as char)
+					}
+				}
+			}
+
 			"printLine" => println!(),
 
 			_ => panic!("Function {name} isn't defined")

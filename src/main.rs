@@ -1,6 +1,9 @@
+#![feature(let_else)]
+
 mod args;
 mod cstd;
 mod extension_host;
+mod testing;
 
 use std::process::Command;
 
@@ -34,6 +37,11 @@ fn main() {
 
     let standard = cstd::StandardLib::default();
 
+    if args.files.first().map(|first| first == "run-tests").unwrap_or(false) {
+        testing::run_tests();
+        return;
+    }
+
     if args.files.first().map(|first| first == "install").unwrap_or(false) {
         standard.install();
         return;
@@ -57,8 +65,8 @@ fn main() {
     let mut project = Project::new(&lib_name, args.extensions.clone());
 
     // Add standard library
-    let lang = ["test/test.bolt"
-                /*"std/print.bolt",
+    let lang = [//"test/test.bolt"
+                "std/print.bolt",
                 "bool/Bool.bolt",
                 "float/Half.bolt",
                 "float/Float.bolt",
@@ -74,7 +82,7 @@ fn main() {
                 "int/UInt32.bolt",
                 "int/UInt64.bolt",
                 "string/StringSlice.bolt",
-                "string/Char.bolt"*/];
+                "string/Char.bolt"];
 
     let lib_path = standard.get_source_path();
     let lib_path_str = lib_path.as_os_str().to_string_lossy();
@@ -197,7 +205,7 @@ impl Project {
                                              &mut context,
                                              &mut debugger).run_pass(self.library.as_mut().unwrap());
 
-        println!("{:?}", self.library.as_ref().unwrap());
+        //println!("{:?}", self.library.as_ref().unwrap());
 
         if debugger.has_errors() {
             return (false, None);
@@ -215,7 +223,7 @@ impl Project {
 
         BlirLowerer::new(&mut project, vec![ self.library.take().unwrap() ]).lower();
 
-        println!("{project}");
+        //println!("{project}");
 
         let entry = context.entry_point;
 
@@ -272,5 +280,55 @@ impl Project {
 
         (!debugger.has_errors(), context.entry_point)*/
         (false, None)
+    }
+
+    pub fn compile_test(&mut self) -> Result<(String, mir::Project), ()> {
+        let mut debugger = Debugger::new(&self.interner);
+
+        let mut host = ExtensionHost::new();
+
+        for extension in &self.extensions {
+            if let Err(_) = unsafe { host.load_extension(extension) } {
+                debugger.throw(ErrorCode::ExtensionLoadFailed(extension.clone()), vec![]);
+            }
+        }
+
+        for file in self.interner.iter() {
+            let parse = parse(file.1.text(), &mut debugger, file.0, &host.operator_factory);
+
+            if debugger.has_errors() {
+                continue;
+            }
+
+            AstLowerer::new(parse, &mut debugger, &host.operator_factory).lower_file(self.library.as_mut().unwrap());
+        }
+
+        if debugger.has_errors() { return Err(()) }
+
+        let mut context = BlirContext::new();
+        blir_passes::TypeResolvePass::new(&host.attribute_factory,
+                                          &host.operator_factory,
+                                          &mut context,
+                                          &mut debugger).run_pass(self.library.as_mut().unwrap());
+
+        if debugger.has_errors() { return Err(()) }
+        blir_passes::TypeInferPass::new(&mut context, &mut debugger).run_pass(self.library.as_mut().unwrap());
+        if debugger.has_errors() { return Err(()) }
+
+
+        blir_passes::ClosureResolvePass::new(&host.attribute_factory,
+                                             &host.operator_factory,
+                                             &mut context,
+                                             &mut debugger).run_pass(self.library.as_mut().unwrap());
+
+
+        if debugger.has_errors() { return Err(()) }
+        blir_passes::TypeCheckPass::new(&mut debugger).run_pass(self.library.as_mut().unwrap());
+        if debugger.has_errors() { return Err(()) }
+
+        let mut project = mir::Project::new("test");
+        BlirLowerer::new(&mut project, vec![ self.library.take().unwrap() ]).lower();
+
+        return Ok((context.entry_point.unwrap(), project))
     }
 }

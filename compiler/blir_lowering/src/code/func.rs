@@ -1,7 +1,7 @@
 use blir::{code::{FunctionRef, MethodRef, FuncParam, ExternFunctionRef}, value::Closure, typ::TypeKind};
 use errors::Span;
 use itertools::Itertools;
-use mir::{instr::Terminator, val::{Place, RValue}};
+use mir::{instr::Terminator, val::Place};
 
 use crate::BlirLowerer;
 
@@ -39,7 +39,7 @@ impl<'a> BlirLowerer<'a> {
 			panic!("compiler error: function had non-function return type")
 		};
 
-		let parameter_iter = method.is_static().then(|| method.is_mutating())
+		let parameter_iter = (!method.is_static()).then(|| method.is_mutating())
 			.into_iter()
 			.chain(borrowed_method.info.params().iter().map(|FuncParam { is_shared, .. }| *is_shared));
 
@@ -92,7 +92,7 @@ impl<'a> BlirLowerer<'a> {
 		for (i, parameter) in borrowed_function.info.params().iter().enumerate() {
 			let ty = self.lower_ty(&parameter.typ);
 			let place = Place::function_param(i, ty, Self::span_of(parameter.typ.span())); // Use the span of the name
-			if let mir::ty::TypeKind::Pointer(_) = place.ty().kind() {
+			if parameter.is_shared {
 				self.function_ctx.insert(parameter.bind_name.clone(), place.copy(Span::empty()).deref(Span::empty()));
 			} else {
 				self.function_ctx.insert(parameter.bind_name.clone(), place);
@@ -135,15 +135,15 @@ impl<'a> BlirLowerer<'a> {
 		let function = self.builder.get_function_by_id(function_id);
 
 		// Optionally add self parameter to function
-		let params = (!borrowed_method.is_static).then_some("self")
+		let params = (!borrowed_method.is_static).then_some(("self", borrowed_method.is_mutating))
 			.into_iter()
-			.chain(borrowed_method.info.params().iter().map(|FuncParam { bind_name, .. }| bind_name.as_str()));
+			.chain(borrowed_method.info.params().iter().map(|FuncParam { bind_name, is_shared, .. }| (bind_name.as_str(), *is_shared)));
 
 		// Add parameters to function
-		for (i, (bind_name, param_type)) in params.zip(function.params()).enumerate() {
+		for (i, ((bind_name, is_shared), param_type)) in params.zip(function.params()).enumerate() {
 			let param = Place::function_param(i, param_type.clone(), Span::empty());
 
-			if let mir::ty::TypeKind::Pointer(_) = param.ty().kind() {
+			if is_shared {
 				self.function_ctx.insert(bind_name.to_string(), param.copy(Span::empty()).deref(Span::empty()));
 			} else {
 				self.function_ctx.insert(bind_name.to_string(), param);

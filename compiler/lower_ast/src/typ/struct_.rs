@@ -18,7 +18,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 			// Error
 			panic!();
 		};
-        let value = self.lower_expr(expr);
+        let value = self.lower_expr(expr, None);
 
         let attributes = self.lower_attributes(var.attributes());
         let span = self.span(var.range());
@@ -32,7 +32,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
         let typ = var.typ()
                      .map(|typ| self.lower_type(typ))
                      .unwrap_or_else(Type::infer);
-        let default_value = var.value().map(|value| self.lower_expr(value));
+        let default_value = var.value().map(|value| self.lower_expr(value, None));
 
         let attributes = self.lower_attributes(var.attributes());
         let span = self.span(var.range());
@@ -46,7 +46,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
         let typ = var.typ()
                      .map(|typ| self.lower_type(typ))
                      .unwrap_or_else(Type::infer);
-        let default_value = var.value().map(|value| self.lower_expr(value));
+        let default_value = var.value().map(|value| self.lower_expr(value, None));
 
         let attributes = self.lower_attributes(var.attributes());
         let span = self.span(var.range());

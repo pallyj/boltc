@@ -15,6 +15,8 @@ ast!(struct EvalSmt(EvalSmt));
 ast!(struct ReturnSmt(ReturnSmt));
 ast!(struct LetSmt(LetSmt));
 ast!(struct NoOp(NoOp));
+ast!(struct BreakSmt(BreakSmt));
+ast!(struct ContinueSmt(ContinueSmt));
 
 ast!(
     enum Smt {
@@ -22,6 +24,8 @@ ast!(
         ReturnSmt,
         LetSmt,
         NoOp,
+        BreakSmt,
+        ContinueSmt,
     }
 );
 
@@ -32,6 +36,8 @@ impl Debug for Smt {
             Self::ReturnSmt(arg0) => write!(f, "{arg0:?}"),
             Self::LetSmt(arg0) => write!(f, "{arg0:?}"),
             Self::NoOp(_) => write!(f, ";"),
+            Self::BreakSmt(arg0) => write!(f, "{arg0:?}"),
+            Self::ContinueSmt(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "Error"),
         }
     }
@@ -134,5 +140,17 @@ impl Debug for CodeBlock {
                              .join("\n");
 
         write!(f, "{{\n{statements}\n}}")
+    }
+}
+
+impl Debug for BreakSmt {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "break")
+    }
+}
+
+impl Debug for ContinueSmt {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "continue")
     }
 }

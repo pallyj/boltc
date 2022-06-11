@@ -17,7 +17,7 @@ fileprivate func printFloat(n: f32)
 
 fileprivate func printBool(n: i1)
 
-fileprivate func printString(string: strslice)
+fileprivate func printString(string: RawPointer<i8>, len: i64)
 
 fileprivate func printChar(c: i32);
 
@@ -125,7 +125,7 @@ public func print(i: UInt8, newline newline: Bool) {
 }
 
 public func print(s: StringSlice, newline newline: Bool) {
-	printString(s.slice)
+	printString(s.ptr, s.len)
 	if newline {
 		printLine()
 	}
@@ -208,7 +208,7 @@ public func print(i: UInt8) {
 }
 
 public func print(s: StringSlice) {
-	printString(s.slice)
+	printString(s.ptr, s.len)
 	printLine()
 }
 
@@ -218,13 +218,13 @@ public func print(c: Char) {
 }
 
 public func print(label: StringSlice, n: Int) {
-	printString(label.slice)
+	printString(label.ptr, label.len)
 	printInt64(n.repr)
 	printLine()
 }
 
 public func print(label: StringSlice, n: Float) {
-	printString(label.slice)
+	printString(label.ptr, label.len)
 	printFloat(n.repr)
 	printLine()
 }

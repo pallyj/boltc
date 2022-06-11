@@ -49,6 +49,10 @@ ast!(struct IndexExpr(IndexExpr));
 ast!(struct VariantLiteral(VariantLiteral));
 ast!(struct MatchExpr(MatchExpr));
 
+ast!(struct RepeatLoop(RepeatLoop));
+ast!(struct WhileLoop(WhileLoop));
+ast!(struct WhileLetLoop(WhileLetLoop));
+
 
 ast!(struct MatchBranch(MatchBranch));
 ast!(struct FuncArg(FuncArg));
@@ -72,6 +76,9 @@ ast!(
         IndexExpr,
         VariantLiteral,
         MatchExpr,
+        RepeatLoop,
+        WhileLoop,
+        WhileLetLoop,
     }
 );
 
@@ -94,6 +101,9 @@ impl Debug for Expr {
             Self::IndexExpr(arg0) => write!(f, "{arg0:?}"),
             Self::VariantLiteral(arg0) => write!(f, "{arg0:?}"),
             Self::MatchExpr(arg0) => write!(f, "{arg0:?}"),
+            Self::RepeatLoop(arg0) => write!(f, "{arg0:?}"),
+            Self::WhileLoop(arg0) => write!(f, "{arg0:?}"),
+            Self::WhileLetLoop(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "error"),
         }
     }
@@ -520,5 +530,72 @@ impl Debug for MatchBranch {
         } else {
             write!(f, "{:?} => {:?}", self.pattern(), self.value().unwrap())
         }
+    }
+}
+
+impl RepeatLoop {
+    pub fn code_block(&self) -> CodeBlock {
+        self.0.children()
+            .find_map(|child| CodeBlock::cast(child))
+            .unwrap()
+    }
+}
+
+impl Debug for RepeatLoop {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "repeat {:?}", self.code_block())
+    }
+}
+
+impl WhileLoop {
+    pub fn condition(&self) -> Expr {
+        self.0
+            .children()
+            .find(|syn| syn.kind() == SyntaxKind::Condition)
+            .and_then(|condition| condition.first_child())
+            .map(Expr::cast)
+            .unwrap()
+    }
+
+    pub fn code_block(&self) -> CodeBlock {
+        self.0.children()
+            .find_map(|child| CodeBlock::cast(child))
+            .unwrap()
+    }
+}
+
+impl Debug for WhileLoop {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "while {:?} {:?}", self.condition(), self.code_block())
+    }
+}
+
+impl WhileLetLoop {
+    pub fn pattern(&self) -> Pattern {
+        self.0
+            .first_child()
+            .map(Pattern::cast)
+            .unwrap()
+    }
+
+    pub fn value(&self) -> Expr {
+        self.0
+            .children()
+            .find(|syn| syn.kind() == SyntaxKind::Condition)
+            .and_then(|condition| condition.first_child())
+            .map(Expr::cast)
+            .unwrap()
+    }
+
+    pub fn code_block(&self) -> CodeBlock {
+        self.0.children()
+            .find_map(|child| CodeBlock::cast(child))
+            .unwrap()
+    }
+}
+
+impl Debug for WhileLetLoop {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "not impl")
     }
 }

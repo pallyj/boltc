@@ -6,7 +6,7 @@ pub mod instr;
 pub mod code;
 mod builder;
 mod project;
-mod exc;
+pub mod exc;
 
 pub use builder::Builder;
 pub use project::Project;

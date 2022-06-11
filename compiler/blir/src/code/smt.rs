@@ -22,6 +22,9 @@ pub enum StatementKind {
     Return {
         value: Option<Value>,
     },
+
+    Break(String),
+    Continue(String),
 }
 
 impl StatementKind {
@@ -61,6 +64,9 @@ impl Statement {
                     ty
                 }
             }
+            StatementKind::Break(_) => TypeKind::Divergent.anon(),
+            StatementKind::Continue(_) => TypeKind::Divergent.anon(),
+
         }
     }
 
@@ -68,6 +74,8 @@ impl Statement {
         match self.deref() {
             StatementKind::Return { .. } => true,
             StatementKind::Eval { value, .. } => matches!(value.typ.deref(), TypeKind::Divergent),
+            StatementKind::Break(_) => true,
+            StatementKind::Continue(_) => true,
             _ => false,
         }
     }
@@ -107,6 +115,8 @@ impl Debug for Statement {
                     write!(f, "return")
                 }
             }
+            StatementKind::Break(label) => write!(f, "break `{label}"),
+            StatementKind::Continue(label) => write!(f, "continue `{label}")
         }
     }
 }

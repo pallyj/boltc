@@ -5,27 +5,27 @@ public typealias String = StringSlice
 @defaultStringRepr
 @transparent
 public struct StringSlice {
-	internal var ptr: rawpointer
-	internal var len: UInt
+	internal var ptr: RawPointer<i8>
+	internal var len: i64
 
 	public func length(): Int {
-		Int(self.len)
+		Int(repr: self.len)
 	}
 
-	public operator func equal(other: StringSlice): Bool {
+	/*public operator func equal(other: StringSlice): Bool {
 		if self.len != other.len {
 			return false
 		}
 
 		let var i = 0;
 
-		while i < self.len {
+		/*while i < self.len {
 			if ptr.offset(i) != other.offset(i) {
 				return false
 			}
 
 			i += 1
-		}
+		}*/
 
 		return true
 	}
@@ -37,13 +37,13 @@ public struct StringSlice {
 
 		let var i = 0;
 
-		while i < self.len {
+		/*while i < self.len {
 			if ptr.offset(i) == ptr.offset.offset(i) {
 				return false
 			}
 
 			i += 1
-		}
+		}*/
 
 		return true
 	}
@@ -61,7 +61,7 @@ public struct StringSlice {
 	}
 
 	public operator func index(unchecked range: IntRange): StringSlice {
-		StringSlice(raw_pointer.add(range.bottom()), len: range.top() - range.bottom() )
+		StringSlice(self.ptr.add(range.bottom()), len: range.top() - range.bottom() )
 	}
 
 	public operator func index(wrapped range: IntRange): Optional_StringSlice {
@@ -113,7 +113,7 @@ public struct StringSlice {
 		}
 
 		return .some(index)
-	}
+	}*/
 }
 
 enum Optional_StringSlice {
@@ -131,12 +131,12 @@ enum Optional_Int {
 	case none
 }
 
-fileprivate func strslice_eq(one: strslice, two: strslice): Bool
-fileprivate func strslice_neq(one: strslice, two: strslice): Bool
-fileprivate func strslice_index(slice: strslice, idx: Int): Char
-fileprivate func strslice_slice(slice: strslice, start: Int, end: Int): StringSlice
-fileprivate func strslice_extend(slice: strslice, delta: Int): StringSlice
-fileprivate func strslice_head_slice(slice: strslice, delta: Int): StringSlice
+// fileprivate func strslice_eq(one: strslice, two: strslice): Bool
+// fileprivate func strslice_neq(one: strslice, two: strslice): Bool
+// fileprivate func strslice_index(slice: strslice, idx: Int): Char
+// fileprivate func strslice_slice(slice: strslice, start: Int, end: Int): StringSlice
+// fileprivate func strslice_extend(slice: strslice, delta: Int): StringSlice
+// fileprivate func strslice_head_slice(slice: strslice, delta: Int): StringSlice
 
 
 /*

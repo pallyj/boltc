@@ -18,7 +18,11 @@ impl<'input, 'l> Parser<'input, 'l> {
         marker.complete(self, SyntaxKind::FuncDef);
     }
 
-    pub fn parse_func(&mut self, marker: Marker) {
+    pub fn parse_func(&mut self, marker: Marker, is_method: bool) {
+        if is_method {
+            self.eat(SyntaxKind::MutatingKw);
+        }
+
         assert!(self.check(SyntaxKind::FuncKw));
         self.eat(SyntaxKind::FuncKw);
 
@@ -44,9 +48,9 @@ impl<'input, 'l> Parser<'input, 'l> {
         self.eat(SyntaxKind::OperatorKw);
 
         if self.check(SyntaxKind::FuncKw) {
-            self.parse_func(marker);
+            self.parse_func(marker, false);
         } else {
-            self.error_recover("", ITEM_RECOVERY_SET);
+            self.error_recover("expected keyword `func`", ITEM_RECOVERY_SET);
         }
     }
 

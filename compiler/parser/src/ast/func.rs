@@ -46,6 +46,12 @@ impl FuncDef {
             .any(|child| child.kind() == SyntaxKind::OperatorKw)
     }
 
+    pub fn is_mutating(&self) -> bool {
+        self.0
+            .children_with_tokens()
+            .any(|child| child.kind() == SyntaxKind::MutatingKw)
+    }
+
     pub fn name(&self) -> String {
         self.0
             .children()

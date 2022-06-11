@@ -10,11 +10,16 @@ impl<'a> BlirLowerer<'a> {
 		&mut self,
 		code: &CodeBlock) -> Option<RValue>
 	{
-		code.statements()
-			.iter()
-			.map(|smt| self.lower_statement(smt))
-			.last()
-			.unwrap_or(None)
+		let mut last_value = None;
+
+		for smt in code.statements() {
+			last_value = self.lower_statement(smt);
+			if smt.diverges() { break }
+		}
+
+		// todo: and then add warnings
+
+		return last_value;
 	}
 
 	///
@@ -55,6 +60,16 @@ impl<'a> BlirLowerer<'a> {
 
 				None
 			},
+			Break(label) => {
+				let bb = *self.break_labels.get(label).unwrap();
+				self.builder.build_terminator(Terminator::goto(bb));
+				None
+			},
+			Continue(label) => {
+				let bb = *self.continue_labels.get(label).unwrap();
+				self.builder.build_terminator(Terminator::goto(bb));
+				None
+			}
 		}
 	}
 }

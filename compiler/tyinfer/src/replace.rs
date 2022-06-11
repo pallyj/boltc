@@ -46,6 +46,8 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                     self.replace_value(value, scope)
                 }
             }
+            StatementKind::Break(_) |
+            StatementKind::Continue(_) => {}
         }
     }
 
@@ -249,6 +251,10 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                     self.replace_codeblock(&mut branch.code, scope);
                 }
             }
+
+            ValueKind::Loop { code: loop_value, .. } => {
+                self.replace_codeblock(loop_value, scope);
+            }
             
             ValueKind::Assign(left, right) => {
                 self.replace_value(left.as_mut(), scope);
@@ -446,8 +452,6 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 					// Throw an error
 					return;
 				};
-
-                println!("{typ:?} = {variant:?}");
 
                 if let Some(concrete_type) = self.type_for_variant(variant) {
                     typ.set_kind(concrete_type);

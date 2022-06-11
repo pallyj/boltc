@@ -92,7 +92,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 				      let case = Case::new(item.name(), associated_types, labels, span);
 
 					  if let Some(const_value) = item.value() {
-						  let value = self.lower_expr(const_value);
+						  let value = self.lower_expr(const_value, None);
 
 						  let integer_value = Self::change_to_u64(self.lower_integer(&value));
 

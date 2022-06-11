@@ -1,0 +1,28 @@
+@entryPoint
+func main() {
+	let iterator = Iterator(max: 5)
+
+	while let .some(x) = iterator.next() {
+		print(x)
+	}
+}
+
+enum Optional_Int {
+	case none
+	case some(Int)
+}
+
+struct Iterator {
+	private var index: Int = 0;
+	var max: Int;
+
+	mutating func next(): Optional_Int {
+		if index < max {
+			let old_idx = self.index
+			self.index += 1;
+			.some(old_idx)
+		} else {
+			.none
+		}
+	}
+}

@@ -106,7 +106,7 @@ impl Intrinsics {
         self.add_float_type(64);
 
         self.add_bool_type();
-        self.add_strslice_type();
+        //self.add_strslice_type();
 
         self.add_rawptr_type();
     }

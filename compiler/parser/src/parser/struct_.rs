@@ -32,7 +32,8 @@ impl<'input, 'l> Parser<'input, 'l> {
         self.eat(SyntaxKind::StaticKw);
 
         match self.peek() {
-            Some(SyntaxKind::FuncKw) => self.parse_func(marker),
+            Some(SyntaxKind::FuncKw) |
+            Some(SyntaxKind::MutatingKw) => self.parse_func(marker, true),
             Some(SyntaxKind::OperatorKw) => self.parse_operator_func(marker),
             Some(SyntaxKind::VarKw) => self.parse_var(marker),
             Some(SyntaxKind::LetKw) => self.parse_let(marker),

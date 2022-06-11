@@ -14,5 +14,5 @@ public struct String {
 @entryPoint
 func main() {
 	let c: Char = "J"
-	let s: String = ""
+	let s: String = "Hello, World"
 }

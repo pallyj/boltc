@@ -1,7 +1,9 @@
 mod unescape;
 
+use std::sync::atomic::{AtomicU64, Ordering};
+
 use blir::{typ::{Type, TypeKind},
-           value::{Closure, ClosureParam, FunctionArgs, IfBranch, IfValue, Value, ValueKind, match_::MatchValue, MatchBranch}, code::{CodeBlock, StatementKind}};
+           value::{Closure, ClosureParam, FunctionArgs, IfBranch, IfValue, Value, ValueKind, match_::MatchValue, MatchBranch}, code::{CodeBlock, StatementKind, Statement}, pattern::PatternKind};
 use errors::Span;
 use parser::ast::expr::{ClosureExpr, Expr as AstExpr, IfExpr, IfExprNegative, LiteralKind};
 use unindent::unindent;
@@ -10,21 +12,23 @@ use crate::AstLowerer;
 
 use self::unescape::unescape;
 
+static LOOP_COUNTER: AtomicU64 = AtomicU64::new(1);
+
 impl<'a, 'b> AstLowerer<'a, 'b> {
-    pub(crate) fn lower_expr(&mut self, expr: AstExpr) -> Value {
+    pub(crate) fn lower_expr(&mut self, expr: AstExpr, last_loop_label: Option<&str>) -> Value {
         let range = expr.range();
         let span = self.span(range);
 
         match expr {
             AstExpr::NamedExpr(named) => ValueKind::Named(named.name()).spanned_infer(span),
 
-            AstExpr::MemberExpr(member_expr) => ValueKind::Member { parent: Box::new(self.lower_expr(member_expr.parent())),
+            AstExpr::MemberExpr(member_expr) => ValueKind::Member { parent: Box::new(self.lower_expr(member_expr.parent(), last_loop_label)),
                                                                     member: member_expr.child().unwrap(), }.spanned_infer(span),
 
             AstExpr::TupleExpr(tuple_expr) => {
                 let (tuple_items, labels): (Vec<_>, Vec<_>) =
                     tuple_expr.items()
-                              .map(|item| (self.lower_expr(item.expr()), item.label()))
+                              .map(|item| (self.lower_expr(item.expr(), last_loop_label), item.label()))
                               .unzip();
 
                 let infer_items = (0..tuple_items.len()).map(|_| Type::infer()).collect();
@@ -42,7 +46,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                                                     labels:      vec![None], }.anon();
 
                 ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
-                                      args:     FunctionArgs { args:   vec![self.lower_expr(prefix.unit())],
+                                      args:     FunctionArgs { args:   vec![self.lower_expr(prefix.unit(), last_loop_label)],
                                                                labels: vec![None], }, }.spanned(Type::infer(), span)
             }
             AstExpr::PostfixExpr(postfix) => {
@@ -54,48 +58,48 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                                                     labels:      vec![None], }.anon();
 
                 ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
-                                      args:     FunctionArgs { args:   vec![self.lower_expr(postfix.unit())],
+                                      args:     FunctionArgs { args:   vec![self.lower_expr(postfix.unit(), last_loop_label)],
                                                                labels: vec![None], }, }.spanned(Type::infer(), span)
             }
             AstExpr::InfixExpr(infix) => {
                 let mut operator_symbol = infix.operator();
 
                 if operator_symbol == "=" {
-                    let left = self.lower_expr(infix.left());
-                    let right = self.lower_expr(infix.right());
+                    let left = self.lower_expr(infix.left(), last_loop_label);
+                    let right = self.lower_expr(infix.right(), last_loop_label);
 
                     return ValueKind::Assign(Box::new(left), Box::new(right))
                                     .spanned(TypeKind::Void.spanned(span), span)
                 }
-                
-                if let Some(operator_symbol) = operator_symbol.strip_suffix('=') {
-                    let operator = self.factory.get_postfix_op(operator_symbol).unwrap();
+                if !["!=", "==", "<=", ">="].contains(&operator_symbol.as_str()) {
+                    if let Some(operator_symbol) = operator_symbol.strip_suffix('=') {
+                        let operator = self.factory.get_postfix_op(operator_symbol).unwrap();
 
-                    let function = TypeKind::Function { return_type: Box::new(Type::infer()),
-                                                        params:      vec![Type::infer(), Type::infer()],
-                                                        labels:      vec![None, None], }.anon();
+                        let function = TypeKind::Function { return_type: Box::new(Type::infer()),
+                                                            params:      vec![Type::infer(), Type::infer()],
+                                                            labels:      vec![None, None], }.anon();
 
-                    let left = self.lower_expr(infix.left());
-                    let right = self.lower_expr(infix.right());
-    
-                    let assign_val = ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
-                                                           args:     FunctionArgs { args:   vec![left.clone(), right],
-                                                                                    labels: vec![None, None] } }.spanned(Type::infer(), span);
+                        let left = self.lower_expr(infix.left(), last_loop_label);
+                        let right = self.lower_expr(infix.right(), last_loop_label);
+        
+                        let assign_val = ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
+                                                            args:     FunctionArgs { args:   vec![left.clone(), right],
+                                                                                        labels: vec![None, None] } }.spanned(Type::infer(), span);
 
-                    return ValueKind::Assign(Box::new(left), Box::new(assign_val))
-                                    .spanned(TypeKind::Void.spanned(span), span)                                   
-                } else {
-                    let operator = self.factory.get_postfix_op(&operator_symbol).unwrap();
-
-                    let function = TypeKind::Function { return_type: Box::new(Type::infer()),
-                                                        params:      vec![Type::infer(), Type::infer()],
-                                                        labels:      vec![None, None], }.anon();
-    
-                    ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
-                                          args:     FunctionArgs { args:   vec![self.lower_expr(infix.left()),
-                                                                                self.lower_expr(infix.right())],
-                                                                   labels: vec![None, None], }, }.spanned(Type::infer(), span)
+                        return ValueKind::Assign(Box::new(left), Box::new(assign_val))
+                                        .spanned(TypeKind::Void.spanned(span), span)                                   
+                    }
                 }
+                let operator = self.factory.get_postfix_op(&operator_symbol).unwrap();
+
+                let function = TypeKind::Function { return_type: Box::new(Type::infer()),
+                                                    params:      vec![Type::infer(), Type::infer()],
+                                                    labels:      vec![None, None], }.anon();
+
+                ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
+                                        args:     FunctionArgs { args:   vec![self.lower_expr(infix.left(), last_loop_label),
+                                                                            self.lower_expr(infix.right(), last_loop_label)],
+                                                                labels: vec![None, None], }, }.spanned(Type::infer(), span)
 
                 
             }
@@ -111,8 +115,8 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                                                     labels:      vec![None, label.clone()], }.anon();
 
                 ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator).anon(function)),
-                                      args:     FunctionArgs { args:   vec![self.lower_expr(index.parent()),
-                                                                            self.lower_expr(value)],
+                                      args:     FunctionArgs { args:   vec![self.lower_expr(index.parent(), last_loop_label),
+                                                                            self.lower_expr(value, last_loop_label)],
                                                                labels: vec![None, label], }, }.spanned(Type::infer(), span)
             }
 
@@ -181,7 +185,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
             AstExpr::ParenthesizedExpr(paren) => {
                 // TODO: Add old span
-                let expr = self.lower_expr(paren.expr());
+                let expr = self.lower_expr(paren.expr(), last_loop_label);
 
                 if let Some(label) = paren.tuple_label() {
                     let (tuple_items, labels) = (vec![expr], vec![Some(label)]);
@@ -196,10 +200,10 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
             }
 
             AstExpr::FuncCallExpr(call) => {
-                let mut func = self.lower_expr(call.function());
+                let mut func = self.lower_expr(call.function(), last_loop_label);
 
                 let (labels, args): (Vec<_>, Vec<_>) = call.args()
-                                                           .map(|arg| (arg.label(), self.lower_expr(arg.value())))
+                                                           .map(|arg| (arg.label(), self.lower_expr(arg.value(), last_loop_label)))
                                                            .unzip();
 
                 let return_type = Box::new(Type::infer());
@@ -217,7 +221,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
             AstExpr::ClosureExpr(closure) => self.lower_closure_expr(closure, span),
 
             AstExpr::TrailingClosureExpr(trailing_closure) => {
-                let mut function = self.lower_expr(trailing_closure.function());
+                let mut function = self.lower_expr(trailing_closure.function(), last_loop_label);
                 let closure = self.lower_closure_expr(trailing_closure.closure(), span);
 
                 if let ValueKind::FuncCall { args, function: func } = &mut function.kind {
@@ -245,7 +249,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
             }
 
             AstExpr::IfExpr(expr) => {
-                let if_value = self.lower_if_expr(expr);
+                let if_value = self.lower_if_expr(expr, last_loop_label);
 
                 ValueKind::If(if_value).spanned_infer(span)
             }
@@ -255,16 +259,16 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
             AstExpr::VariantLiteral(variant_expr) => ValueKind::VariantLiteral(variant_expr.variant_name()).spanned(Type::infer(), span),
 
             AstExpr::MatchExpr(match_expr) => {
-                let discriminant = Box::new(self.lower_expr(match_expr.discriminant()));
+                let discriminant = Box::new(self.lower_expr(match_expr.discriminant(), last_loop_label));
 
                 let branches = match_expr.branches()
                     .map(|branch| {
                         let pattern = self.lower_pattern(branch.pattern());
 
                         let code = if let Some(code_block) = branch.code_block() {
-                            self.lower_code_block(code_block)
+                            self.lower_code_block(code_block, last_loop_label)
                         } else {
-                            let value = self.lower_expr(branch.value().unwrap());
+                            let value = self.lower_expr(branch.value().unwrap(), last_loop_label);
                             let span = value.span.unwrap();
                             let statement = StatementKind::Eval { value, escaped: false }.spanned(span);
 
@@ -276,6 +280,72 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                     .collect();
 
                 ValueKind::Match(MatchValue { discriminant, branches }).spanned_infer(span)
+            }
+
+            AstExpr::RepeatLoop(repeat_loop) => {
+                if !feature_gate::has_feature("repeat_loops") {
+                    panic!("error: repeat loops are unstable");
+                }
+
+                let next_label = format!("repeat#{}", LOOP_COUNTER.fetch_add(1, Ordering::Relaxed));
+                let lowered_block = self.lower_code_block(repeat_loop.code_block(), Some(&next_label));
+
+                ValueKind::Loop{ code: lowered_block, label: next_label }.spanned_infer(span)
+            }
+
+            AstExpr::WhileLoop(while_loop) => {
+                if !feature_gate::has_feature("while_loops") {
+                    panic!("error: while loops are unstable");
+                }
+
+                let condition = self.lower_expr(while_loop.condition(), last_loop_label);
+
+                let next_label = format!("while#{}", LOOP_COUNTER.fetch_add(1, Ordering::Relaxed));
+                let lowered_block = self.lower_code_block(while_loop.code_block(), Some(&next_label));
+                let else_break = CodeBlock::new(vec![ StatementKind::Break(next_label.clone()).spanned(span) ], span);
+
+                let if_switch = ValueKind::If(IfValue {
+                    condition: Box::new(condition),
+                    positive: lowered_block,
+                    negative: Some(IfBranch::CodeBlock(else_break)),
+                }).infer();
+
+                let if_block = CodeBlock::new(vec![
+                    StatementKind::Eval { value: if_switch, escaped: false }.spanned(span)
+                ], span);
+
+
+
+                ValueKind::Loop{ code: if_block, label: next_label }.spanned_infer(span)
+            }
+
+            AstExpr::WhileLetLoop(while_let_loop) => {
+                if !feature_gate::has_feature("while_let_loops") {
+                    panic!("error: while let loops are unstable");
+                }
+
+                let scrutinee = self.lower_expr(while_let_loop.value(), last_loop_label);
+                let pattern = self.lower_pattern(while_let_loop.pattern());
+
+                let next_label = format!("while#{}", LOOP_COUNTER.fetch_add(1, Ordering::Relaxed));
+                let lowered_block = self.lower_code_block(while_let_loop.code_block(), Some(&next_label));
+                let else_break = CodeBlock::new(vec![ StatementKind::Break(next_label.clone()).spanned(span) ], span);
+
+                let match_pat = ValueKind::Match(MatchValue {
+                    discriminant: Box::new(scrutinee),
+                    branches: vec![
+                        MatchBranch { pattern, code: lowered_block },
+                        MatchBranch { pattern: PatternKind::Wildcard.with_span(span), code: else_break }
+                    ]
+                }).infer();
+
+                let if_block = CodeBlock::new(vec![
+                    StatementKind::Eval { value: match_pat, escaped: false }.spanned(span)
+                ], span);
+
+
+
+                ValueKind::Loop{ code: if_block, label: next_label }.spanned_infer(span)
             }
 
             AstExpr::Error => panic!("error")
@@ -301,14 +371,14 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                                                      params:      function_parameter_types,
                                                      labels:      vec![], }.anon();
 
-            let code = self.lower_code_block(closure.code_block());
+            let code = self.lower_code_block(closure.code_block(), None);
 
             let closure = Closure { params: blir_params,
                                     code };
 
             ValueKind::Closure(closure).spanned(function_type, span)
         } else {
-            let code = self.lower_code_block(closure.code_block());
+            let code = self.lower_code_block(closure.code_block(), None);
 
             let closure = Closure { params: vec![], code };
 
@@ -318,12 +388,12 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
         }
     }
 
-    pub(crate) fn lower_if_expr(&mut self, expr: IfExpr) -> IfValue {
-        let condition = Box::new(self.lower_expr(expr.condition()));
-        let positive = self.lower_code_block(expr.positive());
+    pub(crate) fn lower_if_expr(&mut self, expr: IfExpr, last_loop_label: Option<&str>) -> IfValue {
+        let condition = Box::new(self.lower_expr(expr.condition(), last_loop_label));
+        let positive = self.lower_code_block(expr.positive(), last_loop_label);
         let negative = match expr.negative() {
-            Some(IfExprNegative::CodeBlock(cb)) => Some(IfBranch::CodeBlock(self.lower_code_block(cb))),
-            Some(IfExprNegative::IfExpr(else_if)) => Some(IfBranch::Else(Box::new(self.lower_if_expr(else_if)))),
+            Some(IfExprNegative::CodeBlock(cb)) => Some(IfBranch::CodeBlock(self.lower_code_block(cb, last_loop_label))),
+            Some(IfExprNegative::IfExpr(else_if)) => Some(IfBranch::Else(Box::new(self.lower_if_expr(else_if, last_loop_label)))),
             _ => None,
         };
 

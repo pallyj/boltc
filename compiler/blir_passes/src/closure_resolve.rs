@@ -133,6 +133,25 @@ impl<'a, 'l> ClosureResolvePass<'a, 'l> {
 
             ValueKind::InstanceVariable { reciever, .. } => self.resolve_value(reciever, scope),
 
+            ValueKind::Assign(left, right) => {
+                self.resolve_value(left.as_mut(), scope);
+                self.resolve_value(right.as_mut(), scope);
+            }
+
+            ValueKind::Match(match_value) => {
+                self.resolve_value(match_value.discriminant.as_mut(), scope);
+
+                for branch in &mut match_value.branches {
+                    self.resolve_code_block(&mut branch.code, scope)
+                }
+            }
+
+            ValueKind::Loop { code: code_block, .. } => self.resolve_code_block(code_block, scope),
+
+            ValueKind::TupleField(of_tuple, _) => self.resolve_value(of_tuple.as_mut(), scope),
+
+            ValueKind::Tuple(fields) => fields.iter_mut().for_each(|field| self.resolve_value(field, scope)),
+
             // TODO: The rest should have something
 
             _ => {}

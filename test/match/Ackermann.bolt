@@ -1,9 +1,13 @@
 @entryPoint
-func main() {
-	print(ackermann(3, 3))
-}
-
 func ackermann(m: Int, n: Int): Int {
+	if m < 0 {
+		return 0
+	}
+
+	if n < 0 {
+		return 0
+	}
+
 	match (m, n) {
 		(0, _) => n + 1,
 		(_, 0) => ackermann(m - 1, 1),

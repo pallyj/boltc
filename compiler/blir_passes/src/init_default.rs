@@ -54,11 +54,10 @@ pub(crate) fn add_default_initializer(r#struct: &StructRef) {
     let code = CodeBlock::new(init_statements, Span::empty());
     let func_params = parameter_types.into_iter()
                                      .zip(parameter_labels)
-                                     .enumerate()
-                                     .map(|(i, (typ, label))| FuncParam { label: Some(label.clone()),
+                                     .map(|(typ, label)| FuncParam { label: Some(label.clone()),
                                                                           bind_name: label,
                                                                           typ,
-                                                                          is_shared: i == 0 })
+                                                                          is_shared: false })
                                      .collect();
 
     let method = {

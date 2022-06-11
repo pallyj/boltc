@@ -232,6 +232,7 @@ impl<'input, 'l> Parser<'input, 'l> {
         || self.check(SyntaxKind::IfKw)
         || self.check(SyntaxKind::MatchKw)
         || self.check(SyntaxKind::Period)
+        || self.check(SyntaxKind::RepeatKw)
     }
 
     pub fn parse_expr_atom(&mut self, is_before_brace: bool) -> CompletedMarker {
@@ -275,6 +276,16 @@ impl<'input, 'l> Parser<'input, 'l> {
             self.parse_expr_if(marker)
         } else if self.eat(SyntaxKind::MatchKw) {
             self.parse_expr_match(marker)
+        } else if self.eat(SyntaxKind::RepeatKw) {
+            if !self.check(SyntaxKind::OpenBrace) {
+                self.error_recover("expected open brace", EXPR_RECOVERY_SET);
+                return marker.complete(self, SyntaxKind::Error)
+            }
+            self.parse_codeblock();
+            
+            marker.complete(self, SyntaxKind::RepeatLoop)
+        } else if self.eat(SyntaxKind::WhileKw) {
+            self.parse_expr_while(marker)
         } else if self.check(SyntaxKind::OpenBrace) {
             self.parse_closure(marker)
         } else if self.eat(SyntaxKind::Period) {
@@ -313,6 +324,42 @@ impl<'input, 'l> Parser<'input, 'l> {
         }
 
         marker.complete(self, SyntaxKind::IfExpr)
+    }
+
+    pub fn parse_expr_while(&mut self, marker: Marker) -> CompletedMarker {
+        if self.eat(SyntaxKind::LetKw) {
+            return self.parse_expr_while_let(marker)
+        }
+
+        self.node(SyntaxKind::Condition, Self::parse_expr_before_brace);
+
+        if !self.check(SyntaxKind::OpenBrace) {
+            self.error_recover("expected open brace", EXPR_RECOVERY_SET);
+            return marker.complete(self, SyntaxKind::Error)
+        }
+
+        self.parse_codeblock();
+
+        marker.complete(self, SyntaxKind::WhileLoop)
+    }
+
+    pub fn parse_expr_while_let(&mut self, marker: Marker) -> CompletedMarker {
+        self.parse_pattern();
+
+        if !self.eat(SyntaxKind::Equals) {
+            self.error("expected `=`");
+        }
+
+        self.node(SyntaxKind::Condition, Self::parse_expr_before_brace);
+
+        if !self.check(SyntaxKind::OpenBrace) {
+            self.error_recover("expected open brace", EXPR_RECOVERY_SET);
+            return marker.complete(self, SyntaxKind::Error)
+        }
+
+        self.parse_codeblock();
+
+        marker.complete(self, SyntaxKind::WhileLetLoop)
     }
 
     pub fn parse_expr_match(&mut self, marker: Marker) -> CompletedMarker {

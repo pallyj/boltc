@@ -10,7 +10,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 		match expr {
 			AstPattern::WildcardPattern(_) => PatternKind::Wildcard,
 			AstPattern::LiteralPattern(literal) => {
-				let lowered = self.lower_expr(literal.value());
+				let lowered = self.lower_expr(literal.value(), None);
 
 				match &lowered.kind {
 					ValueKind::StringLiteral(_) => {

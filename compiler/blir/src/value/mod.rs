@@ -88,6 +88,10 @@ pub enum ValueKind {
     // Logic
     If(IfValue),
     Match(MatchValue),
+    Loop {
+        label: String,
+        code: CodeBlock
+    },
 
     // Second-class Values
     Unit,
@@ -271,7 +275,8 @@ impl Debug for Value {
             }
             ValueKind::TupleField(value, n) => write!(f, "{value:?}.item{n}"),
             ValueKind::Unit => write!(f, "()"),
-            ValueKind::Error => write!(f, "Error")
+            ValueKind::Error => write!(f, "Error"),
+            ValueKind::Loop { code: code_block, label } => write!(f, "loop {code_block:?} `{label}"),
         }?;
 
         write!(f, " <{:?}>", self.typ)

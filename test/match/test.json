@@ -5,6 +5,7 @@
 		{
 			"name": "match-integer-no-default",
 			"include": "IntegerNoDefault.bolt",
+			"std": "minimal",
 			"expect": {
 				"error": "non_exhaustive_match"
 			}
@@ -19,9 +20,15 @@
 		{
 			"name": "ackermann",
 			"include": "Ackermann.bolt",
-			"expect": {
-				"output": "61"
-			}
+			"std": "minimal",
+			"expect": [
+				{ "inputs": [ 0, 0 ], "output": 1 },
+				{ "inputs": [ 1, 0 ], "output": 2 },
+				{ "inputs": [ 0, 1 ], "output": 2 },
+				{ "inputs": [ 2, 3 ], "output": 9 },
+				{ "inputs": [ 4, 1 ], "output": 65533 },
+				{ "inputs": [ 4, 4 ], "output": 125 }
+			]
 		},
 
 		"match-enum-associated-types",
