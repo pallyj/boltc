@@ -32,7 +32,8 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
     pub fn replace_smt(&mut self, statement: &mut Statement, scope: &ScopeRef) {
         match &mut statement.kind {
             StatementKind::Eval { value, .. } => self.replace_value(value, scope),
-            StatementKind::Bind { typ, value, .. } => {
+            StatementKind::Bind { typ, value, pattern } => {
+                self.replace_pattern(pattern, scope);
                 let span = typ.span();
                 self.replace_type(typ, &span);
                 if let Some(value) = value {
@@ -48,6 +49,17 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
             }
             StatementKind::Break(_) |
             StatementKind::Continue(_) => {}
+
+            StatementKind::Guard { condition, otherwise } => {
+                self.replace_value(condition.as_mut(), scope);
+                self.replace_codeblock(otherwise, scope);
+            }
+
+            StatementKind::GuardLet { pattern, value, otherwise } => {
+                self.replace_value(value, scope);
+                self.replace_pattern(pattern, scope);
+                self.replace_codeblock(otherwise, scope);
+            }
         }
     }
 
@@ -319,6 +331,17 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
             }
             Some(IfBranch::Else(else_if_block)) => {
                 return self.replace_if_value(else_if_block, scope)
+            }
+            Some(IfBranch::ElseLet(match_value)) => {
+                self.replace_value(&mut match_value.discriminant, scope);
+
+                for branch in &mut match_value.branches {
+                    self.meet_types(&mut branch.pattern.match_type, &mut match_value.discriminant.typ);
+
+                    self.replace_pattern(&mut branch.pattern, scope);
+
+                    self.replace_codeblock(&mut branch.code, scope);
+                }
             }
             None => {
                 return Some(TypeKind::Void)

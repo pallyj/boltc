@@ -167,6 +167,13 @@ impl<'a, 'l> ClosureResolvePass<'a, 'l> {
             match negative {
                 IfBranch::CodeBlock(negative_block) => self.resolve_code_block(negative_block, scope),
                 IfBranch::Else(else_if_branch) => self.resolve_if_statement(else_if_branch, scope),
+                IfBranch::ElseLet(match_value) => {
+                    self.resolve_value(match_value.discriminant.as_mut(), scope);
+
+                    for branch in &mut match_value.branches {
+                        self.resolve_code_block(&mut branch.code, scope)
+                    }
+                }
             }
         }
     }

@@ -21,8 +21,8 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 						PatternKind::Literal { value: lowered }
 					}
 
-					ValueKind::BoolLiteral(_) => {
-						PatternKind::Literal { value: lowered }
+					ValueKind::BoolLiteral(b) => {
+						PatternKind::Integer { value: if *b { 1 } else { 0 } }
 					}
 
 					_ => {

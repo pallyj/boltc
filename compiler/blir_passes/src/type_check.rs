@@ -123,7 +123,8 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
     fn check_smt(&mut self, statement: &Statement, return_type: &Type) {
         match &statement.kind {
             StatementKind::Eval { value, .. } => self.check_value(value, return_type),
-            StatementKind::Bind { typ, value, .. } => {
+            StatementKind::Bind { typ, value, pattern } => {
+                self.check_pattern(typ, pattern);
                 let Some(value) = value else { return };
                 
                 self.check_value(value, return_type);
@@ -143,6 +144,17 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 if let Err(error) = check_result {
                     self.handle_return_error(error, statement);
                 }
+            }
+
+            StatementKind::Guard { condition, otherwise } => {
+                self.check_value(&condition, return_type); // todo: check that its a bool
+                self.check_codeblock(otherwise, None, return_type); // todo: check that it diverges
+            }
+
+            StatementKind::GuardLet { pattern, value, otherwise } => {
+                self.check_pattern(&value.typ, pattern);
+                self.check_value(value, return_type);
+                self.check_codeblock(otherwise, None, return_type);
             }
 
             StatementKind::Break(_) |
@@ -373,6 +385,21 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                     }
                 }
                 IfBranch::Else(else_if_branch) => return self.check_if_value(else_if_branch, if_type, return_type, spans),
+                IfBranch::ElseLet(match_value) => {
+                    self.check_value(&*match_value.discriminant, return_type);
+
+                    let scrut_ty = &match_value.discriminant.typ;
+
+                    // Check that scrut_ty can be matched
+                    for arm in &match_value.branches {
+                        match self.check_codeblock(&arm.code, Some(if_type), return_type) {
+                            Err(e) => self.handle_return_yield_error(e, &arm.code.typ().span),
+                            _ => {}
+                        };
+
+                        self.check_pattern(scrut_ty, &arm.pattern);
+                    }
+                }
             }
         }
 

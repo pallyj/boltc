@@ -156,7 +156,7 @@ impl<'a> BlirLowerer<'a> {
 			}
 
 			If(if_value) => self.lower_if_value(if_value, Some(place)),
-			Match(match_value) => self.lower_match(match_value, &value.typ, Some(place)),
+			Match(match_value) => self.lower_match(match_value, Some(place)),
 
 			_ => {
 				panic!("{value:?}");
@@ -200,7 +200,7 @@ impl<'a> BlirLowerer<'a> {
 			}
 
 			Match(match_value) => {
-				self.lower_match(&match_value, &value.typ, None);
+				self.lower_match(&match_value, None);
 
 				RValue::tuple(vec![], Self::span_of(value.span))
 			}
@@ -258,7 +258,6 @@ impl<'a> BlirLowerer<'a> {
 			}
 
 			FuncCall { function, args } => {
-
 				match &function.kind {
 					ValueKind::UnaryIntrinsicFn(intrinsic) => match intrinsic {
 						Unary::RawPointerDeref => self.lower_rvalue(&args.args[0]).deref(Self::span_of(value.span)),

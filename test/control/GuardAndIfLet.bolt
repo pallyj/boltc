@@ -1,0 +1,39 @@
+enum Optional_Int {
+	case none
+	case some(Int)
+}
+
+@entryPoint
+func main() {
+	let treasure: Optional_Int = openTreasure(hasKey: true, isAuth: true, .none);
+
+	if let .some(treasure) = treasure {
+		print("Treasure is ", treasure)
+	} else {
+		print("no treasure :(")
+	}
+
+	let n = if let .some(treasure) = treasure { treasure } else { 0 }
+
+	print(n)
+}
+
+func openTreasure(hasKey hasKey: Bool, isAuth isAuth: Bool, password: Optional_Int): Optional_Int {
+	guard hasKey else {
+		return .none
+	}
+
+	guard isAuth else {
+		return .none
+	}
+
+	guard let .some(password) = password else {
+		return .none
+	}
+
+	return .some(password / 2)
+}
+
+enum Triple {
+	case one(Int), two(Int), three(Int), four
+}

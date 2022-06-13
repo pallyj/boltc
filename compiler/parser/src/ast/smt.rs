@@ -8,7 +8,7 @@
 
 use std::fmt::Debug;
 
-use super::{expr::Expr, typ::Type};
+use super::{expr::Expr, typ::Type, pattern::Pattern};
 use crate::lexer::SyntaxKind;
 
 ast!(struct EvalSmt(EvalSmt));
@@ -17,6 +17,8 @@ ast!(struct LetSmt(LetSmt));
 ast!(struct NoOp(NoOp));
 ast!(struct BreakSmt(BreakSmt));
 ast!(struct ContinueSmt(ContinueSmt));
+ast!(struct GuardSmt(Guard));
+ast!(struct GuardLetSmt(GuardLet));
 
 ast!(
     enum Smt {
@@ -26,6 +28,8 @@ ast!(
         NoOp,
         BreakSmt,
         ContinueSmt,
+        GuardSmt,
+        GuardLetSmt,
     }
 );
 
@@ -38,6 +42,8 @@ impl Debug for Smt {
             Self::NoOp(_) => write!(f, ";"),
             Self::BreakSmt(arg0) => write!(f, "{arg0:?}"),
             Self::ContinueSmt(arg0) => write!(f, "{arg0:?}"),
+            Self::GuardSmt(arg0) => write!(f, "{arg0:?}"),
+            Self::GuardLetSmt(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "Error"),
         }
     }
@@ -78,18 +84,10 @@ impl Debug for ReturnSmt {
 }
 
 impl LetSmt {
-    pub fn varying(&self) -> bool {
+    pub fn pattern(&self) -> Pattern {
         self.0
-            .children_with_tokens()
-            .find(|element| element.kind() == SyntaxKind::VarKw)
-            .is_some()
-    }
-    pub fn label(&self) -> String {
-        self.0
-            .children_with_tokens()
-            .find(|element| element.kind() == SyntaxKind::Ident)
-            .and_then(|element| element.into_token())
-            .map(|token| token.text().to_string())
+            .first_child()
+            .map(Pattern::cast)
             .unwrap()
     }
 
@@ -110,18 +108,60 @@ impl LetSmt {
     }
 }
 
+
+impl GuardSmt {
+    pub fn condition(&self) -> Expr {
+        self.0
+            .children()
+            .find(|syn| syn.kind() == SyntaxKind::Condition)
+            .and_then(|condition| condition.first_child())
+            .map(Expr::cast)
+            .unwrap()
+    }
+
+    pub fn else_block(&self) -> CodeBlock {
+        self.0
+            .last_child()
+            .and_then(CodeBlock::cast)
+            .unwrap()
+    }
+}
+
+impl GuardLetSmt {
+    pub fn pattern(&self) -> Pattern {
+        self.0
+            .first_child()
+            .map(Pattern::cast)
+            .unwrap()
+    }
+    pub fn value(&self) -> Expr {
+        self.0
+            .children()
+            .find(|syn| syn.kind() == SyntaxKind::Condition)
+            .and_then(|condition| condition.first_child())
+            .map(Expr::cast)
+            .unwrap()
+    }
+
+    pub fn else_block(&self) -> CodeBlock {
+        self.0
+            .last_child()
+            .and_then(CodeBlock::cast)
+            .unwrap()
+    }
+}
+
 impl Debug for LetSmt {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let label = self.label();
+        let pattern = self.pattern();
         let typ = self.typ()
                       .map(|typ| format!(": {typ:?}"))
                       .unwrap_or_else(|| "".to_string());
         let value = self.value()
                         .map(|value| format!(" = {value:?}"))
                         .unwrap_or_else(|| "".to_string());
-        let varying = if self.varying() { "var " } else { "" };
 
-        write!(f, "let {varying}{label}{typ}{value}")
+        write!(f, "let {pattern:?}{typ}{value}")
     }
 }
 
@@ -152,5 +192,17 @@ impl Debug for BreakSmt {
 impl Debug for ContinueSmt {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "continue")
+    }
+}
+
+impl Debug for GuardSmt {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "guard {:?} else {:?}", self.condition(), self.else_block())
+    }
+}
+
+impl Debug for GuardLetSmt {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "guard let {:?} = {:?} else {:?}", self.pattern(), self.value(), self.else_block())
     }
 }

@@ -179,16 +179,26 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
             Some(IfBranch::Else(else_if_block)) => {
                 self.constrain_if_value(else_if_block, if_type, scope);
             }
+            Some(IfBranch::ElseLet(match_value)) => {
+                self.constrain_value(&match_value.discriminant, scope);
+
+                for branch in &match_value.branches {
+                    self.constrain_pattern(&branch.pattern, &match_value.discriminant.typ, scope);
+
+                    self.infer_codeblock(&branch.code, if_type, scope);
+                }
+            }
             None => {}
         }
     }
 
     fn infer_smt(&mut self, smt: &Statement, scope: &ScopeRef) {
         match &smt.kind {
-            StatementKind::Bind { typ, value, .. } => {
+            StatementKind::Bind { typ, value, pattern } => {
+                self.constrain_pattern(pattern, typ, scope);
+                
                 if let Some(value) = value.as_ref() {
                     self.constrain_value(value, scope);
-
                     self.constrain_two_way(&value.typ, typ);
                 }
             }
@@ -207,7 +217,18 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
             }
 
             StatementKind::Break(_) |
-            StatementKind::Continue(_) => {}
+            StatementKind::Continue(_) => {},
+
+            StatementKind::Guard { condition, otherwise } => {
+                self.constrain_value(condition.as_ref(), scope);
+                self.infer_codeblock(otherwise, &TypeKind::Divergent.anon(), scope);
+            }
+
+            StatementKind::GuardLet { pattern, value, otherwise } => {
+                self.constrain_value(value, scope);
+                self.constrain_pattern(pattern, &value.typ, scope);
+                self.infer_codeblock(otherwise, &TypeKind::Divergent.anon(), scope);
+            }
         }
     }
 

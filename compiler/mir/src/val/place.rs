@@ -109,7 +109,7 @@ impl Place {
 			let ty = tuple_items[index].clone();
 			Place { kind: PlaceKind::TupleItem(Box::new(self.clone()), index), ty, is_mutable: self.is_mutable, span }
 		} else {
-			panic!("Tried to index into a non-tuple value")
+			panic!("Tried to index into a non-tuple value {:?}", self.ty())
 		}
 	}
 

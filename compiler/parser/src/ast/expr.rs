@@ -35,6 +35,7 @@ ast!(struct NamedExpr(NamedExpr));
 ast!(struct LiteralExpr(Literal));
 ast!(struct ParenthesizedExpr(ParenthesizedExpr));
 ast!(struct IfExpr(IfExpr));
+ast!(struct IfLetExpr(IfLet));
 ast!(struct MemberExpr(MemberExpr));
 ast!(struct FuncCallExpr(FuncCallExpr));
 ast!(struct UnitExpr(UnitExpr));
@@ -64,6 +65,7 @@ ast!(
         LiteralExpr,
         ParenthesizedExpr,
         IfExpr,
+        IfLetExpr,
         MemberExpr,
         FuncCallExpr,
         UnitExpr,
@@ -89,6 +91,7 @@ impl Debug for Expr {
             Self::LiteralExpr(arg0) => write!(f, "{arg0:?}"),
             Self::ParenthesizedExpr(arg0) => write!(f, "{arg0:?}"),
             Self::IfExpr(arg0) => write!(f, "{arg0:?}"),
+            Self::IfLetExpr(arg0) => write!(f, "{arg0:?}"),
             Self::MemberExpr(arg0) => write!(f, "{arg0:?}"),
             Self::FuncCallExpr(arg0) => write!(f, "{arg0:?}"),
             Self::UnitExpr(arg0) => write!(f, "{arg0:?}"),
@@ -112,6 +115,7 @@ impl Debug for Expr {
 ast!(
     enum IfExprNegative {
         IfExpr,
+        IfLetExpr,
         CodeBlock,
     }
 );
@@ -120,6 +124,7 @@ impl Debug for IfExprNegative {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::IfExpr(arg0) => write!(f, "{arg0:?}"),
+            Self::IfLetExpr(arg0) => write!(f, "{arg0:?}"),
             Self::CodeBlock(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "Error"),
         }
@@ -218,6 +223,40 @@ impl Debug for MemberExpr {
 
 impl IfExpr {
     pub fn condition(&self) -> Expr {
+        self.0
+            .children()
+            .find(|syn| syn.kind() == SyntaxKind::Condition)
+            .and_then(|condition| condition.first_child())
+            .map(Expr::cast)
+            .unwrap()
+    }
+
+    pub fn positive(&self) -> CodeBlock {
+        self.0
+            .children()
+            .find(|syn| syn.kind() == SyntaxKind::Positive)
+            .and_then(|positive| positive.first_child())
+            .and_then(CodeBlock::cast)
+            .unwrap()
+    }
+
+    pub fn negative(&self) -> Option<IfExprNegative> {
+        self.0
+            .children()
+            .find(|syn| syn.kind() == SyntaxKind::Negative)
+            .and_then(|positive| positive.first_child())
+            .map(IfExprNegative::cast)
+    }
+}
+
+impl IfLetExpr {
+    pub fn pattern(&self) -> Pattern {
+        self.0
+            .first_child()
+            .map(Pattern::cast)
+            .unwrap()
+    }
+    pub fn value(&self) -> Expr {
         self.0
             .children()
             .find(|syn| syn.kind() == SyntaxKind::Condition)
@@ -370,6 +409,21 @@ impl Debug for IfExpr {
                    negative)
         } else {
             write!(f, "if {:?} {:?}", self.condition(), self.positive())
+        }
+    }
+}
+
+impl Debug for IfLetExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(negative) = self.negative() {
+            write!(f,
+                   "if let {:?} = {:?} {:?} {:?}",
+                   self.pattern(),
+                   self.value(),
+                   self.positive(),
+                   negative)
+        } else {
+            write!(f, "if let {:?} = {:?} {:?}", self.pattern(), self.value(), self.positive())
         }
     }
 }

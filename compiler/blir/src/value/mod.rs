@@ -249,12 +249,14 @@ pub struct IfValue {
 pub enum IfBranch {
     CodeBlock(CodeBlock),
     Else(Box<IfValue>),
+    ElseLet(Box<MatchValue>),
 }
 
 impl Debug for IfBranch {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CodeBlock(arg0) => write!(f, "{arg0:?}"),
+            Self::ElseLet(arg0) => write!(f, "{arg0:?}"),
             Self::Else(arg0) => {
                 if let Some(neg) = &arg0.negative {
                     write!(f,

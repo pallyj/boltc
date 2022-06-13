@@ -270,6 +270,10 @@ impl PatternRow {
 					 end: old_row.end }
 	}
 
+	pub fn columns(&self) -> &Vec<Pattern> {
+		&self.patterns
+	}
+
 	pub fn leaf(&self) -> MatchEnd {
 		self.end
 	}

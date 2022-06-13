@@ -71,6 +71,11 @@ impl<'a> BlirLowerer<'a> {
 
 				// Lowers an elseif branch
 				Else(else_branch) => self.lower_if_value_inner(&else_branch, place, finally),
+
+                ElseLet(else_branch) => {
+                    self.lower_match(else_branch.as_ref(), place);
+                    self.builder.build_terminator(Terminator::goto(finally));
+                }
 			}
 		} else {
 			self.builder.build_terminator(Terminator::branch_if(condition, positive_block, finally));
@@ -93,6 +98,8 @@ impl<'a> BlirLowerer<'a> {
         match negative {
             Some(IfBranch::CodeBlock(_)) => true,
             Some(IfBranch::Else(else_branch)) => self.has_else_covered(&else_branch.negative),
+            //Some(IfBranch::ElseLet(else_branch)) => self.has_else_covered(&else_branch.negative),
+            Some(IfBranch::ElseLet(_)) => true,
             None => false,
         }
     }
@@ -100,7 +107,6 @@ impl<'a> BlirLowerer<'a> {
 	pub (crate) fn lower_match(
 		&mut self,
 		value: &MatchValue,
-		ty: &Type,
 		output_place: Option<&Place>)
 	{
 		let before_block = self.builder.append_block();
@@ -121,8 +127,7 @@ impl<'a> BlirLowerer<'a> {
                                         .map(|branch| branch.code.clone())
                                         .collect::<Vec<_>>();
 
-        let pattern_matrix = PatternMatrix::construct(scrutinee, patterns)
-            .expand();
+        let pattern_matrix = PatternMatrix::construct(scrutinee, patterns).expand();
 
         let decision_tree = pattern_matrix.solve::<Maranget>();
 
@@ -174,10 +179,11 @@ impl<'a> BlirLowerer<'a> {
 						let rvalue = self.lower_rvalue(&scrutinee);
 						self.switch_integer(rvalue, &patterns, default_block)
 					}
-                    TypeKind::Struct(struct_ref) if struct_ref.integer_repr() => {
+                    TypeKind::Struct(struct_ref) if struct_ref.integer_repr() || struct_ref.bool_repr() => {
 						// todo: Get the actual name
                         let place = self.lower_place(&scrutinee);
-						let place = self.builder.build_field(&place, "repr", Span::empty());
+                        let first_field = struct_ref.borrow().instance_vars[0].borrow().name.clone();
+						let place = self.builder.build_field(&place, &first_field, Span::empty());
 						self.switch_integer(place.copy(Span::empty()), &patterns, default_block)
 					}
                     TypeKind::Enum(_) => {
@@ -285,7 +291,7 @@ impl<'a> BlirLowerer<'a> {
                                           let value = *match &pat.kind {
                                               PatternKind::Integer { value } => value,
                                               //PatternKind::Literal { value } => self.lower_value(value),
-                                              _ => unreachable!(),
+                                              _ => panic!("{:?}", pat),
                                           };
 
 										  SwitchArm { match_value: value, arm_block: block }

@@ -28,13 +28,13 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                  }
 
                  AstSmt::LetSmt(smt) => {
-                     let name = smt.label();
+                     let pattern = self.lower_pattern(smt.pattern());
                      let typ = smt.typ()
                                   .map(|typ| self.lower_type(typ))
                                   .unwrap_or_else(Type::infer);
                      let value = smt.value().map(|expr| self.lower_expr(expr, last_loop_label));
 
-                     StatementKind::Bind { name, typ, value }
+                     StatementKind::Bind { pattern, typ, value }
                  }
 
                  AstSmt::BreakSmt(_) => {
@@ -53,6 +53,30 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                      }
                      let label = String::from(last_loop_label.unwrap_or(""));
                      StatementKind::Continue(label)
+                 },
+
+                 AstSmt::GuardSmt(guard_smt) => {
+                    if !feature_gate::has_feature("guard") {
+                        println!("guard is unstable");
+                    }
+
+                    let condition = self.lower_expr(guard_smt.condition(), last_loop_label);
+
+                    let code = self.lower_code_block(guard_smt.else_block(), last_loop_label);
+
+                    StatementKind::Guard { condition: Box::new(condition), otherwise: code }
+                 }
+
+                 AstSmt::GuardLetSmt(guard_let_smt) => {
+                    if !feature_gate::has_feature("guard_let") {
+                        println!("guard let is unstable");
+                    }
+
+                    let pattern = self.lower_pattern(guard_let_smt.pattern());
+                    let value = self.lower_expr(guard_let_smt.value(), last_loop_label);
+                    let code = self.lower_code_block(guard_let_smt.else_block(), last_loop_label);
+
+                    StatementKind::GuardLet { pattern, value, otherwise: code }
                  }
 
                  AstSmt::NoOp(_) => return None,

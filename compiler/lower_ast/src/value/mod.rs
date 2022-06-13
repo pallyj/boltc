@@ -5,7 +5,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use blir::{typ::{Type, TypeKind},
            value::{Closure, ClosureParam, FunctionArgs, IfBranch, IfValue, Value, ValueKind, match_::MatchValue, MatchBranch}, code::{CodeBlock, StatementKind, Statement}, pattern::PatternKind};
 use errors::Span;
-use parser::ast::expr::{ClosureExpr, Expr as AstExpr, IfExpr, IfExprNegative, LiteralKind};
+use parser::ast::expr::{ClosureExpr, Expr as AstExpr, IfExpr, IfExprNegative, LiteralKind, IfLetExpr};
 use unindent::unindent;
 
 use crate::AstLowerer;
@@ -62,7 +62,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                                                                labels: vec![None], }, }.spanned(Type::infer(), span)
             }
             AstExpr::InfixExpr(infix) => {
-                let mut operator_symbol = infix.operator();
+                let operator_symbol = infix.operator();
 
                 if operator_symbol == "=" {
                     let left = self.lower_expr(infix.left(), last_loop_label);
@@ -282,6 +282,8 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                 ValueKind::Match(MatchValue { discriminant, branches }).spanned_infer(span)
             }
 
+            AstExpr::IfLetExpr(if_let_expr) => ValueKind::Match(self.lower_if_let_expr(if_let_expr, last_loop_label)).spanned_infer(span),
+
             AstExpr::RepeatLoop(repeat_loop) => {
                 if !feature_gate::has_feature("repeat_loops") {
                     panic!("error: repeat loops are unstable");
@@ -394,11 +396,46 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
         let negative = match expr.negative() {
             Some(IfExprNegative::CodeBlock(cb)) => Some(IfBranch::CodeBlock(self.lower_code_block(cb, last_loop_label))),
             Some(IfExprNegative::IfExpr(else_if)) => Some(IfBranch::Else(Box::new(self.lower_if_expr(else_if, last_loop_label)))),
+            Some(IfExprNegative::IfLetExpr(else_if)) => Some(IfBranch::ElseLet(Box::new(self.lower_if_let_expr(else_if, last_loop_label)))),
             _ => None,
         };
 
         IfValue { condition,
                   positive,
                   negative }
+    }
+
+    pub(crate) fn lower_if_let_expr(&mut self, expr: IfLetExpr, last_loop_label: Option<&str>) -> MatchValue {
+        if !feature_gate::has_feature("if_let") {
+            panic!("error: if let exprs are unstable");
+        }
+
+        let span = self.span(expr.range());
+        let neg_span = expr.negative().map(|expr| self.span(expr.range()));
+
+        let scrutinee = self.lower_expr(expr.value(), last_loop_label);
+        let pattern = self.lower_pattern(expr.pattern());
+
+        let next_label = format!("while#{}", LOOP_COUNTER.fetch_add(1, Ordering::Relaxed));
+        let lowered_block = self.lower_code_block(expr.positive(), Some(&next_label));
+        let else_break = match expr.negative() {
+            Some(IfExprNegative::CodeBlock(cb)) => self.lower_code_block(cb, last_loop_label),
+            Some(IfExprNegative::IfExpr(else_if)) => CodeBlock::new(vec![
+                StatementKind::Eval { value: ValueKind::If(self.lower_if_expr(else_if, last_loop_label)).spanned_infer(neg_span.unwrap()) , escaped: false }.spanned(neg_span.unwrap())
+            ], neg_span.unwrap()),
+            Some(IfExprNegative::IfLetExpr(else_if)) => CodeBlock::new(vec![
+                StatementKind::Eval { value: ValueKind::Match(self.lower_if_let_expr(else_if, last_loop_label)).spanned_infer(neg_span.unwrap()) , escaped: false }.spanned(neg_span.unwrap())
+            ], neg_span.unwrap()),
+            None => CodeBlock::new(vec![], span),
+            Some(IfExprNegative::Error) => unreachable!(),
+        };
+
+        MatchValue {
+            discriminant: Box::new(scrutinee),
+            branches: vec![
+                MatchBranch { pattern, code: lowered_block },
+                MatchBranch { pattern: PatternKind::Wildcard.with_span(span), code: else_break }
+            ]
+        }
     }
 }

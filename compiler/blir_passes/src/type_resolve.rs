@@ -441,14 +441,14 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
     fn resolve_statement(&mut self, smt: &mut Statement, scope: &ScopeRef) {
         match &mut smt.kind {
-            StatementKind::Bind { name, typ, value } => {
+            StatementKind::Bind { pattern, typ, value } => {
                 self.resolve_type(typ, scope);
 
                 if let Some(value) = value {
                     self.resolve_value(value, scope)
                 }
 
-                *name = scope.define_variable(name, typ.clone(), false);
+                self.define_pattern_in_scope(pattern, &scope);
             }
 
             StatementKind::Eval { value, .. } => {
@@ -460,6 +460,18 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                     self.resolve_value(value, scope);
                 }
             },
+            
+            StatementKind::Guard { condition, otherwise } => {
+                self.resolve_value(condition.as_mut(), scope);
+
+                self.resolve_code_block(otherwise, scope);
+            }
+
+            StatementKind::GuardLet { pattern, value, otherwise } => {
+                self.resolve_value(value, scope);
+                self.resolve_code_block(otherwise, scope);
+                self.define_pattern_in_scope(pattern, scope);
+            }
 
             StatementKind::Break(_) |
             StatementKind::Continue(_) => {}
@@ -696,6 +708,16 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
             match negative_block {
                 IfBranch::CodeBlock(codeblock) => self.resolve_code_block(codeblock, &Self::new_scope(scope)),
                 IfBranch::Else(else_if_value) => self.resolve_if_value(else_if_value, scope),
+                IfBranch::ElseLet(match_value) => {
+                    self.resolve_value(&mut match_value.discriminant, scope);
+
+                    for branch in &mut match_value.branches {
+                        // Create a new scope
+                        let branch_scope = &Self::new_scope(scope);
+                        self.define_pattern_in_scope(&mut branch.pattern, &branch_scope);
+                        self.resolve_code_block(&mut branch.code, &branch_scope);
+                    }
+                }
             }
         }
     }

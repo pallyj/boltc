@@ -4,7 +4,9 @@ use std::{fmt::Debug,
 use errors::Span;
 
 use crate::{typ::{Type, TypeKind},
-            value::Value};
+            value::Value, pattern::Pattern};
+
+use super::CodeBlock;
 
 #[derive(Clone)]
 pub enum StatementKind {
@@ -14,9 +16,9 @@ pub enum StatementKind {
     },
 
     Bind {
-        name:  String,
-        typ:   Type,
-        value: Option<Value>,
+        pattern: Pattern,
+        typ:     Type,
+        value:   Option<Value>,
     },
 
     Return {
@@ -25,6 +27,17 @@ pub enum StatementKind {
 
     Break(String),
     Continue(String),
+
+    Guard {
+        condition: Box<Value>,
+        otherwise: CodeBlock
+    },
+
+    GuardLet {
+        pattern: Pattern,
+        value: Value,
+        otherwise: CodeBlock,
+    }
 }
 
 impl StatementKind {
@@ -67,6 +80,13 @@ impl Statement {
             StatementKind::Break(_) => TypeKind::Divergent.anon(),
             StatementKind::Continue(_) => TypeKind::Divergent.anon(),
 
+            StatementKind::Guard { .. } => {
+                TypeKind::Void.anon()
+            }
+
+            StatementKind::GuardLet { .. } => {
+                TypeKind::Void.anon()
+            }
         }
     }
 
@@ -101,11 +121,11 @@ impl Debug for Statement {
                     write!(f, "{value:?}")
                 }
             }
-            StatementKind::Bind { name, typ, value } => {
+            StatementKind::Bind { pattern, typ, value } => {
                 if let Some(value) = value {
-                    write!(f, "let {name}: {typ:?} = {value:?}")
+                    write!(f, "let {pattern:?}: {typ:?} = {value:?}")
                 } else {
-                    write!(f, "let {name}: {typ:?}")
+                    write!(f, "let {pattern:?}: {typ:?}")
                 }
             }
             StatementKind::Return { value } => {
@@ -116,7 +136,15 @@ impl Debug for Statement {
                 }
             }
             StatementKind::Break(label) => write!(f, "break `{label}"),
-            StatementKind::Continue(label) => write!(f, "continue `{label}")
+            StatementKind::Continue(label) => write!(f, "continue `{label}"),
+
+            StatementKind::Guard { condition, otherwise } => {
+                write!(f, "guard {condition:?} else {otherwise:?}")
+            }
+
+            StatementKind::GuardLet { pattern, value, otherwise } => {
+                write!(f, "guard let {pattern:?} = {value:?} else {otherwise:?}")
+            }
         }
     }
 }

@@ -31,8 +31,6 @@ codegen: 307ms
 
 */
 fn main() {
-    
-
     let args = Args::parse();
 
     if !args.validate() { return; }
@@ -225,7 +223,7 @@ impl Project {
 
         BlirLowerer::new(&mut project, vec![ self.library.take().unwrap() ]).lower();
 
-        //println!("{project}");
+        println!("{project}");
 
         let entry = context.entry_point;
 

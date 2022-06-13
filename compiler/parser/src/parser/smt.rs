@@ -1,4 +1,4 @@
-use super::Parser;
+use super::{Parser, expr::EXPR_RECOVERY_SET};
 use crate::lexer::SyntaxKind;
 
 const LET_RECOVERY_SET: &[SyntaxKind] = &[SyntaxKind::LetKw,
@@ -21,9 +21,7 @@ impl<'input, 'l> Parser<'input, 'l> {
         } else if self.eat(SyntaxKind::LetKw) {
             self.eat(SyntaxKind::VarKw);
 
-            if !self.eat(SyntaxKind::Ident) {
-                self.error_recover("expected name", LET_RECOVERY_SET);
-            }
+            self.parse_pattern();
 
             self.node(SyntaxKind::BindType, |parser| {
                     if parser.eat(SyntaxKind::Colon) {
@@ -45,6 +43,47 @@ impl<'input, 'l> Parser<'input, 'l> {
         } else if self.eat(SyntaxKind::ContinueKw) {
             // todo: add continue `label
             marker.complete(self, SyntaxKind::ContinueSmt);
+        } else if self.eat(SyntaxKind::GuardKw) {
+            if self.eat(SyntaxKind::LetKw) {
+                self.parse_pattern();
+
+                if !self.eat(SyntaxKind::Equals) {
+                    self.error("expected `=`");
+                }
+        
+                self.node(SyntaxKind::Condition, Self::parse_expr);
+
+                if !self.eat(SyntaxKind::ElseKw) {
+                    self.error_recover("expected `else` keyword", EXPR_RECOVERY_SET);
+                }
+        
+                if !self.check(SyntaxKind::OpenBrace) {
+                    self.error_recover("expected open brace", EXPR_RECOVERY_SET);
+                    marker.complete(self, SyntaxKind::Error);
+                    return
+                }
+        
+                self.parse_codeblock();
+        
+                marker.complete(self, SyntaxKind::GuardLet);
+            } else {
+                self.node(SyntaxKind::Condition, Self::parse_expr);
+
+
+                if !self.eat(SyntaxKind::ElseKw) {
+                    self.error_recover("expected `else` keyword", EXPR_RECOVERY_SET);
+                }
+
+                if !self.check(SyntaxKind::OpenBrace) {
+                    self.error_recover("expected open brace", EXPR_RECOVERY_SET);
+                    marker.complete(self, SyntaxKind::Error);
+                    return
+                }
+
+                self.parse_codeblock();
+                marker.complete(self, SyntaxKind::Guard);
+            }
+
         } else if self.eat(SyntaxKind::Semicolon) {
             marker.complete(self, SyntaxKind::NoOp);
         } else {

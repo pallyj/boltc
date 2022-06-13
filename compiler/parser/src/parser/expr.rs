@@ -301,11 +301,12 @@ impl<'input, 'l> Parser<'input, 'l> {
     }
 
     pub fn parse_expr_if(&mut self, marker: Marker) -> CompletedMarker {
-        self.node(SyntaxKind::Condition, |parser| {
-                parser.parse_expr_before_brace()
-            });
+        if self.eat(SyntaxKind::LetKw) {
+            return self.parse_expr_if_let(marker);
+        }
 
-        self.node(SyntaxKind::Positive, |parser| parser.parse_codeblock());
+        self.node(SyntaxKind::Condition, Parser::parse_expr_before_brace);
+        self.node(SyntaxKind::Positive, Parser::parse_codeblock);
 
         if self.eat(SyntaxKind::ElseKw) {
             self.node(SyntaxKind::Negative, |parser| {
@@ -324,6 +325,40 @@ impl<'input, 'l> Parser<'input, 'l> {
         }
 
         marker.complete(self, SyntaxKind::IfExpr)
+    }
+
+    pub fn parse_expr_if_let(&mut self, marker: Marker) -> CompletedMarker {
+        self.parse_pattern();
+
+        if !self.eat(SyntaxKind::Equals) {
+            self.error("expected `=`");
+        }
+
+        self.node(SyntaxKind::Condition, Self::parse_expr_before_brace);
+
+        if !self.check(SyntaxKind::OpenBrace) {
+            self.error_recover("expected open brace", EXPR_RECOVERY_SET);
+            return marker.complete(self, SyntaxKind::Error)
+        }
+
+        self.node(SyntaxKind::Positive, Parser::parse_codeblock);
+        if self.eat(SyntaxKind::ElseKw) {
+            self.node(SyntaxKind::Negative, |parser| {
+                    if parser.check(SyntaxKind::IfKw) {
+                        let marker = parser.start();
+
+                        parser.eat(SyntaxKind::IfKw);
+
+                        parser.parse_expr_if(marker);
+                    } else if parser.check(SyntaxKind::OpenBrace) {
+                        parser.parse_codeblock();
+                    } else {
+                        parser.error_recover("expected code block or if statement", EXPR_RECOVERY_SET);
+                    }
+                });
+        }
+
+        marker.complete(self, SyntaxKind::IfLet)
     }
 
     pub fn parse_expr_while(&mut self, marker: Marker) -> CompletedMarker {
