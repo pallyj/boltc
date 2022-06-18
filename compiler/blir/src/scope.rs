@@ -85,6 +85,8 @@ impl ScopeRef {
 
     pub fn lookup_static_member(&self, name: &str) -> Option<SymbolWrapper> { self.inner.borrow().lookup_static_member(name) }
 
+    pub fn similar_static_member(&self, name: &str) -> Option<SymbolWrapper> { self.inner.borrow().similar_static_member(name) }
+
     pub fn define_variable(&self, name: &str, typ: Type, varying: bool) -> String { self.inner.borrow_mut().define_variable(name, typ, varying) }
 
     pub fn define_scope_type(&self, name: &str, ty: Type) { self.inner.borrow_mut().define_scope_type(name, ty) }
@@ -291,6 +293,22 @@ impl Scope {
         }
 
         None
+    }
+
+    fn similar_static_member(&self, name: &str) -> Option<SymbolWrapper> {
+        let mut least_changes = usize::MAX;
+        let mut sym_wrap = None;
+
+        for sym in self.symbols.iter() {
+            let diff = similar::TextDiff::from_chars(name, &sym.0);
+
+            if least_changes > diff.ops().len() {
+                sym_wrap = Some(sym.1.clone());
+                least_changes = diff.ops().len();
+            }
+        }
+
+        sym_wrap
     }
 
     fn lookup_instance_member(&self, name: &str) -> Option<SymbolWrapper> {

@@ -5,14 +5,14 @@ use blir::{code::{CodeBlock, Statement, StatementKind},
            typ::{Type, TypeKind},
            value::{IfBranch, IfValue, Value, ValueKind},
            BlirContext, SomeFunction, Symbol, pattern::{PatternKind, Pattern}};
-use errors::{debugger::Debugger, error::ErrorCode, Span};
+use errors::{error::ErrorCode, Span, DiagnosticReporter};
 
-use crate::{variant::TypeVariant, context::TypeInferContext};
+use crate::{variant::TypeVariant, context::{TypeInferContext, Error}};
 
 pub struct TypeReplaceContext<'a, 'b> {
     pub(crate) infer_table:      HashMap<u64, TypeVariant>,
     pub(crate) context:          &'a BlirContext,
-    pub(crate) debugger:         &'a mut Debugger<'b>,
+    pub(crate) debugger:         &'a mut DiagnosticReporter<'b>,
     pub(crate) is_final_run:     bool,
 }
 
@@ -195,7 +195,7 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                     let operator = operator.to_string();
 					// Throw an error
                     value.kind = ValueKind::Error;
-					self.debugger.throw_single(ErrorCode::OperatorNotDefined(operator, type_to_string(container_type)), &value.span);
+                    self.debugger.throw_diagnostic(Error::OperatorNotDefined(container_type.clone(), operator, value.span.clone().unwrap_or(Span::empty())));
 					return;
 				};
 
@@ -214,7 +214,7 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 let Some(resolved_member) = parent.typ.lookup_instance_item(member, scope) else {
                     let member = member.clone();
                     value.kind = ValueKind::Error;
-                    self.debugger.throw_single(ErrorCode::MemberNotFound { name: member }, &value.span);
+                    self.debugger.throw_diagnostic(Error::MemberNotFound(value.typ.clone(), member.clone(), value.span.clone().unwrap_or_else(Span::empty)));
                     return
 				};
 

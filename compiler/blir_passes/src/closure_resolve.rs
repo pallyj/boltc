@@ -4,7 +4,7 @@ use blir::{attributes::AttributeFactory,
            typ::{StructRef, EnumRef},
            value::{IfBranch, IfValue, Value, ValueKind},
            BlirContext, Library};
-use errors::debugger::Debugger;
+use errors::DiagnosticReporter;
 use parser::operators::OperatorFactory;
 
 use crate::{TypeInferPass, TypeResolvePass};
@@ -12,12 +12,12 @@ use crate::{TypeInferPass, TypeResolvePass};
 pub struct ClosureResolvePass<'a, 'l> {
     factory:          &'a AttributeFactory,
     context:          &'a mut BlirContext,
-    debugger:         &'a mut Debugger<'l>,
+    debugger:         &'a mut DiagnosticReporter<'l>,
     operator_factory: &'a OperatorFactory,
 }
 
 impl<'a, 'l> ClosureResolvePass<'a, 'l> {
-    pub fn new(factory: &'a AttributeFactory, operator_factory: &'a OperatorFactory, context: &'a mut BlirContext, debugger: &'a mut Debugger<'l>) -> Self {
+    pub fn new(factory: &'a AttributeFactory, operator_factory: &'a OperatorFactory, context: &'a mut BlirContext, debugger: &'a mut DiagnosticReporter<'l>) -> Self {
         Self { factory,
                context,
                debugger,

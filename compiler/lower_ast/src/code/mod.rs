@@ -5,7 +5,7 @@ use blir::{code::{CodeBlock, Statement, StatementKind},
 use errors::error::ErrorCode;
 use parser::ast::smt::{CodeBlock as AstCodeBlock, Smt as AstSmt};
 
-use crate::AstLowerer;
+use crate::{AstLowerer, err::Error};
 
 impl<'a, 'b> AstLowerer<'a, 'b> {
     pub(crate) fn lower_smt(&mut self, smt: AstSmt, last_loop_label: Option<&str>) -> Option<Statement> {
@@ -40,7 +40,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                  AstSmt::BreakSmt(_) => {
                      // todo: break a value and a loop
                      if last_loop_label.is_none() {
-                        self.debugger.throw(ErrorCode::Other(String::from("can't use break statement outside a loop")), vec![span]);
+                        self.reporter.throw_diagnostic(Error::BreakOutsideLoop.at(span));
                     }
                      let label = String::from(last_loop_label.unwrap_or(""));
                      StatementKind::Break(label)
@@ -49,7 +49,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                  AstSmt::ContinueSmt(_) => {
                      // todo: break a label
                      if last_loop_label.is_none() {
-                         self.debugger.throw(ErrorCode::Other(String::from("can't use continue statement outside a loop")), vec![span]);
+                        self.reporter.throw_diagnostic(Error::ContinueOutsideLoop.at(span));
                      }
                      let label = String::from(last_loop_label.unwrap_or(""));
                      StatementKind::Continue(label)
@@ -57,7 +57,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
                  AstSmt::GuardSmt(guard_smt) => {
                     if !feature_gate::has_feature("guard") {
-                        println!("guard is unstable");
+                        self.reporter.throw_diagnostic(Error::FeatureNotEnabled("guard").at(span));
                     }
 
                     let condition = self.lower_expr(guard_smt.condition(), last_loop_label);
@@ -69,7 +69,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
                  AstSmt::GuardLetSmt(guard_let_smt) => {
                     if !feature_gate::has_feature("guard_let") {
-                        println!("guard let is unstable");
+                        self.reporter.throw_diagnostic(Error::FeatureNotEnabled("guard_let").at(span));
                     }
 
                     let pattern = self.lower_pattern(guard_let_smt.pattern());

@@ -181,7 +181,7 @@ impl<'a> BlirLowerer<'a> {
 
 			Assign(place, value) => {
 				if !place.is_mutable() {
-					println!("{place:?} is not mutable");
+					println!("error: {place:?} is not mutable");
 				}
 
 				let place = self.lower_place(place);
@@ -447,6 +447,10 @@ impl<'a> BlirLowerer<'a> {
 			ExternFunc(extern_func) => self.builder.build_extern_function(extern_func.borrow().info.link_name(), Self::span_of(function.span)).call(args, place.span()),
 			InstanceMethod { reciever, method } => {
 				let recv = self.lower_place(&reciever);
+
+				if method.is_mutating() && !reciever.is_mutable() {
+					println!("error: mutating method called on immutable value");
+				}
 
 				// todo: if method takes self ref
 				let first_arg = if method.is_mutating() {

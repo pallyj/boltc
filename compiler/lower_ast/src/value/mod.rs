@@ -1,14 +1,14 @@
 mod unescape;
 
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::{sync::atomic::{AtomicU64, Ordering}};
 
 use blir::{typ::{Type, TypeKind},
-           value::{Closure, ClosureParam, FunctionArgs, IfBranch, IfValue, Value, ValueKind, match_::MatchValue, MatchBranch}, code::{CodeBlock, StatementKind, Statement}, pattern::PatternKind};
+           value::{Closure, ClosureParam, FunctionArgs, IfBranch, IfValue, Value, ValueKind, match_::MatchValue, MatchBranch}, code::{CodeBlock, StatementKind}, pattern::PatternKind};
 use errors::Span;
-use parser::ast::expr::{ClosureExpr, Expr as AstExpr, IfExpr, IfExprNegative, LiteralKind, IfLetExpr};
+use parser::{ast::expr::{ClosureExpr, Expr as AstExpr, IfExpr, IfExprNegative, LiteralKind, IfLetExpr}};
 use unindent::unindent;
 
-use crate::AstLowerer;
+use crate::{AstLowerer, err::Error};
 
 use self::unescape::unescape;
 
@@ -135,8 +135,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                                 let range = (start + err.1, start + err.1 + 1);
                                 let span = (self.file as usize, range);
 
-                                self.debugger
-                                    .throw_parse(err.0, span);
+                                self.reporter.throw_diagnostic(Error::Unicode(err.0).at_raw(span));
                             }
 
                             ValueKind::Error.spanned_infer(span)
@@ -155,8 +154,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                                 let range = (start + err.1, start + err.1 + 1);
                                 let span = (self.file as usize, range);
 
-                                self.debugger
-                                    .throw_parse(err.0, span);
+                                self.reporter.throw_diagnostic(Error::Unicode(err.0).at_raw(span));
                             }
 
                             ValueKind::Error.spanned_infer(span)
@@ -178,7 +176,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
                         LiteralKind::String => unreachable!(),
                         LiteralKind::LongString => unreachable!(),
-                        LiteralKind::Error => panic!(),
+                        LiteralKind::Error => panic!("internal compiler error"),
                     }
                 }
             }
@@ -229,7 +227,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                         TypeKind::Function { params, .. } => {
                             params.push(Type::infer());
                         }
-                        _ => panic!(),
+                        _ => self.reporter.throw_diagnostic(Error::NoTrailingClosure.at(span)),
                     }
                     args.args.push(closure);
                     function
@@ -286,7 +284,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
             AstExpr::RepeatLoop(repeat_loop) => {
                 if !feature_gate::has_feature("repeat_loops") {
-                    panic!("error: repeat loops are unstable");
+                    self.reporter.throw_diagnostic(Error::FeatureNotEnabled("repeat_loops").at(span));
                 }
 
                 let next_label = format!("repeat#{}", LOOP_COUNTER.fetch_add(1, Ordering::Relaxed));
@@ -297,7 +295,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
             AstExpr::WhileLoop(while_loop) => {
                 if !feature_gate::has_feature("while_loops") {
-                    panic!("error: while loops are unstable");
+                    self.reporter.throw_diagnostic(Error::FeatureNotEnabled("while_loops").at(span));
                 }
 
                 let condition = self.lower_expr(while_loop.condition(), last_loop_label);
@@ -323,7 +321,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
             AstExpr::WhileLetLoop(while_let_loop) => {
                 if !feature_gate::has_feature("while_let_loops") {
-                    panic!("error: while let loops are unstable");
+                    self.reporter.throw_diagnostic(Error::FeatureNotEnabled("while_let_loops").at(span));
                 }
 
                 let scrutinee = self.lower_expr(while_let_loop.value(), last_loop_label);
@@ -350,7 +348,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                 ValueKind::Loop{ code: if_block, label: next_label }.spanned_infer(span)
             }
 
-            AstExpr::Error => panic!("error")
+            AstExpr::Error => panic!("internal compiler error")
         }
     }
 
@@ -406,11 +404,12 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
     }
 
     pub(crate) fn lower_if_let_expr(&mut self, expr: IfLetExpr, last_loop_label: Option<&str>) -> MatchValue {
+        let span = self.span(expr.range());
+
         if !feature_gate::has_feature("if_let") {
-            panic!("error: if let exprs are unstable");
+            self.reporter.throw_diagnostic(Error::FeatureNotEnabled("if_let").at(span));
         }
 
-        let span = self.span(expr.range());
         let neg_span = expr.negative().map(|expr| self.span(expr.range()));
 
         let scrutinee = self.lower_expr(expr.value(), last_loop_label);

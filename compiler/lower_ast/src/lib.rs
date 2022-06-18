@@ -1,7 +1,7 @@
 #![feature(let_else)]
 
 use blir::intrinsics::Intrinsics;
-use errors::{Span, debugger::Debugger};
+use errors::{Span, DiagnosticReporter};
 use parser::{ast::{file::FileItem, Parse, Root},
              operators::OperatorFactory};
 use rowan::TextRange;
@@ -10,6 +10,7 @@ mod code;
 mod typ;
 mod value;
 mod pattern;
+pub (crate) mod err;
 
 mod attributes;
 #[cfg(test)]
@@ -19,15 +20,15 @@ pub struct AstLowerer<'a, 'b> {
     file:    u32,
     parse:   Root,
     factory: &'a OperatorFactory,
-    debugger:&'a mut Debugger<'b>
+    reporter:&'a mut DiagnosticReporter<'b>
 }
 
 impl<'a, 'b> AstLowerer<'a, 'b> {
-    pub fn new(parse: Parse, debugger: &'a mut Debugger<'b>, factory: &'a OperatorFactory) -> Self {
+    pub fn new(parse: Parse, reporter: &'a mut DiagnosticReporter<'b>, factory: &'a OperatorFactory) -> Self {
         AstLowerer { file: parse.file as u32,
                      parse: Root::cast(parse.root).unwrap(),
                      factory,
-                    debugger }
+                     reporter }
     }
 
     fn span(&self, range: TextRange) -> Span { Span::new(range, self.file) }

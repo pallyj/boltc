@@ -82,7 +82,6 @@ impl<'input, 'l> Parser<'input, 'l> {
         let operator_symbol = self.lexemes[self.cursor].source;
 
         let Some(operator) = self.operators.get_postfix_op(operator_symbol) else {
-            // Error: this isn't a recognized operator
             let marker = completed.precede(self);
             self.error_recover(&format!("operator `{operator_symbol}` is not recognized"), EXPR_RECOVERY_SET);
             return Some(marker.complete(self, SyntaxKind::Error))

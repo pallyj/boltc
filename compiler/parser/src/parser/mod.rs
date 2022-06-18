@@ -13,7 +13,7 @@ mod enum_;
 mod pattern;
 mod alias;
 
-use errors::debugger::Debugger;
+use errors::DiagnosticReporter;
 
 use self::{event::Event,
            marker::{CompletedMarker, Marker},
@@ -249,7 +249,7 @@ impl<'input, 'l> Parser<'input, 'l> {
     }
 }
 
-pub fn parse<'input>(input: &'input str, debugger: &'input mut Debugger, file: usize, operator_factory: &OperatorFactory) -> Parse {
+pub fn parse<'input>(input: &'input str, debugger: &'input DiagnosticReporter, file: usize, operator_factory: &OperatorFactory) -> Parse {
     let lexemes: Vec<_> = Lexer::new(input).collect();
 
     let parser = Parser::new(&lexemes, operator_factory);
@@ -261,7 +261,7 @@ pub fn parse<'input>(input: &'input str, debugger: &'input mut Debugger, file: u
             root: SyntaxNode::new_root(sink.finish(debugger)) }
 }
 
-pub fn test<'input, F>(input: &'input str, debugger: &'input mut Debugger, file: usize, operator_factory: &OperatorFactory, test: F) -> Parse
+pub fn test<'input, F>(input: &'input str, debugger: &'input DiagnosticReporter, file: usize, operator_factory: &OperatorFactory, test: F) -> Parse
     where F: Fn(&mut Parser)
 {
     let lexemes: Vec<_> = Lexer::new(input).collect();

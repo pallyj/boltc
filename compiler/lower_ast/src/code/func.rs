@@ -147,7 +147,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
             None => Visibility::Internal,
 
-            Some(other) => panic!("{other:?}"),
+            Some(_) => unreachable!(),
         }
     }
 }

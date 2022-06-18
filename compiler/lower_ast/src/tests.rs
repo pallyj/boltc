@@ -1,7 +1,14 @@
+use blir::Library;
+use errors::{fileinterner::FileInterner, DiagnosticReporter};
+use parser::{operators::OperatorFactory, parser::parse};
+
+use crate::AstLowerer;
+
+
 #[test]
 fn test_code() {
     let interner = FileInterner::new();
-    let mut debugger = Debugger::new(&interner);
+    let mut debugger = DiagnosticReporter::new(&interner);
     let mut operator_factory = OperatorFactory::new();
     operator_factory.register_intrinsics();
 
@@ -21,15 +28,9 @@ struct Int64 {
 }
 
 func gcd(a: Int64, b: Int64): Int64 {
-	if a.lt(b) {
-		return gcd(b, a)
-	}
-
-	if a.mod(b).eq(0) {
-		return b
-	}
-
-	return gcd(b, a.mod(b))
+	if a < b { gcd(b, a) }
+	else if a % b == 0 { b }
+	else { gcd(b, a % b) }
 }
 	"#;
 
@@ -42,9 +43,3 @@ func gcd(a: Int64, b: Int64): Int64 {
 
 // Static
 // Imports
-
-use blir::Library;
-use errors::{debugger::Debugger, fileinterner::FileInterner};
-use parser::{operators::OperatorFactory, parser::parse};
-
-use crate::AstLowerer;

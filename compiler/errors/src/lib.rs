@@ -1,9 +1,12 @@
-pub mod debugger;
 pub mod error;
 pub mod fileinterner;
 mod diag;
 #[cfg(test)]
 mod tests;
+
+pub use diag::*;
+use rowan::{TextRange, TextSize};
+
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Span {
@@ -22,6 +25,12 @@ impl Span {
     pub fn range(&self) -> TextRange { self.range }
 
     pub fn file_key(&self) -> u32 { self.file }
+}
+
+impl Default for Span {
+    fn default() -> Self {
+        Self::empty()
+    }
 }
 
 // pub struct Debugger<T> {
@@ -86,5 +95,3 @@ impl Span {
 //
 // func square = mul($1, $1)
 //
-
-use rowan::{TextRange, TextSize};

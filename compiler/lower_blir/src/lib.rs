@@ -13,7 +13,7 @@ use std::collections::HashMap;
 
 use blir::{value::Closure, Library};
 use blirssa::{code::FunctionRef, value::LabelValue, Builder, Library as SsaLibrary};
-use errors::debugger::Debugger;
+use errors::DiagnosticReporter;
 
 pub struct BlirLowerer<'a, 'b> {
     ssa_lib:  SsaLibrary,
@@ -21,11 +21,11 @@ pub struct BlirLowerer<'a, 'b> {
     lib:      Library,
     context:  FunctionLowerContext,
     closures: Vec<(String, Closure)>,
-    debugger: &'a mut Debugger<'b>
+    debugger: &'a mut DiagnosticReporter<'b>
 }
 
 impl<'a, 'b> BlirLowerer<'a, 'b> {
-    pub fn new(lib: Library, debugger: &'a mut Debugger<'b>) -> Self {
+    pub fn new(lib: Library, debugger: &'a mut DiagnosticReporter<'b>) -> Self {
         BlirLowerer { ssa_lib: SsaLibrary::new(lib.name()),
                       builder: Builder::new(),
                       lib,

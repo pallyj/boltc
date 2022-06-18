@@ -13,8 +13,8 @@ use blir_lowering::BlirLowerer;
 use clap::StructOpt;
 //use codegen::config::{BuildConfig, BuildOutput, BuildProfile};
 use colored::Colorize;
-use errors::{debugger::Debugger, fileinterner::FileInterner, error::ErrorCode};
-use extension_host::ExtensionHost;
+use errors::{fileinterner::FileInterner, error::ErrorCode, DiagnosticReporter};
+use extension_host::{ExtensionHost, ExtensionError};
 use lower_ast::AstLowerer;
 //use lower_blir::BlirLowerer;
 use parser::{parser::parse};
@@ -95,34 +95,30 @@ fn main() {
         project.open_file(file);
     }
 
-    let compiled = project.compile(&args);
+    let Ok(entry_point) = project.compile(&args) else {
+        return
+    };
 
-    if !compiled.0 {
-        return;
-    }
+    let lib = standard.get_lib_path();
+    let lib_str = lib.as_os_str().to_string_lossy();
+    // Link with the c standard library
+    let stderr =
+    Command::new("clang").args(["-L",
+                                &lib_str,
+                                "-lstd",
+                                &format!("bin/lib{}.o", lib_name),
+                                "-e",
+                                &format!("_{}", entry_point),
+                                "-o",
+                                &format!("bin/{}", lib_name)])
+                            .output()
+                            .unwrap()
+                            .stderr;
 
-    if let Some(entry_point) = compiled.1 {
-        let lib = standard.get_lib_path();
-        let lib_str = lib.as_os_str().to_string_lossy();
-        // Link with the c standard library
-        let stderr =
-        Command::new("clang").args(["-L",
-                                    &lib_str,
-                                    "-lstd",
-                                    &format!("bin/lib{}.o", lib_name),
-                                    "-e",
-                                    &format!("_{}", entry_point),
-                                    "-o",
-                                    &format!("bin/{}", lib_name)])
-                             .output()
-                             .unwrap()
-                             .stderr;
-
-        if stderr.is_empty() {
-            Command::new(&format!("bin/{}", lib_name)).spawn().unwrap();
-        } else {
-            println!("{} {}", "error:".red().bold(), unsafe { String::from_utf8_unchecked(stderr) });
-        }
+    if stderr.is_empty() {
+        Command::new(&format!("bin/{}", lib_name)).spawn().unwrap();
+    } else {
+        println!("{} {}", "error:".red().bold(), unsafe { String::from_utf8_unchecked(stderr) });
     }
 }
 
@@ -141,14 +137,14 @@ impl Project {
 
     pub fn open_file(&mut self, file: &str) { self.interner.open_file(file); }
 
-    pub fn compile(&mut self, args: &Args) -> (bool, Option<String>) {
-        let mut debugger = Debugger::new(&self.interner);
+    pub fn compile(&mut self, args: &Args) -> Result<String, ()> {
+        let mut debugger = DiagnosticReporter::new(&self.interner);
 
         let mut host = ExtensionHost::new();
 
         for extension in &self.extensions {
             if let Err(_) = unsafe { host.load_extension(extension) } {
-                debugger.throw(ErrorCode::ExtensionLoadFailed(extension.clone()), vec![]);
+                debugger.throw_diagnostic(ExtensionError::LoadFailed(extension.clone()));
             }
         }
 
@@ -160,7 +156,7 @@ impl Project {
             let parse = parse(file.1.text(), &mut debugger, file.0, &host.operator_factory);
             //let post_parse = std::time::Instant::now();
 
-            if debugger.has_errors() {
+            if debugger.errors().is_err() {
                 continue;
             }
 
@@ -173,9 +169,7 @@ impl Project {
 
         //let post_parse = std::time::Instant::now();
 
-        if debugger.has_errors() {
-            return (false, None);
-        }
+        debugger.errors()?;
 
         let mut context = BlirContext::new();
 
@@ -184,9 +178,7 @@ impl Project {
                                           &mut context,
                                           &mut debugger).run_pass(self.library.as_mut().unwrap());
 
-        if debugger.has_errors() {
-            return (false, None);
-        }
+        debugger.errors()?;
 
         //let post_type_resolve = std::time::Instant::now();
 
@@ -194,9 +186,7 @@ impl Project {
 
         blir_passes::TypeInferPass::new(&mut context, &mut debugger).run_pass(self.library.as_mut().unwrap());
 
-        if debugger.has_errors() {
-            return (false, None);
-        }
+        debugger.errors()?;
 
         //let post_type_infer = std::time::Instant::now();
 
@@ -207,27 +197,25 @@ impl Project {
 
         //println!("{:?}", self.library.as_ref().unwrap());
 
-        if debugger.has_errors() {
-            return (false, None);
-        }
+        debugger.errors()?;
 
         //let post_closure_resolve = std::time::Instant::now();
 
         blir_passes::TypeCheckPass::new(&mut debugger).run_pass(self.library.as_mut().unwrap());
 
-        if debugger.has_errors() {
-            return (false, None);
-        }
+        debugger.errors()?;
 
         let mut project = mir::Project::new("test");
 
         BlirLowerer::new(&mut project, vec![ self.library.take().unwrap() ]).lower();
 
-        println!("{project}");
+        //println!("{project}");
 
         let entry = context.entry_point;
 
         project.execute().run_function(&entry.unwrap(), vec![]);
+
+        Err(())
 
         //let post_type_check = std::time::Instant::now();
 
@@ -279,31 +267,28 @@ impl Project {
     (post_llvm - post_lower_blir).as_millis());*/
 
         (!debugger.has_errors(), context.entry_point)*/
-        (false, None)
     }
 
     pub fn compile_test(&mut self) -> Result<(String, mir::Project), ()> {
-        let mut debugger = Debugger::new(&self.interner);
+        let mut debugger = DiagnosticReporter::new(&self.interner);
 
         let mut host = ExtensionHost::new();
 
         for extension in &self.extensions {
             if let Err(_) = unsafe { host.load_extension(extension) } {
-                debugger.throw(ErrorCode::ExtensionLoadFailed(extension.clone()), vec![]);
+                debugger.throw_diagnostic(ExtensionError::LoadFailed(extension.clone()));
             }
         }
 
         for file in self.interner.iter() {
             let parse = parse(file.1.text(), &mut debugger, file.0, &host.operator_factory);
 
-            if debugger.has_errors() {
-                continue;
-            }
+           debugger.errors()?;
 
             AstLowerer::new(parse, &mut debugger, &host.operator_factory).lower_file(self.library.as_mut().unwrap());
         }
 
-        if debugger.has_errors() { return Err(()) }
+        debugger.errors()?;
 
         let mut context = BlirContext::new();
         blir_passes::TypeResolvePass::new(&host.attribute_factory,
@@ -311,9 +296,9 @@ impl Project {
                                           &mut context,
                                           &mut debugger).run_pass(self.library.as_mut().unwrap());
 
-        if debugger.has_errors() { return Err(()) }
+        debugger.errors()?;
         blir_passes::TypeInferPass::new(&mut context, &mut debugger).run_pass(self.library.as_mut().unwrap());
-        if debugger.has_errors() { return Err(()) }
+        debugger.errors()?;
 
 
         blir_passes::ClosureResolvePass::new(&host.attribute_factory,
@@ -322,9 +307,9 @@ impl Project {
                                              &mut debugger).run_pass(self.library.as_mut().unwrap());
 
 
-        if debugger.has_errors() { return Err(()) }
+        debugger.errors()?;
         blir_passes::TypeCheckPass::new(&mut debugger).run_pass(self.library.as_mut().unwrap());
-        if debugger.has_errors() { return Err(()) }
+        debugger.errors()?;
 
         let mut project = mir::Project::new("test");
         BlirLowerer::new(&mut project, vec![ self.library.take().unwrap() ]).lower();

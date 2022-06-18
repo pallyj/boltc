@@ -1,0 +1,14 @@
+public struct List {
+	var n: Int
+	var m: Int
+
+	public init(repeating val: Int, count count: Int) {
+		self.n = val
+		self.m = count
+	}
+}
+
+@entryPoint
+func main() {
+	let block = List(repeating: 0, count: 4096);
+}

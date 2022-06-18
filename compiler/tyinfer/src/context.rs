@@ -5,7 +5,7 @@ use blir::{code::{CodeBlock, Statement, StatementKind},
            typ::{Type, TypeKind},
            value::{IfBranch, IfValue, Value, ValueKind},
            BlirContext, pattern::{Pattern, PatternKind}};
-use errors::{debugger::Debugger, error::ErrorCode};
+use errors::{error::ErrorCode, DiagnosticReporter, Span, IntoDiagnostic, Diagnostic, DiagnosticLevel, CodeLocation};
 use rusttyc::{TcErr, TcKey, VarlessTypeChecker};
 
 use crate::{replace::TypeReplaceContext, variant::TypeVariant};
@@ -13,12 +13,12 @@ use crate::{replace::TypeReplaceContext, variant::TypeVariant};
 pub struct TypeInferContext<'a, 'b> {
     checker:    VarlessTypeChecker<TypeVariant>,
     infer_keys: HashMap<u64, TcKey>,
-    debugger:   &'a mut Debugger<'b>,
+    debugger:   &'a mut DiagnosticReporter<'b>,
     context:    &'a BlirContext,
 }
 
 impl<'a, 'b> TypeInferContext<'a, 'b> {
-    pub fn new(debugger: &'a mut Debugger<'b>, context: &'a BlirContext) -> Self {
+    pub fn new(debugger: &'a mut DiagnosticReporter<'b>, context: &'a BlirContext) -> Self {
         Self { checker: VarlessTypeChecker::new(),
                infer_keys: HashMap::new(),
                debugger,
@@ -300,8 +300,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                 return;
             }
 
-            self.debugger
-                .throw_single(ErrorCode::TypeIsNotAnInteger, &value.span);
+            self.debugger.throw_diagnostic(Error::NotAnInteger(value.typ.clone(), value.span.clone().unwrap_or(Span::empty())));
 
             match constraint.err().unwrap() {
                 TcErr::KeyEquation(_key1, _key2, _error) => {
@@ -482,6 +481,37 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
             self.infer_keys.insert(*key, new_tc_key);
 
             Some(new_tc_key)
+        }
+    }
+}
+
+pub (crate) enum Error {
+    NotAnInteger(Type, Span),
+    OperatorNotDefined(Type, String, Span),
+    MemberNotFound(Type, String, Span),
+}
+
+impl IntoDiagnostic for Error {
+    fn into_diagnostic(self) -> errors::Diagnostic {
+        match self {
+            Self::NotAnInteger(ty, span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "not_an_integer",
+                                format!("type {ty} cannot be coerced to {{integer}}"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
+            Self::OperatorNotDefined(ty, op, span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "op_not_def",
+                                format!("operator `{op}` is not defined on {ty}"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
+            Self::MemberNotFound(ty, member, span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "member_not_found",
+                                format!("member `{member}` is not defined on {ty}"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
         }
     }
 }

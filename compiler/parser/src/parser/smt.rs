@@ -19,8 +19,6 @@ impl<'input, 'l> Parser<'input, 'l> {
 
             marker.complete(self, SyntaxKind::ReturnSmt);
         } else if self.eat(SyntaxKind::LetKw) {
-            self.eat(SyntaxKind::VarKw);
-
             self.parse_pattern();
 
             self.node(SyntaxKind::BindType, |parser| {

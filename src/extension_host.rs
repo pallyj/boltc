@@ -2,7 +2,7 @@ use std::{io, cell::RefCell};
 
 use blir::attributes::{AttributeFactory, FuncAttribute};
 use bolt_ext::{Fix, FunctionSignature, FunctionKind};
-use errors::{Span, debugger::Debugger, error::ErrorCode};
+use errors::{Span, DiagnosticReporter, IntoDiagnostic, Diagnostic, DiagnosticLevel, CodeLocation};
 use parser::{operators::{OperatorFactory, OperatorFix}};
 
 pub struct ExtensionHost {
@@ -85,7 +85,7 @@ impl FuncAttribute for AnyFuncAttribute {
         self.attribute.borrow().label()
     }
 
-    fn apply(&self, info: &mut blir::code::FunctionInfo, _context: &mut blir::BlirContext, debugger: &mut errors::debugger::Debugger) {
+    fn apply(&self, info: &mut blir::code::FunctionInfo, _context: &mut blir::BlirContext, debugger: &mut errors::DiagnosticReporter) {
 		let mut inline = false;
 		let name = info.name().clone();
 		let mut link_name = info.link_name().clone();
@@ -115,7 +115,7 @@ impl FuncAttribute for AnyFuncAttribute {
 
 pub struct SimpleDebugger<'a, 'b> {
 	span: Span,
-	debugger: &'a mut Debugger<'b>
+	debugger: &'a mut DiagnosticReporter<'b>
 }
 
 impl<'a, 'b> bolt_ext::Debugger for SimpleDebugger<'a, 'b> {
@@ -123,13 +123,52 @@ impl<'a, 'b> bolt_ext::Debugger for SimpleDebugger<'a, 'b> {
 		&mut self,
 		warning: &str)
 	{
-        self.debugger.throw(ErrorCode::Other(String::from(warning)), vec! [ self.span ])
+		self.debugger.throw_diagnostic(Warning(String::from(warning), self.span));
     }
 
     fn throw(
 		&mut self, 
 		error: &str)
 	{
-		self.debugger.throw(ErrorCode::Other(String::from(error)), vec! [ self.span ])
+		self.debugger.throw_diagnostic(Error(String::from(error), self.span));
+    }
+}
+
+struct Error(String, Span);
+
+impl IntoDiagnostic for Error {
+    fn into_diagnostic(self) -> errors::Diagnostic {
+        Diagnostic::new(DiagnosticLevel::Error,
+						"attribute",
+						self.0,
+						vec![ CodeLocation::new(self.1, None) ])
+    }
+}
+
+struct Warning(String, Span);
+
+impl IntoDiagnostic for Warning {
+    fn into_diagnostic(self) -> errors::Diagnostic {
+        Diagnostic::new(DiagnosticLevel::Warning,
+						"attribute",
+						self.0,
+						vec![ CodeLocation::new(self.1, None) ])
+    }
+}
+
+pub enum ExtensionError {
+	LoadFailed(String)
+}
+
+impl IntoDiagnostic for ExtensionError {
+    fn into_diagnostic(self) -> Diagnostic {
+		match self {
+			Self::LoadFailed(name) => {
+				Diagnostic::new(DiagnosticLevel::Error,
+					"ext_load_failed",
+					format!("extension {name} failed to load"),
+					vec![])
+			}
+		}
     }
 }

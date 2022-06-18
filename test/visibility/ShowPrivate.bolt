@@ -1,0 +1,10 @@
+struct Number {
+	private func printPi() {
+		print(3.14);
+	}
+}
+
+@entryPoint
+func main() {
+	Number.printPi()
+}

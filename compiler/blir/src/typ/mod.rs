@@ -2,12 +2,13 @@ mod struct_;
 mod enum_;
 mod case_;
 
-use std::{fmt::Debug,
+use std::{fmt::{Debug, Display},
           hash::Hash,
           ops::{Deref, DerefMut},
           sync::atomic::{AtomicU64, Ordering}};
 
 use errors::Span;
+use itertools::Itertools;
 use mangle::MangledType;
 pub use struct_::*;
 pub use enum_::*;
@@ -301,6 +302,55 @@ impl Debug for Type {
             TypeKind::GenericOf { higher_kind, params } => write!(f, "{higher_kind:?}<{}>", params.iter().map(|p| format!("{p:?}")).collect::<Vec<_>>().join(", ")),
             TypeKind::HKRawPointer => write!(f, "RawPointer<_>"),
             TypeKind::RawPointer { pointer_type: ptr } => write!(f, "RawPointer<{ptr:?}>"),
+        }
+    }
+}
+
+impl Display for Type {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use TypeKind::*;
+        
+        match self.kind() {
+            Void => write!(f, "()"),
+            Function { return_type, params, labels } => write!(f, "func ({}) -> {return_type}", params.iter().zip(labels).map(|(ty, label)| if let Some(label) = label {
+                format!("{label}: {}", ty)
+            } else {
+                format!("{ty}")
+            }).join(", ")),
+            Method { reciever, return_type, params } => write!(f, "func (self: {reciever}, {}) -> {return_type}", params.iter().join(", ")),
+            Struct(struct_repr) => write!(f, "struct `{}`", struct_repr.name()),
+            Enum(enum_repr) => write!(f, "enum `{}`", enum_repr.name()),
+            Tuple(types, labels) => write!(f, "({})", types.iter().zip(labels).map(|(ty, label)| if let Some(label) = label {
+                format!("{label}: {ty}")
+            } else {
+                format!("{ty}")
+            }).join(", ")),
+            
+            Integer { bits } => write!(f, "i{bits}"),
+            Float { bits } => write!(f, "f{bits}"),
+            Divergent => write!(f, "!"),
+            
+            RawPointer { pointer_type } => write!(f, "RawPointer<{pointer_type}>"),
+    
+            Error => todo!(),
+    
+            Metatype(_) => todo!(),
+    
+            Named(_) => todo!(),
+            Member { parent, member } => todo!(),
+            GenericParam(_) => todo!(),
+            GenericOf { higher_kind, params } => todo!(),
+            HKRawPointer => todo!(),
+    
+            Infer { key } => todo!(),
+            UnknownInfer => todo!(),
+    
+            SomeInteger => todo!(),
+            SomeFloat => todo!(),
+            SomeBool => todo!(),
+            SomeFunction => todo!(),
+    
+            StrSlice => todo!(),
         }
     }
 }

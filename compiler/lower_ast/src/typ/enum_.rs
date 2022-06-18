@@ -3,7 +3,7 @@ use errors::error::ErrorCode;
 use mangle::Path;
 use parser::ast::{containers::{EnumDef, EnumItem, CaseDef}};
 
-use crate::AstLowerer;
+use crate::{AstLowerer, err::Error};
 
 impl<'a, 'b> AstLowerer<'a, 'b> {
 	pub fn lower_enum(
@@ -128,12 +128,12 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 					self.lower_integer(&args.args[0])
 				}
 				_ => {
-					self.debugger.throw_single(ErrorCode::WrongIntegerLiteral, &value.span);
+					self.reporter.throw_diagnostic(Error::NotAnInteger.at(value.span.unwrap()));
 					(false, 0)
 				}
 			}
 			_ => {
-				self.debugger.throw_single(ErrorCode::WrongIntegerLiteral, &value.span);
+				self.reporter.throw_diagnostic(Error::NotAnInteger.at(value.span.unwrap()));
 				(false, 0)
 			}
 		}

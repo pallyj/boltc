@@ -3,16 +3,16 @@ use blir::{code::{FunctionRef, MethodRef},
            typ::{StructRef, Type, TypeKind, EnumRef},
            value::{Closure, Value},
            BlirContext, Library};
-use errors::debugger::Debugger;
+use errors::DiagnosticReporter;
 use tyinfer::context::TypeInferContext;
 
 pub struct TypeInferPass<'a, 'l> {
     context:  &'a mut BlirContext,
-    debugger: &'a mut Debugger<'l>,
+    debugger: &'a mut DiagnosticReporter<'l>,
 }
 
 impl<'a, 'l> TypeInferPass<'a, 'l> {
-    pub fn new(context: &'a mut BlirContext, debugger: &'a mut Debugger<'l>) -> Self { Self { context, debugger } }
+    pub fn new(context: &'a mut BlirContext, debugger: &'a mut DiagnosticReporter<'l>) -> Self { Self { context, debugger } }
 
     pub fn run_pass(&mut self, library: &mut Library) {
         for r#struct in library.structs.iter() {

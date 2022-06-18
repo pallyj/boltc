@@ -1,8 +1,8 @@
 import intrinsics
 
 @transparent
-@defaultCharRepr
 @charExpressible
+@defaultCharRepr
 public struct Char {
 	internal var repr: i32
 

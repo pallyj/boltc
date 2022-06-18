@@ -3,7 +3,6 @@ import intrinsics
 public typealias String = StringSlice
 
 @defaultStringRepr
-@transparent
 public struct StringSlice {
 	internal var ptr: RawPointer<i8>
 	internal var len: i64

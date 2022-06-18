@@ -4,20 +4,30 @@
 
 Bolt is a powerful coding language designed for expressiveness and speed. Bolt combines the ease-of-use of functional programming with the speed of C to make the ultimate language, suitable for any use-case. Bolt is inspired by Swift, Rust, Kotlin, and OCaml. The current version features:
 
-- immutable variables
-- integer, float, and string types
+- immutable-by-default variables
 - first-class functions
 - algebraic data structures
-- overridable operators
 - pattern matching
+- primitive types
+- first-class tuples and arrays
 - closures
-- tuples
+- trailing closure syntax
+- loops
+- guard statement
+- overloadable operators
 - compiler extensions
 
-Bolt eventually wants to be usable in any domain, but the first areas we are targeting are:
+The first releases of Bolt target:
 
+- Fast prototyping
 - Scripting
-- Fast webpages
+- Webpages
+
+We are looking to expand into:
+
+- UI Development
+- Distributed computing
+- Servers
 
 Check out the [wiki](https://github.com/pallyj/boltc/wiki) for more details!
 
@@ -26,14 +36,14 @@ The Bolt Language focuses on
 - Safety
 - Expressiveness
 - Accessibility
-- Safety
+- Speed
 
 ## Safety
 
 Bolt is designed with safety in mind. All types are statically determined, and implicit conversion is frowned upon. Bolt has pointer safety, preventing dangerous null pointer exceptions and making nil checking mandatory. Bolt uses automatic reference counting to prevent memory leaks and ensure memory safety.
 ## Expressiveness
 
-The Bolt language is a fresh, fun take on speedy coding languages. Bolt code is easy to write and understand, and just looks better than any other language. The compiler can be extended to support low-level features, with attribute semantics to add them to your code.
+The Bolt language is a fresh, fun take on speedy coding languages. Code is easy to read and understand at a glance. The compiler can be tuned to squeeze the most possible performance out of your code 
 
 ## Accessibility
 
@@ -41,7 +51,7 @@ Bolt code is easily accessible for beginners and the experienced alike. Beginner
 
 ## Speed
 
-The Bolt compiler is optimized for speed. Pure, raw speed. Quick building, quick execution, and quick development. Bolt uses the LLVM framework to output the fastest code possible. In CPU-bound workloads, Bolt approaches the speed of C, while in memory-bound tasks it beats C# and Java.
+The Bolt compiler is optimized for blazing fast speed. Bolt is written quickly, compiles quickly, and runs quickly. Bolt uses the LLVM framework to output the fastest code possible, and an interpreter for the fastest development. In some workloads, Bolt approaches the performance of C.
 
 ## Benchmarks
 

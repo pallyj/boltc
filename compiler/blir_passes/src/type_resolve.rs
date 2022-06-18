@@ -6,7 +6,7 @@ use blir::{attributes::AttributeFactory,
            typ::{StructRef, Type, TypeKind, EnumRef},
            value::{Closure, ClosureParam, ConstantRef, IfBranch, IfValue, Value, ValueKind, VarRef},
            BlirContext, Library, Symbol, Visibility, pattern::{Pattern, PatternKind}};
-use errors::{debugger::Debugger, error::ErrorCode};
+use errors::{error::ErrorCode, Span, DiagnosticReporter, IntoDiagnostic, Diagnostic, DiagnosticLevel, CodeLocation};
 use parser::operators::{OperatorFactory, OperatorFix};
 
 use crate::init_default::add_default_initializer;
@@ -36,12 +36,12 @@ use crate::init_default::add_default_initializer;
 pub struct TypeResolvePass<'a, 'l> {
     factory:          &'a AttributeFactory,
     context:          &'a mut BlirContext,
-    debugger:         &'a mut Debugger<'l>,
+    debugger:         &'a mut DiagnosticReporter<'l>,
     operator_factory: &'a OperatorFactory,
 }
 
 impl<'a, 'l> TypeResolvePass<'a, 'l> {
-    pub fn new(factory: &'a AttributeFactory, operator_factory: &'a OperatorFactory, context: &'a mut BlirContext, debugger: &'a mut Debugger<'l>) -> Self {
+    pub fn new(factory: &'a AttributeFactory, operator_factory: &'a OperatorFactory, context: &'a mut BlirContext, debugger: &'a mut DiagnosticReporter<'l>) -> Self {
         Self { factory,
                context,
                debugger,
@@ -149,7 +149,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
         for (tag, spans) in used_tags {
             if spans.len() > 1 {
-                self.debugger.throw(ErrorCode::TagAlreadyUsed(tag), spans);
+                self.debugger.throw_diagnostic(Error::TagAlreadyUsed(tag, spans));
             }
         }
 
@@ -165,8 +165,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 r#enum.repr_type_mut().set_kind(integer_type.kind);
             }
             _ => {
-                let typ = format!("`{:?}`", r#enum.repr_type());
-                self.debugger.throw_single(ErrorCode::TypeCannotBackEnum(typ), &r#enum.repr_type().span());
+                self.debugger.throw_diagnostic(Error::WrongEnumType(r#enum.repr_type().clone(), r#enum.repr_type().span().unwrap_or_else(Span::empty)));
             }
         }
 
@@ -195,29 +194,26 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
     }
 
     fn resolve_struct_types(&mut self, r#struct: &StructRef) {
-        self.factory
-            .apply_struct_attributes(r#struct, self.context, self.debugger);
+        let borrowed_struct = r#struct.borrow();
+        let scope = borrowed_struct.scope();
 
-        let r#struct = r#struct.borrow();
-        let scope = r#struct.scope();
-
-        for substruct in &r#struct.substructs {
+        for substruct in &borrowed_struct.substructs {
             self.resolve_struct_types(substruct);
         }
 
-        for subenum in &r#struct.subenums {
+        for subenum in &borrowed_struct.subenums {
             self.resolve_enum_types(subenum);
         }
 
-        for constant in &r#struct.constants {
+        for constant in &borrowed_struct.constants {
             self.resolve_constant(constant, scope);
         }
 
-        for variable in &r#struct.instance_vars {
+        for variable in &borrowed_struct.instance_vars {
             self.resolve_variable(variable, scope);
         }
 
-        for method in &r#struct.methods {
+        for method in &borrowed_struct.methods {
             // Resolve method types
             self.resolve_method_types(method);
 
@@ -231,6 +227,10 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
             self.factory
                 .apply_func_attributes(&attributes, &mut method.info, self.context, self.debugger)
         }
+
+        drop(borrowed_struct);
+
+        self.factory.apply_struct_attributes(r#struct, self.context, self.debugger);
     }
 
     fn resolve_struct_code(&mut self, r#struct: &StructRef) {
@@ -266,12 +266,14 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
     fn resolve_variable(&mut self, var: &VarRef, scope: &ScopeRef) {
         self.resolve_type(&mut var.borrow_mut().typ, scope);
 
-        // Resolve value
+        if let Some(default_value) = &mut var.borrow_mut().default_value {
+            self.resolve_value(default_value, scope);
+        }
     }
 
     fn resolve_constant(&mut self, var: &ConstantRef, scope: &ScopeRef) {
         self.resolve_type(&mut var.borrow_mut().typ, scope);
-        // Resolve value
+        self.resolve_value(&mut var.borrow_mut().value, scope);
     }
 
     fn resolve_func_types(&mut self, function: &FunctionRef) {
@@ -307,7 +309,8 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
         if borrowed_func.is_operator {
             let Some(operator) = self.operator_factory.get_op(borrowed_func.info.name()) else {
-                self.debugger.throw(ErrorCode::OperatorDNE(borrowed_func.info.name().clone()), vec![borrowed_func.span]);
+                let operator_name = borrowed_func.info.name().clone();
+                self.debugger.throw_diagnostic(Error::OperatorNotFound(operator_name, borrowed_func.span));
                 return;
             };
 
@@ -318,9 +321,8 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
             };
 
             if borrowed_func.info.params().len() != nop {
-                self.debugger
-                    .throw(ErrorCode::OperatorExpectedParams(borrowed_func.info.name().clone(), nop - 1),
-                           vec![borrowed_func.span])
+                let operator_name = borrowed_func.info.name().clone();
+                self.debugger.throw_diagnostic(Error::OperatorExpectedParams(operator_name, nop - 1, borrowed_func.span.clone()));
             }
         }
     }
@@ -344,7 +346,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
             TypeKind::Named(symbol_name) => {
                 let Some(resolved_symbol) = scope.lookup_symbol(symbol_name) else {
                     // Throw an error and return
-                    self.debugger.throw_single(ErrorCode::MemberNotFound { name: symbol_name.clone() }, &typ.span);
+                    self.debugger.throw_diagnostic(Error::SymbolNotFound(symbol_name.clone(), typ.span().unwrap_or_else(Span::empty)));
                     return;
                 };
 
@@ -355,9 +357,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
                     _ => {
                         // Do something with `other_symbol`
-                        self.debugger
-                            .throw_single(ErrorCode::SymNotAType { name: symbol_name.clone(), },
-                                          &typ.span);
+                        self.debugger.throw_diagnostic(Error::SymbolNotAType(symbol_name.clone(), typ.span().unwrap_or_else(Span::empty)));
                     }
                 };
             }
@@ -373,14 +373,15 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
                     Some(_) => {
                         // Do something with `other_symbol`
-                        self.debugger
-                            .throw_single(ErrorCode::MemberNotATy { name: member.clone() }, &typ.span);
+                        self.debugger.throw_diagnostic(Error::MemberNotATy { parent_ty: parent.as_ref().clone(),
+                                                                             member: member.clone(),
+                                                                             span: typ.span().unwrap_or_else(Span::empty) });
                     }
 
                     None => {
-                        self.debugger
-                            .throw_single(ErrorCode::MemberNotFound { name: member.clone() },
-                                          &typ.span);
+                        self.debugger.throw_diagnostic(Error::MemberNotFound { parent_ty: parent.as_ref().clone(),
+                                                                               member: member.clone(),
+                                                                               span: typ.span().unwrap_or_else(Span::empty) });
                     }
                 };
             }
@@ -408,7 +409,10 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
                 if let TypeKind::HKRawPointer = higher_kind.kind() {
                     if params.len() != 1 {
-                        panic!("error: RawPointer<T> expects one generic parameter, found {}", params.len());
+                        self.debugger.throw_diagnostic(Error::RPExpectsGenericParam {
+                            count: params.len(),
+                            span: higher_kind.span().unwrap_or_else(Span::empty)
+                        });
                     }
 
                     let ptr = Box::new(params.remove(0));
@@ -482,7 +486,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
         match &mut value.kind {
             ValueKind::Named(name) => {
                 let Some(sym) = scope.lookup_symbol(name).map(|sym| sym.resolve()) else {
-                    self.debugger.throw_single(ErrorCode::SymbolNotFound { name: name.clone() }, &value.span );
+                    self.debugger.throw_diagnostic(Error::SymbolNotFound(name.clone(), value.span.clone().unwrap_or_else(Span::empty)));
                     return
                 };
 
@@ -509,7 +513,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                             scope.lookup_symbol("self")
                                  .expect("Compiler Error: Expected self type when looking up instance variable")
                                  .resolve()
-                        else { panic!() };
+                        else { panic!("internal compiler error") };
 
                         value.set_kind(ValueKind::InstanceVariable { reciever: Box::new(myself),
                                                                      var:      instance, })
@@ -543,7 +547,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                         }
 
                         _ => {
-                            panic!("{initializer:?}");
+                            // error: no initializer
                         }
                     }
                 }
@@ -620,8 +624,6 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
                 let function_kind = std::mem::replace(&mut function.kind, ValueKind::Unit);
                 value.set_kind(function_kind);
-
-                println!("Monomorphized {value:?}");
             }
 
             _ => {}
@@ -724,5 +726,45 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
     pub (crate) fn new_scope(outer: &ScopeRef) -> ScopeRef {
         ScopeRef::new(Some(outer), ScopeRelation::Code, ScopeType::Code, false, false)
+    }
+}
+
+
+enum Error {
+    ClosureIsNotAFunc,
+    RPExpectsGenericParam { count: usize, span: Span },
+    SymbolNotFound(String, Span),
+    SymbolNotAType(String, Span),
+    ExpectedTypeFound(String),
+
+    MemberNotFound { parent_ty: Type, member: String, span: Span },
+
+    MemberNotATy { parent_ty: Type, member: String, span: Span },
+
+    OperatorExpectedParams(String, usize, Span),
+
+    OperatorNotFound(String, Span),
+
+    WrongEnumType(Type, Span),
+    TagAlreadyUsed(usize, Vec<Span>),
+
+    PrivateSymbol {
+        name: String,
+        span: Span,
+        suggestion: Option<Symbol>
+    }
+}
+
+impl IntoDiagnostic for Error {
+    fn into_diagnostic(self) -> errors::Diagnostic {
+        match self {
+            Self::RPExpectsGenericParam { count, span } => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "expects_generic_param",
+                                format!("expected 1 generic parameter, found {count}"),
+                                vec![CodeLocation::new(span, None)])
+            }
+            _ => todo!()
+        }
     }
 }

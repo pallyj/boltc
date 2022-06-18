@@ -1,9 +1,9 @@
-use errors::debugger::Debugger;
+use errors::DiagnosticReporter;
 use rowan::{GreenNode, GreenNodeBuilder, Language};
 
 use super::event::Event;
 use crate::{ast::BoltLanguage,
-            lexer::{SyntaxKind, Token}};
+            lexer::{SyntaxKind, Token}, err::ParseError};
 
 pub(super) struct Sink<'input, 'l> {
     builder:     GreenNodeBuilder<'static>,
@@ -24,7 +24,7 @@ impl<'input, 'l> Sink<'input, 'l> {
                file }
     }
 
-    pub(super) fn finish(mut self, debugger: &mut Debugger) -> GreenNode {
+    pub(super) fn finish(mut self, debugger: &DiagnosticReporter) -> GreenNode {
         for idx in 0..self.events.len() {
             // self.eat_trivia();
             let event = std::mem::replace(&mut self.events[idx], Event::Placeholder);
@@ -67,9 +67,9 @@ impl<'input, 'l> Sink<'input, 'l> {
                 }
                 Event::Error(error) => {
                     self.eat_trivia();
-                    let description = format!("{error}, found {}", token_specific(self.peek()));
-                    let span = self.next_span();
-                    debugger.throw_parse(description, (self.file, span));
+                    let span = (self.file, self.next_span());
+                    let error_message = format!("{error}, found {}", token_specific(self.peek()));
+                    debugger.throw_diagnostic(ParseError::new(error_message, span));
                 }
                 Event::Placeholder => {}
             }
