@@ -18,6 +18,7 @@ pub struct ExternFunctionInner {
     pub info:       FunctionInfo,
     pub span:       Span,
     pub parent:     ScopeRef,
+    pub meta:       String,
 }
 
 impl ExternFunctionInner {
@@ -39,14 +40,19 @@ pub struct ExternFunction {
 }
 
 impl ExternFunction {
-    pub fn new(attributes: Attributes, visibility: Visibility, name: String, params: Vec<FuncParam>, return_type: Type, span: Span, parent: &ScopeRef) -> ExternFunctionRef {
+    pub fn new(attributes: Attributes, visibility: Visibility, name: String, params: Vec<FuncParam>, return_type: Type, span: Span, parent: &ScopeRef, meta: String) -> ExternFunctionRef {
         let func = ExternFunctionInner { attributes,
                                          visibility,
                                          info: FunctionInfo::new(name, params, return_type, false, span),
                                          span,
-                                         parent: parent.clone() };
+                                         parent: parent.clone(),
+                                         meta };
 
         ExternFunctionRef { func: Arc::new(ExternFunction { inner: RefCell::new(func), }), }
+    }
+
+    pub fn attributes(&self) -> Ref<Attributes> {
+        Ref::map(self.inner.borrow(), |inner| &inner.attributes)
     }
 }
 

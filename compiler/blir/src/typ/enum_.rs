@@ -17,7 +17,8 @@ impl Enum {
 		name:		String,
 		parent:		&ScopeRef,
 		parent_path:&Path,
-		repr_type:	Type) -> EnumRef
+		repr_type:	Type,
+		meta: 		String) -> EnumRef
 	{
 		let arc = Arc::new_cyclic(|enum_arc| {
 			let enum_inner = EnumInner {
@@ -33,12 +34,17 @@ impl Enum {
 				subenums:   	Vec::new(),
 				named_variants: HashMap::new(),
 				repr_type,
-				self_ref: 		enum_arc.clone() };
+				self_ref: 		enum_arc.clone(),
+				meta };
 
 			Enum { inner: RefCell::new(enum_inner) }
 		});
 
-		EnumRef { enum_ref: arc }
+		let enum_ref = EnumRef { enum_ref: arc };
+
+		enum_ref.inner.borrow().scope.add_symbol(String::from("Self"), Visibility::Public, Symbol::Type(TypeKind::Enum(enum_ref.clone())));
+
+		enum_ref
 	}
 	pub fn attributes(
 		&self) -> Ref<Attributes>
@@ -207,6 +213,10 @@ impl Enum {
 			.lookup_static_member(name)
 			.map(|wrapper| wrapper.resolve())
 	}
+
+	pub fn meta(&self) -> String {
+		self.inner.borrow().meta.clone()
+	}
 }
 
 struct EnumInner {
@@ -228,7 +238,9 @@ struct EnumInner {
 
 	repr_type:		Type,
 
-	self_ref:		Weak<Enum>
+	self_ref:		Weak<Enum>,
+
+	meta: 			String,
 }
 
 #[derive(Clone)]

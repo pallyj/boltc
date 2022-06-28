@@ -10,7 +10,9 @@ impl<'input, 'l> Parser<'input, 'l> {
 
         self.name(ITEM_RECOVERY_SET);
 
-        // TODO: Attribute parameters
+        if self.check(SyntaxKind::OpenParen) {
+            self.parse_paren_comma_seq(Self::parse_func_arg);
+        }
 
         marker.complete(self, SyntaxKind::Attribute);
     }

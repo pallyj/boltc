@@ -81,7 +81,7 @@ fn main() {
                 "int/UInt16.bolt",
                 "int/UInt32.bolt",
                 "int/UInt64.bolt",
-                "string/StringSlice.bolt",
+                "string/String.bolt",
                 "string/Char.bolt"];
 
     let lib_path = standard.get_source_path();
@@ -95,7 +95,7 @@ fn main() {
         project.open_file(file);
     }
 
-    let Ok(entry_point) = project.compile(&args) else {
+    let Ok(entry_point) = project.docgen(&args) else {
         return
     };
 
@@ -159,6 +159,8 @@ impl Project {
             if debugger.errors().is_err() {
                 continue;
             }
+
+            //println!("{parse:?}");
 
             AstLowerer::new(parse, &mut debugger, &host.operator_factory).lower_file(self.library.as_mut().unwrap());
             //let post_lower = std::time::Instant::now();
@@ -267,6 +269,57 @@ impl Project {
     (post_llvm - post_lower_blir).as_millis());*/
 
         (!debugger.has_errors(), context.entry_point)*/
+    }
+
+    pub fn docgen(mut self, args: &Args) -> Result<String, ()> {
+        let mut debugger = DiagnosticReporter::new(&self.interner);
+
+        let mut host = ExtensionHost::new();
+
+        for extension in &self.extensions {
+            if let Err(_) = unsafe { host.load_extension(extension) } {
+                debugger.throw_diagnostic(ExtensionError::LoadFailed(extension.clone()));
+            }
+        }
+
+        for file in self.interner.iter() {
+            let parse = parse(file.1.text(), &mut debugger, file.0, &host.operator_factory);
+
+            if debugger.errors().is_err() {
+                continue;
+            }
+
+            AstLowerer::new(parse, &mut debugger, &host.operator_factory).lower_file(self.library.as_mut().unwrap());
+        }
+        debugger.errors()?;
+
+        let mut context = BlirContext::new();
+
+        blir_passes::TypeResolvePass::new(&host.attribute_factory,
+                                          &host.operator_factory,
+                                          &mut context,
+                                          &mut debugger).run_pass(self.library.as_mut().unwrap());
+
+        debugger.errors()?;
+        blir_passes::TypeInferPass::new(&mut context, &mut debugger).run_pass(self.library.as_mut().unwrap());
+        debugger.errors()?;
+
+        blir_passes::ClosureResolvePass::new(&host.attribute_factory,
+                                             &host.operator_factory,
+                                             &mut context,
+                                             &mut debugger).run_pass(self.library.as_mut().unwrap());
+
+        debugger.errors()?;
+        blir_passes::TypeCheckPass::new(&mut debugger).run_pass(self.library.as_mut().unwrap());
+        debugger.errors()?;
+
+        let mut bundle = docgen::Bundle::new(args.lib.clone().unwrap());
+
+        bundle.add_library(self.library.unwrap());
+
+        bundle.save();
+
+        Err(())
     }
 
     pub fn compile_test(&mut self) -> Result<(String, mir::Project), ()> {

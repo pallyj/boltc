@@ -11,13 +11,19 @@
 
 use std::fmt::Debug;
 
-use super::{attribute::Attributes, find_token, smt::CodeBlock, typ::Type};
+use super::{attribute::Attributes, find_token, smt::CodeBlock, typ::Type, comment::Comment};
 use crate::lexer::SyntaxKind;
 
 ast!(struct FuncPar(FuncPar));
 ast!(struct FuncDef(FuncDef));
 
 impl FuncDef {
+    pub fn doc_comments(&self) -> Comment {
+        self.0.first_child()
+            .and_then(Comment::cast)
+            .unwrap()
+    }
+
     pub fn attributes(&self) -> Attributes { self.0.children().find_map(Attributes::cast).unwrap() }
 
     pub fn visibility(&self) -> Option<SyntaxKind> {

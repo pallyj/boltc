@@ -9,6 +9,7 @@ use crate::AstLowerer;
 
 impl<'a, 'b> AstLowerer<'a, 'b> {
     pub fn lower_func(&mut self, func: FuncDef, parent: &ScopeRef, parent_mangled: &Path) -> FunctionRef {
+        let doc_c = self.comments.pop().unwrap();
         let range = func.range();
         let span = self.span(range);
 
@@ -44,10 +45,12 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                       code,
                       span,
                       parent,
-                      parent_mangled.clone())
+                      parent_mangled.clone(),
+                      doc_c)
     }
 
-    pub fn lower_extern_func(&self, func: FuncDef, parent: &ScopeRef) -> ExternFunctionRef {
+    pub fn lower_extern_func(&mut self, func: FuncDef, parent: &ScopeRef) -> ExternFunctionRef {
+        let doc_c = self.comments.pop().unwrap();
         let range = func.range();
         let span = self.span(range);
 
@@ -80,17 +83,19 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                             params,
                             return_type,
                             span,
-                            parent)
+                            parent,
+                            doc_c)
     }
 
     pub fn lower_method(&mut self, func: FuncDef, reciever: Type, parent: &ScopeRef, parent_mangled: &Path) -> MethodRef {
+        let doc_c = self.comments.pop().unwrap();
         let range = func.range();
         let span = self.span(range);
 
         let visibility = self.lower_visibility(func.visibility());
-        let is_static = func.is_static() || func.is_operator() || func.is_init(); // todo: is_init and is_operator are NOT static
+        let is_static = func.is_static() || func.is_operator(); // todo: is_init and is_operator are NOT static
         let is_operator = func.is_operator();
-        let is_mutating = func.is_mutating();
+        let is_mutating = func.is_mutating() || func.is_init();
         let is_init = func.is_init();
         let name = if is_init {
             "init".to_string()
@@ -113,7 +118,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                          })
                          .collect();
         let return_type = if is_init {
-            reciever.clone()
+            TypeKind::Void.anon()
         } else {
             func.return_type()
                 .map(|rt| self.lower_type(rt))
@@ -127,7 +132,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                     reciever,
                     is_static,
                     is_operator,
-                    is_mutating, // todo: check if it mutates
+                    is_mutating,
                     visibility,
                     name,
                     params,
@@ -135,7 +140,8 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                     code,
                     span,
                     parent,
-                    parent_mangled)
+                    parent_mangled,
+                    doc_c)
     }
 
     pub fn lower_visibility(&self, visibility: Option<SyntaxKind>) -> Visibility {

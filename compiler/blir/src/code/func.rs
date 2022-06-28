@@ -22,6 +22,7 @@ pub struct FunctionInner {
     pub span:       Span,
     scope:          ScopeRef,
     path:           Path,
+    pub comment:    String
 }
 
 impl FunctionInner {
@@ -80,6 +81,9 @@ pub struct FuncParam {
 
 impl Debug for FuncParam {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.is_shared {
+            write!(f, "shared ")?;
+        }
         if let Some(label) = &self.label {
             write!(f,
                    "{label} {bind_name}: {ty:?}",
@@ -103,8 +107,10 @@ impl Function {
                code: CodeBlock,
                span: Span,
                parent: &ScopeRef,
-               parent_path: Path)
+               parent_path: Path,
+               comment: String)
                -> FunctionRef {
+
         let func = FunctionInner { attributes,
                                    visibility,
                                    path: parent_path.append(&name),
@@ -115,7 +121,8 @@ impl Function {
                                                         ScopeRelation::SameFile,
                                                         ScopeType::Code,
                                                         false,
-                                                        true) };
+                                                        true),
+                                   comment };
 
         FunctionRef { func: Arc::new(Function { inner: RefCell::new(func), }), }
     }
@@ -144,6 +151,10 @@ impl Function {
     pub fn borrow(&self) -> Ref<FunctionInner> { self.inner.borrow() }
 
     pub fn borrow_mut(&self) -> RefMut<FunctionInner> { self.inner.borrow_mut() }
+
+    pub fn attributes(&self) -> Ref<Attributes> {
+        Ref::map(self.inner.borrow(), |inner| &inner.attributes)
+    }
 }
 
 impl Debug for FunctionRef {
@@ -174,6 +185,8 @@ pub struct FunctionInfo {
     always_link: bool,
     is_method:   bool,
 
+    is_hidden: bool,
+
     span: Span,
 }
 
@@ -187,6 +200,8 @@ impl FunctionInfo {
 
                always_link: false,
                is_method,
+
+               is_hidden: false,
             
                span}
     }
@@ -212,4 +227,12 @@ impl FunctionInfo {
     pub fn is_method(&self) -> bool { self.is_method }
 
     pub fn span(&self) -> Span { self.span }
+
+    pub fn is_hidden(&self) -> bool {
+        self.is_hidden
+    }
+
+    pub fn hide(&mut self) {
+        self.is_hidden = true;
+    }
 }

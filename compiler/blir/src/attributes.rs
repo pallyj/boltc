@@ -3,16 +3,17 @@ use std::{collections::HashMap, fmt::format};
 use errors::{error::ErrorCode, Span, DiagnosticReporter, IntoDiagnostic, Diagnostic, DiagnosticLevel, CodeLocation};
 use itertools::Itertools;
 
-use crate::{code::FunctionInfo, typ::{StructRef, Type, TypeKind}, BlirContext};
+use crate::{code::FunctionInfo, typ::{StructRef, Type, TypeKind}, BlirContext, value::FunctionArgs};
 
 #[derive(Clone)]
 pub struct Attribute {
     attribute_name: String,
+    args:           AttributeArgs,
     span:           Span,
 }
 
 impl Attribute {
-    pub fn new(attribute_name: String, span: Span) -> Self { Self { attribute_name, span } }
+    pub fn new(attribute_name: String, args: AttributeArgs, span: Span) -> Self { Self { attribute_name, args, span } }
 
     pub fn name(&self) -> &str { &self.attribute_name }
 
@@ -59,8 +60,8 @@ impl AttributeFactory {
         let attributes = struct_ref.borrow().attributes.clone();
 
         for attribute in attributes.iter() {
-            if let Some(attribute) = self.struct_attributes.get(attribute.name()) {
-                attribute.apply(struct_ref, context, debugger);
+            if let Some(attr) = self.struct_attributes.get(attribute.name()) {
+                attr.apply(&attribute.args, struct_ref, context, debugger);
             } else {
                 // Throw an error
                 let struct_span = Span::empty(); // todo: have a span
@@ -71,8 +72,8 @@ impl AttributeFactory {
 
     pub fn apply_func_attributes(&self, attributes: &Attributes, func_info: &mut FunctionInfo, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
         for attribute in attributes.iter() {
-            if let Some(attribute) = self.func_attributes.get(attribute.name()) {
-                attribute.apply(func_info, context, debugger);
+            if let Some(attr) = self.func_attributes.get(attribute.name()) {
+                attr.apply(&attribute.args, func_info, context, debugger);
             } else {
                 // Throw an error
                 let struct_span = func_info.span();
@@ -87,6 +88,7 @@ pub fn default_attributes() -> AttributeFactory {
 
     factory.register_func_attribute(EntryPointAttribute {});
     factory.register_func_attribute(ExportCAttribute {});
+    factory.register_func_attribute(HiddenFuncAttribute {});
 
     factory.register_struct_attribute(TransparentAttribute {});
     factory.register_struct_attribute(DefaultIntegerReprAttribute {});
@@ -102,17 +104,19 @@ pub fn default_attributes() -> AttributeFactory {
 pub trait FuncAttribute {
     fn name(&self) -> &'static str;
 
-    fn apply(&self, info: &mut FunctionInfo, context: &mut BlirContext, debugger: &mut DiagnosticReporter);
+    fn apply(&self, args: &AttributeArgs, info: &mut FunctionInfo, context: &mut BlirContext, debugger: &mut DiagnosticReporter);
 }
 
 pub trait StructAttribute {
     fn name(&self) -> &'static str;
 
-    fn apply(&self, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter);
+    fn apply(&self, args: &AttributeArgs, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter);
 }
 
 struct EntryPointAttribute;
 struct ExportCAttribute;
+struct HiddenFuncAttribute;
+struct ExternAttribute;
 
 struct TransparentAttribute;
 struct DefaultIntegerReprAttribute;
@@ -128,19 +132,64 @@ struct DefaultStringReprAttribute;
 impl FuncAttribute for EntryPointAttribute {
     fn name(&self) -> &'static str { "entryPoint" }
 
-    fn apply(&self, info: &mut FunctionInfo, context: &mut BlirContext, _debugger: &mut DiagnosticReporter) { let _ = context.entry_point.insert(info.link_name().clone()); }
+    fn apply(&self, args: &AttributeArgs, info: &mut FunctionInfo, context: &mut BlirContext, _debugger: &mut DiagnosticReporter) {
+        let _ = context.entry_point.insert(info.link_name().clone());
+    }
 }
 
 impl FuncAttribute for ExportCAttribute {
     fn name(&self) -> &'static str { "exportC" }
 
-    fn apply(&self, info: &mut FunctionInfo, _context: &mut BlirContext, _debugger: &mut DiagnosticReporter) { info.set_link_name(info.name().clone()) }
+    fn apply(&self, args: &AttributeArgs, info: &mut FunctionInfo, _context: &mut BlirContext, _debugger: &mut DiagnosticReporter) { info.set_link_name(info.name().clone()) }
 }
+
+impl FuncAttribute for HiddenFuncAttribute {
+    fn name(&self) -> &'static str { "hidden" }
+
+    fn apply(&self, args: &AttributeArgs, info: &mut FunctionInfo, _context: &mut BlirContext, _debugger: &mut DiagnosticReporter) { info.hide() }
+}
+
+impl FuncAttribute for ExternAttribute {
+    fn name(&self) -> &'static str {
+        "extern"
+    }
+
+    fn apply(&self, args: &AttributeArgs, info: &mut FunctionInfo, _context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
+        if args.count() == 0 {
+            // extern "C"
+            let link_name = info.name().clone();
+            info.set_link_name(link_name)
+        } else if args.count() == 1 {
+            // check the label
+            if let Some(label) = args.get_label(0) {
+                let val = args.get_indexed(0).unwrap();
+                match label.as_str() {
+                    "linkName" => match val {
+                        AttributeArg::String(link_name) => {
+                            info.set_link_name(link_name.clone())
+                        },
+                        _ => {
+                            // Error
+                            debugger.throw_diagnostic(AttributeError::WrongArgType.at(Span::empty(), info.span()))
+                        }
+                    },
+                    _ => {}
+                }
+            } else {
+                // error
+                debugger.throw_diagnostic(AttributeError::WrongLabel(String::from("_")).at(Span::empty(), info.span()))
+            }
+        } else {
+            debugger.throw_diagnostic(AttributeError::ExpectedOneArg.at(Span::empty(), info.span()))
+        }
+    }
+}
+
 
 impl StructAttribute for TransparentAttribute {
     fn name(&self) -> &'static str { "transparent" }
 
-    fn apply(&self, struct_ref: &StructRef, _context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
+    fn apply(&self, args: &AttributeArgs, struct_ref: &StructRef, _context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
         let struct_span = Span::empty();
         let attribute_span = Span::empty();
 
@@ -156,7 +205,7 @@ impl StructAttribute for TransparentAttribute {
 impl StructAttribute for DefaultIntegerReprAttribute {
     fn name(&self) -> &'static str { "defaultIntegerRepr" }
 
-    fn apply(&self, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
+    fn apply(&self, args: &AttributeArgs, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
         let struct_span = Span::empty();
         let attribute_span = Span::empty();
 
@@ -175,7 +224,7 @@ impl StructAttribute for DefaultIntegerReprAttribute {
 impl StructAttribute for DefaultFloatReprAttribute {
     fn name(&self) -> &'static str { "defaultFloatRepr" }
 
-    fn apply(&self, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
+    fn apply(&self, args: &AttributeArgs, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
         let struct_span = Span::empty();
         let attribute_span = Span::empty();
 
@@ -194,7 +243,7 @@ impl StructAttribute for DefaultFloatReprAttribute {
 impl StructAttribute for DefaultBoolReprAttribute {
     fn name(&self) -> &'static str { "defaultBooleanRepr" }
 
-    fn apply(&self, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
+    fn apply(&self, args: &AttributeArgs, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
         let struct_span = Span::empty();
         let attribute_span = Span::empty();
 
@@ -213,7 +262,7 @@ impl StructAttribute for DefaultBoolReprAttribute {
 impl StructAttribute for DefaultStringReprAttribute {
     fn name(&self) -> &'static str { "defaultStringRepr" }
 
-    fn apply(&self, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
+    fn apply(&self, args: &AttributeArgs, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
         let struct_span = Span::empty();
         let attribute_span = Span::empty();
 
@@ -232,7 +281,7 @@ impl StructAttribute for DefaultStringReprAttribute {
 impl StructAttribute for DefaultCharReprAttribute {
     fn name(&self) -> &'static str { "defaultCharRepr" }
 
-    fn apply(&self, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
+    fn apply(&self, args: &AttributeArgs, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
         let struct_span = Span::empty();
         let attribute_span = Span::empty();
 
@@ -251,7 +300,7 @@ impl StructAttribute for DefaultCharReprAttribute {
 impl StructAttribute for CharExpressibleAttribute {
     fn name(&self) -> &'static str { "charExpressible" }
 
-    fn apply(&self, struct_ref: &StructRef, _context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
+    fn apply(&self, args: &AttributeArgs, struct_ref: &StructRef, _context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
         let struct_span = Span::empty();
         let attribute_span = Span::empty();
 
@@ -281,6 +330,12 @@ enum AttributeError {
         primitive_name: &'static str,
     },
     TransparentOneVar { struct_name: String, var_spans: Vec<Span> },
+
+    ExpectedOneArg,
+
+    WrongLabel(String),
+
+    WrongArgType,
 }
 
 impl AttributeError {
@@ -346,7 +401,83 @@ impl IntoDiagnostic for AttributeErrorSpanned {
                                 format!("{{{primitive_name}}} structs need one field, this one has {}", vsl),
                                 locs)
             }
-            _ => todo!()
+            AttributeError::ExpectedOneArg => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "expected_one_arg",
+                                format!("expected one arg in attribute"),
+                                vec![ CodeLocation::new(self.struct_span, None) ])
+            }
+            AttributeError::WrongLabel(label) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "wrong_label",
+                                format!("found incorrect label {label} in attribute"),
+                                vec![ CodeLocation::new(self.struct_span, None) ])
+            }
+            AttributeError::WrongArgType => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "wrong_arg_type",
+                                format!("attribute arg has the wrong type"),
+                                vec![ CodeLocation::new(self.struct_span, None) ])
+            }
         }
+    }
+}
+
+#[derive(Clone)]
+pub struct AttributeArgs {
+    args: Vec<(Option<String>, AttributeArg)>,
+}
+
+#[derive(Clone)]
+pub enum AttributeArg {
+    Integer(u64),
+    Float(f64),
+    Bool(bool),
+    String(String),
+    Variant(String),
+    Named(String),
+}
+
+impl AttributeArgs {
+    pub fn new(args: Vec<(Option<String>, AttributeArg)>,) -> Self {
+        Self { args }
+    }
+
+    ///
+    /// Gets an arg for an attribute by name
+    /// 
+    pub fn get(&self, name: &str) -> Option<&AttributeArg> {
+        self.args
+            .iter()
+            .find_map(|(label, arg)| label.is_some_and(|label| label == name).then_some(arg) )
+    }
+
+    ///
+    /// Gets the argument of an attribute at an index
+    /// 
+    pub fn get_indexed(&self, idx: usize) -> Option<&AttributeArg> {
+        if idx >= self.args.len() {
+            return None;
+        }
+
+        Some(&self.args[idx].1)
+    }
+
+    ///
+    /// Gets the label of an arg of an attribute at an index
+    /// 
+    pub fn get_label(&self, idx: usize) -> Option<&String> {
+        if idx >= self.args.len() {
+            return None;
+        }
+
+        self.args[idx].0.as_ref()
+    }
+
+    ///
+    /// The number of args given to the argument
+    /// 
+    pub fn count(&self) -> usize {
+        self.args.len()
     }
 }

@@ -269,6 +269,8 @@ pub enum SyntaxKind {
     BreakSmt,
     ContinueSmt,
 
+    Docs,
+
     _Invalid,
 }
 

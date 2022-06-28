@@ -22,6 +22,8 @@ pub(crate) fn add_default_initializer(r#struct: &StructRef) {
     // Create a value for self
     let self_value = ValueKind::SelfVal(true).anon(self_type.clone());
 
+    let mut least_visibile = Visibility::Public;
+
     // Loop through the variables
     for variable in struct_variables {
         let variable_type = variable.borrow().typ.clone();
@@ -34,6 +36,10 @@ pub(crate) fn add_default_initializer(r#struct: &StructRef) {
         let assigned_value = if let Some(default_value) = variable_default {
             default_value
         } else {
+            if variable.borrow().visibility < least_visibile {
+                least_visibile = variable.borrow().visibility;
+            }
+
             let parameter_value = ValueKind::FunctionParam(variable_name.clone()).anon(variable_type.clone());
 
             parameter_types.push(variable_type.clone());
@@ -70,14 +76,15 @@ pub(crate) fn add_default_initializer(r#struct: &StructRef) {
                     false,
                     false,
                     true,
-                    Visibility::Public,
+                    least_visibile,
                     "init".to_string(),
                     func_params,
                     TypeKind::Void.anon(),
                     code,
                     Span::empty(),
                     scope,
-                    path)
+                    path,
+                    String::from(""))
     };
 
     {

@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 colored = "2.0.0"
-clap = { version = "3.0.10", features = [ "derive" ] }
+clap = { version = "3.2.5", features = [ "derive" ] }
 
 parser = { path = "compiler/parser" }
 lower_ast = { path = "compiler/lower_ast" }
@@ -18,12 +18,14 @@ mir = { path = "compiler/mir" }
 errors = { path = "compiler/errors" }
 bolt-ext = { path = "compiler/bolt-ext" }
 feature-gate = {path = "compiler/feature-gate"}
+docgen = { path = "compiler/docgen" }
 logos = "0.12.0"
 proc-macro2 = "1.0.36"
 etcetera = "0.4.0"
 fs_extra = "1.2.0"
 libloading = "0.7.3"
 json = "0.12.4"
+tera = "1.15.0"
 
 
 [workspace]
@@ -46,7 +48,8 @@ members = [
 	"compiler/bolt-ext",
 	"compiler/feature-gate",
 	"compiler/mir",
-	"compiler/mir_lowering"
+	"compiler/mir_lowering",
+	"compiler/docgen",
 ]
 
 exclude = [

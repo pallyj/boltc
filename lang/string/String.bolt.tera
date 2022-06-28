@@ -1,17 +1,23 @@
+{% import "Optional.bolt.tera" as Optional %}
+
 import intrinsics
 
-public typealias String = StringSlice
-
+///
+/// A string type with full unicode support represented by UTF-8
+///
 @defaultStringRepr
-public struct StringSlice {
+public struct String {
 	internal var ptr: RawPointer<i8>
 	internal var len: i64
 
-	public func length(): Int {
+	///
+	/// Returns the byte length of this string
+	///
+	public func length() -> Int {
 		Int(repr: self.len)
 	}
 
-	/*public operator func equal(other: StringSlice): Bool {
+	/*public operator func equal(other: String) -> Bool {
 		if self.len != other.len {
 			return false
 		}
@@ -29,7 +35,7 @@ public struct StringSlice {
 		return true
 	}
 
-	public operator func notEqual(other: StringSlice): Bool {
+	public operator func notEqual(other: String) -> Bool {
 		if self.len == other.len {
 			return false
 		}
@@ -47,7 +53,7 @@ public struct StringSlice {
 		return true
 	}
 
-	public operator func index(range: IntRange): Optional_StringSlice {
+	public operator func index(range: IntRange) -> String.Optional {
 		let len = self.length();
 
 		if (range.top() >= len) || (range.bottom() < 0) { return .none; }
@@ -59,11 +65,11 @@ public struct StringSlice {
 		return .some(slice)
 	}
 
-	public operator func index(unchecked range: IntRange): StringSlice {
-		StringSlice(self.ptr.add(range.bottom()), len: range.top() - range.bottom() )
+	public operator func index(unchecked range: IntRange) -> String {
+		String(self.ptr.add(range.bottom()), len: range.top() - range.bottom() )
 	}
 
-	public operator func index(wrapped range: IntRange): Optional_StringSlice {
+	public operator func index(wrapped range: IntRange) -> String.Optional {
 		// todo: any type should undiverge
 		let bottom = match self.indexOf(wrapped: range.bottom()) {
 			.some(bottom) => bottom,
@@ -81,7 +87,7 @@ public struct StringSlice {
 		.some(self[unchecked: range])
 	}
 
-	public operator func index(index: Int): Optional_Char {
+	public operator func index(index: Int) -> Char.Optional {
 		if index >= self.length() {
 			return .none
 		}
@@ -89,18 +95,20 @@ public struct StringSlice {
 		return .some(strslice_index(self.slice, index))
 	}
 
-	public operator func index(unchecked index: Int): Char {
+	public operator func index(unchecked index: Int) -> Char {
 		strslice_index(self.slice, index)
 	}
 
-	public operator func index(wrapped index: Int): Optional_Char {
+	public operator func index(wrapped index: Int) -> Char.Optional {
+		self.indexOf(wrapped: index).map { }
+
 		match self.indexOf(wrapped: index) {
 			.some(index) => .some(strslice_index(self.slice, index)),
 			.none => .none
 		}
 	}
 
-	private func indexOf(wrapped index: Int): Optional_Int {
+	private func indexOf(wrapped index: Int) -> Int.Optional {
 		let index = if index < 0 {
 			self.length() + index
 		} else {
@@ -113,37 +121,23 @@ public struct StringSlice {
 
 		return .some(index)
 	}*/
-}
-
-enum Optional_StringSlice {
-	case some(StringSlice)
-	case none
-}
-
-enum Optional_Char {
-	case some(Char)
-	case none
-}
-
-enum Optional_Int {
-	case some(Int)
-	case none
+	{{ Optional::optional(name="String") }}
 }
 
 // fileprivate func strslice_eq(one: strslice, two: strslice): Bool
 // fileprivate func strslice_neq(one: strslice, two: strslice): Bool
 // fileprivate func strslice_index(slice: strslice, idx: Int): Char
-// fileprivate func strslice_slice(slice: strslice, start: Int, end: Int): StringSlice
-// fileprivate func strslice_extend(slice: strslice, delta: Int): StringSlice
-// fileprivate func strslice_head_slice(slice: strslice, delta: Int): StringSlice
+// fileprivate func strslice_slice(slice: strslice, start: Int, end: Int): String
+// fileprivate func strslice_extend(slice: strslice, delta: Int): String
+// fileprivate func strslice_head_slice(slice: strslice, delta: Int): String
 
 
 /*
 
-StringSlice
-	subscript(IntRange) -> StringSlice?
-	subscript(wrapped: IntRange) -> StringSlice?
-	subscript(unchecked: IntRange) -> StringSlice
+String
+	subscript(IntRange) -> String?
+	subscript(wrapped: IntRange) -> String?
+	subscript(unchecked: IntRange) -> String
 
 	subscript(Int) -> Char?
 	subscript(wrapped: Int) -> Char?
@@ -169,8 +163,8 @@ StringSlice
 	split(by: Char)
 	split(once: Char)
 
-	strip(prefix: StringSlice)
-	strip(suffix: StringSlice)
+	strip(prefix: String)
+	strip(suffix: String)
 
 	trim(end: Char)
 	trim(start: Char)

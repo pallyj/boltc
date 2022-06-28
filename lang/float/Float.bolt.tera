@@ -1,0 +1,143 @@
+{% import "Optional.bolt.tera" as Optional %}
+import intrinsics
+
+///
+/// {{description}}
+///
+@transparent{%if is_default%}@defaultFloatRepr{%endif%}
+public struct {{name}} {
+	internal var repr: f{{bits}}
+
+	///
+	/// Adds two floating point numbers
+	///
+	public operator func add(b: Self) -> Self {
+		Self (repr: float{{bits}}Add(self.repr, b.repr) )
+	}
+
+	///
+	/// Subtracts two floating point numbers
+	///
+	public operator func sub(b: Self) -> Self {
+		Self (repr: float{{bits}}Sub(self.repr, b.repr) )
+	}
+
+	///
+	/// Multiplies two floating point numbers
+	///
+	public operator func mul(b: Self) -> Self {
+		Self (repr: float{{bits}}Mul(self.repr, b.repr) )
+	}
+
+	///
+	/// This method returns the quotient of two floating point numbers
+	///
+	public operator func div(b: Self) -> Self {
+		Self (repr: float{{bits}}Div(self.repr, b.repr) )
+	}
+
+	///
+	/// This method returns the remainder of two floating point numbers
+	///
+	public operator func mod(b: Self) -> Self {
+		Self (repr: float{{bits}}Rem(self.repr, b.repr) )
+	}
+
+	///
+	/// This method tests for equality (`self` equals `other`) and is used by the `==` operator
+	///
+	public operator func equal(b: Self) -> Bool {
+		Bool (repr: float{{bits}}CmpEq(self.repr, b.repr) )
+	}
+
+	///
+	/// This method tests for equality (`self` is not equal to `other`) and is used by the `!=` operator
+	///
+	public operator func notEqual(b: Self) -> Bool {
+		Bool (repr: float{{bits}}CmpNeq(self.repr, b.repr) )
+	}
+
+	///
+	/// This method tests for comparison (`self` is less than `other`) and is used by the `<` operator
+	///
+	public operator func lessThan(b: Self) -> Bool {
+		Bool (repr: float{{bits}}CmpLt(self.repr, b.repr) )
+	}
+
+	///
+	/// This method tests for comparison (`self` is greater than `other`) and is used by the `>` operator
+	///
+	public operator func greaterThan(b: Self) -> Bool {
+		Bool (repr: float{{bits}}CmpGt(self.repr, b.repr) )
+	}
+
+	///
+	/// This method tests for comparison (`self` is less than or equal to `other`) and is used by the `<=` operator
+	///
+	public operator func lessThanEq(b: Self) -> Bool {
+		Bool (repr: float{{bits}}CmpLte(self.repr, b.repr) )
+	}
+
+	///
+	/// This method tests for comparison (`self` is greater than or equal to `other`) and is used by the `>=` operator
+	///
+	public operator func greaterThanEq(b: Self) -> Bool {
+		Bool (repr: float{{bits}}CmpGte(self.repr, b.repr) )
+	}
+
+	///
+	/// This method returns the negative of a number
+	///
+	public operator func negate() -> Self {
+		Self (repr: float{{bits}}Negate(self.repr) )
+	}
+
+	///
+	/// Returns the number passed in
+	///
+	public operator func unit() -> Self {
+		self
+	}
+{%for nb in [16, 32, 64]%}{%if nb < bits%}
+	///
+	/// Creates a new {{name}} extending a floating-point value from {{nb}}-bits to {{bits}}-bits
+	///
+	public init(extend: {%if nb == 16%}Half{%elif nb == 32%}Float{%endif%}) {
+		self.repr = float{{nb}}Ext{{bits}}(extend.repr)
+	}
+{%endif%}{%if nb > bits%}
+	///
+	/// Creates a new {{name}} truncating a floating-point value from {{nb}}-bits to {{bits}}-bits
+	///
+	public init(truncating n: {%if nb == 64%}Double{%elif nb == 32%}Float{%endif%}) {
+		self.repr = float{{nb}}Trunc{{bits}}(n.repr)
+	}
+{%endif%}{%endfor%}
+	///
+	/// Convert an unsigned integer to a `{{name}}`
+	///
+	public init(num: UInt64) {
+		self.repr = float{{bits}}FromInt(num.repr)
+	}
+
+	///
+	/// Convert a signed integer to a `{{name}}`
+	///
+	public init(num: Int64) {
+		self.repr = float{{bits}}FromIntSig(num.repr)
+	}
+
+	///
+	/// Convert an unsigned integer to a `{{name}}`
+	///
+	public init(num: UInt) {
+		self.repr = float{{bits}}FromInt(num.repr)
+	}
+
+	///
+	/// Convert a signed integer to a `{{name}}`
+	///
+	public init(num: Int) {
+		self.repr = float{{bits}}FromIntSig(num.repr)
+	}
+}

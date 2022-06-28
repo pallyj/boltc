@@ -1,4 +1,5 @@
 use errors::Span;
+use itertools::Itertools;
 
 use crate::{code::{ExternFunctionRef, FunctionInfo, FunctionRef, MethodRef},
             scope::ScopeRelation,
@@ -131,11 +132,22 @@ impl Monomorphizer {
     }
 
     pub fn filter_labels(&mut self, labels: &Vec<Option<String>>) {
-        self.functions
-            .retain(|sig| labels_match(&sig.info(), labels));
+        //self.functions.retain(|sig| labels_match(&sig.info(), labels));
+
+        let mut drained = self.functions.drain_filter(|sig| !labels_match(&sig.info(), labels)).collect_vec();
+
+        if self.functions.len() == 0 {
+            drained.pop().map(|element| self.functions.push(element));
+        }
     }
 
-    pub fn filter_types(&mut self, types: &Vec<Type>) { self.functions.retain(|sig| types_match(&sig.info(), types)); }
+    pub fn filter_types(&mut self, types: &Vec<Type>) {
+        let mut drained = self.functions.drain_filter(|sig| !types_match(&sig.info(), types)).collect_vec();
+
+        if self.functions.len() == 0 {
+            drained.pop().map(|element| self.functions.push(element));
+        }
+    }
 
     pub fn degrees(&self) -> usize { self.functions.len() }
 

@@ -28,6 +28,7 @@ internal func readInternalChar(): i32
 
 public func printLine()
 
+@hidden
 public func print(b: Bool, newline newline: Bool) {
 	printBool(b.repr)
 	if newline {
@@ -35,6 +36,7 @@ public func print(b: Bool, newline newline: Bool) {
 	}
 }
 
+@hidden
 public func print(f: Half, newline newline: Bool) {
 	printFloat( float16Ext32(f.repr) )
 	if newline {
@@ -42,6 +44,7 @@ public func print(f: Half, newline newline: Bool) {
 	}
 }
 
+@hidden
 public func print(f: Float, newline newline: Bool) {
 	printFloat( f.repr )
 	if newline {
@@ -49,6 +52,7 @@ public func print(f: Float, newline newline: Bool) {
 	}
 }
 
+@hidden
 public func print(f: Double, newline newline: Bool) {
 	printDouble( f.repr )
 	if newline {
@@ -56,6 +60,7 @@ public func print(f: Double, newline newline: Bool) {
 	}
 }
 
+@hidden
 public func print(i: Int, newline newline: Bool) {
 	printInt64(i.repr)
 	if newline {
@@ -63,6 +68,7 @@ public func print(i: Int, newline newline: Bool) {
 	}
 }
 
+@hidden
 public func print(i: Int64, newline newline: Bool) {
 	printInt64(i.repr)
 	if newline {
@@ -70,12 +76,15 @@ public func print(i: Int64, newline newline: Bool) {
 	}
 }
 
+@hidden
 public func print(i: Int32, newline newline: Bool) {
 	printInt32(i.repr)
 	if newline {
 		printLine()
 	}
 }
+
+@hidden
 public func print(i: Int16, newline newline: Bool) {
 	printInt16(i.repr)
 	if newline {
@@ -83,6 +92,7 @@ public func print(i: Int16, newline newline: Bool) {
 	}
 }
 
+@hidden
 public func print(i: Int8, newline newline: Bool) {
 	printInt8(i.repr)
 	if newline {
@@ -90,6 +100,7 @@ public func print(i: Int8, newline newline: Bool) {
 	}
 }
 
+@hidden
 public func print(i: UInt, newline newline: Bool) {
 	printUInt64(i.repr)
 	if newline {
@@ -97,6 +108,7 @@ public func print(i: UInt, newline newline: Bool) {
 	}
 }
 
+@hidden
 public func print(i: UInt64, newline newline: Bool) {
 	printUInt64(i.repr)
 	if newline {
@@ -104,12 +116,15 @@ public func print(i: UInt64, newline newline: Bool) {
 	}
 }
 
+@hidden
 public func print(i: UInt32, newline newline: Bool) {
 	printUInt32(i.repr)
 	if newline {
 		printLine()
 	}
 }
+
+@hidden
 public func print(i: UInt16, newline newline: Bool) {
 	printUInt16(i.repr)
 	if newline {
@@ -117,6 +132,7 @@ public func print(i: UInt16, newline newline: Bool) {
 	}
 }
 
+@hidden
 public func print(i: UInt8, newline newline: Bool) {
 	printUInt8(i.repr)
 	if newline {
@@ -124,13 +140,17 @@ public func print(i: UInt8, newline newline: Bool) {
 	}
 }
 
-public func print(s: StringSlice, newline newline: Bool) {
+///
+/// Prints a value on its own or on a newline
+///
+public func print(s: String, newline newline: Bool) {
 	printString(s.ptr, s.len)
 	if newline {
 		printLine()
 	}
 }
 
+@hidden
 public func print(c: Char, newline newline: Bool) {
 	printChar(c.repr)
 	if newline {
@@ -138,92 +158,115 @@ public func print(c: Char, newline newline: Bool) {
 	}
 }
 
-
+@hidden
 public func print(b: Bool) {
 	printBool(b.repr)
 	printLine()
 }
 
+@hidden
 public func print(f: Half) {
 	printFloat( float16Ext32(f.repr) )
 	printLine()
 }
 
+@hidden
 public func print(f: Float) {
 	printFloat( f.repr )
 	printLine()
 }
 
+@hidden
 public func print(f: Double) {
 	printDouble( f.repr )
 	printLine()
 }
 
+@hidden
 public func print(i: Int) {
 	printInt64(i.repr)
 	printLine()
 }
 
+@hidden
 public func print(i: Int64) {
 	printInt64(i.repr)
 	printLine()
 }
 
+@hidden
 public func print(i: Int32) {
 	printInt32(i.repr)
 	printLine()
 }
+
+@hidden
 public func print(i: Int16) {
 	printInt16(i.repr)
 	printLine()
 }
 
+@hidden
 public func print(i: Int8) {
 	printInt8(i.repr)
 	printLine()
 }
 
+@hidden
 public func print(i: UInt) {
 	printUInt64(i.repr)
 	printLine()
 }
 
+@hidden
 public func print(i: UInt64) {
 	printUInt64(i.repr)
 	printLine()
 }
 
+@hidden
 public func print(i: UInt32) {
 	printUInt32(i.repr)
 	printLine()
 }
+
+@hidden
 public func print(i: UInt16) {
 	printUInt16(i.repr)
 	printLine()
 }
 
+@hidden
 public func print(i: UInt8) {
 	printUInt8(i.repr)
 	printLine()
 }
 
-public func print(s: StringSlice) {
+///
+/// Prints a value on a newline
+///
+public func print(s: String) {
 	printString(s.ptr, s.len)
 	printLine()
 }
 
+@hidden
 public func print(c: Char) {
 	printChar(c.repr)
 	printLine()
 }
 
-public func print(label: StringSlice, n: Int) {
+///
+/// Prints a number with a label
+///
+public func print(label: String, n: Int) {
 	printString(label.ptr, label.len)
 	printInt64(n.repr)
 	printLine()
 }
 
-public func print(label: StringSlice, n: Float) {
+@hidden
+public func print(label: String, n: Float) {
 	printString(label.ptr, label.len)
 	printFloat(n.repr)
 	printLine()

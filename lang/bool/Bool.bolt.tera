@@ -1,0 +1,48 @@
+{% import "Optional.bolt.tera" as Optional %}
+import intrinsics
+
+///
+/// A boolean type
+///
+@transparent
+@defaultBooleanRepr
+public struct Bool /*: BooleanLiteralRepr */ {
+	internal var repr: i1
+
+	///
+	/// This method returns the logical AND of two boolean values
+	///
+	public operator func and(right: Self) -> Self {
+		Self(repr: integer1And(self.repr, right.repr) )
+	}
+
+	///
+	/// This method returns the logical OR of two boolean values 
+	///
+	public operator func or(right: Self) -> Self {
+		Self(repr: integer1Or(self.repr, right.repr) )
+	}
+
+	///
+	/// This method returns the logical NOT of a boolean value
+	///
+	public operator func invert() -> Self {
+		Self(repr: integer1Invert(self.repr))
+	}
+
+	///
+	/// This method tests for equality (`self` equals `other`) and is used by the `==` operator
+	///
+	public operator func equal(right: Self) -> Self {
+		Self(repr: integer1CmpEq(self.repr, right.repr))
+	}
+
+	///
+	/// This method tests for equality (`self` is not equal to `other`) and is used by the `!=` operator
+	///
+	public operator func notEqual(right: Self) -> Self {
+		Self(repr: integer1CmpNeq(self.repr, right.repr))
+	}
+
+	{{ Optional::optional(name="Bool") }}
+}

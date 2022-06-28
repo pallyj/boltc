@@ -1,4 +1,4 @@
-use std::collections::{HashMap};
+use std::{collections::{HashMap}, fmt::format};
 
 use blir::{attributes::AttributeFactory,
            code::{CodeBlock, ExternFunctionRef, FunctionRef, MethodRef, Statement, StatementKind},
@@ -730,6 +730,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 }
 
 
+#[derive(Debug)]
 enum Error {
     ClosureIsNotAFunc,
     RPExpectsGenericParam { count: usize, span: Span },
@@ -764,7 +765,27 @@ impl IntoDiagnostic for Error {
                                 format!("expected 1 generic parameter, found {count}"),
                                 vec![CodeLocation::new(span, None)])
             }
-            _ => todo!()
+            Error::ClosureIsNotAFunc => todo!(),
+            Error::SymbolNotFound(name, span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "sym_not_found",
+                                format!("symbol `{name}` not found"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
+            Error::SymbolNotAType(_, _) => todo!(),
+            Error::ExpectedTypeFound(_) => todo!(),
+            Error::MemberNotFound { parent_ty, member, span } => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "mem_not_found",
+                                format!("{parent_ty} doesn't have member `{member}`"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
+            Error::MemberNotATy { parent_ty, member, span } => todo!(),
+            Error::OperatorExpectedParams(_, _, _) => todo!(),
+            Error::OperatorNotFound(_, _) => todo!(),
+            Error::WrongEnumType(_, _) => todo!(),
+            Error::TagAlreadyUsed(_, _) => todo!(),
+            Error::PrivateSymbol { name, span, suggestion } => todo!(),
         }
     }
 }

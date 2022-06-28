@@ -1,4 +1,4 @@
-use super::find_token;
+use super::{find_token, expr::FuncArg};
 use crate::lexer::SyntaxKind;
 
 ast!(struct Attribute(Attribute));
@@ -13,6 +13,13 @@ impl Attribute {
 
         find_token(&func_name, SyntaxKind::Ident).map(|name| name.text().to_string())
                                                  .unwrap()
+    }
+
+    pub fn args(&self) -> Option<impl Iterator<Item = FuncArg>> {
+        self.0
+            .children()
+            .find(|node| node.kind() == SyntaxKind::CommaSeparatedList)
+            .map(|node| node.children().filter_map(FuncArg::cast))
     }
 }
 

@@ -417,6 +417,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
     }
 }
 
+#[derive(Debug)]
 enum TypeCheckError {
     CouldNotInfer(Span),
     MismatchedTypes(Type, Type),
@@ -452,7 +453,35 @@ impl IntoDiagnostic for TypeCheckError {
                                 vec![ CodeLocation::new(span, None) ])
             }
 
-            _ => todo!(),
+            Self::MismatchedTypes(t1, t2) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "mismatched_types",
+                                format!("cannot assign {t2} to {t1}"),
+                                t1.span().into_iter().chain(t2.span()).map(|span| CodeLocation::new(span, None)).collect())
+            }
+            TypeCheckError::MismatchedLabel(_, _) => todo!(),
+            TypeCheckError::CantMatchFloat(_) => todo!(),
+            TypeCheckError::ExpectedLabel { expected, found, span } => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "expected_label",
+                                format!("expected label `{expected}`, found `{found}`"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
+            TypeCheckError::IsNotAFunc(_) => todo!(),
+            TypeCheckError::MissingParams(_) => todo!(),
+            TypeCheckError::ExtraParams(_) => todo!(),
+            TypeCheckError::FuncNotFound(span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "func_not_found",
+                                format!("could not find function in scope"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
+            TypeCheckError::AmbiguousFunc(_) => todo!(),
+            TypeCheckError::OperatorDNE(_, _) => todo!(),
+            TypeCheckError::SymbolNotAValue(_, _) => todo!(),
+            TypeCheckError::MemberNotAValue(_, _, _) => todo!(),
+            TypeCheckError::CodeAfterUnreachable(_) => todo!(),
+            TypeCheckError::UnreachableCode(_) => todo!(),
         }
     }
 }

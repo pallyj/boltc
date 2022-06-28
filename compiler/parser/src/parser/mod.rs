@@ -257,8 +257,11 @@ pub fn parse<'input>(input: &'input str, debugger: &'input DiagnosticReporter, f
     let events = parser.parse_file();
     let sink = Sink::new(events, &lexemes, file);
 
+    let (root, comments) = sink.finish(debugger);
+
     Parse { file,
-            root: SyntaxNode::new_root(sink.finish(debugger)) }
+            root: SyntaxNode::new_root(root),
+            comments }
 }
 
 pub fn test<'input, F>(input: &'input str, debugger: &'input DiagnosticReporter, file: usize, operator_factory: &OperatorFactory, test: F) -> Parse
@@ -272,6 +275,9 @@ pub fn test<'input, F>(input: &'input str, debugger: &'input DiagnosticReporter,
 
     let sink = Sink::new(events, &lexemes, file);
 
+    let (root, comments) = sink.finish(debugger);
+
     Parse { file,
-            root: SyntaxNode::new_root(sink.finish(debugger)) }
+            root: SyntaxNode::new_root(root),
+            comments }
 }

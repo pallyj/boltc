@@ -1,0 +1,91 @@
+{% import "Optional.bolt.tera" as Optional %}
+
+import intrinsics
+
+///
+/// A character type with full unicode support
+///
+@transparent
+@charExpressible
+@defaultCharRepr
+public struct Char {
+	internal var repr: i32
+
+	///
+	/// Whether this character represents a binary digit
+	///
+	public func isBinDigit() -> Bool {
+		self == "0" || self == "1"
+	}
+
+	///
+	/// Whether this character represents
+	/// a decimal digit between `0` and `9`
+	///
+	public func isDigit() -> Bool {
+		self >= "0" && self <= "9"
+	}
+
+	///
+	/// Whether this character represents an octal digit between `0` and `7`
+	///
+	public func isOctDigit() -> Bool {
+		self >= "0" && self <= "7"
+	}
+
+	///
+	/// Whether this character represents a hexadecimal digit in one of the following ranges:
+	///
+	/// `0` through `9`
+	/// `a` through `f`
+	/// `A` through `F`
+	///
+	public func isHexDigit() -> Bool {
+		let isDecimal: Bool = self >= "0" && self <= "9";
+		let isHex: Bool = self >= "a" && self <= "f";
+		let isUpperHex: Bool = self >= "A" && self <= "F";
+		
+		isDecimal || isHex || isUpperHex
+	}
+
+	///
+	/// Creates a character from its raw, UTF-32 codepoint
+	///
+	public init (raw repr: UInt32) {
+		self.repr = repr.repr;
+	}
+
+	operator func equal(other: Char) -> Bool {
+		Bool(repr: integer32CmpEq(self.repr, other.repr))
+	}
+
+	operator func notEqual(other: Char) -> Bool {
+		Bool(repr: integer32CmpNeq(self.repr, other.repr))
+	}
+
+	operator func greaterThan(other: Char) -> Bool {
+		Bool(repr: integer32CmpGt(self.repr, other.repr))
+	}
+
+	operator func greaterThanEq(other: Char) -> Bool {
+		Bool(repr: integer32CmpGte(self.repr, other.repr))
+	}
+
+	operator func lessThan(other: Char) -> Bool {
+		Bool(repr: integer32CmpLt(self.repr, other.repr))
+	}
+
+	operator func lessThanEq(other: Char) -> Bool {
+		Bool(repr: integer32CmpLte(self.repr, other.repr))
+	}
+
+	///
+	/// Prompts the user for a character
+	///
+	public static func prompt(prompt: String) -> Self {
+		print(prompt)
+		Self(repr: readInternalChar())
+	}
+
+	{{ Optional::optional(name="Char") }}
+}

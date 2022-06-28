@@ -28,8 +28,9 @@ pub struct MethodInner {
     pub code:        CodeBlock,
     pub span:        Span,
     scope:           ScopeRef,
-    self_type:       Type,
+    pub self_type:       Type,
     path:            Path,
+    pub meta:        String,
 }
 
 impl MethodInner {
@@ -115,7 +116,8 @@ impl Method {
                code: CodeBlock,
                span: Span,
                parent: &ScopeRef,
-               parent_path: &Path)
+               parent_path: &Path,
+               meta: String)
                -> MethodRef {
         let func = MethodInner { attributes,
                                  visibility,
@@ -131,7 +133,8 @@ impl Method {
                                                       ScopeType::Code,
                                                       !is_static,
                                                       true),
-                                 self_type };
+                                 self_type,
+                                 meta };
 
         MethodRef { func: Arc::new(Method { inner: RefCell::new(func), }), }
     }
@@ -149,6 +152,10 @@ impl Method {
     pub fn borrow(&self) -> Ref<MethodInner> { self.inner.borrow() }
 
     pub fn borrow_mut(&self) -> RefMut<MethodInner> { self.inner.borrow_mut() }
+
+    pub fn attributes(&self) -> Ref<Attributes> {
+        Ref::map(self.inner.borrow(), |inner| &inner.attributes)
+    }
 }
 
 #[derive(Clone)]

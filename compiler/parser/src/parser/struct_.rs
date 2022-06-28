@@ -25,11 +25,10 @@ impl<'input, 'l> Parser<'input, 'l> {
         }
 
         let marker = self.start();
-
+        self.parse_comments();
         self.parse_attributes();
-
         self.parse_visibility();
-        self.eat(SyntaxKind::StaticKw);
+        self.eat(SyntaxKind::StaticKw); // todo: check if the static keyword can be applied
 
         match self.peek() {
             Some(SyntaxKind::FuncKw) |

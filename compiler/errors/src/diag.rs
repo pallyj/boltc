@@ -115,6 +115,8 @@ impl<'a> DiagnosticReporter<'a> {
 
 			last_file = loc.span.file;
 		}
+
+		println!();
 	}
 
 	///
@@ -166,7 +168,7 @@ impl<'a> DiagnosticReporter<'a> {
 		};
 
 
-		print!("     {}{space:width$}{}",
+		print!("     {} {space:width$}{}",
 			   "|".bold().blue(),
 			   colorify(selector.bold()),
 			   space = "",

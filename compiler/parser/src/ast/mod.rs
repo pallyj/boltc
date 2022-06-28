@@ -10,6 +10,7 @@ pub type SyntaxElement = rowan::SyntaxElement<BoltLanguage>;
 pub struct Parse {
     pub file: usize,
     pub root: SyntaxNode,
+	pub comments: Vec<String>,
 }
 
 impl Debug for Parse {
@@ -120,6 +121,7 @@ pub mod typ;
 pub mod var;
 pub mod pattern;
 pub mod alias;
+pub mod comment;
 
 fn find_token(node: &SyntaxNode, kind: SyntaxKind) -> Option<SyntaxToken> {
     node.children_with_tokens()

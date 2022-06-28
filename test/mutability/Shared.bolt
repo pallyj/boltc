@@ -1,0 +1,12 @@
+func doSomething(shared i: Int) {
+	i = 10
+}
+
+@entryPoint
+func main() {
+	let var i = 0;
+
+	doSomething(shared i)
+
+	print(i)
+}

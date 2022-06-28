@@ -1,0 +1,335 @@
+{% import "Optional.bolt.tera" as Optional %}
+
+import intrinsics
+
+///
+/// {{description}}
+///
+@transparent
+{% if is_default %}@defaultIntegerRepr{% endif %}
+public struct {{name}} {
+	public static let min: {{name}} = {{minimum}}
+	public static let max: {{name}} = {{maximum}}
+
+	internal var repr: i{{bits}}
+
+	///
+	/// Adds two numbers with overflow
+	///
+	public operator func add(b: Self) -> Self {
+		Self(repr: integer{{bits}}Add(self.repr, b.repr) )
+	}
+
+	///
+	/// Subtracts two numbers with overflow
+	///
+	public operator func sub(b: Self) -> Self {
+		Self(repr: integer{{bits}}Sub(self.repr, b.repr) )
+	}
+
+	///
+	/// Multiplies two numbers
+	///
+	public operator func mul(b: Self) -> Self {
+		Self (repr: integer{{bits}}Mul(self.repr, b.repr) )
+	}
+
+	///
+	/// Divides two numbers
+	///
+	/// Panics if the denominator is 0
+	///
+	public operator func div(b: Self) -> Self {
+		if b == 0 {
+			//panic("can't divide by zero")
+		}
+		Self (repr: integer{{bits}}Div{% if signed %}Sig{% endif %}(self.repr, b.repr) )
+	}
+
+	///
+	/// Takes the remainder of two numbers
+	///
+	/// Panics if the denominator is 0
+	///
+	public operator func mod(b: Self) -> Self {
+		if b == 0 {
+			//panic("can't divide by zero")
+		}
+		Self (repr: integer{{bits}}Rem{% if signed %}Sig{% endif %}(self.repr, b.repr) )
+	}
+
+	///
+	/// Bitwise OR of two values.
+	/// {% if signed %}
+	/// Note: Not a signed operation
+	/// {% endif %}
+	public operator func bitOr(b: Self) -> Self {
+		Self (repr: integer{{bits}}Or(self.repr, b.repr) )
+	}
+
+	///
+	/// Bitwise XOR of two values.
+	/// {% if signed %}
+	/// Note: Not a signed operation
+	/// {% endif %}
+	public operator func bitXor(b: Self) -> Self {
+		Self (repr: integer{{bits}}Xor(self.repr, b.repr) )
+	}
+
+	///
+	/// Bitwise AND of two values
+	/// {% if signed %}
+	/// Note: Not a signed operation
+	/// {% endif %}
+	public operator func bitAnd(b: Self) -> Self {
+		Self (repr: integer{{bits}}And(self.repr, b.repr) )
+	}
+
+	///
+	/// Shifts a value left (bigger) by an amount
+	///
+	public operator func shiftLeft(b: Self) -> Self {
+		Self (repr: integer{{bits}}Shl(self.repr, b.repr) )
+	}
+
+	///
+	/// Shifts a value right by an amount
+	/// {% if signed %}
+	/// This operation will preserve the signedness
+	/// {% endif %}
+	public operator func shiftRight(b: Self) -> Self {
+		Self (repr: integer{{bits}}Shr{% if signed %}Sig{% endif %}(self.repr, b.repr) )
+	}
+
+	///
+	/// This method tests for equality (`self` equals `other`) and is used by the `==` operator
+	///
+	public operator func equal(b: Self) -> Bool {
+		Bool (repr: integer{{bits}}CmpEq(self.repr, b.repr) )
+	}
+
+	///
+	/// This method tests for equality (`self` is not equal to `other`) and is used by the `!=` operator
+	///
+	public operator func notEqual(b: Self) -> Bool {
+		Bool (repr: integer{{bits}}CmpNeq(self.repr, b.repr) )
+	}
+
+	///
+	/// This method tests for comparison (`self` is less than `other`) and is used by the `<` operator
+	///
+	public operator func lessThan(b: Self) -> Bool {
+		Bool (repr: integer{{bits}}CmpLt{% if signed %}Sig{% endif %}(self.repr, b.repr) )
+	}
+
+	///
+	/// This method tests for comparison (`self` is greater than `other`) and is used by the `>` operator
+	///
+	public operator func greaterThan(b: Self) -> Bool {
+		Bool (repr: integer{{bits}}CmpGt{% if signed %}Sig{% endif %}(self.repr, b.repr) )
+	}
+
+	///
+	/// This method tests for comparison (`self` is less than or equal to `other`) and is used by the `<=` operator
+	///
+	public operator func lessThanEq(b: Self) -> Bool {
+		Bool (repr: integer{{bits}}CmpLte{% if signed %}Sig{% endif %}(self.repr, b.repr) )
+	}
+
+	///
+	/// This method tests for comparison (`self` is greater than or equal to `other`) and is used by the `>=` operator
+	///
+	public operator func greaterThanEq(b: Self) -> Bool {
+		Bool (repr: integer{{bits}}CmpGte{% if signed %}Sig{% endif %}(self.repr, b.repr) )
+	}
+
+	///
+	/// Returns the number passed in
+	///
+	public operator func unit() -> Self {
+		self
+	}
+
+	///
+	/// Creates a range between two numbers where the top of the range is not included
+	///
+	public operator func openRange(upper: Self) -> Range {
+		Range(from: self, to: upper)
+	}
+
+	///
+	/// Creates a range between two numbers where the top of the range is included
+	///
+	public operator func closedRange(upper: Self) -> ClosedRange {
+		ClosedRange(from: self, to: upper)
+	}
+
+
+	///
+	/// This method returns the negative of a number
+	///
+	public operator func negate() -> Self {
+		Self (repr: integer{{bits}}Negate(self.repr) )
+	}
+
+	///
+	/// This method returns the bitwise inverse of a number
+	/// {% if signed %}
+	/// Note: Not a signed operation
+	/// {% endif %}
+	public operator func invert() -> Self {
+		Self (repr: integer{{bits}}Invert(self.repr) )
+	}{% if bits == 64 %}
+
+	///
+	/// Convert a floating point number to an integer,
+	/// flooring it to the nearest whole number
+	///
+	public init(floor f: Float) {
+		self.repr = float32ToInt{% if signed %}Sig{% endif %}(f.repr);
+	}
+
+	@hidden
+	public init(floor f: Double) {
+		self.repr = float64ToInt{% if signed %}Sig{% endif %}(f.repr)
+	}
+
+	@hidden
+	public init(floor f: Half) {
+		self.repr = float16ToInt{% if signed %}Sig{% endif %}(f.repr)
+	}{% endif %}{% for nb in [8, 16, 32, 64,] %}{% if nb < bits %}{% if nb == bits / 2 %}
+	///
+	/// Extend from a smaller, unsigned integer
+	/// {% else %}    @hidden{% endif %}
+	public init(extend: UInt{{nb}}) {
+		self.repr = integer{{nb}}ExtZero{{bits}}(extend.repr)
+	}
+	
+{% if signed %}{% if nb == bits / 2 %}
+	///
+	/// Extend from a smaller, signed integer
+	/// {% else %}    @hidden{% endif %}
+	public init(extend: Int{{nb}}) {
+		self.repr = integer{{nb}}ExtSig{{bits}}(extend.repr)
+	}
+{% endif %}{% endif %}{% endfor %}
+{% for nb in [8, 16, 32, 64,] %}
+{% if nb > bits %}{% if nb == 64 %}
+	///
+	/// Truncates a bigger integer to a smaller one
+	/// {% else %}    @hidden{% endif %}
+	public init(truncating n: {%if signed%}Int{%else%}UInt{%endif%}{{nb}}) {
+		self.repr = integer{{nb}}Trunc{{bits}}(n.repr)
+	}
+{% endif %}{% endfor %}
+
+	{%if signed%}///
+	/// Convert from an unsigned integer,
+	/// bitcasting it to a signed one
+	///{%else%}
+	///
+	/// Convert from a signed integer,
+	/// bitcasting it to an unsigned one
+	///{%endif%}
+	public init(bitcast n: {%if signed%}UInt{{bits}}{%else%}Int{{bits}}{%endif%}) {
+		self.repr = n.repr
+	}
+	{%if name=="Int"%}
+	@hidden
+	public init(bitcast n: UInt) {
+		self.repr = n.repr
+	}
+
+    @hidden
+	public init(n: Int64) {
+		self.repr = n.repr
+	}
+	{%elif name=="Int64"%}
+	@hidden
+	public init(bitcast n: UInt) {
+		self.repr = n.repr
+	}
+
+    @hidden
+	public init(n: Int) {
+		self.repr = n.repr
+	}
+	{%elif name=="UInt"%}
+	@hidden
+	public init(bitcast n: Int) {
+		self.repr = n.repr
+	}
+
+    @hidden
+	public init(n: UInt64) {
+		self.repr = n.repr
+	}
+	{%elif name=="UInt64"%}
+	@hidden
+	public init(bitcast n: Int) {
+		self.repr = n.repr
+	}
+
+    @hidden
+	public init(n: UInt) {
+		self.repr = n.repr
+	}{%endif%}
+	public struct ClosedRange {
+		fileprivate var low: {{name}}
+		fileprivate var high: {{name}}
+
+		///
+		/// Creates a range from a low bound up to and including a high bound
+		///
+		public init(from low: {{name}}, to high: {{name}}) {
+			self.low = low;
+			self.high = high;
+		}
+
+		public func bottom() -> {{name}} { self.low }
+		public func top() -> {{name}} { self.high }
+	}
+
+	public struct Range {
+		fileprivate var low: {{name}}
+		fileprivate var high: {{name}}
+
+		///
+		/// Creates a range from a low bound up to a high bound
+		///
+		public init(from low: {{name}}, to high: {{name}}) {
+			self.low = low;
+			self.high = high;
+		}
+
+		public func bottom() -> {{name}} { self.low }
+		public func top() -> {{name}} { self.high }
+	}
+	{{ Optional::optional(name=name) }}
+}
+
+{%if is_default%}
+///
+/// Loops through an iterator until exhaustian
+///
+{%else%}
+@hidden
+{%endif%}
+public func for(range: {{name}}.Range, f: func ({{name}})) {
+	let var range = range;
+	while range.low < range.high {
+		f(range.low);
+
+		range.low += 1;
+	}
+}
+
+@hidden
+public func for(range: {{name}}.ClosedRange, f: func ({{name}})) {
+	let var range = range;
+	while range.low <= range.high {
+		f(range.low);
+
+		range.low += 1;
+	}
+}

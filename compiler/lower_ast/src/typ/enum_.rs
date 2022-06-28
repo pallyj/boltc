@@ -12,6 +12,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 		parent: &ScopeRef,
 		parent_path: &Path) -> EnumRef
 	{
+		let doc_c = self.comments.pop().unwrap();
 		let attributes = self.lower_attributes(def.attributes());
 		let visibility = self.lower_visibility(def.visibility());
 		let name = def.name();
@@ -21,7 +22,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 			.map(|ty| self.lower_type(ty))
 			.unwrap_or(TypeKind::Integer { bits: 32 }.anon());
 
-		let enum_def = Enum::new(attributes, visibility, name, parent, parent_path, repr_type);
+		let enum_def = Enum::new(attributes, visibility, name, parent, parent_path, repr_type, doc_c);
 		let enum_scope = enum_def.scope();
 
 		let enum_type = enum_def.get_type().anon();
@@ -77,6 +78,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 		&mut self,
 		cases: CaseDef) -> Vec<CaseRef>
 	{
+		let mut doc_c =  self.comments.pop();
 		cases.items()
 			 .map(|item| {
 				      let (associated_types, labels) = if let Some(associated_types) = item.associated_types() {
@@ -89,7 +91,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
 					  let span = self.span(item.range());
 					      
-				      let case = Case::new(item.name(), associated_types, labels, span);
+				      let case = Case::new(item.name(), associated_types, labels, span, doc_c.take().unwrap_or_else(String::new));
 
 					  if let Some(const_value) = item.value() {
 						  let value = self.lower_expr(const_value, None);

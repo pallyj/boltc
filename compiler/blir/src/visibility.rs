@@ -1,12 +1,12 @@
 use std::fmt::Display;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Visibility {
-    Public,
-    Internal,
-    Fileprivate,
-    Private,
-    Local,
+    Public = 50,
+    Internal = 40,
+    Fileprivate = 30,
+    Private = 20,
+    Local = 10,
 }
 
 impl Display for Visibility {

@@ -9,6 +9,7 @@ use crate::AstLowerer;
 
 impl<'a, 'b> AstLowerer<'a, 'b> {
     pub fn lower_struct_static_let(&mut self, var: LetDef) -> ConstantRef {
+        let doc_c = self.comments.pop().unwrap();
         let visibility = self.lower_visibility(var.visibility());
         let name = var.label();
         let typ = var.typ()
@@ -23,10 +24,11 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
         let attributes = self.lower_attributes(var.attributes());
         let span = self.span(var.range());
 
-        Constant::new(attributes, visibility, name, typ, value, span)
+        Constant::new(attributes, visibility, name, typ, value, span, doc_c)
     }
 
     pub fn lower_struct_let(&mut self, var: LetDef) -> VarRef {
+        let doc_c = self.comments.pop().unwrap();
         let visibility = self.lower_visibility(var.visibility());
         let name = var.label();
         let typ = var.typ()
@@ -37,10 +39,11 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
         let attributes = self.lower_attributes(var.attributes());
         let span = self.span(var.range());
 
-        Var::new(attributes, visibility, name, typ, default_value, true, span)
+        Var::new(attributes, visibility, name, typ, default_value, true, span, doc_c)
     }
 
     pub fn lower_struct_var(&mut self, var: VariableDef) -> VarRef {
+        let doc_c = self.comments.pop().unwrap();
         let visibility = self.lower_visibility(var.visibility());
         let name = var.label();
         let typ = var.typ()
@@ -57,16 +60,18 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                  typ,
                  default_value,
                  false,
-                 span)
+                 span,
+                 doc_c)
     }
 
     pub fn lower_struct(&mut self, def: StructDef, parent: &ScopeRef, parent_mangle: &Path) -> StructRef {
+        let doc_c = self.comments.pop().unwrap();
         let visibility = self.lower_visibility(def.visibility());
         let name = def.name();
 
         let attributes = self.lower_attributes(def.attributes());
 
-        let r#struct = Struct::new(attributes, visibility, name, parent, parent_mangle.clone());
+        let r#struct = Struct::new(attributes, visibility, name, parent, parent_mangle.clone(), doc_c);
         let scope = r#struct.borrow().scope().clone();
 
         let self_ty = TypeKind::Struct(r#struct.clone()).anon();
@@ -112,10 +117,14 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                     let name = type_alias.name();
                     let aliased = self.lower_type(type_alias.aliased_type());
 
+                    // todo: need to do something about this
+
                     r#struct.add_type(name, visibility, aliased.kind);
                 }
 
-                StructItem::NoOp(_) => {}
+                StructItem::NoOp(_) => {
+                    self.comments.pop();
+                }
 
                 StructItem::Error => panic!(),
             }

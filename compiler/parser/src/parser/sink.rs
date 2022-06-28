@@ -12,6 +12,8 @@ pub(super) struct Sink<'input, 'l> {
     events:      Vec<Event<'input>>,
     text_cursor: usize,
     file:        usize,
+    comment:     String,
+    comment_q:   Vec<String>,
 }
 
 impl<'input, 'l> Sink<'input, 'l> {
@@ -21,15 +23,21 @@ impl<'input, 'l> Sink<'input, 'l> {
                cursor: 0,
                events,
                text_cursor: 0,
-               file }
+               file,
+               comment: String::new(),
+               comment_q: Vec::new(), }
     }
 
-    pub(super) fn finish(mut self, debugger: &DiagnosticReporter) -> GreenNode {
+    pub(super) fn finish(mut self, debugger: &DiagnosticReporter) -> (GreenNode, Vec<String>) {
         for idx in 0..self.events.len() {
-            // self.eat_trivia();
             let event = std::mem::replace(&mut self.events[idx], Event::Placeholder);
+
             match event {
                 Event::StartNode { kind, forward_parent } => {
+                    if kind == SyntaxKind::Docs {
+                        let comment = std::mem::take(&mut self.comment);
+                        self.comment_q.push(comment);
+                    }
                     let mut kinds = vec![kind];
 
                     let mut idx = idx;
@@ -58,8 +66,8 @@ impl<'input, 'l> Sink<'input, 'l> {
                     }
                 }
                 Event::AddToken { kind, text } => {
+                    self.token(kind, text);
                     self.eat_trivia();
-                    self.token(kind, text)
                 }
                 Event::FinishNode => {
                     self.builder.finish_node();
@@ -75,7 +83,7 @@ impl<'input, 'l> Sink<'input, 'l> {
             }
         }
 
-        self.builder.finish()
+        (self.builder.finish(), self.comment_q)
     }
 
     fn next_span(&self) -> (usize, usize) {
@@ -88,6 +96,27 @@ impl<'input, 'l> Sink<'input, 'l> {
     }
 
     fn token(&mut self, kind: SyntaxKind, text: &str) {
+        if kind == SyntaxKind::Comment {
+            // Check if its a doc comment
+            let is_short_doc_comment = text.starts_with("///");
+            let is_long_doc_comment = text.starts_with("/**") && text.ends_with("**/") && text.lines().skip(1).all(|line| line.trim_start().starts_with("*"));
+
+           if is_short_doc_comment {
+                let comment = format!("{}\n", text.strip_prefix("///").unwrap().trim());
+
+                self.comment.push_str(&comment);
+            } else if is_long_doc_comment {
+                let comment = text.strip_prefix("/*").unwrap();
+
+                let comment =
+                    comment.lines()
+                        .map(|line| format!("{}\n", line.trim_start().strip_prefix("*").unwrap().trim()))
+                        .collect::<String>();
+
+                self.comment.push_str(&comment);
+            };
+        }
+
         self.builder.token(BoltLanguage::kind_to_raw(kind), text);
         self.cursor += 1;
         self.text_cursor += text.len();

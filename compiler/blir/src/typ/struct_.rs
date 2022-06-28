@@ -19,14 +19,14 @@ pub struct Struct {
 
 #[allow(dead_code)]
 pub struct StructInner {
-    pub attributes: Attributes,
-    pub visibility: Visibility,
+    pub attributes:    Attributes,
+    pub visibility:    Visibility,
 
-    pub name: String,
+    pub name:          String,
 
-    pub link_name: String,
+    pub link_name:     String,
 
-    scope: ScopeRef,
+    scope:             ScopeRef,
 
     pub substructs:    Vec<StructRef>,
     pub methods:       Vec<MethodRef>,
@@ -34,10 +34,12 @@ pub struct StructInner {
     pub constants:     Vec<ConstantRef>,
     pub subenums:      Vec<EnumRef>,
 
-    pub is_transparent: bool,
-    pub is_char_repr: bool,
+    pub is_transparent:bool,
+    pub is_char_repr:  bool,
 
-    path: Path,
+    path:              Path,
+
+    pub meta:          String
 }
 
 impl StructInner {
@@ -49,7 +51,7 @@ impl StructInner {
 }
 
 impl Struct {
-    pub fn new(attributes: Attributes, visibility: Visibility, name: String, parent: &ScopeRef, parent_path: Path) -> StructRef {
+    pub fn new(attributes: Attributes, visibility: Visibility, name: String, parent: &ScopeRef, parent_path: Path, meta: String) -> StructRef {
         let r#struct = StructInner { attributes,
                                      visibility,
                                      link_name: name.clone(),
@@ -66,7 +68,8 @@ impl Struct {
                                      name,
                                      constants: Vec::new(),
                                      is_transparent: false,
-                                     is_char_repr: false };
+                                     is_char_repr: false,
+                                     meta };
 
         let struct_ref = StructRef { r#struct: Arc::new(Struct { inner: RefCell::new(r#struct), }), };
 
@@ -209,6 +212,10 @@ impl Struct {
             ExternFunction(_) => unreachable!(),
         }
     }
+
+    pub fn meta(&self) -> String {
+		self.inner.borrow().meta.clone()
+	}
 }
 
 #[derive(Clone)]

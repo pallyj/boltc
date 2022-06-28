@@ -1,4 +1,7 @@
 #![feature(let_else)]
+#![feature(drain_filter)]
+#![feature(is_some_with)]
+#![feature(bool_to_option)]
 
 pub mod attributes;
 pub mod code;

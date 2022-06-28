@@ -19,6 +19,7 @@ mod tests;
 pub struct AstLowerer<'a, 'b> {
     file:    u32,
     parse:   Root,
+    comments:Vec<String>,
     factory: &'a OperatorFactory,
     reporter:&'a mut DiagnosticReporter<'b>
 }
@@ -27,6 +28,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
     pub fn new(parse: Parse, reporter: &'a mut DiagnosticReporter<'b>, factory: &'a OperatorFactory) -> Self {
         AstLowerer { file: parse.file as u32,
                      parse: Root::cast(parse.root).unwrap(),
+                     comments: parse.comments,
                      factory,
                      reporter }
     }
@@ -34,6 +36,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
     fn span(&self, range: TextRange) -> Span { Span::new(range, self.file) }
 
     pub fn lower_file(mut self, library: &mut blir::Library) {
+        self.comments.reverse();
         let intrinsics = Intrinsics::new();
 
         intrinsics.populate();
@@ -43,6 +46,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
         for file_item in self.parse.items().into_iter() {
             match file_item {
                 FileItem::ImportDef(_import_def) => {
+                    self.comments.pop().unwrap();
                     if _import_def.import_library() == "intrinsics" {
                         parent.import(intrinsics.scope());
                     }

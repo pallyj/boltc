@@ -20,6 +20,8 @@ pub struct ConstantInner {
     pub value: Value,
 
     pub span: Span,
+
+    pub meta: String,
 }
 
 pub struct Constant {
@@ -27,13 +29,14 @@ pub struct Constant {
 }
 
 impl Constant {
-    pub fn new(attributes: Attributes, visibility: Visibility, name: String, typ: Type, value: Value, span: Span) -> ConstantRef {
+    pub fn new(attributes: Attributes, visibility: Visibility, name: String, typ: Type, value: Value, span: Span, meta: String) -> ConstantRef {
         let constant_inner = ConstantInner { attributes,
                                              visibility,
                                              name,
                                              typ,
                                              value,
-                                             span };
+                                             span,
+                                             meta };
 
         ConstantRef { constant: Arc::new(Constant { constant: RefCell::new(constant_inner), }), }
     }

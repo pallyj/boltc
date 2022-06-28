@@ -1,6 +1,6 @@
 use std::{io, cell::RefCell};
 
-use blir::attributes::{AttributeFactory, FuncAttribute};
+use blir::attributes::{AttributeFactory, FuncAttribute, AttributeArgs};
 use bolt_ext::{Fix, FunctionSignature, FunctionKind};
 use errors::{Span, DiagnosticReporter, IntoDiagnostic, Diagnostic, DiagnosticLevel, CodeLocation};
 use parser::{operators::{OperatorFactory, OperatorFix}};
@@ -85,7 +85,7 @@ impl FuncAttribute for AnyFuncAttribute {
         self.attribute.borrow().label()
     }
 
-    fn apply(&self, info: &mut blir::code::FunctionInfo, _context: &mut blir::BlirContext, debugger: &mut errors::DiagnosticReporter) {
+    fn apply(&self, args: &AttributeArgs, info: &mut blir::code::FunctionInfo, _context: &mut blir::BlirContext, debugger: &mut errors::DiagnosticReporter) {
 		let mut inline = false;
 		let name = info.name().clone();
 		let mut link_name = info.link_name().clone();

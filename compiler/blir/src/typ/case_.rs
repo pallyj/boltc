@@ -10,17 +10,19 @@ pub struct Case {
 	tag: Cell<Option<usize>>,
 	associated: RefCell<Vec<Type>>,
 	labels: Vec<Option<String>>,
-	span: Span
+	span: Span,
+	meta: String
 }
 
 impl Case {
-	pub fn new(name: String, associated: Vec<Type>, labels: Vec<Option<String>>, span: Span) -> CaseRef {
+	pub fn new(name: String, associated: Vec<Type>, labels: Vec<Option<String>>, span: Span, meta: String) -> CaseRef {
 		CaseRef {
 			case_ref: Arc::new(Case { name,
 							   tag: Cell::new(None),
 							   associated: RefCell::new(associated),
 							   labels,
-							   span })
+							   span,
+							   meta})
 		}
 	}
 
@@ -54,6 +56,10 @@ impl Case {
 
 	pub fn span(&self) -> Span {
 		self.span
+	}
+
+	pub fn meta(&self) -> String {
+		self.meta.clone()
 	}
 }
 

@@ -12,6 +12,10 @@ impl Path {
         self.path_components.push(child.to_string());
         self
     }
+
+    pub fn into_components(self) -> Vec<String> {
+        self.path_components
+    }
 }
 
 impl Display for Path {

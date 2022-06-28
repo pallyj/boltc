@@ -11,4 +11,6 @@ public struct List {
 @entryPoint
 func main() {
 	let block = List(repeating: 0, count: 4096);
+
+	print(block.n);
 }

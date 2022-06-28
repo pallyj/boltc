@@ -1,0 +1,74 @@
+{% macro optional(name, mapTypes="") %}
+	public enum Optional {
+		case none
+		case some({{name}})
+
+		//
+		// Forcibly unwraps a value, returning it if it exists, or panicing if it doesn't
+		//
+		// TODO: use the bang operator to implement this
+		//
+		/*public func unwrap() -> {{name}} {
+			match self {
+				.some(value) => value,
+				.none => panic("can't unwrap value")
+			}
+		}*/
+
+		///
+		/// Unwraps a value, returning an alternative if it doesn't exist
+		///
+		/// TODO: Use the coalesce operator to implement this
+		///
+		public func unwrap(orElse alternative: {{name}}) -> {{name}} {
+			match self {
+				.some(value) => value,
+				.none => alternative,
+			}
+		}
+
+		///
+		/// Maps a value to another value if it exists
+		///
+		/// TODO: Use the map operator to implement this
+		///
+		public func map(f: func ({{name}}) -> {{name}}) -> Self {
+			match self {
+				.some(value) => .some(f(value)),
+				.none => .none
+			}
+		}
+
+		///
+		/// Flat maps a value to another value if it exists
+		///
+		/// TODO: Use the map operator to implement this
+		///
+		public func flatMap(f: func ({{name}}) -> Self) -> Self {
+			match self {
+				.some(value) => f(value),
+				.none => .none
+			}
+		}
+	{%if mapTypes != ""%}
+	{% for type in mapTypes | split(pat=" ") %}
+		@hidden
+		public func map(f: func ({{type}}) -> {{type}}) -> Self {
+			match self {
+				.some(value) => .some(f(value)),
+				.none => .none
+			}
+		}
+
+		@hidden
+		public func flatMap(f: func ({{type}}) -> Self) -> Self {
+			match self {
+				.some(value) => f(value),
+				.none => .none
+			}
+		}
+	{% endfor %}
+	{%endif%}
+	}
+
+{% endmacro optional %}

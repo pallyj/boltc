@@ -41,6 +41,12 @@ impl<'input, 'l> Parser<'input, 'l> {
         marker.complete(self, SyntaxKind::Import);
     }
 
+    // todo: whitespaces are parsed afterwards
+    pub fn parse_comments(&mut self) {
+        let marker = self.start();
+        marker.complete(self, SyntaxKind::Docs);
+    }
+
     pub fn parse_file_item(&mut self) {
         if self.eat(SyntaxKind::Semicolon) {
             let marker = self.start();
@@ -49,10 +55,11 @@ impl<'input, 'l> Parser<'input, 'l> {
             return;
         }
 
+        self.eat_trivia();
+
         let marker = self.start();
-
+        self.parse_comments();
         self.parse_attributes();
-
         self.parse_visibility();
 
         match self.peek() {
