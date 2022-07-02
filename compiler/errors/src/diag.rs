@@ -2,7 +2,7 @@ use std::{fmt::format, sync::atomic::{AtomicU64, Ordering}};
 
 use colored::{Colorize, ColoredString};
 
-use crate::{Span, fileinterner::FileInterner};
+use crate::{Span, fileinterner::{FileInterner, LineInfo}};
 
 ///
 /// How serious a diagnostic is
@@ -187,5 +187,9 @@ impl<'a> DiagnosticReporter<'a> {
 		} else {
 			Ok(())
 		}
+	}
+
+	pub fn lookup(&self, span: Span) -> LineInfo {
+		self.interner.get_line_info(span.file as usize, span.range.start().into())
 	}
 }

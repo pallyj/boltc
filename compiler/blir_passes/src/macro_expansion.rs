@@ -9,19 +9,15 @@ use parser::operators::OperatorFactory;
 
 use crate::{TypeInferPass, TypeResolvePass};
 
-pub struct ClosureResolvePass<'a, 'l> {
+pub struct MacroExpansionPass<'a, 'l> {
     factory:          &'a AttributeFactory,
-    context:          &'a mut BlirContext,
     debugger:         &'a mut DiagnosticReporter<'l>,
-    operator_factory: &'a OperatorFactory,
 }
 
-impl<'a, 'l> ClosureResolvePass<'a, 'l> {
-    pub fn new(factory: &'a AttributeFactory, operator_factory: &'a OperatorFactory, context: &'a mut BlirContext, debugger: &'a mut DiagnosticReporter<'l>) -> Self {
+impl<'a, 'l> MacroExpansionPass<'a, 'l> {
+    pub fn new(factory: &'a AttributeFactory, operator_factory: &'a OperatorFactory, debugger: &'a mut DiagnosticReporter<'l>) -> Self {
         Self { factory,
-               context,
-               debugger,
-               operator_factory }
+               debugger }
     }
 
     pub fn run_pass(&mut self, library: &mut Library) {
@@ -105,18 +101,7 @@ impl<'a, 'l> ClosureResolvePass<'a, 'l> {
     fn resolve_value(&mut self, value: &mut Value, scope: &ScopeRef) {
         match &mut value.kind {
             ValueKind::Closure(closure) => {
-                // Run the resolve pass
-                let mut resolve_pass = TypeResolvePass::new(self.factory,
-                                                            self.operator_factory,
-                                                            self.context,
-                                                            self.debugger);
-
-                resolve_pass.resolve_closure(closure, &mut value.typ, scope);
-
-                // Infer the codeblock
-                let mut infer_pass = TypeInferPass::new(self.context, self.debugger);
-
-                infer_pass.infer_closure(closure, &mut value.typ, scope);
+				self.resolve_code_block(&mut closure.code, scope);
             }
 
             ValueKind::FuncCall { function, args } => {
@@ -166,7 +151,7 @@ impl<'a, 'l> ClosureResolvePass<'a, 'l> {
                 self.resolve_value(repeating, scope);
             }
 
-            _ => {}
+			_ => {}
         }
     }
 

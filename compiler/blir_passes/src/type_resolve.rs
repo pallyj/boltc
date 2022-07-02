@@ -48,7 +48,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                operator_factory }
     }
 
-    pub fn run_pass(mut self, library: &mut Library) {
+    pub fn run_pass(&mut self, library: &mut Library) {
         // Run the pass on each extern function
         for extern_func in &library.extern_functions {
             // Resolve types in the extern function
@@ -431,6 +431,10 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 typ.set_kind(ty.kind);
             }
 
+            TypeKind::Array { item, .. } => {
+                self.resolve_type(item, scope);
+            }
+
             _ => {
                 // Do nothing
             }
@@ -479,6 +483,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
             StatementKind::Break(_) |
             StatementKind::Continue(_) => {}
+            StatementKind::Panic => {}
         }
     }
 
@@ -626,6 +631,16 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 value.set_kind(function_kind);
             }
 
+            ValueKind::SequenceLiteral(seq) => {
+                for item in seq {
+                    self.resolve_value(item, scope);
+                }
+            }
+
+            ValueKind::RepeatingLiteral { repeating, .. } => {
+                self.resolve_value(repeating, scope);
+            }
+
             _ => {}
         }
     }
@@ -666,7 +681,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
         self.add_closure_params(closure, closure_type);
 
         for param in &mut closure.params {
-            let param_value = ValueKind::FunctionParam(param.name.clone()).anon(param.typ.clone());
+            let param_value = ValueKind::FunctionParam(param.name.clone(), false).anon(param.typ.clone());
 
             closure_scope.add_symbol(param.name.clone(),
                                      Visibility::Local,

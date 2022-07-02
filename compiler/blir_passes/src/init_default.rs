@@ -40,7 +40,7 @@ pub(crate) fn add_default_initializer(r#struct: &StructRef) {
                 least_visibile = variable.borrow().visibility;
             }
 
-            let parameter_value = ValueKind::FunctionParam(variable_name.clone()).anon(variable_type.clone());
+            let parameter_value = ValueKind::FunctionParam(variable_name.clone(), false).anon(variable_type.clone());
 
             parameter_types.push(variable_type.clone());
             parameter_labels.push(variable_name);

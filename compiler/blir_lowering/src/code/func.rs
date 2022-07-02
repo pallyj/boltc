@@ -13,12 +13,15 @@ impl<'a> BlirLowerer<'a> {
 		let borrowed_func = func.borrow();
 
 		let func_name = borrowed_func.info.link_name();
+		
 		let parameters = borrowed_func.info.params()
 										   .iter()
 										   .map(|it| {
 												let ty = self.lower_ty(&it.typ);
 
-												if it.is_shared { ty.shared_pointer() }
+												if it.is_shared {
+													ty.shared_pointer()
+												}
 												else { ty }
 											})
 											.collect_vec();
@@ -88,10 +91,13 @@ impl<'a> BlirLowerer<'a> {
 
 		self.function_ctx.clear();
 
+		// Get the function so we can use its type
+		let function = self.builder.get_function_by_id(function_id);
+
 		// Add parameters to the local context
-		for (i, parameter) in borrowed_function.info.params().iter().enumerate() {
-			let ty = self.lower_ty(&parameter.typ);
-			let place = Place::function_param(i, ty, Self::span_of(parameter.typ.span())); // Use the span of the name
+		for (i, (parameter, param_type)) in borrowed_function.info.params().iter().zip(function.params()).enumerate() {
+			let place = Place::function_param(i, param_type.clone(), Self::span_of(parameter.typ.span())); // Use the span of the name
+
 			if parameter.is_shared {
 				self.function_ctx.insert(parameter.bind_name.clone(), place.copy(Span::empty()).deref(Span::empty()));
 			} else {

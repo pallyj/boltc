@@ -1,9 +1,9 @@
 use blir::{code::{Statement, StatementKind, CodeBlock}, value::{ValueKind, match_::MatchValue, MatchBranch}, pattern::PatternKind, typ::TypeKind};
 use errors::Span;
 use mir::{val::RValue, instr::Terminator};
-use patmat::{PatternMatrix, Maranget};
+use patmat::{PatternMatrix};
 
-use crate::{BlirLowerer, val};
+use crate::{BlirLowerer};
 
 mod func;
 
@@ -26,6 +26,9 @@ impl<'a> BlirLowerer<'a> {
 
 	///
 	/// Lowers a statement to MIR code
+	/// 
+	/// If the statement returns a value, return that value
+	/// so it can be returned
 	/// 
 	pub fn lower_statement(
 		&mut self,
@@ -76,7 +79,7 @@ impl<'a> BlirLowerer<'a> {
 						self.function_ctx.insert(bind_name.clone(), place);
 					}
 				} else {
-					let pattern_matrix = PatternMatrix::construct(ValueKind::Uninit.infer(), vec![ pattern.clone() ]).expand();
+					let pattern_matrix = PatternMatrix::construct(ValueKind::Uninit.anon(pattern.match_type.clone()), vec![ pattern.clone() ]).expand();
 
 					let mut rows = pattern_matrix.rows();
 					let Some(first_row) = rows.next() else {
@@ -110,7 +113,7 @@ impl<'a> BlirLowerer<'a> {
 			Return { value } => {
 				if let Some(value) = value {
 					let value = self.lower_rvalue(value);
-
+ 
 					self.builder.build_terminator(Terminator::returns(value));
 				} else {
 					self.builder.build_terminator(Terminator::return_void());
@@ -173,6 +176,11 @@ impl<'a> BlirLowerer<'a> {
 
 				self.lower_match(&guard_coerced_to_match, None);
 
+				None
+			}
+
+			Panic => {
+				self.builder.build_terminator(Terminator::panic());
 				None
 			}
 		}

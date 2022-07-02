@@ -33,6 +33,11 @@ pub enum PlaceKind {
 	TupleItem(Box<Place>, usize),
 
 	///
+	/// Gets the item at an index in an array
+	/// 
+	ArrayIndex(Box<Place>, usize),
+
+	///
 	/// The dereference of a pointer value
 	/// Does NOT move the value out of the pointer
 	/// The value can be assigned, copied, moved, or referenced
@@ -114,6 +119,17 @@ impl Place {
 	}
 
 	///
+	/// Retrieves an indexed item from an array
+	/// 
+	pub fn array_index(&self, index: usize, span: Span) -> Place {
+		if let TypeKind::Array { item, count } = &self.ty.kind() {
+			Place { kind: PlaceKind::ArrayIndex(Box::new(self.clone()), index), ty: item.as_ref().clone(), is_mutable: self.is_mutable, span }
+		} else {
+			panic!("Tried to index into a non-array value {:?}", self.ty())
+		}
+	}
+
+	///
 	/// A place for a function param
 	/// 
 	pub fn function_param(n: usize, ty: Type, span: Span) -> Place {
@@ -166,6 +182,7 @@ impl Display for PlaceKind {
 			Self::TupleItem(place, index) => write!(f, "{place}.{index}"),
 			Self::Deref(pointer_value) => write!(f, "*{pointer_value}"),
 			Self::Discriminant(place) => write!(f, "discriminant {place}"),
+			Self::ArrayIndex(place, idx) => write!(f, "index {idx} of {place}"),
 		}
     }
 }

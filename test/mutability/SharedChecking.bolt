@@ -1,0 +1,17 @@
+func double(n: shared Int) {
+	n *= 2
+}
+
+func doubleWithErr(n: Int) {
+	n *= 2
+}
+
+@entryPoint
+func main() {
+	let var i = 100;
+
+	double(i);
+	doubleWithErr(shared i);
+
+	assert(i == 0)
+}

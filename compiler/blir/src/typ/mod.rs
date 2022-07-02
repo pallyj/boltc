@@ -87,6 +87,8 @@ pub enum TypeKind {
     /// 
     RawPointer { pointer_type: Box<Type> },
 
+    Array { item: Box<Type>, len: usize },
+
     Error,
 }
 
@@ -302,6 +304,7 @@ impl Debug for Type {
             TypeKind::GenericOf { higher_kind, params } => write!(f, "{higher_kind:?}<{}>", params.iter().map(|p| format!("{p:?}")).collect::<Vec<_>>().join(", ")),
             TypeKind::HKRawPointer => write!(f, "RawPointer<_>"),
             TypeKind::RawPointer { pointer_type: ptr } => write!(f, "RawPointer<{ptr:?}>"),
+            TypeKind::Array { item, len } => write!(f, "{item:?}[{len}]"),
         }
     }
 }
@@ -331,6 +334,7 @@ impl Display for Type {
             Divergent => write!(f, "!"),
             
             RawPointer { pointer_type } => write!(f, "RawPointer<{pointer_type}>"),
+            Array { item, len } => write!(f, "{item}[{len}]"),
     
             Error => todo!(),
     

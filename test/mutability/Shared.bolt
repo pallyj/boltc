@@ -1,5 +1,5 @@
-func doSomething(shared i: Int) {
-	i = 10
+func doSomething(n: shared Int) {
+	n = 10
 }
 
 @entryPoint

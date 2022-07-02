@@ -59,9 +59,9 @@ fn run_test(path: &Path, test: &JsonValue) {
 
 		let mut project = super::Project::new("test", vec![]);
 
-		project.open_file(path.join(include).as_os_str().to_str().unwrap());
+		project.open_file(path.join(include).as_os_str().to_str().unwrap(), "test");
 		for std_file in get_std(test["std"].as_str()) {
-			project.open_file(std_file);
+			project.open_file(std_file, "test");
 		}
 		if test.has_key("expect") {
 			if let Ok((entry_point, project)) = project.compile_test() {

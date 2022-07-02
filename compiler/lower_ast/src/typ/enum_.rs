@@ -108,7 +108,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
 	pub fn change_to_u64(value: (bool, u64)) -> u64 {
 		if value.0 {
-			0 - value.1
+			0_u64.wrapping_sub(value.1)
 		} else {
 			value.1
 		}

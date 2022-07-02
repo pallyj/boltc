@@ -1,0 +1,13 @@
+@entryPoint
+func main() {
+	print("Line", @line)
+	print("Col", @col)
+	print("File", @file)
+
+	@assert(true)
+	@assert(0, equals: 0)
+	@assert(1, notEqualTo: 0)
+	@assert(1, greaterThan: 1)
+
+	@panic()
+}

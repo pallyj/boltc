@@ -71,6 +71,8 @@ impl<'input, 'l> Parser<'input, 'l> {
                                                             SyntaxKind::CloseParen]);
         }
 
+        self.eat(SyntaxKind::SharedKw); // todo: move this?
+
         self.parse_ty();
 
         marker.complete(self, SyntaxKind::FuncPar);

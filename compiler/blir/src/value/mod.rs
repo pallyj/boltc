@@ -9,6 +9,7 @@ use std::{fmt::Debug,
 pub use closure::*;
 pub use constant::*;
 use errors::Span;
+use itertools::Itertools;
 pub use var::*;
 pub use match_::*;
 
@@ -58,11 +59,17 @@ pub enum ValueKind {
         enum_value: Box<Value>,
         variant: CaseRef,
     },
+    SequenceLiteral(Vec<Value>),
+    RepeatingLiteral {
+        repeating: Box<Value>,
+        count: Option<u64>,
+    },
+
 
     // Variable Values
     Metatype(TypeKind),
     LocalVariable(String, bool),
-    FunctionParam(String),
+    FunctionParam(String, bool),
     Assign(Box<Value>, Box<Value>),
 
     // Function Values
@@ -181,7 +188,7 @@ impl Value {
             ValueKind::TupleField(tuple, _) => tuple.is_mutable(),
 
             ValueKind::LocalVariable(_, mutating) => *mutating,
-            ValueKind::FunctionParam(_) => false, // todo: add mutating
+            ValueKind::FunctionParam(_, mutating) => *mutating,
 
             ValueKind::Named(_) => false,
             ValueKind::Member { .. } => false,
@@ -215,6 +222,10 @@ impl Value {
             ValueKind::Loop { .. } => false,
             ValueKind::Unit => false,
             ValueKind::MonomorphizeFn { .. } => false,
+
+            ValueKind::SequenceLiteral(_) => false,
+            ValueKind::RepeatingLiteral { .. } => false,
+
             ValueKind::Error => false,
         }
     }
@@ -224,6 +235,7 @@ impl Value {
 pub struct FunctionArgs {
     pub args:   Vec<Value>,
     pub labels: Vec<Option<String>>,
+    pub is_shared: Vec<bool>
 }
 
 impl Debug for FunctionArgs {
@@ -300,7 +312,7 @@ impl Debug for Value {
             } else {
                 write!(f, "{name}")
             },
-            ValueKind::FunctionParam(name) => write!(f, "{name}"),
+            ValueKind::FunctionParam(name, _) => write!(f, "{name}"),
             ValueKind::UnaryIntrinsicFn(intrinsic) => write!(f, "{intrinsic:?}"),
             ValueKind::BinaryIntrinsicFn(intrinsic) => write!(f, "{intrinsic:?}"),
             ValueKind::StaticFunc(func) => write!(f, "{}", func.take_name()),
@@ -328,6 +340,12 @@ impl Debug for Value {
                 write!(f, "({tuple_items})")
             }
             ValueKind::TupleField(value, n) => write!(f, "{value:?}.item{n}"),
+            ValueKind::SequenceLiteral(sequence) => write!(f, "[{:?}]", sequence.iter().format(", ")),
+            ValueKind::RepeatingLiteral { repeating, count } => if let Some(count) = count {
+                write!(f, "[repeating: {repeating:?}, count: {count}]")
+            } else {
+                write!(f, "[repeating: {repeating:?}]")
+            },
             ValueKind::Unit => write!(f, "()"),
             ValueKind::Error => write!(f, "Error"),
             ValueKind::Loop { code: code_block, label } => write!(f, "loop {code_block:?} `{label}"),

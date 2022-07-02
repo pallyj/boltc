@@ -183,6 +183,7 @@ pub enum SyntaxKind {
     InferType,
     FuncType,
     GenericType,
+    ArrayType,
 
     FuncReturn,
 
@@ -248,6 +249,7 @@ pub enum SyntaxKind {
     Tuple,
 
     VariantLiteral,
+    ArrayLiteral,
 
     BindPattern,
     WildcardPattern,
@@ -270,6 +272,9 @@ pub enum SyntaxKind {
     ContinueSmt,
 
     Docs,
+
+    MapItem,
+    ArrayItem,
 
     _Invalid,
 }

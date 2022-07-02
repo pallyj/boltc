@@ -1,11 +1,11 @@
 mod unescape;
 
-use std::{sync::atomic::{AtomicU64, Ordering}};
+use std::{sync::atomic::{AtomicU64, Ordering}, vec};
 
 use blir::{typ::{Type, TypeKind},
            value::{Closure, ClosureParam, FunctionArgs, IfBranch, IfValue, Value, ValueKind, match_::MatchValue, MatchBranch}, code::{CodeBlock, StatementKind}, pattern::PatternKind};
 use errors::Span;
-use parser::{ast::expr::{ClosureExpr, Expr as AstExpr, IfExpr, IfExprNegative, LiteralKind, IfLetExpr}};
+use parser::{ast::expr::{ClosureExpr, Expr as AstExpr, IfExpr, IfExprNegative, LiteralKind, IfLetExpr, CollectionItem}};
 use unindent::unindent;
 
 use crate::{AstLowerer, err::Error};
@@ -45,9 +45,12 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                                                     params:      vec![Type::infer()],
                                                     labels:      vec![None], }.anon();
 
-                ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
-                                      args:     FunctionArgs { args:   vec![self.lower_expr(prefix.unit(), last_loop_label)],
-                                                               labels: vec![None], }, }.spanned(Type::infer(), span)
+                ValueKind::FuncCall {
+                    function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
+                    args:     FunctionArgs {
+                        args:   vec![self.lower_expr(prefix.unit(), last_loop_label)],
+                        labels: vec![None],
+                        is_shared: vec![false] }, }.spanned(Type::infer(), span)
             }
             AstExpr::PostfixExpr(postfix) => {
                 let operator_symbol = postfix.operator();
@@ -57,9 +60,14 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                                                     params:      vec![Type::infer()],
                                                     labels:      vec![None], }.anon();
 
-                ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
-                                      args:     FunctionArgs { args:   vec![self.lower_expr(postfix.unit(), last_loop_label)],
-                                                               labels: vec![None], }, }.spanned(Type::infer(), span)
+                ValueKind::FuncCall {
+                    function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
+                    args:     FunctionArgs {
+                        args:   vec![self.lower_expr(postfix.unit(), last_loop_label)],
+                        labels: vec![None],
+                        is_shared: vec![false]
+                    },
+                }.spanned(Type::infer(), span)
             }
             AstExpr::InfixExpr(infix) => {
                 let operator_symbol = infix.operator();
@@ -82,9 +90,13 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                         let left = self.lower_expr(infix.left(), last_loop_label);
                         let right = self.lower_expr(infix.right(), last_loop_label);
         
-                        let assign_val = ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
-                                                            args:     FunctionArgs { args:   vec![left.clone(), right],
-                                                                                        labels: vec![None, None] } }.spanned(Type::infer(), span);
+                        let assign_val = ValueKind::FuncCall {
+                            function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
+                            args:     FunctionArgs {
+                                args:   vec![left.clone(), right],
+                                labels: vec![None, None],
+                                is_shared: vec![false, false]
+                        } }.spanned(Type::infer(), span);
 
                         return ValueKind::Assign(Box::new(left), Box::new(assign_val))
                                         .spanned(TypeKind::Void.spanned(span), span)                                   
@@ -99,7 +111,8 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                 ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator.name().clone()).anon(function)),
                                         args:     FunctionArgs { args:   vec![self.lower_expr(infix.left(), last_loop_label),
                                                                             self.lower_expr(infix.right(), last_loop_label)],
-                                                                labels: vec![None, None], }, }.spanned(Type::infer(), span)
+                                                                labels: vec![None, None],
+                                                                is_shared: vec![false, false] }, }.spanned(Type::infer(), span)
 
                 
             }
@@ -117,7 +130,8 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                 ValueKind::FuncCall { function: Box::new(ValueKind::Operator(operator).anon(function)),
                                       args:     FunctionArgs { args:   vec![self.lower_expr(index.parent(), last_loop_label),
                                                                             self.lower_expr(value, last_loop_label)],
-                                                               labels: vec![None, label], }, }.spanned(Type::infer(), span)
+                                                               labels: vec![None, label],
+                                                               is_shared: vec![false, false] }, }.spanned(Type::infer(), span)
             }
 
             AstExpr::LiteralExpr(literal) => {
@@ -204,6 +218,8 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                                                            .map(|arg| (arg.label(), self.lower_expr(arg.value(), last_loop_label)))
                                                            .unzip();
 
+                let is_shared = call.args().map(|arg| arg.is_shared()).collect();
+
                 let return_type = Box::new(Type::infer());
                 let params = (0..args.len()).map(|_| Type::infer()).collect();
 
@@ -213,7 +229,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                 func.typ.set_kind(function_type);
 
                 ValueKind::FuncCall { function: Box::new(func),
-                                      args:     FunctionArgs { args, labels }, }.spanned_infer(span)
+                                      args:     FunctionArgs { args, labels, is_shared }, }.spanned_infer(span)
             }
 
             AstExpr::ClosureExpr(closure) => self.lower_closure_expr(closure, span),
@@ -230,6 +246,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                         _ => self.reporter.throw_diagnostic(Error::NoTrailingClosure.at(span)),
                     }
                     args.args.push(closure);
+                    args.is_shared.push(false);
                     function
                 } else {
                     let return_type = Box::new(Type::infer());
@@ -242,7 +259,8 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
                     ValueKind::FuncCall { function: Box::new(function),
                                           args:     FunctionArgs { args:   vec![closure],
-                                                                   labels: vec![], }, }.spanned_infer(span)
+                                                                   labels: vec![],
+                                                                   is_shared: vec![ false ] }, }.spanned_infer(span)
                 }
             }
 
@@ -346,6 +364,76 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
 
                 ValueKind::Loop{ code: if_block, label: next_label }.spanned_infer(span)
+            }
+
+            AstExpr::ArrayLiteral(array_literal) => {
+                let items = array_literal.items();
+
+                let is_sequence = items.iter().all(|item| matches!(item, CollectionItem::ArrayItem(_)));
+
+                if is_sequence {
+                    let sequence_items = items.iter()
+                        .map(|item| {
+                            match item {
+                                CollectionItem::ArrayItem(array_item) => self.lower_expr(array_item.item(), None),
+                                _ => unreachable!()
+                            }
+                        })
+                        .collect::<Vec<_>>();
+
+                    let ty = TypeKind::Array {
+                        item: Box::new(Type::infer()),
+                        len: sequence_items.len()
+                    }.spanned(span);
+
+                    return ValueKind::SequenceLiteral(sequence_items).spanned(ty, span)
+                }
+
+                if items.len() == 1 {
+                    if let CollectionItem::MapItem(map_item) = &items[0] {
+                        let key = map_item.key();
+
+                        if let AstExpr::NamedExpr(named_expr) = key &&
+                           named_expr.name() == "repeating" {
+
+                            return ValueKind::RepeatingLiteral {
+                                repeating: Box::new(self.lower_expr(map_item.value(), None)),
+                                count: None
+                            }.spanned_infer(span)
+                        }
+                    }
+                } else if items.len() == 2 {
+                    if let CollectionItem::MapItem(repeating) = &items[0] &&
+                       let CollectionItem::MapItem(count) = &items[1] {
+
+                        if let AstExpr::NamedExpr(repeating_named) = repeating.key() &&
+                           let AstExpr::NamedExpr(count_named) = count.key() &&
+                           repeating_named.name() == "repeating" &&
+                           count_named.name() == "count" {
+
+                            let value = self.lower_expr(count.value(), None);
+                            let (is_negative, count) = self.lower_integer(&value);
+
+                            if is_negative {
+                                // throw an error
+                                println!("error: negative array length")
+                            }
+
+                            let typ = TypeKind::Array { item: Box::new(Type::infer()), len: count as usize }.spanned(span);
+
+                            return ValueKind::RepeatingLiteral {
+                                repeating: Box::new(self.lower_expr(repeating.value(), None)),
+                                count: Some(count)
+                            }.spanned(typ, span)
+                        }
+
+                    }
+                }
+
+                // Throw an error
+                self.reporter.throw_diagnostic(Error::FeatureNotEnabled("map_lit_construct").at(span));
+
+                ValueKind::Error.infer()
             }
 
             AstExpr::Error => panic!("internal compiler error")

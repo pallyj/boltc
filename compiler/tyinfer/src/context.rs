@@ -5,7 +5,7 @@ use blir::{code::{CodeBlock, Statement, StatementKind},
            typ::{Type, TypeKind},
            value::{IfBranch, IfValue, Value, ValueKind},
            BlirContext, pattern::{Pattern, PatternKind}};
-use errors::{error::ErrorCode, DiagnosticReporter, Span, IntoDiagnostic, Diagnostic, DiagnosticLevel, CodeLocation};
+use errors::{DiagnosticReporter, Span, IntoDiagnostic, Diagnostic, DiagnosticLevel, CodeLocation};
 use rusttyc::{TcErr, TcKey, VarlessTypeChecker};
 
 use crate::{replace::TypeReplaceContext, variant::TypeVariant};
@@ -162,6 +162,23 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                 self.constrain_two_way(&left.typ, &right.typ);
             }
 
+            ValueKind::SequenceLiteral(sequence) => {
+                if let TypeKind::Array { item, .. } = value.typ.kind() {
+                    for sequence_item in sequence {
+                        self.constrain_value(sequence_item, scope);
+                        self.constrain_two_way(&sequence_item.typ, &item);
+                    }
+                }
+            }
+
+            ValueKind::RepeatingLiteral { repeating, .. } => {
+                self.constrain_value(&repeating, scope);
+
+                if let TypeKind::Array { item, .. } = value.typ.kind() {
+                    self.constrain_two_way(&repeating.typ, &item);
+                }
+            }
+
             _ => {}
         }
     }
@@ -229,6 +246,8 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                 self.constrain_pattern(pattern, &value.typ, scope);
                 self.infer_codeblock(otherwise, &TypeKind::Divergent.anon(), scope);
             }
+
+            StatementKind::Panic => {},
         }
     }
 
@@ -372,6 +391,10 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
             TypeKind::RawPointer { pointer_type: pointer_type_2 }) = (constrain.kind(), absolute.kind())
         {
             self.constrain_one_way(&pointer_type_1, &pointer_type_2);
+        } else if let (TypeKind::Array { item: item_1, len: _ },
+                               TypeKind::Array { item: item_2, len: _ }) = (constrain.kind(), absolute.kind())
+        {
+            self.constrain_one_way(item_1, item_2);
         }
 
         let Some(constrain_key) = self.infer_key(constrain) else {
@@ -425,6 +448,10 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                                TypeKind::RawPointer { pointer_type: pointer_type_2 }) = (ty1.kind(), ty2.kind())
                 {
                     self.constrain_two_way(&pointer_type_1, &pointer_type_2);
+                } else if let (TypeKind::Array { item: item_1, len: _ },
+                               TypeKind::Array { item: item_2, len: _ }) = (ty1.kind(), ty2.kind())
+                {
+                    self.constrain_two_way(item_1, item_2);
                 }
 
                 return;
@@ -461,6 +488,8 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
             TypeKind::Tuple(tuple_items, labels) => TypeVariant::Tuple(tuple_items.clone(), labels.clone()),
             TypeKind::RawPointer { pointer_type } => TypeVariant::RawPointer(pointer_type.as_ref().clone()),
             TypeKind::GenericParam(param) => TypeVariant::GenericParam(param.to_string()),
+
+            TypeKind::Array { item, len } => TypeVariant::Array(item.as_ref().clone(), *len),
 
             TypeKind::Error => TypeVariant::Error,
 

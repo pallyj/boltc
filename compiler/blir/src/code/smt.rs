@@ -37,7 +37,9 @@ pub enum StatementKind {
         pattern: Pattern,
         value: Value,
         otherwise: CodeBlock,
-    }
+    },
+
+    Panic
 }
 
 impl StatementKind {
@@ -86,7 +88,9 @@ impl Statement {
 
             StatementKind::GuardLet { .. } => {
                 TypeKind::Void.anon()
-            }
+            },
+
+            StatementKind::Panic => TypeKind::Divergent.anon(),
         }
     }
 
@@ -145,6 +149,8 @@ impl Debug for Statement {
             StatementKind::GuardLet { pattern, value, otherwise } => {
                 write!(f, "guard let {pattern:?} = {value:?} else {otherwise:?}")
             }
+
+            StatementKind::Panic => write!(f, "panic"),
         }
     }
 }

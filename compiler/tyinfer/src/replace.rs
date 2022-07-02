@@ -5,7 +5,7 @@ use blir::{code::{CodeBlock, Statement, StatementKind},
            typ::{Type, TypeKind},
            value::{IfBranch, IfValue, Value, ValueKind},
            BlirContext, SomeFunction, Symbol, pattern::{PatternKind, Pattern}};
-use errors::{error::ErrorCode, Span, DiagnosticReporter};
+use errors::{Span, DiagnosticReporter};
 
 use crate::{variant::TypeVariant, context::{TypeInferContext, Error}};
 
@@ -60,6 +60,8 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 self.replace_pattern(pattern, scope);
                 self.replace_codeblock(otherwise, scope);
             }
+
+            StatementKind::Panic => {}
         }
     }
 
@@ -271,6 +273,20 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
             ValueKind::Assign(left, right) => {
                 self.replace_value(left.as_mut(), scope);
                 self.replace_value(right.as_mut(), scope);
+            }
+
+            ValueKind::SequenceLiteral(sequence) => {
+                for seq_item in sequence {
+                    self.replace_value(seq_item, scope);
+                }
+            }
+
+            ValueKind::RepeatingLiteral { repeating, count } => {
+                self.replace_value(repeating, scope);
+
+                if let TypeKind::Array { len, .. } = value.typ.kind() {
+                    let _ = count.insert(*len as u64);
+                }
             }
 
             _ => {}
@@ -496,6 +512,10 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 }
             }
 
+            TypeKind::Array { item, .. } => {
+                self.replace_type(item, span);
+            }
+
             TypeKind::Member { parent, .. } => self.replace_type(parent, span),
 
             TypeKind::Method { reciever, .. } => self.replace_type(reciever, span),
@@ -536,23 +556,10 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 
             TypeVariant::Tuple(tuple_items, labels) => Some(TypeKind::Tuple(tuple_items.clone(), labels.clone())),
 
+            TypeVariant::RawPointer(ty) => Some(TypeKind::RawPointer { pointer_type: Box::new(ty.clone()) }),
+            TypeVariant::Array(ty, len) => Some(TypeKind::Array { item: Box::new(ty.clone()), len: *len }),
+
             _ => None,
         }
-    }
-}
-
-fn type_to_string(ty: &Type) -> String {
-    match ty.kind() {
-        TypeKind::Struct(r#struct) => format!("struct `{}`", r#struct.name()),
-        TypeKind::Enum(r#enum) => format!("enum `{}`", r#enum.name()),
-
-        TypeKind::Void => "()".to_string(),
-        TypeKind::Divergent => "!".to_string(),
-
-        TypeKind::Integer { bits } => format!("intrinsics.i{bits}"),
-        TypeKind::Float { bits } => format!("intrinsics.f{bits}"),
-        TypeKind::StrSlice => format!("intrinsics.strslice"),
-
-        _ => "unknown".to_string(),
     }
 }

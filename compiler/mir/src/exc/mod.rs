@@ -8,13 +8,6 @@ pub mod val;
 mod var;
 mod frame;
 
-//
-// todo:
-//  - struct 
-//  - enum
-//  - references
-//
-
 pub struct ExecutionEngine<'a> {
 	project: &'a Project
 }
@@ -187,6 +180,10 @@ impl<'a> ExecutionEngine<'a> {
 			Discriminant(place) => match self.get_ptr(place, frame) {
 				Value::Enum(discriminant, _) => discriminant,
 				_ => panic!()
+			},
+			ArrayIndex(place, idx) => match self.get_ptr(place, frame) {
+				Value::Array(values) => &values[*idx],
+				_ => panic!()
 			}
 		}
 	}
@@ -231,6 +228,10 @@ impl<'a> ExecutionEngine<'a> {
 			},
 			Discriminant(place) => match self.get_mut_ptr(place, frame) {
 				Value::Enum(discriminant, _) => discriminant,
+				_ => panic!()
+			},
+			ArrayIndex(place, idx) => match self.get_mut_ptr(place, frame) {
+				Value::Array(values) => &mut values[*idx],
 				_ => panic!()
 			}
 		}

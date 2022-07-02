@@ -5,8 +5,11 @@ use crate::{lexer::SyntaxKind,
 
 pub const EXPR_RECOVERY_SET: &[SyntaxKind] = &[SyntaxKind::LetKw,
                                                SyntaxKind::ReturnKw,
+                                               SyntaxKind::IfKw,
+                                               SyntaxKind::MatchKw,
+                                               SyntaxKind::WhileKw,
+                                               SyntaxKind::RepeatKw,
                                                SyntaxKind::OpenBrace,
-                                               SyntaxKind::CloseBrace,
                                                SyntaxKind::Semicolon,
                                                SyntaxKind::OpenParen,
                                                SyntaxKind::Period];
@@ -70,6 +73,8 @@ impl<'input, 'l> Parser<'input, 'l> {
             self.eat(SyntaxKind::Ident);
             self.eat(SyntaxKind::Colon);
         }
+
+        self.eat(SyntaxKind::SharedKw); // todo: move this?
 
         self.parse_expr();
 
@@ -228,10 +233,12 @@ impl<'input, 'l> Parser<'input, 'l> {
         || self.check(SyntaxKind::Operator)
         || self.check(SyntaxKind::OpenParen)
         || self.check(SyntaxKind::OpenBrace)
+        || self.check(SyntaxKind::OpenBracket)
         || self.check(SyntaxKind::IfKw)
         || self.check(SyntaxKind::MatchKw)
         || self.check(SyntaxKind::Period)
         || self.check(SyntaxKind::RepeatKw)
+        || self.check(SyntaxKind::WhileKw)
     }
 
     pub fn parse_expr_atom(&mut self, is_before_brace: bool) -> CompletedMarker {
@@ -287,6 +294,8 @@ impl<'input, 'l> Parser<'input, 'l> {
             self.parse_expr_while(marker)
         } else if self.check(SyntaxKind::OpenBrace) {
             self.parse_closure(marker)
+        } else if self.check(SyntaxKind::OpenBracket) {
+            self.parse_expr_array(marker)
         } else if self.eat(SyntaxKind::Period) {
             if !self.eat(SyntaxKind::Ident) {
                 self.error_recover("expected ident in variant", EXPR_RECOVERY_SET);
@@ -435,5 +444,30 @@ impl<'input, 'l> Parser<'input, 'l> {
 
         marker.complete(self, SyntaxKind::MatchBranch);
         return
+    }
+
+    pub fn parse_expr_array(&mut self, marker: Marker) -> CompletedMarker {
+        self.parse_delim_separated(SyntaxKind::CommaSeparatedList,
+            SyntaxKind::OpenBracket,
+            SyntaxKind::CloseBracket,
+            SyntaxKind::Comma,
+            Self::parse_expr_array_item);
+
+        marker.complete(self, SyntaxKind::ArrayLiteral)
+        
+    }
+
+    pub fn parse_expr_array_item(&mut self) {
+        let marker = self.start();
+
+        self.parse_expr();
+
+        if self.eat(SyntaxKind::Colon) {
+            self.parse_expr();
+
+            marker.complete(self, SyntaxKind::MapItem);
+        } else {
+            marker.complete(self, SyntaxKind::ArrayItem);
+        }
     }
 }

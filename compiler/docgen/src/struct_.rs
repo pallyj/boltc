@@ -106,6 +106,21 @@ impl Struct {
 			typealiases: Vec::new(),
 		}
 	}
+
+	pub fn hide_below(&mut self, visibility: crate::visibility::Visibility) {
+        self.methods.retain(|func| func.visibility >= visibility);
+		self.fields.retain(|func| func.visibility >= visibility);
+        self.substructs.retain(|func| func.visibility >= visibility);
+        self.subenums.retain(|func| func.visibility >= visibility);
+
+        for each_struct in &mut self.substructs {
+            each_struct.hide_below(visibility);
+        }
+
+        for each_enum in &mut self.subenums {
+            each_enum.hide_below(visibility);
+        }
+    }
 }
 
 impl StructField {

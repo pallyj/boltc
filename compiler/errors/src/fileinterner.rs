@@ -9,21 +9,21 @@ impl FileInterner {
 
     pub fn get_line_info<'a>(&'a self, file: usize, pos: usize) -> LineInfo<'a> { self.files[file].get_line_info(pos) }
 
-    pub fn open_file(&mut self, path: &str) {
+    pub fn open_file(&mut self, path: &str, project: &str) {
         // todo: check if the file exists
         let mut file = std::fs::File::open(path).unwrap();
 
         let mut code = String::new();
         file.read_to_string(&mut code).unwrap();
 
-        let file = File::new(path.to_string(), code);
+        let file = File::new(path.to_string(), code, project.to_string());
 
         self.files.push(file);
     }
 
     pub fn test_code(&mut self, code: &str) {
         self.files
-            .push(File::new("test.bolt".to_string(), code.to_string()));
+            .push(File::new("test.bolt".to_string(), code.to_string(), "test".to_string()));
     }
 
     pub fn iter(&self) -> impl Iterator<Item = (usize, &File)> { self.files.iter().enumerate() }
@@ -32,11 +32,12 @@ impl FileInterner {
 pub struct File {
     text:        String,
     file_name:   String,
+    project:     String,
     line_breaks: BTreeSet<usize>,
 }
 
 impl File {
-    pub fn new(file_name: String, text: String) -> File {
+    pub fn new(file_name: String, text: String, project: String) -> File {
         let mut line_breaks = BTreeSet::new();
 
         line_breaks.insert(0);
@@ -51,6 +52,7 @@ impl File {
 
         File { text,
                line_breaks,
+               project,
                file_name }
     }
 
@@ -67,16 +69,9 @@ impl File {
                              .cloned()
                              .unwrap_or_else(|| self.text.len());
 
-        // let next_break = if next_break == 0 { 0 } else { next_break - 1 };
-
         let line = self.line_breaks.range(..n).count();
-
-        // if next_break
-
         let text = &self.text[last_break..next_break];
-
         let col = n - last_break;
-
         let filename = &self.file_name;
 
         LineInfo { line,
@@ -86,6 +81,8 @@ impl File {
     }
 
     pub fn text(&self) -> &str { &self.text }
+
+    pub fn project(&self) -> &str { &self.project }
 }
 
 pub struct LineInfo<'a> {

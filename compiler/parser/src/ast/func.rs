@@ -128,6 +128,8 @@ impl FuncPar {
             .map(|bind_name_token| bind_name_token.text().to_string())
     }
 
+    pub fn is_shared(&self) -> bool { find_token(&self.0, SyntaxKind::SharedKw).is_some() }
+
     pub fn typ(&self) -> Type { self.0.last_child().map(Type::cast).unwrap_or(Type::Error) }
 }
 

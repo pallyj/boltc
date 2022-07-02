@@ -131,6 +131,20 @@ impl<'input, 'l> Parser<'input, 'l> {
 
                 self.error_recover("expected closing bracket `>`", EXPR_RECOVERY_SET);
             }
+        } else if self.eat(SyntaxKind::OpenBracket) {
+            let marker = parent.precede(self);
+
+            if !self.check_expr() {
+                self.error_recover("expected expression as array length", EXPR_RECOVERY_SET);
+            }
+
+            self.parse_expr();
+
+            if !self.eat(SyntaxKind::CloseBracket) {
+                self.error_recover("expected `]`", EXPR_RECOVERY_SET);
+            }
+
+            marker.complete(self, SyntaxKind::ArrayType);
         }
     }
 }

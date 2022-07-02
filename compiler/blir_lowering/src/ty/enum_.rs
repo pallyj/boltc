@@ -1,4 +1,4 @@
-use blir::typ::{EnumRef, Type};
+use blir::typ::{EnumRef};
 use itertools::Itertools;
 
 use crate::BlirLowerer;

@@ -8,6 +8,7 @@ pub enum Value {
 	Float(f64),
 
 	Tuple(Vec<Value>),
+	Array(Vec<Value>),
 
 	Function(String),
 	ExternFunction(String),

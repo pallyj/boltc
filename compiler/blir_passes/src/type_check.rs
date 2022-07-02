@@ -159,6 +159,8 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
 
             StatementKind::Break(_) |
             StatementKind::Continue(_) => {}
+
+            StatementKind::Panic => {}
         }
     }
 
@@ -270,6 +272,40 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
 
             ValueKind::Loop { code: code_block, .. } => {
                 self.check_codeblock(code_block, None, return_type);
+            }
+
+            ValueKind::SequenceLiteral(sequence) => {
+                if let TypeKind::Array { item, len } = value.typ.kind() {
+                    for seq_item in sequence {
+                        self.check_value(seq_item, return_type);
+                        self.check_type(&seq_item.typ, item);
+                    }
+
+                    if *len != sequence.len() {
+                        println!("error: lengths don't match")
+                    }
+                } else {
+                    // error
+                    println!("error: array has type");
+                }
+                // todo: check that count is equal to the type length
+            }
+
+            ValueKind::RepeatingLiteral { repeating, count } => {
+                if let TypeKind::Array { item, len } = value.typ.kind() {
+                    self.check_value(&repeating, return_type);
+                    self.check_type(&repeating.typ, item);
+                    if let Some(repeating_count) = count {
+                        if *repeating_count != *len as u64 {
+                            println!("error: lengths don't match")
+                        }
+                    } else {
+                        println!("error: couldn't infer count for ");
+                    }
+                } else {
+                    // error
+                    println!("error: array has type");
+                }
             }
 
             _ => { /* Do nothing */ }

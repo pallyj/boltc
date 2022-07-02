@@ -21,6 +21,7 @@ impl<'a> BlirLowerer<'a> {
 			Struct(struct_ref) => mir::ty::Type::c_struct(self.builder.get_struct_id(&struct_ref.link_name())),
 			Enum(enum_ref) => mir::ty::Type::c_enum(self.builder.get_enum_id(enum_ref.link_name())),
 			Tuple(items, _) => mir::ty::Type::tuple(items.iter().map(|item| self.lower_ty(item)).collect_vec()),
+			Array { item, len } => self.lower_ty(&item).array(*len),
 			StrSlice => todo!(),
 			Divergent => todo!(),
 

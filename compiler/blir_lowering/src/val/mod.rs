@@ -10,14 +10,10 @@ use rand::Rng;
 
 use crate::BlirLowerer;
 
-// strings
-// chars
 impl<'a> BlirLowerer<'a> {
 	pub fn lower_kind(&self, value: &Value) -> LowerKind {
 		use ValueKind::*;
 		
-		// true: its a place
-		// false: its an rvalue
 		match &value.kind {
 			IntLiteral(_) => matches!(value.typ.kind(), TypeKind::Integer { .. }).then_some(LowerKind::Const).unwrap_or(LowerKind::Construct),
 			BoolLiteral(_) => matches!(value.typ.kind(), TypeKind::Integer { bits: 1 }).then_some(LowerKind::Const).unwrap_or(LowerKind::Construct),
@@ -47,9 +43,11 @@ impl<'a> BlirLowerer<'a> {
 			Initializer(_, _) => LowerKind::Construct,
 			Tuple(_) => LowerKind::Construct,
 			EnumVariant { .. } => LowerKind::Construct,
+			SequenceLiteral(_) => LowerKind::Construct,
+			RepeatingLiteral {..} => LowerKind::Construct,
 
 			LocalVariable(_, _) => LowerKind::Access,
-			FunctionParam(_) => LowerKind::Access,
+			FunctionParam(_, _) => LowerKind::Access,
 			SelfVal(_) => LowerKind::Access,
  			InstanceVariable { .. } => LowerKind::Access,
 			TupleField(..) => LowerKind::Access,
@@ -136,8 +134,17 @@ impl<'a> BlirLowerer<'a> {
 			StringLiteral(s) => self.lower_string_literal(s.clone(), &value.typ, place),
 
 			FuncCall { function, args } => {
-				let args = args.args.iter()
-									.map(|arg| self.lower_rvalue(arg))
+				let args = args.args.iter().zip(&args.is_shared)
+									.map(|(arg, is_shared)| {
+										if *is_shared {
+											if !arg.is_mutable() {
+												println!("error: value is immutable")
+											}
+											self.lower_place(arg).get_ref(Self::span_of(arg.span))
+										} else {
+											self.lower_rvalue(arg)
+										}
+									})
 									.collect_vec();					
 
 				self.lower_function(function, args, place);
@@ -157,6 +164,23 @@ impl<'a> BlirLowerer<'a> {
 
 			If(if_value) => self.lower_if_value(if_value, Some(place)),
 			Match(match_value) => self.lower_match(match_value, Some(place)),
+
+			SequenceLiteral(sequence) => {
+				for (i, seq_item) in sequence.iter().enumerate() {
+					let item_place = place.array_index(i, Self::span_of(seq_item.span));
+
+					self.lower_assign(&item_place, seq_item);
+				}
+			}
+
+			RepeatingLiteral { repeating, count } => {
+				// todo: roll this loop
+				for i in 0..count.unwrap() {
+					let item_place = place.array_index(i as usize, Self::span_of(repeating.span));
+
+					self.lower_assign(&item_place, &repeating);
+				}
+			}
 
 			_ => {
 				panic!("{value:?}");
@@ -185,8 +209,6 @@ impl<'a> BlirLowerer<'a> {
 				}
 
 				let place = self.lower_place(place);
-
-				// todo: check if the place is mutable
 
 				self.lower_assign(&place, value);
 
@@ -237,7 +259,7 @@ impl<'a> BlirLowerer<'a> {
 
 		match &value.kind {
 			LocalVariable(name, _) => self.function_ctx.get(name).unwrap().clone(),
-			FunctionParam(name) => self.function_ctx.get(name).unwrap().clone(),
+			FunctionParam(name, _) => self.function_ctx.get(name).unwrap().clone(),
 			SelfVal(_) => self.function_ctx.get("self").unwrap().clone(),
 
 			TupleField(place, index) => self.lower_place(&place).tuple_item(*index, Self::span_of(value.span)),

@@ -7,7 +7,7 @@ use parser::ast::typ::Type as AstType;
 use crate::AstLowerer;
 
 impl<'a, 'b> AstLowerer<'a, 'b> {
-    pub(crate) fn lower_type(&self, typ: AstType) -> Type {
+    pub(crate) fn lower_type(&mut self, typ: AstType) -> Type {
         let range = typ.range();
         let span = self.span(range);
 
@@ -59,6 +59,19 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
                 TypeKind::GenericOf { higher_kind: Box::new(hk), params: parameters }
             }
+            AstType::ArrayType(array_type) => {
+                let item = self.lower_type(array_type.item_type());
+                let lowered_expr = self.lower_expr(array_type.length(), None);
+                let (is_negative, len) = self.lower_integer(&lowered_expr);
+
+                if is_negative {
+                    // throw an error
+                    println!("error: negative array length")
+                }
+
+                TypeKind::Array { item: Box::new(item), len: len as usize }
+            }
+
             AstType::Error => panic!(),
         }.spanned(span)
     }

@@ -11,7 +11,7 @@ use std::fmt::Debug;
 
 use crate::lexer::SyntaxKind;
 
-use super::find_token;
+use super::{find_token, expr::Expr};
 
 ast!(struct NamedType(NamedType));
 ast!(struct MemberType(MemberType));
@@ -22,6 +22,7 @@ ast!(struct ParenthesizedType(ParenthesizedType));
 ast!(struct TupleType(TupleType));
 ast!(struct TupleMember(FuncArg));
 ast!(struct GenericType(GenericType));
+ast!(struct ArrayType(ArrayType));
 
 ast!(
     enum Type {
@@ -33,6 +34,7 @@ ast!(
         TupleType,
         InferType,
         GenericType,
+        ArrayType,
     }
 );
 
@@ -47,7 +49,8 @@ impl Debug for Type {
             Self::TupleType(arg0) => write!(f, "{arg0:?}"),
             Self::InferType(_) => write!(f, "_"),
             Self::Error => write!(f, "Error"),
-            Self::GenericType(arg0) => write!(f, "{arg0:?}")
+            Self::GenericType(arg0) => write!(f, "{arg0:?}"),
+            Self::ArrayType(arg0) => write!(f, "{arg0:?}"),
         }
     }
 }
@@ -197,5 +200,21 @@ impl GenericType {
 impl Debug for GenericType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}<{}>", self.polymorphic_type(), self.type_arguments().iter().map(|ty| format!("{ty:?}")).collect::<Vec<_>>().join(", "))
+    }
+}
+
+impl ArrayType {
+    pub fn item_type(&self) -> Type {
+        Type::cast(self.0.first_child().unwrap())
+    }
+
+    pub fn length(&self) -> Expr {
+        Expr::cast(self.0.last_child().unwrap())
+    }
+}
+
+impl Debug for ArrayType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}[{:?}]", self.item_type(), self.length())
     }
 }

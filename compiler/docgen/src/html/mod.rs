@@ -23,12 +23,22 @@ pub fn render_docs(bundle: Bundle) {
 
 		let html = create_file(library.into_html(&library.name), &library.name, "..", &library.name).into_string();
 		let mut file = File::create(lib_dir.join("index.html")).unwrap();
-		file.write_all(html.as_bytes());
+		file.write_all(html.as_bytes()).unwrap();
 
 		for structure in &library.structs {
 			save_struct(structure, &lib_dir, Path::new(".."), &library.name);
 		}
 	}
+
+	let html = html! {
+html {
+	head {
+		meta http-equiv="Refresh" content={"0; url="(bundle.primary)};
+	}
+}
+	};
+	let mut file = File::create(root.join("index.html")).unwrap();
+	file.write_all(html.into_string().as_bytes()).unwrap();
 }
 
 fn save_struct(structure: &Struct, path: &Path, root: &Path, rel_path: &str) {

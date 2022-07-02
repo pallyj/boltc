@@ -54,10 +54,21 @@ ast!(struct RepeatLoop(RepeatLoop));
 ast!(struct WhileLoop(WhileLoop));
 ast!(struct WhileLetLoop(WhileLetLoop));
 
+ast!(struct ArrayLiteral(ArrayLiteral));
 
 ast!(struct MatchBranch(MatchBranch));
 ast!(struct FuncArg(FuncArg));
 ast!(struct ClosureParam(FuncPar));
+
+ast!(struct ArrayItem(ArrayItem));
+ast!(struct MapItem(MapItem));
+
+ast!(
+    enum CollectionItem {
+        ArrayItem,
+        MapItem,
+    }
+);
 
 ast!(
     enum Expr {
@@ -81,6 +92,7 @@ ast!(
         RepeatLoop,
         WhileLoop,
         WhileLetLoop,
+        ArrayLiteral,
     }
 );
 
@@ -107,6 +119,7 @@ impl Debug for Expr {
             Self::RepeatLoop(arg0) => write!(f, "{arg0:?}"),
             Self::WhileLoop(arg0) => write!(f, "{arg0:?}"),
             Self::WhileLetLoop(arg0) => write!(f, "{arg0:?}"),
+            Self::ArrayLiteral(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "error"),
         }
     }
@@ -126,6 +139,16 @@ impl Debug for IfExprNegative {
             Self::IfExpr(arg0) => write!(f, "{arg0:?}"),
             Self::IfLetExpr(arg0) => write!(f, "{arg0:?}"),
             Self::CodeBlock(arg0) => write!(f, "{arg0:?}"),
+            Self::Error => write!(f, "Error"),
+        }
+    }
+}
+
+impl Debug for CollectionItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ArrayItem(arg0) => write!(f, "{arg0:?}"),
+            Self::MapItem(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "Error"),
         }
     }
@@ -298,6 +321,8 @@ impl FuncCallExpr {
 
 impl FuncArg {
     pub fn label(&self) -> Option<String> { find_token(&self.0, SyntaxKind::Ident).map(|arg_label| arg_label.text().to_string()) }
+
+    pub fn is_shared(&self) -> bool { find_token(&self.0, SyntaxKind::SharedKw).is_some() }
 
     pub fn value(&self) -> Expr { self.0.last_child().map(Expr::cast).unwrap() }
 }
@@ -651,5 +676,48 @@ impl WhileLetLoop {
 impl Debug for WhileLetLoop {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "not impl")
+    }
+}
+
+impl ArrayLiteral {
+    pub fn items(&self) -> Vec<CollectionItem> {
+        self.0.first_child().unwrap()
+            .children()
+            .map(CollectionItem::cast)
+            .collect()
+    }
+}
+
+impl Debug for ArrayLiteral {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[{}]", self.items().iter().map(|arg| format!("{arg:?}")).collect::<Vec<_>>().join(", "))
+    }
+}
+
+impl ArrayItem {
+    pub fn item(&self) -> Expr {
+        self.0.first_child().map(Expr::cast).unwrap()
+    }
+}
+
+impl Debug for ArrayItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.item())
+    }
+}
+
+impl MapItem {
+    pub fn key(&self) -> Expr {
+        self.0.first_child().map(Expr::cast).unwrap()
+    }
+
+    pub fn value(&self) -> Expr {
+        self.0.last_child().map(Expr::cast).unwrap()
+    }
+}
+
+impl Debug for MapItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}: {:?}", self.key(), self.value())
     }
 }

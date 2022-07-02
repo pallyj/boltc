@@ -1,0 +1,9 @@
+@entryPoint
+func main() {
+	printToScreen("Hello")
+}
+
+@extern(linkName: "prints")
+func printToScreen(s: String) {
+	print(s)
+}

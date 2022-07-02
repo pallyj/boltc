@@ -31,6 +31,7 @@ pub enum TypeVariant {
     },
     Tuple(Vec<Type>, Vec<Option<String>>),
     RawPointer(Type),
+    Array(Type, usize),
 
     GenericParam(String),
 

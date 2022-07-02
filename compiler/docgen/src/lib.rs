@@ -60,6 +60,21 @@ impl Library {
             enums
         }
     }
+
+    pub fn hide_below(&mut self, visibility: visibility::Visibility) {
+        self.extern_funcs.retain(|func| func.visibility >= visibility);
+        self.functions.retain(|func| func.visibility >= visibility);
+        self.structs.retain(|func| func.visibility >= visibility);
+        self.enums.retain(|func| func.visibility >= visibility);
+
+        for each_struct in &mut self.structs {
+            each_struct.hide_below(visibility);
+        }
+
+        for each_enum in &mut self.enums {
+            each_enum.hide_below(visibility);
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -88,6 +103,12 @@ impl Bundle {
 
     pub fn get_json_representation(&self) -> String {
         serde_json::to_string_pretty(self).unwrap()
+    }
+
+    pub fn hide_internals(&mut self) {
+        for (_, library) in &mut self.libraries {
+            library.hide_below(visibility::Visibility::Public);
+        }
     }
 
     pub fn save(self) {

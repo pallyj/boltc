@@ -1,0 +1,21 @@
+import intrinsics
+
+@entryPoint
+func main() {
+	let var numbers = [ 1, 2, 3, 4, 5 ]
+	let zeroes: Int[10] = [repeating: 0]
+	let ones = [repeating: 1, count: 20]
+
+	//arrayIndex(numbers, 0) = 6
+	//arrayIndex(zeroes, 9) = 1
+
+	//print(arrayIndex(numbers, 0))
+	//print(arrayIndex(zeroes, 9))
+
+	// What's left to do?
+	/*
+	- Array literal
+	- Array repeating literal
+	- arrayIndex(shared array<T>, index: i64) -> T
+	*/
+}

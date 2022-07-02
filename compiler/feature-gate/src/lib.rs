@@ -17,7 +17,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use colored::Colorize;
 
-static ARROW_FUNCTION: AtomicBool = AtomicBool::new(false);
+static ARROW_FUNCTION: AtomicBool = AtomicBool::new(true);
 static VAR_DECLARE: AtomicBool = AtomicBool::new(false);
 static LET_MUT_DECLARE: AtomicBool = AtomicBool::new(false);
 static LET_VAR_DECLAR: AtomicBool = AtomicBool::new(false);

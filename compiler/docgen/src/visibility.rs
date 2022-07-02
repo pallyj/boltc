@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use serde::{Serialize, Deserialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Copy, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Visibility {
 	Private,
 	Fileprivate,

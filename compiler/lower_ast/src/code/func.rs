@@ -27,7 +27,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                              FuncParam { label,
                                          bind_name,
                                          typ: self.lower_type(param.typ()),
-                                         is_shared: false }
+                                         is_shared: param.is_shared() }
                          })
                          .collect();
         let return_type = func.return_type()
@@ -68,7 +68,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                              FuncParam { label,
                                          bind_name,
                                          typ: self.lower_type(param.typ()),
-                                         is_shared: false }
+                                         is_shared: param.is_shared() }
                          })
                          .collect();
         let return_type = func.return_type()
@@ -114,7 +114,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                              FuncParam { label,
                                          bind_name,
                                          typ: self.lower_type(param.typ()),
-                                         is_shared: false }
+                                         is_shared: param.is_shared() }
                          })
                          .collect();
         let return_type = if is_init {

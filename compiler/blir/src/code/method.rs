@@ -57,7 +57,7 @@ impl MethodInner {
             .define_scope_type("return", self.info.return_type().clone());
 
         for p in self.info.params().iter() {
-            let val = ValueKind::FunctionParam(p.bind_name.clone()).anon(p.typ.clone());
+            let val = ValueKind::FunctionParam(p.bind_name.clone(), p.is_shared).anon(p.typ.clone());
 
             self.scope
                 .add_symbol(p.bind_name.clone(), Visibility::Local, Symbol::Value(val));
