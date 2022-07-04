@@ -68,7 +68,7 @@ pub enum ValueKind {
 
     // Variable Values
     Metatype(TypeKind),
-    LocalVariable(String, bool),
+    LocalVariable(String, bool, String),
     FunctionParam(String, bool),
     Assign(Box<Value>, Box<Value>),
 
@@ -180,6 +180,15 @@ impl Value {
         val
     }
 
+    pub fn name(&self) -> Option<&String> {
+        match &self.kind {
+            ValueKind::Named(name) => Some(name),
+            ValueKind::LocalVariable(_, _, name) => Some(name),
+            ValueKind::FunctionParam(name, _) => Some(name),
+            _ => None
+        }
+    }
+
     pub fn is_mutable(&self) -> bool {
         match &self.kind {
             ValueKind::FuncCall { function, args } => {
@@ -196,7 +205,7 @@ impl Value {
             ValueKind::InstanceVariable { reciever, var } => reciever.is_mutable() && !var.borrow().is_constant,
             ValueKind::TupleField(tuple, _) => tuple.is_mutable(),
 
-            ValueKind::LocalVariable(_, mutating) => *mutating,
+            ValueKind::LocalVariable(_, mutating, _) => *mutating,
             ValueKind::FunctionParam(_, mutating) => *mutating,
 
             ValueKind::Named(_) => false,
@@ -318,7 +327,7 @@ impl Debug for Value {
             // ValueKind::Deref(value) => write!(f, "*{value:?}"),
             ValueKind::Closure(c) => write!(f, "{{ {:?} }}", c.code),
             ValueKind::Metatype(t) => write!(f, "<{:?}>", t.clone().anon()),
-            ValueKind::LocalVariable(name, varying) => if *varying {
+            ValueKind::LocalVariable(name, varying, _) => if *varying {
                 write!(f, "var {name}")
             } else {
                 write!(f, "{name}")

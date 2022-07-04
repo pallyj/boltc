@@ -1,5 +1,5 @@
 #![feature(let_else)]
-//#[feature(let_chain)]
+#![feature(let_chains)]
 
 pub mod closure_resolve;
 mod init_default;

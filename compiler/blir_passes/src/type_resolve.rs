@@ -562,7 +562,11 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 }
 
                 if let ValueKind::Polymorphic(polymorphics) = &mut function.kind {
-                    polymorphics.filter_labels(&args.labels);
+                    let other = args.args
+                        .iter()
+                        .map(|arg| arg.name().cloned())
+                        .collect();
+                    polymorphics.filter_labels(&args.labels, &other);
                 }
 
                 if let TypeKind::Function { return_type, .. } | TypeKind::Method { return_type, .. } = function.typ.kind() {

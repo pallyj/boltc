@@ -3,7 +3,7 @@ func double(n: shared Int) {
 }
 
 func doubleWithErr(n: Int) {
-	n *= 2
+
 }
 
 @entryPoint
@@ -13,5 +13,5 @@ func main() {
 	double(i);
 	doubleWithErr(shared i);
 
-	assert(i == 0)
+	@assert(i, equals: 100)
 }

@@ -143,6 +143,8 @@ impl<'a> DiagnosticReporter<'a> {
 					line_info.line,
 					line_info.col + 1);
 		}
+
+		println!("     {}", "|".bold().blue());
 				
 		// num | line_text
 		println!("{:>4} {} {}",

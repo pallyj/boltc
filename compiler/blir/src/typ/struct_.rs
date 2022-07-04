@@ -199,7 +199,7 @@ impl Struct {
             panic!("{symbol:?} is not an initializer")
         };
 
-        monomorphizer.filter_labels(&labels);
+        monomorphizer.filter_labels(&labels, &labels);
         monomorphizer.filter_types(&types);
 
         use crate::SomeFunction::*;

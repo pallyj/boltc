@@ -113,9 +113,16 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 
             ValueKind::FuncCall { function, args } => {
                 if let ValueKind::PolymorphicMethod { polymorphic, .. } |
-                       ValueKind::Polymorphic(polymorphic) = &mut function.kind {
-                    polymorphic.filter_labels(&args.labels);
-                } else if let ValueKind::VariantLiteral(named) = &function.kind {
+                       ValueKind::Polymorphic(polymorphic) = &mut function.kind
+                {
+                    let other = args.args
+                        .iter()
+                        .map(|arg| arg.name().cloned())
+                        .collect();
+                    polymorphic.filter_labels(&args.labels, &other);
+                }
+                
+                else if let ValueKind::VariantLiteral(named) = &function.kind {
                     let TypeKind::Enum(enum_type) = value.typ.kind() else {
                         // TODO: Throw an error?
                         return

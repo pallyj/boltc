@@ -49,9 +49,9 @@ impl Debug for Pattern {
         match &self.kind {
 			PatternKind::Wildcard => write!(f, "_"),
 			PatternKind::Bind(name, varying) => if *varying {
-				write!(f, "var {name}")
+				write!(f, "[[var {name}: {:?}]]", self.match_type())
 			} else {
-				write!(f, "{name}")
+				write!(f, "[[{name}: {:?}]]", self.match_type())
 			},
 			PatternKind::Integer { value } => write!(f, "{value}"),
 			PatternKind::Literal { value } => write!(f, "{value:?}"),

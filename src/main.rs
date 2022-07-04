@@ -185,7 +185,7 @@ impl Project {
         }
         debugger.errors()?;
 
-        println!("{:?}", libraries["test"]);
+        //println!("{:?}", libraries["test"]);
         
         let mut type_infer_pass = blir_passes::TypeInferPass::new(&mut context, &mut debugger);
         
@@ -201,7 +201,7 @@ impl Project {
         }
         debugger.errors()?;
 
-        println!("{:?}", libraries["test"]);
+        //println!("{:?}", libraries["test"]);
 
         let mut type_check_pass = blir_passes::TypeCheckPass::new(&mut debugger);
 

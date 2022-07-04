@@ -117,7 +117,7 @@ impl<'a> BlirLowerer<'a> {
         let match_name = format!("match{}", idx);
         self.function_ctx.insert(match_name.clone(), scrut);
 
-        let scrutinee = ValueKind::LocalVariable(match_name, false)
+        let scrutinee = ValueKind::LocalVariable(match_name, false, String::new())
             .spanned(value.discriminant.typ.clone(), value.discriminant.span.unwrap());
 
         let patterns = value.branches.iter()

@@ -47,7 +47,7 @@ impl<'a> BlirLowerer<'a> {
 			SequenceLiteral(_) => LowerKind::Construct,
 			RepeatingLiteral {..} => LowerKind::Construct,
 
-			LocalVariable(_, _) => LowerKind::Access,
+			LocalVariable(_, _, _) => LowerKind::Access,
 			FunctionParam(_, _) => LowerKind::Access,
 			SelfVal(_) => LowerKind::Access,
  			InstanceVariable { .. } => LowerKind::Access,
@@ -259,7 +259,7 @@ impl<'a> BlirLowerer<'a> {
 		use ValueKind::*;
 
 		match &value.kind {
-			LocalVariable(name, _) => self.function_ctx.get(name).unwrap().clone(),
+			LocalVariable(name, _, _) => self.function_ctx.get(name).unwrap().clone(),
 			FunctionParam(name, _) => self.function_ctx.get(name).unwrap().clone(),
 			SelfVal(_) => self.function_ctx.get("self").unwrap().clone(),
 

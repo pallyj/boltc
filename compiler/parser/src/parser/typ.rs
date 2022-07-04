@@ -134,11 +134,11 @@ impl<'input, 'l> Parser<'input, 'l> {
         } else if self.eat(SyntaxKind::OpenBracket) {
             let marker = parent.precede(self);
 
-            if self.eat(SyntaxKind::CloseBracket) {
+            /*if self.eat(SyntaxKind::CloseBracket) {
                 // Its a slice
                 marker.complete(self, SyntaxKind::SliceType);
                 return;
-            }
+            }*/
 
             if !self.check_expr() {
                 self.error_recover("expected expression as array length", EXPR_RECOVERY_SET);

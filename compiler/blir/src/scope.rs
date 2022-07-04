@@ -341,7 +341,7 @@ impl Scope {
 
         let mangled_name = format!("var{idx}_{name}");
 
-        let sym = Symbol::Value(ValueKind::LocalVariable(mangled_name.clone(), varying).anon(typ));
+        let sym = Symbol::Value(ValueKind::LocalVariable(mangled_name.clone(), varying, name.into()).anon(typ));
 
         self.add_symbol(name.to_string(), Visibility::Local, sym);
 

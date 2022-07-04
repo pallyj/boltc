@@ -1,0 +1,15 @@
+func addAndMul(a a: Int, b b: Int) {
+	print(a * b + a)
+}
+
+func addAndMul(b: String, c: String) {
+	print(b)
+}
+
+@entryPoint
+func main() {
+	let a = 20
+	let b = 20
+
+	addAndMul(a, b)
+}

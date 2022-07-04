@@ -131,22 +131,22 @@ impl Monomorphizer {
             .retain(|sig| visibility_matches(sig, relationship))
     }
 
-    pub fn filter_labels(&mut self, labels: &Vec<Option<String>>) {
+    pub fn filter_labels(&mut self, labels: &Vec<Option<String>>, labels2: &Vec<Option<String>>) {
         //self.functions.retain(|sig| labels_match(&sig.info(), labels));
 
-        let mut drained = self.functions.drain_filter(|sig| !labels_match(&sig.info(), labels)).collect_vec();
+        let mut drained = self.functions.drain_filter(|sig| !labels_match(&sig.info(), labels, labels2)).collect_vec();
 
-        if self.functions.len() == 0 {
+        /*if self.functions.len() == 0 {
             drained.pop().map(|element| self.functions.push(element));
-        }
+        }*/
     }
 
     pub fn filter_types(&mut self, types: &Vec<Type>) {
         let mut drained = self.functions.drain_filter(|sig| !types_match(&sig.info(), types)).collect_vec();
 
-        if self.functions.len() == 0 {
+        /*if self.functions.len() == 0 {
             drained.pop().map(|element| self.functions.push(element));
-        }
+        }*/
     }
 
     pub fn degrees(&self) -> usize { self.functions.len() }
@@ -162,11 +162,11 @@ impl Monomorphizer {
     }
 }
 
-fn labels_match(sig: &FunctionInfo, labels: &Vec<Option<String>>) -> bool {
+fn labels_match(sig: &FunctionInfo, labels: &Vec<Option<String>>, label2: &Vec<Option<String>>) -> bool {
     sig.params()
        .iter()
-       .zip(labels)
-       .all(|(sig_label, label)| &sig_label.label == label)
+       .zip(labels.iter().zip(label2))
+       .all(|(sig_label, (label, label2))| &sig_label.label == label || &sig_label.label == label2)
 }
 
 fn types_match(sig: &FunctionInfo, types: &Vec<Type>) -> bool {

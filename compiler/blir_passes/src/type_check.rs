@@ -196,18 +196,66 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 self.check_codeblock(&closure.code, Some(return_type), return_type);
             }
             ValueKind::FuncCall { function, args } => {
+                //println!();
+                //println!("{function:?}");
+                //println!();
                 self.check_value(function, return_type);
 
-                let params = match &function.typ.kind {
-                    TypeKind::Function { params, labels, .. } => {
-                        for (i, (label1, label2)) in labels.iter().zip(&args.labels).enumerate() {
-                            if label1 != label2 {
-                                let label1 = label1.clone().unwrap_or_else(|| "_".to_string());
-                                let label2 = label2.clone().unwrap_or_else(|| "_".to_string());
+                let (params_are_shared, params_labels): (Vec<bool>, Vec<_>) =
+                    match &function.kind {
+                        ValueKind::StaticFunc(func)
+                            => func.borrow().info.params().iter().map(|p| (p.is_shared, p.label.clone())).unzip(),
+                        ValueKind::StaticMethod(func)
+                            => func.borrow().info.params().iter().map(|p| (p.is_shared, p.label.clone())).unzip(),
+                        ValueKind::InstanceMethod { method, .. }
+                            => method.borrow().info.params().iter().map(|p| (p.is_shared, p.label.clone())).unzip(),
+                        ValueKind::ExternFunc(func)
+                            => func.borrow().info.params().iter().map(|p| (p.is_shared, p.label.clone())).unzip(),
+                        ValueKind::Initializer(init, _)
+                            => init.borrow().info.params().iter().map(|p| (p.is_shared, p.label.clone())).unzip(),
+                        
+                        _ => { (0..args.is_shared.len()).map(|_| (false, None)).unzip() }
+                    };
 
-                                self.debugger.throw_diagnostic(TypeCheckError::ExpectedLabel { expected: label1, found: label2, span: args.args[i].span.unwrap_or_default()});
-                            }
+                for (p, (a, s)) in params_are_shared.iter().zip(args.is_shared.iter().zip(&args.args)) {
+                    if *p && !a {
+                        self.debugger.throw_diagnostic(TypeCheckError::ExpectedShared(s.span.unwrap_or_default()));
+                    }
+
+                    else if *a && !p {
+                        self.debugger.throw_diagnostic(TypeCheckError::UnexpectedShared(s.span.unwrap_or_default()));
+                    }
+                }
+
+                for (param_label, (arg_label, val)) in params_labels.iter().zip(args.labels.iter().zip(&args.args)) {
+                    if let Some(param) = param_label &&
+                       let None = arg_label
+                    {
+                        if let Some(arg) = val.name() &&
+                           arg == param
+                        {
+                            continue
                         }
+                        self.debugger.throw_diagnostic(TypeCheckError::ExpectedLabel { expected: param.clone(), found: "_".into(), span: val.span.unwrap_or_default() })
+                    }
+                    
+                    else if let None = param_label &&
+                            let Some(arg) = arg_label
+                    {
+                        self.debugger.throw_diagnostic(TypeCheckError::ExpectedLabel { expected: "_".into(), found: arg.clone(), span: val.span.unwrap_or_default() })
+                    }
+
+                    else if let Some(param) = param_label &&
+                            let Some(arg) = arg_label
+                    {
+                        if param != arg {
+                            self.debugger.throw_diagnostic(TypeCheckError::MismatchedLabel(param.clone(), arg.clone()))
+                        }
+                    }
+                }
+
+                let params = match &function.typ.kind {
+                    TypeKind::Function { params, .. } => {
                         params
                     },
                     TypeKind::Method { params, .. } => {
@@ -237,6 +285,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 }
 
                 for (param, arg) in params.iter().zip(&args.args) {
+                    //println!("{param:?} <-> {arg:?}");
                     self.check_value(arg, return_type);
 
                     self.check_type(param, &arg.typ);
@@ -477,6 +526,9 @@ enum TypeCheckError {
     MemberNotAValue(Type, String, Span),
     CodeAfterUnreachable(Span),
     UnreachableCode(Span),
+
+    UnexpectedShared(Span),
+    ExpectedShared(Span),
 }
 
 impl IntoDiagnostic for TypeCheckError {
@@ -523,6 +575,19 @@ impl IntoDiagnostic for TypeCheckError {
             TypeCheckError::MemberNotAValue(_, _, _) => todo!(),
             TypeCheckError::CodeAfterUnreachable(_) => todo!(),
             TypeCheckError::UnreachableCode(_) => todo!(),
+
+            TypeCheckError::UnexpectedShared(span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "unexpected_shared",
+                                format!("argument is marked as `shared`"),
+                                vec![ CodeLocation::new(span, Some("remove this `shared`".into())) ])
+            }
+            TypeCheckError::ExpectedShared(span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "expected_shared",
+                                format!("argument should be marked as `shared`"),
+                                vec![ CodeLocation::new(span, Some("add a `shared` keyword".into())) ])
+            }
         }
     }
 }
