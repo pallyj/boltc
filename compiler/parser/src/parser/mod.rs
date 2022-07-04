@@ -127,7 +127,7 @@ impl<'input, 'l> Parser<'input, 'l> {
     pub fn error_recover(&mut self, error: &str, recovery_set: &[SyntaxKind]) -> CompletedMarker {
         self.error(error);
         let err = self.start();
-        if !self.peek()
+        while !self.peek()
                 .map(|peeked_token| recovery_set.contains(&peeked_token))
                 .unwrap_or(false)
         {

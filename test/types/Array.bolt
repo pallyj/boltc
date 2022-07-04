@@ -2,9 +2,29 @@ import intrinsics
 
 @entryPoint
 func main() {
+	// todo: array's infer key gets deleted
 	let var numbers = [ 1, 2, 3, 4, 5 ]
-	let zeroes: Int[10] = [repeating: 0]
+	let var zeroes: Int[10] = [repeating: 0]
 	let ones = [repeating: 1, count: 20]
+
+	let var i = 0
+
+	while i < numbers.length {
+		numbers[i] *= 2
+
+		i+= 1
+	}
+
+	i = 0
+
+	while i < numbers.length {
+
+		let j = numbers[i];//+= 1;
+
+		print(j)
+
+		i+=1;
+	}
 
 	//arrayIndex(numbers, 0) = 6
 	//arrayIndex(zeroes, 9) = 1

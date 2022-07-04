@@ -504,7 +504,12 @@ impl IntoDiagnostic for TypeCheckError {
                                 vec![ CodeLocation::new(span, None) ])
             }
             TypeCheckError::IsNotAFunc(_) => todo!(),
-            TypeCheckError::MissingParams(_) => todo!(),
+            TypeCheckError::MissingParams(span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "missing_params",
+                                format!("missing parameters"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
             TypeCheckError::ExtraParams(_) => todo!(),
             TypeCheckError::FuncNotFound(span) => {
                 Diagnostic::new(DiagnosticLevel::Error,

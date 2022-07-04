@@ -26,7 +26,7 @@
 // Index: **expr** `[` **expr** `]`
 //
 
-use std::fmt::Debug;
+use std::fmt::{Debug};
 
 use super::{find_token, smt::CodeBlock, typ::Type, pattern::Pattern};
 use crate::lexer::SyntaxKind;
@@ -53,6 +53,7 @@ ast!(struct MatchExpr(MatchExpr));
 ast!(struct RepeatLoop(RepeatLoop));
 ast!(struct WhileLoop(WhileLoop));
 ast!(struct WhileLetLoop(WhileLetLoop));
+ast!(struct Macro(Macro));
 
 ast!(struct ArrayLiteral(ArrayLiteral));
 
@@ -93,6 +94,7 @@ ast!(
         WhileLoop,
         WhileLetLoop,
         ArrayLiteral,
+        Macro,
     }
 );
 
@@ -120,6 +122,7 @@ impl Debug for Expr {
             Self::WhileLoop(arg0) => write!(f, "{arg0:?}"),
             Self::WhileLetLoop(arg0) => write!(f, "{arg0:?}"),
             Self::ArrayLiteral(arg0) => write!(f, "{arg0:?}"),
+            Self::Macro(arg0) => write!(f, "{arg0:?}"),
             Self::Error => write!(f, "error"),
         }
     }
@@ -719,5 +722,34 @@ impl MapItem {
 impl Debug for MapItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}: {:?}", self.key(), self.value())
+    }
+}
+
+impl Macro {
+    pub fn macro_name(&self) -> String {
+        let func_name = self.0
+                            .children()
+                            .find(|node| node.kind() == SyntaxKind::FuncName)
+                            .unwrap();
+
+        find_token(&func_name, SyntaxKind::Ident).map(|name| name.text().to_string())
+                                                 .unwrap()
+    }
+
+    pub fn args(&self) -> Option<impl Iterator<Item = FuncArg>> {
+        self.0
+            .children()
+            .find(|node| node.kind() == SyntaxKind::CommaSeparatedList)
+            .map(|node| node.children().filter_map(FuncArg::cast))
+    }
+}
+
+impl Debug for Macro {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(arg) = self.args() {
+            write!(f, "@{}({})", self.macro_name(), arg.map(|x| format!("{x:?}")).collect::<Vec<_>>().join(", ") )
+        } else {
+            write!(f, "@{}", self.macro_name())
+        }
     }
 }

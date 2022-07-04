@@ -47,7 +47,9 @@ pub enum DuoIntrinsic {
 
 	FCmpEq, FCmpNeq,
 	FCmpLt, FCmpLte,
-	FCmpGt, FCmpGte
+	FCmpGt, FCmpGte,
+
+    AItem, PtrAdd
 }
 
 impl SoloIntrinsic {
@@ -158,6 +160,8 @@ impl Display for DuoIntrinsic {
             DuoIntrinsic::FCmpLte => write!(f, "float.cmp.lte"),
             DuoIntrinsic::FCmpGt => write!(f, "float.cmp.gt"),
             DuoIntrinsic::FCmpGte => write!(f, "float.cmp.gte"),
+            DuoIntrinsic::AItem => write!(f, "array.item"),
+            DuoIntrinsic::PtrAdd => write!(f, "ptr.add"),
         }
     }
 }

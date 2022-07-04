@@ -100,6 +100,7 @@ impl Statement {
             StatementKind::Eval { value, .. } => matches!(value.typ.deref(), TypeKind::Divergent),
             StatementKind::Break(_) => true,
             StatementKind::Continue(_) => true,
+            StatementKind::Panic => true,
             _ => false,
         }
     }

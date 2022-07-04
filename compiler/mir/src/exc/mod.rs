@@ -1,4 +1,4 @@
-use itertools::Itertools;
+	use itertools::Itertools;
 
 use crate::{Project, code::BasicBlockId, instr::{Terminator, Instruction}, val::{RValue, DuoIntrinsic, Place, SoloIntrinsic, ConstValue}, ty::{Type, TypeKind}};
 
@@ -122,7 +122,7 @@ impl<'a> ExecutionEngine<'a> {
 			}
 			ReturnVoid => Action::Return(Value::Undef),
 			Return { value } => Action::Return(self.eval(&value, frame)),
-			Panic => panic!("panic at src/:xx:xx"),
+			Panic => panic!(),
 		}
 	}
 
@@ -181,9 +181,17 @@ impl<'a> ExecutionEngine<'a> {
 				Value::Enum(discriminant, _) => discriminant,
 				_ => panic!()
 			},
-			ArrayIndex(place, idx) => match self.get_ptr(place, frame) {
-				Value::Array(values) => &values[*idx],
-				_ => panic!()
+			ArrayIndex(place, idx) => {
+				let val = self.eval(idx, frame);
+				match self.get_mut_ptr(place, frame) {
+					Value::Array(values) => {
+						match val {
+							Value::Int(n) => &values[n as usize],
+							_ => panic!()
+						}
+					}
+					_ => panic!()
+				}
 			}
 		}
 	}
@@ -230,9 +238,17 @@ impl<'a> ExecutionEngine<'a> {
 				Value::Enum(discriminant, _) => discriminant,
 				_ => panic!()
 			},
-			ArrayIndex(place, idx) => match self.get_mut_ptr(place, frame) {
-				Value::Array(values) => &mut values[*idx],
-				_ => panic!()
+			ArrayIndex(place, idx) => {
+				let val = self.eval(idx, frame);
+				match self.get_mut_ptr(place, frame) {
+					Value::Array(values) => {
+						match val {
+							Value::Int(n) => &mut values[n as usize],
+							_ => panic!()
+						}
+					}
+					_ => panic!()
+				}
 			}
 		}
 	}

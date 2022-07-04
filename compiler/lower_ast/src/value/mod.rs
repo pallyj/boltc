@@ -3,7 +3,7 @@ mod unescape;
 use std::{sync::atomic::{AtomicU64, Ordering}, vec};
 
 use blir::{typ::{Type, TypeKind},
-           value::{Closure, ClosureParam, FunctionArgs, IfBranch, IfValue, Value, ValueKind, match_::MatchValue, MatchBranch}, code::{CodeBlock, StatementKind}, pattern::PatternKind};
+           value::{Closure, ClosureParam, FunctionArgs, IfBranch, IfValue, Value, ValueKind, match_::MatchValue, MatchBranch}, code::{CodeBlock, StatementKind}, pattern::PatternKind, attributes::{AttributeArg, AttributeArgs}};
 use errors::Span;
 use parser::{ast::expr::{ClosureExpr, Expr as AstExpr, IfExpr, IfExprNegative, LiteralKind, IfLetExpr, CollectionItem}};
 use unindent::unindent;
@@ -434,6 +434,33 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                 self.reporter.throw_diagnostic(Error::FeatureNotEnabled("map_lit_construct").at(span));
 
                 ValueKind::Error.infer()
+            }
+
+            AstExpr::Macro(macro_def) => {
+                let macro_name = macro_def.macro_name();
+
+               let args = macro_def.args()
+                    .map(|args|
+                    args.filter_map(|arg| {
+                        let label = arg.label();
+                        let value = self.lower_expr(arg.value(), None);
+                        let arg_val = match &value.kind {
+                            blir::value::ValueKind::Named(name) => AttributeArg::Named(name.clone()),
+                            blir::value::ValueKind::IntLiteral(n) => AttributeArg::Integer(*n),
+                            blir::value::ValueKind::FloatLiteral(n) => AttributeArg::Float(*n),
+                            blir::value::ValueKind::BoolLiteral(b) => AttributeArg::Bool(*b),
+                            blir::value::ValueKind::StringLiteral(s) => AttributeArg::String(s.clone()),
+                            blir::value::ValueKind::VariantLiteral(v) => AttributeArg::Variant(v.clone()),
+                            _ => { return None }
+                        };
+
+                        Some((label, arg_val))
+                    })
+                    .collect()).unwrap_or_else(|| Vec::new());
+
+                let attribute_args = AttributeArgs::new(args);
+
+                ValueKind::Macro(macro_name, attribute_args).spanned_infer(span)
             }
 
             AstExpr::Error => panic!("internal compiler error")

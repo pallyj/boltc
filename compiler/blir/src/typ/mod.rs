@@ -14,7 +14,7 @@ pub use struct_::*;
 pub use enum_::*;
 pub use case_::*;
 
-use crate::{scope::ScopeRef, Symbol};
+use crate::{scope::ScopeRef, Symbol, value::ValueKind, intrinsics::{UnaryIntrinsicFn, BinaryIntrinsicFn}};
 
 static NEXT_INFER_KEY: AtomicU64 = AtomicU64::new(1);
 
@@ -88,6 +88,7 @@ pub enum TypeKind {
     RawPointer { pointer_type: Box<Type> },
 
     Array { item: Box<Type>, len: usize },
+    Slice(Box<Type>),
 
     Error,
 }
@@ -134,6 +135,10 @@ impl Type {
         match &self.kind {
             TypeKind::Struct(r#struct) => r#struct.lookup_static_item(named),
             TypeKind::Enum(r#enum) => r#enum.lookup_static_item(named),
+            TypeKind::Array { item, .. } => match named {
+                "op~index" => get_array_index(item),
+                _ => { None }
+            },
             _ => None,
         }
     }
@@ -142,6 +147,12 @@ impl Type {
         match &self.kind {
             TypeKind::Metatype(ty) => ty.clone().lookup_static_item(named),
             TypeKind::Struct(r#struct) => r#struct.lookup_instance_item(named, scope),
+            TypeKind::Array { len, .. } => {
+                match named {
+                    "length" => Some(Symbol::Value(ValueKind::IntLiteral(*len as u64).infer())),
+                    _ => None,
+                }
+            }
             TypeKind::Tuple(items, labels) => {
                 for (i, label) in labels.iter().enumerate() {
                     if let Some(label) = label {
@@ -209,7 +220,7 @@ impl Type {
                 MangledType::Function(params, Box::new(return_type.mangle()))
             }
             TypeKind::Struct(r#struct) => MangledType::Struct(r#struct.borrow().path().clone()),
-            TypeKind::Enum(r#enum) => MangledType::Enum(r#enum.path()), // TODO: Fix
+            TypeKind::Enum(r#enum) => MangledType::Enum(r#enum.path()),
 
             TypeKind::Void => MangledType::Void,
             TypeKind::Divergent => MangledType::Diverges,
@@ -219,6 +230,7 @@ impl Type {
             TypeKind::Tuple(types, _) => MangledType::Tuple(types.iter().map(Self::mangle).collect()),
 
             TypeKind::RawPointer { pointer_type: _ } => MangledType::Pointer, // todo: add arg
+            // todo: add array and slice
 
             _ => panic!(),
         }
@@ -305,8 +317,20 @@ impl Debug for Type {
             TypeKind::HKRawPointer => write!(f, "RawPointer<_>"),
             TypeKind::RawPointer { pointer_type: ptr } => write!(f, "RawPointer<{ptr:?}>"),
             TypeKind::Array { item, len } => write!(f, "{item:?}[{len}]"),
+            TypeKind::Slice(item) => write!(f, "{item}[]"),
         }
     }
+}
+
+fn get_array_index(item: &Type) -> Option<Symbol> {
+    let func_type = TypeKind::Function { return_type: Box::new(item.clone()), params: vec![
+            Type::infer(),
+            Type::infer(),
+        ], labels: vec![None, None] }.anon();
+
+    println!("func_t: {func_type:?}");
+
+    Some(Symbol::Value(ValueKind::BinaryIntrinsicFn(BinaryIntrinsicFn::ArrayItem).anon(func_type)))
 }
 
 impl Display for Type {
@@ -335,6 +359,7 @@ impl Display for Type {
             
             RawPointer { pointer_type } => write!(f, "RawPointer<{pointer_type}>"),
             Array { item, len } => write!(f, "{item}[{len}]"),
+            Slice(item) => write!(f, "{item}[]"),
     
             Error => todo!(),
     
@@ -342,11 +367,11 @@ impl Display for Type {
     
             Named(_) => todo!(),
             Member { parent, member } => todo!(),
-            GenericParam(_) => todo!(),
+            GenericParam(name) => write!(f, "`{name}`"),
             GenericOf { higher_kind, params } => todo!(),
             HKRawPointer => todo!(),
     
-            Infer { key } => todo!(),
+            Infer { key } => write!(f, "_"),
             UnknownInfer => todo!(),
     
             SomeInteger => todo!(),

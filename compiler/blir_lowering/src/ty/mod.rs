@@ -43,6 +43,8 @@ impl<'a> BlirLowerer<'a> {
 			GenericOf { higher_kind: _, params: _ } => panic!(),
 			RawPointer { pointer_type } => self.lower_ty(pointer_type).shared_pointer(),
 
+			Slice(_) => panic!(),
+
 			Error => panic!("compiler error: failed to catch error type"),
 		}
 	}

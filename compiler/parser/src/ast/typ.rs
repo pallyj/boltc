@@ -23,6 +23,7 @@ ast!(struct TupleType(TupleType));
 ast!(struct TupleMember(FuncArg));
 ast!(struct GenericType(GenericType));
 ast!(struct ArrayType(ArrayType));
+ast!(struct SliceType(SliceType));
 
 ast!(
     enum Type {
@@ -35,6 +36,7 @@ ast!(
         InferType,
         GenericType,
         ArrayType,
+        SliceType,
     }
 );
 
@@ -51,6 +53,7 @@ impl Debug for Type {
             Self::Error => write!(f, "Error"),
             Self::GenericType(arg0) => write!(f, "{arg0:?}"),
             Self::ArrayType(arg0) => write!(f, "{arg0:?}"),
+            Self::SliceType(arg0) => write!(f, "{arg0:?}"),
         }
     }
 }
@@ -216,5 +219,17 @@ impl ArrayType {
 impl Debug for ArrayType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}[{:?}]", self.item_type(), self.length())
+    }
+}
+
+impl SliceType {
+    pub fn item_type(&self) -> Type {
+        Type::cast(self.0.first_child().unwrap())
+    }
+}
+
+impl Debug for SliceType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}[]", self.item_type())
     }
 }

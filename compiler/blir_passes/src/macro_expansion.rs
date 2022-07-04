@@ -1,13 +1,10 @@
-use blir::{attributes::AttributeFactory,
+use blir::{attributes::{AttributeFactory, AttributeArgs},
            code::{CodeBlock, StatementKind},
            scope::ScopeRef,
            typ::{StructRef, EnumRef},
            value::{IfBranch, IfValue, Value, ValueKind},
-           BlirContext, Library};
-use errors::DiagnosticReporter;
-use parser::operators::OperatorFactory;
-
-use crate::{TypeInferPass, TypeResolvePass};
+           Library};
+use errors::{DiagnosticReporter, Span};
 
 pub struct MacroExpansionPass<'a, 'l> {
     factory:          &'a AttributeFactory,
@@ -15,7 +12,7 @@ pub struct MacroExpansionPass<'a, 'l> {
 }
 
 impl<'a, 'l> MacroExpansionPass<'a, 'l> {
-    pub fn new(factory: &'a AttributeFactory, operator_factory: &'a OperatorFactory, debugger: &'a mut DiagnosticReporter<'l>) -> Self {
+    pub fn new(factory: &'a AttributeFactory, debugger: &'a mut DiagnosticReporter<'l>) -> Self {
         Self { factory,
                debugger }
     }
@@ -151,6 +148,14 @@ impl<'a, 'l> MacroExpansionPass<'a, 'l> {
                 self.resolve_value(repeating, scope);
             }
 
+            ValueKind::Macro(name, args) => {
+                if let Some(expanded_value) = self.expand_macro(name, args, value.span.unwrap()) {
+                    *value = expanded_value;
+                } else {
+                    value.kind = ValueKind::Unit;
+                }
+            }
+
 			_ => {}
         }
     }
@@ -173,5 +178,9 @@ impl<'a, 'l> MacroExpansionPass<'a, 'l> {
                 }
             }
         }
+    }
+
+    fn expand_macro(&mut self, name: &str, args: &AttributeArgs, source: Span) -> Option<Value> {
+        self.factory.expand_macro(name, args, source, self.debugger)
     }
 }

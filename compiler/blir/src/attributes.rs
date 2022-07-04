@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::format};
+use std::{collections::HashMap, fmt::{format, Display}};
 
 use errors::{error::ErrorCode, Span, DiagnosticReporter, IntoDiagnostic, Diagnostic, DiagnosticLevel, CodeLocation};
 use itertools::Itertools;
@@ -91,12 +91,12 @@ impl AttributeFactory {
         }
     }
 
-    pub fn expand_macro(&self, attribute: &Attribute, source: Span, debugger: &mut DiagnosticReporter) -> Option<Value> {
-        if let Some(attr) = self.macro_attributes.get(attribute.name()) {
-            Some(attr.expand(&attribute.args, source, debugger))
+    pub fn expand_macro(&self, name: &str, args: &AttributeArgs, source: Span, debugger: &mut DiagnosticReporter) -> Option<Value> {
+        if let Some(attr) = self.macro_attributes.get(name) {
+            Some(attr.expand(args, source, debugger))
         }
         else {
-            debugger.throw_diagnostic(AttributeError::DoesNotExist(attribute.name().to_string()).at(source, source));
+            debugger.throw_diagnostic(AttributeError::DoesNotExist(name.to_string()).at(source, source));
 
             return None
         }
@@ -118,6 +118,13 @@ pub fn default_attributes() -> AttributeFactory {
     factory.register_struct_attribute(DefaultStringReprAttribute {});
     factory.register_struct_attribute(DefaultCharReprAttribute {});
     factory.register_struct_attribute(CharExpressibleAttribute {});
+
+    factory.register_macro_attribute(LineMacro {});
+    factory.register_macro_attribute(ColMacro {});
+    factory.register_macro_attribute(FileMacro {});
+    factory.register_macro_attribute(PanicMacro {});
+    factory.register_macro_attribute(AssertMacro {});
+    factory.register_macro_attribute(PrintMacro {});
 
     factory
 }
@@ -159,10 +166,12 @@ struct DefaultStringReprAttribute;
 struct PanicMacro;
 
 struct AssertMacro;
+struct PrintMacro;
 
 struct LineMacro;
 struct ColMacro;
 struct FileMacro;
+
 
 impl FuncAttribute for EntryPointAttribute {
     fn name(&self) -> &'static str { "entryPoint" }
@@ -464,9 +473,15 @@ impl MacroAttribute for PanicMacro {
     }
 
     fn expand(&self, args: &AttributeArgs, source: Span, debugger: &mut DiagnosticReporter) -> Value {
-        let prints = (0..args.count()).map(|arg_n| {
-            let arg = args.get_indexed(arg_n).unwrap();
+        let line_info = debugger.lookup(source);
 
+        let pred = std::iter::once(AttributeArg::String("panic: '".into()));
+        let post = std::iter::once(AttributeArg::String(format!("' at {}:{}:{}", line_info.filename, line_info.line, line_info.col)));
+
+        let arguments =  (0..args.count()).map(|arg_n| args.get_indexed(arg_n).unwrap());
+        let arguments = pred.chain(arguments.cloned()).chain(post);
+
+        let prints = arguments.map(|arg| {
             let av = match arg.clone() {
                 AttributeArg::Integer(n) => ValueKind::IntLiteral(n),
                 AttributeArg::Float(n) => ValueKind::FloatLiteral(n),
@@ -474,10 +489,16 @@ impl MacroAttribute for PanicMacro {
                 AttributeArg::String(s) => ValueKind::StringLiteral(s),
                 AttributeArg::Variant(variant) => ValueKind::VariantLiteral(variant),
                 AttributeArg::Named(n) => ValueKind::Named(n),
+                AttributeArg::Value(v) => v.kind
             }.spanned_infer(source);
 
+            let ty = TypeKind::Function {
+                return_type: Box::new(Type::infer()),
+                params: vec![ Type::infer(), Type::infer() ],
+                labels: vec![ None, Some(String::from("newline")) ] }.spanned(source);
+
             StatementKind::Eval { value: ValueKind::FuncCall {
-                function: Box::new(ValueKind::Named("print".into()).spanned_infer(source)),
+                function: Box::new(ValueKind::Named("print".into()).spanned(ty, source)),
                 args: FunctionArgs {
                     args: vec![ av, ValueKind::BoolLiteral(false).spanned_infer(source) ],
                     labels: vec![ None, Some("newline".into()) ],
@@ -485,11 +506,65 @@ impl MacroAttribute for PanicMacro {
                 }
             }.spanned_infer(source), escaped: true }.spanned(source)
         })
-        .chain(std::iter::once(StatementKind::Eval { value: ValueKind::FuncCall {
-            function: Box::new(ValueKind::Named("printLine".into()).spanned_infer(source)),
+        .chain((args.count() > 0).then(|| StatementKind::Eval { value: ValueKind::FuncCall {
+            function: Box::new(ValueKind::Named("printLine".into()).spanned(TypeKind::Function {
+                return_type: Box::new(Type::infer()),
+                params: vec![],
+                labels: vec![] }.spanned(source), source)),
             args: FunctionArgs { args: vec![], labels: vec![], is_shared: vec![] }
         }.spanned_infer(source), escaped: true }.spanned(source)))
         .chain(std::iter::once(StatementKind::Panic.spanned(source)))
+        .collect();
+
+        ValueKind::If(IfValue {
+            condition: Box::new(ValueKind::BoolLiteral(true).spanned_infer(source)),
+            positive: CodeBlock::new(prints, source),
+            negative: None
+        }).spanned_infer(source)
+    }
+}
+
+
+impl MacroAttribute for PrintMacro {
+    fn name(&self) -> &'static str {
+        "print"
+    }
+
+    fn expand(&self, args: &AttributeArgs, source: Span, debugger: &mut DiagnosticReporter) -> Value {
+        let arguments =  (0..args.count()).map(|arg_n| args.get_indexed(arg_n).unwrap());
+
+        let prints = arguments.map(|arg| {
+            let av = match arg.clone() {
+                AttributeArg::Integer(n) => ValueKind::IntLiteral(n),
+                AttributeArg::Float(n) => ValueKind::FloatLiteral(n),
+                AttributeArg::Bool(b) => ValueKind::BoolLiteral(b),
+                AttributeArg::String(s) => ValueKind::StringLiteral(s),
+                AttributeArg::Variant(variant) => ValueKind::VariantLiteral(variant),
+                AttributeArg::Named(n) => ValueKind::Named(n),
+                AttributeArg::Value(v) => v.kind,
+            }.spanned_infer(source);
+
+            let ty = TypeKind::Function {
+                return_type: Box::new(Type::infer()),
+                params: vec![ Type::infer(), Type::infer() ],
+                labels: vec![ None, Some(String::from("newline")) ] }.spanned(source);
+
+            StatementKind::Eval { value: ValueKind::FuncCall {
+                function: Box::new(ValueKind::Named("print".into()).spanned(ty, source)),
+                args: FunctionArgs {
+                    args: vec![ av, ValueKind::BoolLiteral(false).spanned_infer(source) ],
+                    labels: vec![ None, Some("newline".into()) ],
+                    is_shared: vec![ false, false ]
+                }
+            }.spanned_infer(source), escaped: true }.spanned(source)
+        })
+        .chain((args.count() > 0).then(|| StatementKind::Eval { value: ValueKind::FuncCall {
+            function: Box::new(ValueKind::Named("printLine".into()).spanned(TypeKind::Function {
+                return_type: Box::new(Type::infer()),
+                params: vec![],
+                labels: vec![] }.spanned(source), source)),
+            args: FunctionArgs { args: vec![], labels: vec![], is_shared: vec![] }
+        }.spanned_infer(source), escaped: true }.spanned(source)))
         .collect();
 
         ValueKind::If(IfValue {
@@ -521,13 +596,31 @@ impl MacroAttribute for AssertMacro {
             AttributeArg::String(s) => ValueKind::StringLiteral(s),
             AttributeArg::Variant(variant) => ValueKind::VariantLiteral(variant),
             AttributeArg::Named(n) => ValueKind::Named(n),
+            AttributeArg::Value(v) => v.kind,
         }.spanned_infer(source);
 
         if args.count() == 1 {
+            let line_info = debugger.lookup(source);
+            let panic_txt = format!("assert: {:?} failed at {}:{}:{}", args.get_indexed(0).unwrap().format(debugger), line_info.filename, line_info.line, line_info.col);
+
+            let print_smt = StatementKind::Eval { value: ValueKind::FuncCall {
+                function: Box::new(ValueKind::Named("print".into()).spanned(TypeKind::Function {
+                    return_type: Box::new(Type::infer()),
+                    params: vec![Type::infer()],
+                    labels: vec![None],
+                }.spanned(source), source)),
+                args: FunctionArgs {
+                    args: vec![ ValueKind::StringLiteral(panic_txt).spanned_infer(source) ],
+                    labels: vec![None],
+                    is_shared: vec![false],
+                }
+            }.spanned_infer(source), escaped: true }.spanned(source);
+
             ValueKind::If(IfValue {
                 condition: Box::new(av),
                 positive: CodeBlock::new(vec![], source),
                 negative: Some(IfBranch::CodeBlock(CodeBlock::new(vec![
+                    print_smt,
                     StatementKind::Panic.spanned(source)
                 ], source)))
             }).spanned_infer(source)
@@ -539,22 +632,45 @@ impl MacroAttribute for AssertMacro {
                 AttributeArg::String(s) => ValueKind::StringLiteral(s),
                 AttributeArg::Variant(variant) => ValueKind::VariantLiteral(variant),
                 AttributeArg::Named(n) => ValueKind::Named(n),
+                AttributeArg::Value(v) => v.kind,
             }.spanned_infer(source);
 
-            let function = match args.get_label(2).unwrap().as_str() {
+            let function = match args.get_label(1).unwrap().as_str() {
                 "equals" => "equal",
                 "notEqualTo" => "notEqual",
                 "greaterThan" => "greaterThan",
                 "lessThan" => "lessThan",
                 "greaterThanOrEquals" => "greaterThanEq",
                 "lessThanOrEquals" => "lessThanEq",
-                _ => todo!(),
+                _ => {
+                    // throw an error
+                    panic!()
+                }
             };
 
+            let line_info = debugger.lookup(source);
+            let panic_txt = format!("assert: {:?} {} {:?} failed at {}:{}:{}",
+                args.get_indexed(0).unwrap().format(debugger),
+                args.get_label(1).unwrap(),
+                args.get_indexed(1).unwrap().format(debugger), line_info.filename, line_info.line, line_info.col);
+
+            let print_smt = StatementKind::Eval { value: ValueKind::FuncCall {
+                function: Box::new(ValueKind::Named("print".into()).spanned(TypeKind::Function {
+                    return_type: Box::new(Type::infer()),
+                    params: vec![Type::infer()],
+                    labels: vec![None],
+                }.spanned(source), source)),
+                args: FunctionArgs {
+                    args: vec![ ValueKind::StringLiteral(panic_txt).spanned_infer(source) ],
+                    labels: vec![None],
+                    is_shared: vec![false],
+                }
+            }.spanned_infer(source), escaped: true }.spanned(source);
             ValueKind::If(IfValue {
-                condition: Box::new(ValueKind::FuncCall { function: Box::new(ValueKind::Operator(function.into()).spanned_infer(source)), args: FunctionArgs { args: vec![ av, against ], labels: vec![], is_shared: vec![ false, false] }  }.spanned_infer(source)),
+                condition: Box::new(ValueKind::FuncCall { function: Box::new(ValueKind::Operator(function.into()).spanned(TypeKind::Function { return_type: Box::new(Type::infer()), params: vec![ Type::infer(), Type::infer() ], labels: vec![] }.spanned(source), source)), args: FunctionArgs { args: vec![ av, against ], labels: vec![], is_shared: vec![ false, false] }  }.spanned_infer(source)),
                 positive: CodeBlock::new(vec![], source),
                 negative: Some(IfBranch::CodeBlock(CodeBlock::new(vec![
+                    print_smt,
                     StatementKind::Panic.spanned(source)
                 ], source)))
             }).spanned_infer(source)
@@ -590,7 +706,7 @@ impl MacroAttribute for ColMacro {
 
         let line_info = debugger.lookup(source);
 
-        ValueKind::StringLiteral(line_info.filename.to_string()).spanned_infer(source)
+        ValueKind::IntLiteral(line_info.line as u64).spanned_infer(source)
     }
 }
 
@@ -606,7 +722,7 @@ impl MacroAttribute for FileMacro {
 
         let line_info = debugger.lookup(source);
 
-        ValueKind::IntLiteral(line_info.line as u64).spanned_infer(source)
+        ValueKind::StringLiteral(line_info.filename.to_string()).spanned_infer(source)
     }
 }
 
@@ -623,6 +739,7 @@ pub enum AttributeArg {
     String(String),
     Variant(String),
     Named(String),
+    Value(Value),
 }
 
 impl AttributeArgs {
@@ -666,5 +783,22 @@ impl AttributeArgs {
     /// 
     pub fn count(&self) -> usize {
         self.args.len()
+    }
+}
+
+impl AttributeArg {
+    ///
+    /// Formats an attribute arg
+    /// 
+    pub fn format(&self, reporter: &DiagnosticReporter) -> String {
+        match self {
+            AttributeArg::Integer(n) => format!("{n}"),
+            AttributeArg::Float(n) => format!("{n}"),
+            AttributeArg::Bool(b) => format!("{b}"),
+            AttributeArg::String(s) => format!("\"{s}\""),
+            AttributeArg::Variant(v) => format!(".{v}"),
+            AttributeArg::Named(n) => format!("{n}"),
+            AttributeArg::Value(v) => reporter.lookup(v.span.unwrap()).text.to_string()
+        }
     }
 }

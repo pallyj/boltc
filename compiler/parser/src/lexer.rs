@@ -184,6 +184,7 @@ pub enum SyntaxKind {
     FuncType,
     GenericType,
     ArrayType,
+    SliceType,
 
     FuncReturn,
 
@@ -275,6 +276,8 @@ pub enum SyntaxKind {
 
     MapItem,
     ArrayItem,
+
+    Macro,
 
     _Invalid,
 }

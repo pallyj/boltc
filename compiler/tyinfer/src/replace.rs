@@ -193,17 +193,30 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 // Now we turn it into a polymorphizer
                 let operator_name = format!("op~{operator}");
 
-                let Some(Symbol::Function(polymorphizer)) = container_type.lookup_static_item(&operator_name) else {
-                    let operator = operator.to_string();
-					// Throw an error
-                    value.kind = ValueKind::Error;
-                    self.debugger.throw_diagnostic(Error::OperatorNotDefined(container_type.clone(), operator, value.span.clone().unwrap_or(Span::empty())));
-					return;
-				};
+                //println!("{operator_name}");
 
-                value.set_kind(ValueKind::Polymorphic(polymorphizer));
+                match container_type.lookup_static_item(&operator_name) {
+                    Some(Symbol::Function(polymorphizer)) => {
+                        value.set_kind(ValueKind::Polymorphic(polymorphizer));
 
-                self.replace_value(value, scope);
+                        self.replace_value(value, scope);
+                    }
+                    Some(Symbol::Value(arr_item)) => {
+                        value.set_kind(arr_item.kind);
+                        value.set_type(arr_item.typ);
+
+                        self.replace_value(value, scope);
+                    }
+                    _ => {
+                        let operator = operator.to_string();
+                        // Throw an error
+                        value.kind = ValueKind::Error;
+                        self.debugger.throw_diagnostic(Error::OperatorNotDefined(container_type.clone(), operator, value.span.clone().unwrap_or(Span::empty())));
+                        return;
+                    }
+                }
+
+                
             }
 
             ValueKind::Member { parent, member } => {
@@ -215,8 +228,8 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 
                 let Some(resolved_member) = parent.typ.lookup_instance_item(member, scope) else {
                     let member = member.clone();
+                    self.debugger.throw_diagnostic(Error::MemberNotFound(parent.typ.clone(), member.clone(), value.span.clone().unwrap_or_else(Span::empty)));
                     value.kind = ValueKind::Error;
-                    self.debugger.throw_diagnostic(Error::MemberNotFound(value.typ.clone(), member.clone(), value.span.clone().unwrap_or_else(Span::empty)));
                     return
 				};
 

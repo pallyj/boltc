@@ -12,6 +12,7 @@ Bolt is a powerful coding language designed for expressiveness and speed. Bolt c
 - first-class tuples and arrays
 - closures
 - trailing closure syntax
+- macros
 - loops
 - guard statement
 - overloadable operators
@@ -101,15 +102,14 @@ boltc examples/guessing_game/game.bolt --lib=game
 - Mutable variables
 - RawPointers
 - Virtual Machine
-
-- Completeness checks
-- Global Variables
 - Guard
 - If and guard pattern matching
 - Arrays
-- Generate C Headers
-- Generate Bolt Headers
 - Boltdoc
+- Macros
+
+- Completeness checks
+- Global Variables
 - Bolt playgroud
 
 ### Bolt 0.5 [ Current Version ]

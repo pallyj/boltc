@@ -16,7 +16,7 @@ pub use match_::*;
 use crate::{code::{CodeBlock, ExternFunctionRef, FunctionRef, MethodRef},
             intrinsics::{BinaryIntrinsicFn, UnaryIntrinsicFn},
             typ::{Type, TypeKind, CaseRef, EnumRef},
-            Monomorphizer};
+            Monomorphizer, attributes::AttributeArgs};
 
 use self::match_::MatchValue;
 
@@ -109,6 +109,8 @@ pub enum ValueKind {
         generics: HashMap<String, Type>,
     },
 
+    Macro(String, AttributeArgs),
+
     Error,
 }
 
@@ -180,7 +182,14 @@ impl Value {
 
     pub fn is_mutable(&self) -> bool {
         match &self.kind {
-            ValueKind::FuncCall { .. } => false, // todo: maybe
+            ValueKind::FuncCall { function, args } => {
+                match &function.kind {
+                    ValueKind::BinaryIntrinsicFn(BinaryIntrinsicFn::ArrayItem) => {
+                        args.args[0].is_mutable()
+                    }
+                    _ => false
+                }
+            }, // todo: maybe
             ValueKind::SelfVal(mutating) => *mutating, // I Think?
 
             ValueKind::CastEnumToVariant { enum_value, .. } => enum_value.is_mutable(),
@@ -225,6 +234,8 @@ impl Value {
 
             ValueKind::SequenceLiteral(_) => false,
             ValueKind::RepeatingLiteral { .. } => false,
+
+            ValueKind::Macro(_, _) => false,
 
             ValueKind::Error => false,
         }
@@ -349,6 +360,8 @@ impl Debug for Value {
             ValueKind::Unit => write!(f, "()"),
             ValueKind::Error => write!(f, "Error"),
             ValueKind::Loop { code: code_block, label } => write!(f, "loop {code_block:?} `{label}"),
+
+            ValueKind::Macro(name, args) => write!(f, "@{name}()"),
         }?;
 
         write!(f, " <{:?}>", self.typ)

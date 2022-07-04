@@ -86,6 +86,8 @@ pub enum BinaryIntrinsicFn {
     FloatCmpLte,
 
     RawPointerAdd,
+
+    ArrayItem,
 }
 
 pub struct Intrinsics {
@@ -117,13 +119,6 @@ impl Intrinsics {
         self.scope.add_symbol(String::from("RawPointer"),
                               Visibility::Public,
                               Symbol::Type(hk_rawptr.clone()));
-
-        // rawPointerCopy
-        // rawPointerDeref
-        // rawPointerRef
-        // rawPointerAdd
-        // rawPointerToAddr
-        // rawPointerFromAddr
 
         let generic_param = TypeKind::GenericParam(String::from("T")).anon();
         let generic_pointer = TypeKind::RawPointer { pointer_type: Box::new(generic_param.clone()) }.anon();

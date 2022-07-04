@@ -301,6 +301,14 @@ impl<'input, 'l> Parser<'input, 'l> {
                 self.error_recover("expected ident in variant", EXPR_RECOVERY_SET);
             }
             marker.complete(self, SyntaxKind::VariantLiteral)
+        } else if self.eat(SyntaxKind::At) {
+            self.name(EXPR_RECOVERY_SET);
+
+            if self.check(SyntaxKind::OpenParen) {
+                self.parse_paren_comma_seq(Self::parse_func_arg);
+            }
+
+            marker.complete(self, SyntaxKind::Macro)
         } else {
             // Try to do recovery
             self.error_recover("expected expression", EXPR_RECOVERY_SET);

@@ -71,6 +71,11 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
                 TypeKind::Array { item: Box::new(item), len: len as usize }
             }
+            AstType::SliceType(slice_type) => {
+                let item = self.lower_type(slice_type.item_type());
+
+                TypeKind::Slice(Box::new(item))
+            }
 
             AstType::Error => panic!(),
         }.spanned(span)

@@ -38,6 +38,7 @@ impl<'a> BlirLowerer<'a> {
 			FuncCall { function, .. } => match &function.kind {
 				UnaryIntrinsicFn(Unary::RawPointerDeref) => LowerKind::Access,
 				UnaryIntrinsicFn(Unary::RawPointerRef) => LowerKind::Const,
+				BinaryIntrinsicFn(Binary::ArrayItem) => LowerKind::Access,
 				_ => LowerKind::Construct,
 			}
 			Initializer(_, _) => LowerKind::Construct,
@@ -167,7 +168,7 @@ impl<'a> BlirLowerer<'a> {
 
 			SequenceLiteral(sequence) => {
 				for (i, seq_item) in sequence.iter().enumerate() {
-					let item_place = place.array_index(i, Self::span_of(seq_item.span));
+					let item_place = place.array_index(RValue::const_int(i as u64, mir::ty::Type::int(64), Self::span_of(value.span)), Self::span_of(seq_item.span));
 
 					self.lower_assign(&item_place, seq_item);
 				}
@@ -176,7 +177,7 @@ impl<'a> BlirLowerer<'a> {
 			RepeatingLiteral { repeating, count } => {
 				// todo: roll this loop
 				for i in 0..count.unwrap() {
-					let item_place = place.array_index(i as usize, Self::span_of(repeating.span));
+					let item_place = place.array_index(RValue::const_int(i, mir::ty::Type::int(64), Self::span_of(value.span)), Self::span_of(repeating.span));
 
 					self.lower_assign(&item_place, &repeating);
 				}
@@ -285,6 +286,28 @@ impl<'a> BlirLowerer<'a> {
 						Unary::RawPointerDeref => self.lower_rvalue(&args.args[0]).deref(Self::span_of(value.span)),
 						_ => unreachable!(),
 					},
+					ValueKind::BinaryIntrinsicFn(Binary::ArrayItem) => {
+						let place = self.lower_place(&args.args[0]);
+						let index = match args.args[1].typ.kind() {
+							TypeKind::Integer { bits: 64 } => { self.lower_rvalue(&args.args[0]) },
+							TypeKind::Struct(struct_ref) if struct_ref.integer_repr() => {
+								let borrowed_struct = struct_ref.borrow();
+								let first = borrowed_struct.instance_vars.first().unwrap().borrow();
+								let field_name = &first.name;
+								let field_type = self.lower_ty(&first.typ);
+								let span = Self::span_of(value.span);
+								self.lower_place(&args.args[1])
+									.field(&field_name, field_type, span)
+									.copy(span)
+							}
+
+							_ => {
+								panic!("error: cannot index into array with type {}", args.args[1].typ);
+							}
+						}; //self.lower_rvalue(&args.args[1]);
+
+						place.array_index(index, Self::span_of(value.span))
+					}
 					_ => unreachable!(),
 				}
 			}
@@ -628,7 +651,9 @@ fn lower_duo_intrinsic(op: Binary) -> DuoIntrinsic {
 		FloatCmpLt => DuoIntrinsic::FCmpLt,
 		FloatCmpLte => DuoIntrinsic::FCmpLte,
 
-		RawPointerAdd => todo!(),
+		ArrayItem => unreachable!(),
+
+		RawPointerAdd => DuoIntrinsic::PtrAdd,
 	}
 }
 

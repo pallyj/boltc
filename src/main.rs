@@ -171,12 +171,21 @@ impl Project {
 
         let mut context = BlirContext::new();
 
+        let mut macro_expand_pass = blir_passes::MacroExpansionPass::new(&host.attribute_factory, &mut debugger);
+        
+        for library in libraries.values_mut() {
+            macro_expand_pass.run_pass(library);
+        }
+        debugger.errors()?;
+
         let mut type_resolve_pass = blir_passes::TypeResolvePass::new(&host.attribute_factory, &host.operator_factory, &mut context, &mut debugger);
         
         for library in libraries.values_mut() {
             type_resolve_pass.run_pass(library);
         }
         debugger.errors()?;
+
+        println!("{:?}", libraries["test"]);
         
         let mut type_infer_pass = blir_passes::TypeInferPass::new(&mut context, &mut debugger);
         
@@ -192,6 +201,8 @@ impl Project {
         }
         debugger.errors()?;
 
+        println!("{:?}", libraries["test"]);
+
         let mut type_check_pass = blir_passes::TypeCheckPass::new(&mut debugger);
 
         for library in libraries.values_mut() {
@@ -202,7 +213,7 @@ impl Project {
         let mut project = mir::Project::new("test");
         BlirLowerer::new(&mut project, libraries.into_values().collect()).lower();
 
-        println!("{project}");
+        //println!("{project}");
 
         let entry = context.entry_point;
         project.execute().run_function(&entry.unwrap(), vec![]);

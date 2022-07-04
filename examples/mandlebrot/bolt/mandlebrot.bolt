@@ -1,0 +1,47 @@
+@entryPoint
+func main() {
+	let level = 1;
+
+	for((-39)..<39) { i =>
+		for((-39)..<39) { j =>
+			let fj = Float(j); // error inits dont have a type
+			let fi = Float(i);
+			let x = fj / 40.0
+			let y = fi / 40.0
+
+			let dist = getDistance(x: x, y: y)
+
+			if dist > level {
+				print("*")
+			} else {
+				print(" ")
+			}
+		}
+
+		printLine()
+	}
+}
+
+let maximum = 16.0
+let maxIters = 1000
+
+func getDistance(x: Float, y: Float) -> Int {
+	let (ci, cr) = (x, y - 0.5);
+	let var (zi, zr) = (0.0, 0.0);
+	let var i: Int = 0;
+
+	repeat {
+		i += 1;
+		let temp = zr * zi;
+		let zr2 = zr * zr;
+		let zi2 = zi * zi;
+		zr = zr2 - zi2 + cr;
+		zi = temp + temp + ci;
+		if zi2 + zr2 > maximum {
+			return i
+		}
+		if i > maxIters {
+			return 0
+		}
+	}
+}

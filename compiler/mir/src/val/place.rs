@@ -35,7 +35,7 @@ pub enum PlaceKind {
 	///
 	/// Gets the item at an index in an array
 	/// 
-	ArrayIndex(Box<Place>, usize),
+	ArrayIndex(Box<Place>, RValue),
 
 	///
 	/// The dereference of a pointer value
@@ -121,7 +121,7 @@ impl Place {
 	///
 	/// Retrieves an indexed item from an array
 	/// 
-	pub fn array_index(&self, index: usize, span: Span) -> Place {
+	pub fn array_index(&self, index: RValue, span: Span) -> Place {
 		if let TypeKind::Array { item, count } = &self.ty.kind() {
 			Place { kind: PlaceKind::ArrayIndex(Box::new(self.clone()), index), ty: item.as_ref().clone(), is_mutable: self.is_mutable, span }
 		} else {
