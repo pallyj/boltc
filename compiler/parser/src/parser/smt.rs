@@ -1,13 +1,6 @@
 use super::{Parser, expr::EXPR_RECOVERY_SET};
 use crate::lexer::SyntaxKind;
 
-const LET_RECOVERY_SET: &[SyntaxKind] = &[SyntaxKind::LetKw,
-                                          SyntaxKind::Colon,
-                                          SyntaxKind::Equals,
-                                          SyntaxKind::Semicolon,
-                                          SyntaxKind::ReturnKw,
-                                          SyntaxKind::OpenParen];
-
 impl<'input, 'l> Parser<'input, 'l> {
     pub fn parse_smt(&mut self) {
         let marker = self.start();

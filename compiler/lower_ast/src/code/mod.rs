@@ -1,8 +1,9 @@
 mod func;
 
-use blir::{code::{CodeBlock, Statement, StatementKind},
-           typ::Type};
-use errors::error::ErrorCode;
+use blir::{
+    code::{CodeBlock, Statement, StatementKind},
+    typ::Type
+};
 use parser::ast::smt::{CodeBlock as AstCodeBlock, Smt as AstSmt};
 
 use crate::{AstLowerer, err::Error};

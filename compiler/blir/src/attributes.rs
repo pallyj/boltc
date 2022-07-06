@@ -1,6 +1,6 @@
-use std::{collections::HashMap, fmt::{format, Display}};
+use std::{collections::HashMap};
 
-use errors::{error::ErrorCode, Span, DiagnosticReporter, IntoDiagnostic, Diagnostic, DiagnosticLevel, CodeLocation};
+use errors::{Span, DiagnosticReporter, IntoDiagnostic, Diagnostic, DiagnosticLevel, CodeLocation};
 use itertools::Itertools;
 
 use crate::{code::{FunctionInfo, CodeBlock, StatementKind}, typ::{StructRef, Type, TypeKind}, BlirContext, value::{FunctionArgs, Value, ValueKind, IfValue, IfBranch}};

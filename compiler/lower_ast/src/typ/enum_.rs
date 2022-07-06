@@ -1,5 +1,4 @@
 use blir::{scope::ScopeRef, typ::{Enum, EnumRef, Case, CaseRef, TypeKind}, value::{Value, ValueKind}};
-use errors::error::ErrorCode;
 use mangle::Path;
 use parser::ast::{containers::{EnumDef, EnumItem, CaseDef}};
 

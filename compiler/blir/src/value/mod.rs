@@ -370,7 +370,7 @@ impl Debug for Value {
             ValueKind::Error => write!(f, "Error"),
             ValueKind::Loop { code: code_block, label } => write!(f, "loop {code_block:?} `{label}"),
 
-            ValueKind::Macro(name, args) => write!(f, "@{name}()"),
+            ValueKind::Macro(name, _) => write!(f, "@{name}()"),
         }?;
 
         write!(f, " <{:?}>", self.typ)

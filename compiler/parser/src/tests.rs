@@ -1,6 +1,6 @@
-use errors::{DiagnosticReporter, fileinterner::FileInterner};
+use errors::{fileinterner::FileInterner};
 
-use crate::{operators::OperatorFactory, parser::{test}};
+use crate::{operators::OperatorFactory};
 
 #[test]
 fn test_code() {
@@ -10,7 +10,7 @@ fn test_code() {
 
     interner.open_file("../../test/patterns/match.bolt", "test");
 
-    let mut debugger = DiagnosticReporter::new(&interner);
+    //let mut debugger = DiagnosticReporter::new(&interner);
 }
 
 // Static

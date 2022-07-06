@@ -1,6 +1,6 @@
 use std::{fmt::Display, collections::HashMap};
 
-use crate::{code::{BasicBlock, BasicBlockId, FunctionId, Function, ExternFunction, ExternFunctionId}, ty::{Type, Struct, StructId, Enum, EnumId}, Builder, exc::ExecutionEngine};
+use crate::{code::{BasicBlock, BasicBlockId, FunctionId, Function, ExternFunction, ExternFunctionId}, ty::{Type, Struct, StructId, Enum, EnumId}, Builder, exc::ExecutionEngine, val::{Global, GlobalId}};
 
 ///
 /// A `Project` encapsulates an entire Bolt projects
@@ -10,16 +10,18 @@ use crate::{code::{BasicBlock, BasicBlockId, FunctionId, Function, ExternFunctio
 pub struct Project {
 	name: String,
 
-	basic_blocks: Vec<BasicBlock>,
-	functions: Vec<Function>,
-	extern_functions: Vec<ExternFunction>,
-	structs: Vec<Struct>,
-	enums: Vec<Enum>,
+	basic_blocks: 	       Vec<BasicBlock>,
+	functions: 		       Vec<Function>,
+	extern_functions:      Vec<ExternFunction>,
+	structs: 		       Vec<Struct>,
+	enums: 			       Vec<Enum>,
+	pub (crate) globals:   Vec<Global>,
 
-	function_names: HashMap<String, FunctionId>,
+	function_names: 	   HashMap<String, FunctionId>,
 	extern_function_names: HashMap<String, ExternFunctionId>,
-	struct_names: HashMap<String, StructId>,
-	enum_names: HashMap<String, EnumId>,
+	struct_names: 		   HashMap<String, StructId>,
+	enum_names: 		   HashMap<String, EnumId>,
+	global_names: 		   HashMap<String, GlobalId>
 }
 
 impl Project {
@@ -32,16 +34,18 @@ impl Project {
 		Self {
 			name: name.to_string(),
 
-			basic_blocks: 	  vec![],
-			functions:    	  vec![],
-			extern_functions: vec![],
-			structs:      	  vec![],
-			enums:			  vec![],
+			basic_blocks: 	  Vec::new(),
+			functions:    	  Vec::new(),
+			extern_functions: Vec::new(),
+			structs:      	  Vec::new(),
+			enums:			  Vec::new(),
+			globals:		  Vec::new(),
 
 			function_names: 	   HashMap::new(),
 			extern_function_names: HashMap::new(),
 			struct_names:   	   HashMap::new(),
 			enum_names:			   HashMap::new(),
+			global_names:		   HashMap::new(),
 		}
 	}
 
@@ -106,9 +110,9 @@ impl Project {
 	///
 	/// 
 	/// 
-	pub (crate) fn get_extern_function_id(&self, name: &str) -> Option<FunctionId> {
-		self.function_names.get(name).cloned()
-	}
+	//pub (crate) fn get_extern_function_id(&self, name: &str) -> Option<FunctionId> {
+	//	self.function_names.get(name).cloned()
+	//}
 
 	///
 	/// 
@@ -194,6 +198,36 @@ impl Project {
 	}
 
 	///
+	/// Adds a global to the project
+	/// 
+	pub (crate) fn add_global(&mut self, name: String, ty: Type) -> GlobalId {
+		let id = GlobalId::new(self.globals.len());
+		let global = Global::new(id, name.clone(), ty);
+		self.global_names.insert(name, global.id());
+		self.globals.push(global);
+
+		id
+	}
+
+	pub (crate) fn global_id(&self, name: &str) -> Option<GlobalId> {
+		self.global_names.get(name).cloned()
+	}
+
+	///
+	/// Gets a reference to a `Global` from its id
+	/// 
+	pub (crate) fn global(&self, id: GlobalId) -> Option<&Global> {
+		self.globals.get(id.index())
+	}
+
+	///
+	/// Gets a mutable reference to a `Global` from its id
+	/// 
+	pub (crate) fn global_mut(&mut self, id: GlobalId) -> Option<&mut Global> {
+		self.globals.get_mut(id.index())
+	}
+
+	///
 	/// Gets the basic block at an index
 	/// 
 	pub (crate) fn basic_block_mut(&mut self, block_id: BasicBlockId) -> Option<&mut BasicBlock> {
@@ -245,6 +279,10 @@ impl Display for Project {
 
 		for enum_val in &self.enums {
 			enum_val.write(f, self)?;
+		}
+
+		for extern_function in &self.extern_functions {
+			extern_function.write(f, self)?;
 		}
 
         for function in &self.functions {

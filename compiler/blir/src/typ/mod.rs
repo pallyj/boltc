@@ -14,7 +14,7 @@ pub use struct_::*;
 pub use enum_::*;
 pub use case_::*;
 
-use crate::{scope::ScopeRef, Symbol, value::ValueKind, intrinsics::{UnaryIntrinsicFn, BinaryIntrinsicFn}};
+use crate::{scope::ScopeRef, Symbol, value::ValueKind, intrinsics::BinaryIntrinsicFn};
 
 static NEXT_INFER_KEY: AtomicU64 = AtomicU64::new(1);
 
@@ -365,13 +365,13 @@ impl Display for Type {
     
             Metatype(_) => todo!(),
     
-            Named(_) => todo!(),
-            Member { parent, member } => todo!(),
+            Named(name) => write!(f, "{name}"),
+            Member { parent, member } => write!(f, "{parent}.{member}"),
             GenericParam(name) => write!(f, "`{name}`"),
-            GenericOf { higher_kind, params } => todo!(),
+            GenericOf { .. } => todo!(),
             HKRawPointer => todo!(),
     
-            Infer { key } => write!(f, "_"),
+            Infer { .. } => write!(f, "_"),
             UnknownInfer => todo!(),
     
             SomeInteger => write!(f, "{{integer}}"),

@@ -1,6 +1,6 @@
 use errors::Span;
 
-use crate::{project::Project, code::{BasicBlockId, BasicBlock, FunctionId, Function, ExternFunctionId}, instr::{Terminator, Instruction}, ty::{Type, StructId, TypeKind, EnumId}, val::{Place, RValue, PlaceKind}};
+use crate::{project::Project, code::{BasicBlockId, BasicBlock, FunctionId, Function, ExternFunctionId}, instr::{Terminator, Instruction}, ty::{Type, StructId, TypeKind, EnumId}, val::{Place, RValue, PlaceKind, Global, GlobalId}};
 
 ///
 /// A helper struct to build MIR code
@@ -130,6 +130,31 @@ impl<'a> Builder<'a> {
 		let local_id = self.current_function_mut().add_local(ty.clone());
 
 		Place::new(PlaceKind::Local(local_id), ty, is_mutable, span)
+	}
+
+	///
+	/// Adds a global to the project
+	/// 
+	pub fn add_global(&mut self, name: String, ty: Type) -> GlobalId {
+		self.project.add_global(name, ty)
+	}
+
+	pub fn global_id(&self, name: &str) -> Option<GlobalId> {
+		self.project.global_id(name)
+	}
+
+	///
+	/// Gets a reference to a `Global` from its id
+	/// 
+	pub fn global(&self, id: GlobalId) -> Option<&Global> {
+		self.project.global(id)
+	}
+
+	///
+	/// Gets a mutable reference to a `Global` from its id
+	/// 
+	pub fn global_mut(&mut self, id: GlobalId) -> Option<&mut Global> {
+		self.project.global_mut(id)
 	}
 
 	///

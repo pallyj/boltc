@@ -1,20 +1,32 @@
-	use itertools::Itertools;
+use std::cell::UnsafeCell;
 
-use crate::{Project, code::BasicBlockId, instr::{Terminator, Instruction}, val::{RValue, DuoIntrinsic, Place, SoloIntrinsic, ConstValue}, ty::{Type, TypeKind}};
+use itertools::Itertools;
 
-use self::{val::Value, frame::StackFrame};
+use crate::{Project, code::BasicBlockId, instr::{Terminator, Instruction}, val::{RValue, DuoIntrinsic, Place, SoloIntrinsic, ConstValue}, ty::TypeKind};
+
+use self::{val::Value, frame::StackFrame, var::Var};
 
 pub mod val;
 mod var;
 mod frame;
 
 pub struct ExecutionEngine<'a> {
-	project: &'a Project
+	project: &'a Project,
+	globals: UnsafeCell<Vec<Var>>
 }
 
 impl<'a> ExecutionEngine<'a> {
 	pub (crate) fn new(project: &'a Project) -> Self {
-		Self { project }
+		let globals =
+			project.globals
+				   .iter()
+				   .map(|global| Var::new(global.ty(), project))
+				   .collect_vec();
+
+		Self {
+			project,
+			globals: UnsafeCell::new(globals)
+		}
 	}
 
 	pub fn run_function(&self, name: &str, params: Vec<Value>) -> Value {
@@ -138,7 +150,7 @@ impl<'a> ExecutionEngine<'a> {
 		*self.get_mut_ptr(place, frame) = value;
 	}
 
-	fn get_ptr<'b>(&self, place: &Place, frame: &'b mut StackFrame) -> &'b Value {
+	fn get_ptr<'b, 'c: 'b>(&'c self, place: &Place, frame: &'b mut StackFrame) -> &'b Value {
 		use crate::val::PlaceKind::*;
 
 		match place.kind() {
@@ -192,11 +204,14 @@ impl<'a> ExecutionEngine<'a> {
 					}
 					_ => panic!()
 				}
+			},
+			Global(global_id) => {
+				unsafe { &*self.globals.get() }.get(global_id.index()).unwrap().get()
 			}
 		}
 	}
 
-	fn get_mut_ptr<'b>(&self, place: &Place, frame: &'b mut StackFrame) -> &'b mut Value {
+	fn get_mut_ptr<'b, 'c: 'b>(&'c self, place: &Place, frame: &'b mut StackFrame) -> &'b mut Value {
 		use crate::val::PlaceKind::*;
 
 		match place.kind() {
@@ -249,6 +264,9 @@ impl<'a> ExecutionEngine<'a> {
 					}
 					_ => panic!()
 				}
+			},
+			Global(global_id) => {
+				unsafe { &mut *self.globals.get() }.get_mut(global_id.index()).unwrap().get_mut()
 			}
 		}
 	}

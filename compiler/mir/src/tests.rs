@@ -82,7 +82,7 @@ r#"func meaningOfLife (i64) -> i64 {
 	let bb0 = builder.append_block();
 	builder.position_at_end(bb0);
 
-	builder.build_terminator(Terminator::returns(RValue::const_int(42, Type::int(64))));
+	builder.build_terminator(Terminator::returns(RValue::const_int(42, Type::int(64), Default::default())));
 
 	println!("{project}");
 	//assert_eq!(format!("{project}"), expected);
@@ -100,30 +100,30 @@ fn loop_to_ten() {
 	let bb1 = builder.append_block();
 	let bb2 = builder.append_block();
 
-	let acc = builder.build_local(Type::int(64));
-	let added = builder.build_local(Type::int(64));
-	let keep_going = builder.build_local(Type::int(1));
+	let acc = builder.build_local(Type::int(64), true, Default::default());
+	let added = builder.build_local(Type::int(64), true, Default::default());
+	let keep_going = builder.build_local(Type::int(1), true, Default::default());
 
 	builder.position_at_end(bb0);
 
-	builder.build_assign(&acc, RValue::const_int(0, Type::int(64)));
+	builder.build_assign(&acc, RValue::const_int(0, Type::int(64), Default::default()));
 	builder.build_terminator(Terminator::goto(bb1));
 
 	builder.position_at_end(bb1);
 
 	// Increment acc by 1
-	builder.build_assign(&added, RValue::intrinsic2(DuoIntrinsic::IAdd, acc.copy(), RValue::const_int(1, Type::int(64))));
-	builder.build_assign(&acc, added.copy());
+	builder.build_assign(&added, RValue::intrinsic2(DuoIntrinsic::IAdd, acc.copy(Default::default()), RValue::const_int(1, Type::int(64), Default::default()), Default::default()));
+	builder.build_assign(&acc, added.copy(Default::default()));
 
 	// Check if acc is bigger than 10
-	builder.build_assign(&keep_going, RValue::intrinsic2(DuoIntrinsic::ICmpLt, acc.copy(), RValue::const_int(10, Type::int(64))));
+	builder.build_assign(&keep_going, RValue::intrinsic2(DuoIntrinsic::ICmpLt, acc.copy(Default::default()), RValue::const_int(10, Type::int(64), Default::default()), Default::default()));
 
 	// Check if the accumulator has reached its value
-	builder.build_terminator(Terminator::branch_if(keep_going.copy(), bb1, bb2));
+	builder.build_terminator(Terminator::branch_if(keep_going.copy(Default::default()), bb1, bb2));
 
 	builder.position_at_end(bb2);
 
-	builder.build_terminator(Terminator::returns(acc.copy()));
+	builder.build_terminator(Terminator::returns(acc.copy(Default::default())));
 
 	//println!("{project}");
 
@@ -183,13 +183,13 @@ fn macros() {
 		let var keep_going: Type::int(1); in
 
 		bb0: {
-			builder.build_assign(&acc, RValue::const_int(0, Type::int(64)))
+			builder.build_assign(&acc, RValue::const_int(0, Type::int(64), Default::default()))
 			builder.build_terminator(Terminator::goto(bb1))
 		}
 
 		bb1: {
 			// Increment acc by 1
-			builder.build_assign(&added, RValue::intrinsic2(DuoIntrinsic::IAdd, acc.copy(), RValue::const_int(1, Type::int(64))))
+			builder.build_assign(&added, RValue::intrinsic2(DuoIntrinsic::IAdd, acc.copy(), RValue::const_int(1, Type::int(64), Default::default()), Default::default()))
 			builder.build_assign(&acc, added.copy())
 
 			// Check if acc is bigger than 10

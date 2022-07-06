@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use blir::Library;
 use errors::{fileinterner::FileInterner, DiagnosticReporter};
 use parser::{operators::OperatorFactory, parser::parse};
@@ -35,8 +37,9 @@ func gcd(a: Int64, b: Int64): Int64 {
 	"#;
 
     let mut lib = Library::new("");
+	let imports = HashMap::new();
 
-    AstLowerer::new(parse(&code, &mut debugger, 0, &operator_factory), &mut debugger, &operator_factory).lower_file(&mut lib);
+    AstLowerer::new(parse(&code, &mut debugger, 0, &operator_factory), &mut debugger, &operator_factory, &imports).lower_file(&mut lib);
 
     println!("{lib:?}");
 }

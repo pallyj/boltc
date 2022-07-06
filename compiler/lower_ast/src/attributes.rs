@@ -1,4 +1,4 @@
-use blir::{attributes::{Attribute, Attributes, AttributeArg, AttributeArgs}, value::FunctionArgs};
+use blir::{attributes::{Attribute, Attributes, AttributeArg, AttributeArgs}};
 use errors::{IntoDiagnostic, Span, Diagnostic, DiagnosticLevel, CodeLocation};
 
 use crate::AstLowerer;

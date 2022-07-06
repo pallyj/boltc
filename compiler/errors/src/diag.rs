@@ -1,4 +1,4 @@
-use std::{fmt::format, sync::atomic::{AtomicU64, Ordering}};
+use std::{sync::atomic::{AtomicU64, Ordering}};
 
 use colored::{Colorize, ColoredString};
 

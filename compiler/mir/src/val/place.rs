@@ -4,7 +4,7 @@ use errors::Span;
 
 use crate::{instr::LocalId, ty::{Type, TypeKind}};
 
-use super::{RValue, RValueKind};
+use super::{RValue, RValueKind, GlobalId};
 
 /// 
 /// A place represents an value stored in memory. Like a lvalue in C,
@@ -16,6 +16,11 @@ pub enum PlaceKind {
 	/// Fetches the value of a local
 	/// 
 	Local(LocalId),
+
+	///
+	/// The value of a global variable
+	/// 
+	Global(GlobalId),
 
 	///
 	/// Gets a field of a struct
@@ -122,7 +127,7 @@ impl Place {
 	/// Retrieves an indexed item from an array
 	/// 
 	pub fn array_index(&self, index: RValue, span: Span) -> Place {
-		if let TypeKind::Array { item, count } = &self.ty.kind() {
+		if let TypeKind::Array { item, .. } = &self.ty.kind() {
 			Place { kind: PlaceKind::ArrayIndex(Box::new(self.clone()), index), ty: item.as_ref().clone(), is_mutable: self.is_mutable, span }
 		} else {
 			panic!("Tried to index into a non-array value {:?}", self.ty())
@@ -175,14 +180,17 @@ impl Place {
 
 impl Display for PlaceKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		use PlaceKind::*;
+
         match self {
-			Self::Local(id) => write!(f, "{id}"),
-			Self::StructField(place, field) => write!(f, "{place}.{field}"),
-			Self::CastEnumVariant(place, _, variant_name) => write!(f, "{place} as .{variant_name}"),
-			Self::TupleItem(place, index) => write!(f, "{place}.{index}"),
-			Self::Deref(pointer_value) => write!(f, "*{pointer_value}"),
-			Self::Discriminant(place) => write!(f, "discriminant {place}"),
-			Self::ArrayIndex(place, idx) => write!(f, "index {idx} of {place}"),
+			Local(id) => write!(f, "{id}"),
+			Global(id) => write!(f, "{id}"),
+			StructField(place, field) => write!(f, "{place}.{field}"),
+			CastEnumVariant(place, _, variant_name) => write!(f, "{place} as .{variant_name}"),
+			TupleItem(place, index) => write!(f, "{place}.{index}"),
+			Deref(pointer_value) => write!(f, "*{pointer_value}"),
+			Discriminant(place) => write!(f, "discriminant {place}"),
+			ArrayIndex(place, idx) => write!(f, "index {idx} of {place}"),
 		}
     }
 }
