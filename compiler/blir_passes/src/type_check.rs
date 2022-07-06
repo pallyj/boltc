@@ -1,17 +1,23 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, collections::HashMap};
 
 use blir::{code::{CodeBlock, FunctionRef, MethodRef, Statement, StatementKind},
            typ::{StructRef, Type, TypeKind, EnumRef},
            value::{ConstantRef, IfBranch, IfValue, Value, ValueKind, VarRef},
-           Library, Monomorphizer, pattern::{Pattern, PatternKind}, Symbol};
-use errors::{error::ErrorCode, Span, IntoDiagnostic, DiagnosticReporter, Diagnostic, DiagnosticLevel, CodeLocation};
+           Library, Monomorphizer, pattern::{Pattern, PatternKind}};
+use errors::{Span, IntoDiagnostic, DiagnosticReporter, Diagnostic, DiagnosticLevel, CodeLocation};
 
 pub struct TypeCheckPass<'a, 'b> {
-    debugger: &'a mut DiagnosticReporter<'b>,
+    debugger:   &'a mut DiagnosticReporter<'b>,
+    loop_types: HashMap<String, Type>,
 }
 
 impl<'a, 'b> TypeCheckPass<'a, 'b> {
-    pub fn new(debugger: &'a mut DiagnosticReporter<'b>) -> Self { Self { debugger } }
+    pub fn new(debugger: &'a mut DiagnosticReporter<'b>) -> Self {
+        Self {
+            debugger,
+            loop_types: HashMap::new()
+        }
+    }
 
     pub fn run_pass(&mut self, library: &mut Library) {
         for func in &library.functions {
@@ -105,7 +111,6 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
 
         for smt in code_block.statements() {
             if did_diverge {
-                // error: raise a warning
                 self.debugger.throw_diagnostic(TypeCheckError::UnreachableCode(smt.span.unwrap_or_default()));
             }
             if let Some(smt) = diverging_smt.take() {
@@ -118,7 +123,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 diverging_smt = smt.span;
             }
 
-            did_diverge = did_it_diverge;
+            did_diverge |= did_it_diverge;
         }
 
         if let Some(code_block_type) = code_block_type {
@@ -157,7 +162,25 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 self.check_codeblock(otherwise, None, return_type);
             }
 
-            StatementKind::Break(_) |
+            StatementKind::Break(value, label) => {
+                let loop_ty = self.loop_types.get(label).unwrap();
+
+                match value {
+                    Some(val) => {
+                        self.check_type(loop_ty, &val.typ);
+                        self.check_value(val, return_type);
+                    }
+
+                    None => match loop_ty.kind() {
+                        TypeKind::Divergent |
+                        TypeKind::Void => {  }
+
+                        _ => {
+                            self.debugger.throw_diagnostic(TypeCheckError::MismatchedTypes(loop_ty.clone(), TypeKind::Void.anon()));
+                        }
+                    }
+                }
+            }
             StatementKind::Continue(_) => {}
 
             StatementKind::Panic => {}
@@ -319,8 +342,10 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 }
             }
 
-            ValueKind::Loop { code: code_block, .. } => {
+            ValueKind::Loop { code: code_block, label } => {
+                self.loop_types.insert(label.clone(), value.typ.clone());
                 self.check_codeblock(code_block, None, return_type);
+                self.loop_types.remove(label);
             }
 
             ValueKind::SequenceLiteral(sequence) => {
@@ -354,6 +379,45 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 } else {
                     // error
                     println!("error: array has type");
+                }
+            }
+
+            ValueKind::IntLiteral(_) => {
+                match value.typ.kind() {
+                    TypeKind::Integer { .. } => {}
+                    TypeKind::Struct(struct_ref) if struct_ref.integer_repr() => {}
+                    _ => {
+                        self.debugger.throw_diagnostic(TypeCheckError::MismatchedTypes(TypeKind::SomeInteger.anon(), value.typ.clone()))
+                    }
+                }
+            }
+
+            ValueKind::FloatLiteral(_) => {
+                match value.typ.kind() {
+                    TypeKind::Float { .. } => {}
+                    TypeKind::Struct(struct_ref) if struct_ref.float_repr() => {}
+                    _ => {
+                        self.debugger.throw_diagnostic(TypeCheckError::MismatchedTypes(TypeKind::SomeFloat.anon(), value.typ.clone()))
+                    }
+                }
+            }
+
+            ValueKind::BoolLiteral(_) => {
+                match value.typ.kind() {
+                    TypeKind::Integer { .. } => {}
+                    TypeKind::Struct(struct_ref) if struct_ref.bool_repr() => {}
+                    _ => {
+                        self.debugger.throw_diagnostic(TypeCheckError::MismatchedTypes(TypeKind::SomeBool.anon(), value.typ.clone()))
+                    }
+                }
+            }
+
+            ValueKind::StringLiteral(_) => {
+                match value.typ.kind() {
+                    TypeKind::Struct(struct_ref) if struct_ref.string_repr() || struct_ref.char_repr() => {}
+                    _ => {
+                        self.debugger.throw_diagnostic(TypeCheckError::MismatchedTypes(TypeKind::StrSlice.anon(), value.typ.clone()))
+                    }
                 }
             }
 
@@ -573,8 +637,18 @@ impl IntoDiagnostic for TypeCheckError {
             TypeCheckError::OperatorDNE(_, _) => todo!(),
             TypeCheckError::SymbolNotAValue(_, _) => todo!(),
             TypeCheckError::MemberNotAValue(_, _, _) => todo!(),
-            TypeCheckError::CodeAfterUnreachable(_) => todo!(),
-            TypeCheckError::UnreachableCode(_) => todo!(),
+            TypeCheckError::CodeAfterUnreachable(span) =>  {
+                Diagnostic::new(DiagnosticLevel::Warning,
+                                "unreachable_expr",
+                                format!("unreachable expression"),
+                                vec![ CodeLocation::new(span, Some("any code following this expression is unreachable".into())) ])
+            }
+            TypeCheckError::UnreachableCode(span) => {
+                Diagnostic::new(DiagnosticLevel::Warning,
+                                "unreachable_code",
+                                format!("encountered unreachable code"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
 
             TypeCheckError::UnexpectedShared(span) => {
                 Diagnostic::new(DiagnosticLevel::Error,

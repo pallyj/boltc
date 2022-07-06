@@ -47,7 +47,10 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                     self.replace_value(value, scope)
                 }
             }
-            StatementKind::Break(_) |
+            StatementKind::Break(Some(value), _) => {
+                self.replace_value(value, scope);
+            }
+            StatementKind::Break(None, _) |
             StatementKind::Continue(_) => {}
 
             StatementKind::Guard { condition, otherwise } => {
@@ -567,6 +570,7 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                                                                .map(TypeKind::Struct),
             TypeVariant::SomeBool if self.is_final_run => self.context.default_bool_repr.clone().map(TypeKind::Struct),
             TypeVariant::SomeString if self.is_final_run => self.context.default_string_repr.clone().map(TypeKind::Struct),
+            TypeVariant::SomeDiverges if self.is_final_run => Some(TypeKind::Divergent),
 
             TypeVariant::Function { params,
                                     labels,

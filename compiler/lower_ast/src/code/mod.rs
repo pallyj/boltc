@@ -37,22 +37,22 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                      StatementKind::Bind { pattern, typ, value }
                  }
 
-                 AstSmt::BreakSmt(_) => {
-                     // todo: break a value and a loop
-                     if last_loop_label.is_none() {
+                 AstSmt::BreakSmt(break_smt) => {
+                    let label = break_smt.scope().or_else(|| last_loop_label.map(str::to_string));
+                    // todo: break a value
+                    if label.is_none() {
                         self.reporter.throw_diagnostic(Error::BreakOutsideLoop.at(span));
                     }
-                     let label = String::from(last_loop_label.unwrap_or(""));
-                     StatementKind::Break(label)
+                    let value = break_smt.value().map(|val| self.lower_expr(val, last_loop_label));
+                    StatementKind::Break(value, label.unwrap())
                  }
 
-                 AstSmt::ContinueSmt(_) => {
-                     // todo: break a label
-                     if last_loop_label.is_none() {
+                 AstSmt::ContinueSmt(continue_smt) => {
+                    let label = continue_smt.scope().or_else(|| last_loop_label.map(str::to_string));
+                    if label.is_none() {
                         self.reporter.throw_diagnostic(Error::ContinueOutsideLoop.at(span));
-                     }
-                     let label = String::from(last_loop_label.unwrap_or(""));
-                     StatementKind::Continue(label)
+                    }
+                    StatementKind::Continue(label.unwrap())
                  },
 
                  AstSmt::GuardSmt(guard_smt) => {

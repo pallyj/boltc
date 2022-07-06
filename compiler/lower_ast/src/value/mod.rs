@@ -305,7 +305,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                     self.reporter.throw_diagnostic(Error::FeatureNotEnabled("repeat_loops").at(span));
                 }
 
-                let next_label = format!("repeat#{}", LOOP_COUNTER.fetch_add(1, Ordering::Relaxed));
+                let next_label = repeat_loop.scope().unwrap_or_else(|| format!("repeat#{}", LOOP_COUNTER.fetch_add(1, Ordering::Relaxed)));
                 let lowered_block = self.lower_code_block(repeat_loop.code_block(), Some(&next_label));
 
                 ValueKind::Loop{ code: lowered_block, label: next_label }.spanned_infer(span)
@@ -318,9 +318,9 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
 
                 let condition = self.lower_expr(while_loop.condition(), last_loop_label);
 
-                let next_label = format!("while#{}", LOOP_COUNTER.fetch_add(1, Ordering::Relaxed));
+                let next_label = while_loop.scope().unwrap_or_else(|| format!("while#{}", LOOP_COUNTER.fetch_add(1, Ordering::Relaxed)));
                 let lowered_block = self.lower_code_block(while_loop.code_block(), Some(&next_label));
-                let else_break = CodeBlock::new(vec![ StatementKind::Break(next_label.clone()).spanned(span) ], span);
+                let else_break = CodeBlock::new(vec![ StatementKind::Break(None, next_label.clone()).spanned(span) ], span);
 
                 let if_switch = ValueKind::If(IfValue {
                     condition: Box::new(condition),
@@ -345,9 +345,9 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                 let scrutinee = self.lower_expr(while_let_loop.value(), last_loop_label);
                 let pattern = self.lower_pattern(while_let_loop.pattern());
 
-                let next_label = format!("while#{}", LOOP_COUNTER.fetch_add(1, Ordering::Relaxed));
+                let next_label = while_let_loop.scope().unwrap_or_else(|| format!("while#{}", LOOP_COUNTER.fetch_add(1, Ordering::Relaxed)));
                 let lowered_block = self.lower_code_block(while_let_loop.code_block(), Some(&next_label));
-                let else_break = CodeBlock::new(vec![ StatementKind::Break(next_label.clone()).spanned(span) ], span);
+                let else_break = CodeBlock::new(vec![ StatementKind::Break(None, next_label.clone()).spanned(span) ], span);
 
                 let match_pat = ValueKind::Match(MatchValue {
                     discriminant: Box::new(scrutinee),

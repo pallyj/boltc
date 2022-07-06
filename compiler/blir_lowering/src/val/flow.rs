@@ -393,7 +393,7 @@ impl<'a> BlirLowerer<'a> {
         loop_code_block: &CodeBlock,
         label: &str)
     {
-        // todo: have an after and before loop
+
         let break_block = self.builder.append_block();
         let loop_block = self.builder.append_block();
         self.builder.build_terminator(Terminator::goto(loop_block));

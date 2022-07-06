@@ -374,12 +374,12 @@ impl Display for Type {
             Infer { key } => write!(f, "_"),
             UnknownInfer => todo!(),
     
-            SomeInteger => todo!(),
-            SomeFloat => todo!(),
-            SomeBool => todo!(),
-            SomeFunction => todo!(),
+            SomeInteger => write!(f, "{{integer}}"),
+            SomeFloat => write!(f, "{{float}}"),
+            SomeBool => write!(f, "{{bool}}"),
+            SomeFunction => write!(f, "{{function}}"),
     
-            StrSlice => todo!(),
+            StrSlice => write!(f, "{{string}}"),
         }
     }
 }

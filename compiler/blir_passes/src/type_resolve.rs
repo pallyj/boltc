@@ -1,4 +1,4 @@
-use std::{collections::{HashMap}, fmt::format};
+use std::{collections::{HashMap}};
 
 use blir::{attributes::AttributeFactory,
            code::{CodeBlock, ExternFunctionRef, FunctionRef, MethodRef, Statement, StatementKind},
@@ -6,7 +6,7 @@ use blir::{attributes::AttributeFactory,
            typ::{StructRef, Type, TypeKind, EnumRef},
            value::{Closure, ClosureParam, ConstantRef, IfBranch, IfValue, Value, ValueKind, VarRef},
            BlirContext, Library, Symbol, Visibility, pattern::{Pattern, PatternKind}};
-use errors::{error::ErrorCode, Span, DiagnosticReporter, IntoDiagnostic, Diagnostic, DiagnosticLevel, CodeLocation};
+use errors::{Span, DiagnosticReporter, IntoDiagnostic, Diagnostic, DiagnosticLevel, CodeLocation};
 use parser::operators::{OperatorFactory, OperatorFix};
 
 use crate::init_default::add_default_initializer;
@@ -481,7 +481,10 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                 self.define_pattern_in_scope(pattern, scope);
             }
 
-            StatementKind::Break(_) |
+            StatementKind::Break(Some(value), _) => {
+                self.resolve_value(value, scope)
+            }
+            StatementKind::Break(None, _) |
             StatementKind::Continue(_) => {}
             StatementKind::Panic => {}
         }

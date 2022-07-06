@@ -25,7 +25,7 @@ pub enum StatementKind {
         value: Option<Value>,
     },
 
-    Break(String),
+    Break(Option<Value>, String),
     Continue(String),
 
     Guard {
@@ -79,7 +79,7 @@ impl Statement {
                     ty
                 }
             }
-            StatementKind::Break(_) => TypeKind::Divergent.anon(),
+            StatementKind::Break(_, _) => TypeKind::Divergent.anon(),
             StatementKind::Continue(_) => TypeKind::Divergent.anon(),
 
             StatementKind::Guard { .. } => {
@@ -98,7 +98,7 @@ impl Statement {
         match self.deref() {
             StatementKind::Return { .. } => true,
             StatementKind::Eval { value, .. } => matches!(value.typ.deref(), TypeKind::Divergent),
-            StatementKind::Break(_) => true,
+            StatementKind::Break(_, _) => true,
             StatementKind::Continue(_) => true,
             StatementKind::Panic => true,
             _ => false,
@@ -140,7 +140,11 @@ impl Debug for Statement {
                     write!(f, "return")
                 }
             }
-            StatementKind::Break(label) => write!(f, "break `{label}"),
+            StatementKind::Break(value, label) => if let Some(value) = value {
+                write!(f, "break {value:?} `{label}")
+            } else {
+                write!(f, "break `{label}")
+            },
             StatementKind::Continue(label) => write!(f, "continue `{label}"),
 
             StatementKind::Guard { condition, otherwise } => {

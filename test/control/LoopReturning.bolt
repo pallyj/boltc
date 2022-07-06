@@ -1,0 +1,21 @@
+@entryPoint
+func main() {
+	let n = 3;
+
+	let var (a, b) = (1, 1);
+	let var i = 2;
+
+	let fibonacci = repeat {
+		if i == n {
+			break b	
+		}
+
+		let c = a + b;
+		a = b;
+		b = c;
+
+		i += 1;
+	}
+
+	print(fibonacci)
+}

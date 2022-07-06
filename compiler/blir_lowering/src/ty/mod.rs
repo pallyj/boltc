@@ -23,7 +23,7 @@ impl<'a> BlirLowerer<'a> {
 			Tuple(items, _) => mir::ty::Type::tuple(items.iter().map(|item| self.lower_ty(item)).collect_vec()),
 			Array { item, len } => self.lower_ty(&item).array(*len),
 			StrSlice => todo!(),
-			Divergent => todo!(),
+			Divergent => mir::ty::Type::void(),
 
 			Named(name) => panic!("compiler error: failed to catch unresolved type `{name}`"),
 			Member { parent, member } => panic!("compiler error: failed to catch unresolved type `{parent:?}.{member}`"),

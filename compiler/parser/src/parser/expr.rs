@@ -288,6 +288,8 @@ impl<'input, 'l> Parser<'input, 'l> {
                 return marker.complete(self, SyntaxKind::Error)
             }
             self.parse_codeblock();
+
+            self.eat(SyntaxKind::Scope);
             
             marker.complete(self, SyntaxKind::RepeatLoop)
         } else if self.eat(SyntaxKind::WhileKw) {
@@ -391,6 +393,8 @@ impl<'input, 'l> Parser<'input, 'l> {
 
         self.parse_codeblock();
 
+        self.eat(SyntaxKind::Scope);
+
         marker.complete(self, SyntaxKind::WhileLoop)
     }
 
@@ -409,6 +413,8 @@ impl<'input, 'l> Parser<'input, 'l> {
         }
 
         self.parse_codeblock();
+
+        self.eat(SyntaxKind::Scope);
 
         marker.complete(self, SyntaxKind::WhileLetLoop)
     }

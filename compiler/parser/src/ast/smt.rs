@@ -8,7 +8,7 @@
 
 use std::fmt::Debug;
 
-use super::{expr::Expr, typ::Type, pattern::Pattern};
+use super::{expr::Expr, typ::Type, pattern::Pattern, find_token};
 use crate::lexer::SyntaxKind;
 
 ast!(struct EvalSmt(EvalSmt));
@@ -183,15 +183,40 @@ impl Debug for CodeBlock {
     }
 }
 
+impl BreakSmt {
+    pub fn value(&self) -> Option<Expr> {
+        self.0
+            .first_child()
+            .map(Expr::cast)
+    }
+    pub fn scope(&self) -> Option<String> {
+        find_token(&self.0, SyntaxKind::Scope).map(|t| t.text().to_string())
+    }
+}
+
 impl Debug for BreakSmt {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "break")
+        if let Some(scope_label) = self.scope() {
+            write!(f, "break {scope_label}")
+        } else {
+            write!(f, "break")
+        }
+    }
+}
+
+impl ContinueSmt {
+    pub fn scope(&self) -> Option<String> {
+        find_token(&self.0, SyntaxKind::Scope).map(|t| t.text().to_string())
     }
 }
 
 impl Debug for ContinueSmt {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "continue")
+        if let Some(scope_label) = self.scope() {
+            write!(f, "continue {scope_label}")
+        } else {
+            write!(f, "continue")
+        }
     }
 }
 

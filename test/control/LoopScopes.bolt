@@ -1,0 +1,9 @@
+@entryPoint
+func main() {
+	print("Starting loops...")
+	repeat {
+		repeat {
+			break `inner
+		}
+	} `outer
+}

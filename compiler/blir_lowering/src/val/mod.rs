@@ -28,7 +28,9 @@ impl<'a> BlirLowerer<'a> {
 				LowerKind::Const
 			} else { LowerKind::Construct }
 
-			Loop { .. } => LowerKind::Const,
+			Loop { .. } => if matches!(value.typ.kind(), TypeKind::Divergent | TypeKind::Void) {
+				LowerKind::Const
+			} else { LowerKind::Construct }
 			
 			Unit => LowerKind::Const,
 			StaticFunc(_) => LowerKind::Const,
@@ -165,7 +167,11 @@ impl<'a> BlirLowerer<'a> {
 
 			If(if_value) => self.lower_if_value(if_value, Some(place)),
 			Match(match_value) => self.lower_match(match_value, Some(place)),
-
+			Loop { label, code } => {
+				self.loop_places.insert(label.clone(), place.clone());
+				self.lower_loop(code, &label);
+				self.loop_places.remove(label);
+			}
 			SequenceLiteral(sequence) => {
 				for (i, seq_item) in sequence.iter().enumerate() {
 					let item_place = place.array_index(RValue::const_int(i as u64, mir::ty::Type::int(64), Self::span_of(value.span)), Self::span_of(seq_item.span));

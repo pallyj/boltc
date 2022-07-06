@@ -86,7 +86,10 @@ impl<'a, 'l> MacroExpansionPass<'a, 'l> {
     fn resolve_code_block(&mut self, code_block: &mut CodeBlock, scope: &ScopeRef) {
         for statement in code_block.statements_mut() {
             match &mut statement.kind {
-                StatementKind::Bind { value: Some(value), .. } | StatementKind::Return { value: Some(value) } | StatementKind::Eval { value, .. } => {
+                StatementKind::Bind { value: Some(value), .. } |
+                StatementKind::Return { value: Some(value) } |
+                StatementKind::Eval { value, .. } |
+                StatementKind::Break(Some(value), _) => {
                     self.resolve_value(value, scope)
                 }
 

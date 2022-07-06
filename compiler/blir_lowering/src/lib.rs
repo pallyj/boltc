@@ -23,6 +23,7 @@ pub struct BlirLowerer<'a> {
 
     break_labels: HashMap<String, BasicBlockId>,
     continue_labels: HashMap<String, BasicBlockId>,
+    loop_places: HashMap<String, Place>,
 }
 
 impl<'a> BlirLowerer<'a> {
@@ -37,7 +38,8 @@ impl<'a> BlirLowerer<'a> {
                function_ctx: HashMap::new(),
                closures: Vec::new(),
                break_labels: HashMap::new(),
-               continue_labels: HashMap::new() }
+               continue_labels: HashMap::new(),
+               loop_places: HashMap::new() }
     }
 
     ///

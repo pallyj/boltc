@@ -121,14 +121,33 @@ impl<'a> BlirLowerer<'a> {
 
 				None
 			},
-			Break(label) => {
-				let bb = *self.break_labels.get(label).unwrap();
-				self.builder.build_terminator(Terminator::goto(bb));
+			Break(value, label) => {
+				if let Some(bb) = self.break_labels.get(label) {
+					let bb = *bb;
+
+					if let Some(value) = value {
+						let value_to_assign = self.lower_rvalue(value);
+						let place = self.loop_places.get(label).unwrap();
+						
+
+						self.builder.build_assign(place, value_to_assign);
+					}
+
+					self.builder.build_terminator(Terminator::goto(bb));
+				} else {
+					println!("error: loop {} doesn't exist", label);
+					self.builder.build_terminator(Terminator::panic());
+				}
+				
 				None
 			},
 			Continue(label) => {
-				let bb = *self.continue_labels.get(label).unwrap();
-				self.builder.build_terminator(Terminator::goto(bb));
+				if let Some(bb) = self.continue_labels.get(label) {
+					self.builder.build_terminator(Terminator::goto(*bb));
+				} else {
+					println!("error: loop {} doesn't exist", label);
+					self.builder.build_terminator(Terminator::panic());
+				}
 				None
 			}
 

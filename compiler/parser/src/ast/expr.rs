@@ -621,11 +621,19 @@ impl RepeatLoop {
             .find_map(|child| CodeBlock::cast(child))
             .unwrap()
     }
+
+    pub fn scope(&self) -> Option<String> {
+        find_token(&self.0, SyntaxKind::Scope).map(|t| t.text().to_string())
+    }
 }
 
 impl Debug for RepeatLoop {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "repeat {:?}", self.code_block())
+        if let Some(scope_label) = self.scope() {
+            write!(f, "repeat {:?} {scope_label}", self.code_block())
+        } else {
+           write!(f, "repeat {:?}", self.code_block())
+        }
     }
 }
 
@@ -644,11 +652,19 @@ impl WhileLoop {
             .find_map(|child| CodeBlock::cast(child))
             .unwrap()
     }
+
+    pub fn scope(&self) -> Option<String> {
+        find_token(&self.0, SyntaxKind::Scope).map(|t| t.text().to_string())
+    }
 }
 
 impl Debug for WhileLoop {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "while {:?} {:?}", self.condition(), self.code_block())
+        if let Some(scope_label) = self.scope() {
+            write!(f, "while {:?} {:?} {}", self.condition(), self.code_block(), scope_label)
+        } else {
+            write!(f, "while {:?} {:?}", self.condition(), self.code_block())
+        }
     }
 }
 
@@ -673,6 +689,10 @@ impl WhileLetLoop {
         self.0.children()
             .find_map(|child| CodeBlock::cast(child))
             .unwrap()
+    }
+
+    pub fn scope(&self) -> Option<String> {
+        find_token(&self.0, SyntaxKind::Scope).map(|t| t.text().to_string())
     }
 }
 

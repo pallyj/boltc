@@ -5,6 +5,8 @@ use rusttyc::{Constructable, Partial, Variant};
 pub enum TypeVariant {
     Unconstrained,
 
+    SomeDiverges,
+
     SomeInteger,
     SomeFloat,
     SomeBool,
@@ -51,6 +53,8 @@ impl Variant for TypeVariant {
             (Self::Diverges, x) | (x, Self::Diverges) => Ok(x),
             
             (Self::Unconstrained, x) | (x, Self::Unconstrained) => Ok(x),
+
+            (Self::SomeDiverges, x) | (x, Self::SomeDiverges) => Ok(x),
 
             (Self::SomeInteger, Self::LlvmInt { bits }) | (Self::LlvmInt { bits }, Self::SomeInteger) => Ok(Self::LlvmInt { bits }),
 

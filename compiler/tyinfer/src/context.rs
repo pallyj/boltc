@@ -15,6 +15,7 @@ pub struct TypeInferContext<'a, 'b> {
     infer_keys: HashMap<u64, TcKey>,
     debugger:   &'a mut DiagnosticReporter<'b>,
     context:    &'a BlirContext,
+    loop_values:HashMap<String, Type>
 }
 
 impl<'a, 'b> TypeInferContext<'a, 'b> {
@@ -22,7 +23,8 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
         Self { checker: VarlessTypeChecker::new(),
                infer_keys: HashMap::new(),
                debugger,
-               context }
+               context,
+               loop_values: HashMap::new() }
     }
 
     pub fn replace<'c>(&'c mut self) -> TypeReplaceContext<'c, 'b> {
@@ -151,9 +153,11 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                 }
             }
 
-            ValueKind::Loop { code: loop_value, .. } => {
-                self.constrain_one_way(&value.typ, &TypeKind::Void.anon());
-                self.infer_codeblock(loop_value, &TypeKind::Void.anon(), scope)
+            ValueKind::Loop { code: loop_value, label } => {
+                self.loop_values.insert(label.clone(), value.typ.clone());
+                self.constrain_divergent(&value);
+                self.infer_codeblock(loop_value, &TypeKind::Void.anon(), scope);
+                self.loop_values.remove(label.as_str());
             }
 
             ValueKind::Assign(left, right) => {
@@ -233,7 +237,15 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                 }
             }
 
-            StatementKind::Break(_) |
+            StatementKind::Break(value, label) => {
+                let loop_type = self.loop_values.get(label).unwrap().clone();
+                if let Some(value) = value {
+                    self.constrain_value(value, scope);
+                    self.constrain_two_way(&loop_type, &value.typ);
+                } else {
+                    self.constrain_two_way(&loop_type, &TypeKind::Void.anon())
+                }
+            }
             StatementKind::Continue(_) => {},
 
             StatementKind::Guard { condition, otherwise } => {
@@ -309,6 +321,16 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
         }
     }
 
+    fn constrain_divergent(&mut self, value: &Value) {
+        // println!("{value:?} <- some Bool");
+        if let Some(infer_key) = self.infer_key(&value.typ) {
+            let _constraint = self.checker
+                                  .impose(infer_key.concretizes_explicit(TypeVariant::SomeDiverges));
+
+            // Match constraint for errors
+        }
+    }
+
     fn constrain_int(&mut self, value: &Value) {
         // println!("{value:?} <- some Int");
         if let Some(infer_key) = self.infer_key(&value.typ) {
@@ -319,11 +341,11 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
                 return;
             }
 
+            // todo: move this to a later layer
             self.debugger.throw_diagnostic(Error::NotAnInteger(value.typ.clone(), value.span.clone().unwrap_or(Span::empty())));
 
             match constraint.err().unwrap() {
                 TcErr::KeyEquation(_key1, _key2, _error) => {
-                    println!("Incompatible types");
                 }
 
                 _ => {}

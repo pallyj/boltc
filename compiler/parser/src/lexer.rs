@@ -93,6 +93,9 @@ pub enum SyntaxKind {
     #[regex("[a-zA-Z_$][a-zA-Z_$0-9]*", priority = 2)]
     Ident,
 
+    #[regex("`[a-zA-Z_$][a-zA-Z_$0-9]*")]
+    Scope,
+
     #[regex("[+|\\-|*|/|%|<|>|&|\\||^|=|!|?|\\.|~]+")]
     Operator,
 
