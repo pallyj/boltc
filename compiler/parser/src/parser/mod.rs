@@ -249,7 +249,7 @@ impl<'input, 'l> Parser<'input, 'l> {
     }
 }
 
-pub fn parse<'input>(input: &'input str, debugger: &'input DiagnosticReporter, file: usize, operator_factory: &OperatorFactory) -> Parse {
+pub fn parse<'input>(input: &'input str, debugger: &'input DiagnosticReporter, file: usize, operator_factory: &OperatorFactory) -> Parse<'input> {
     let lexemes: Vec<_> = Lexer::new(input).collect();
 
     let parser = Parser::new(&lexemes, operator_factory);
@@ -261,10 +261,11 @@ pub fn parse<'input>(input: &'input str, debugger: &'input DiagnosticReporter, f
 
     Parse { file,
             root: SyntaxNode::new_root(root),
-            comments }
+            comments,
+            lexemes }
 }
 
-pub fn test<'input, F>(input: &'input str, debugger: &'input DiagnosticReporter, file: usize, operator_factory: &OperatorFactory, test: F) -> Parse
+pub fn test<'input, F>(input: &'input str, debugger: &'input DiagnosticReporter, file: usize, operator_factory: &OperatorFactory, test: F) -> Parse<'input>
     where F: Fn(&mut Parser)
 {
     let lexemes: Vec<_> = Lexer::new(input).collect();
@@ -279,5 +280,6 @@ pub fn test<'input, F>(input: &'input str, debugger: &'input DiagnosticReporter,
 
     Parse { file,
             root: SyntaxNode::new_root(root),
-            comments }
+            comments,
+            lexemes }
 }

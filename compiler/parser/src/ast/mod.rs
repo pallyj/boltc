@@ -1,19 +1,20 @@
 use std::fmt::Debug;
 
 use self::file::FileItem;
-use crate::lexer::SyntaxKind;
+use crate::lexer::{SyntaxKind, Token};
 
 pub type SyntaxNode = rowan::SyntaxNode<BoltLanguage>;
 pub type SyntaxToken = rowan::SyntaxToken<BoltLanguage>;
 pub type SyntaxElement = rowan::SyntaxElement<BoltLanguage>;
 
-pub struct Parse {
+pub struct Parse<'a> {
     pub file: usize,
     pub root: SyntaxNode,
 	pub comments: Vec<String>,
+	pub lexemes: Vec<Token<'a>>,
 }
 
-impl Debug for Parse {
+impl<'a> Debug for Parse<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{:#?}", self.root) }
 }
 

@@ -1,4 +1,4 @@
-use std::{sync::atomic::{AtomicU64, Ordering}};
+use std::{sync::atomic::{AtomicU64, Ordering}, cell::RefCell};
 
 use colored::{Colorize, ColoredString};
 
@@ -37,6 +37,20 @@ impl CodeLocation {
 	pub fn new(span: Span, suggestion: Option<String>) -> CodeLocation {
 		Self { suggestion, span }
 	}
+
+	///
+	/// A suggestion to fix the code at this location
+	/// 
+	pub fn suggestion(&self) -> &Option<String> {
+		&self.suggestion
+	}
+
+	///
+	/// Where the error occurred
+	/// 
+	pub fn span(&self) -> Span {
+		self.span
+	}
 }
 
 ///
@@ -61,6 +75,31 @@ impl Diagnostic {
 			error_message,
 			locations }
 	}
+
+	/// 
+	/// How severe the diagnostic is
+	/// 
+	/// `Error` - A fatal error
+	/// `Warning` - An annoyance
+	/// `Info` - A hint
+	/// 
+	pub fn level(&self) -> DiagnosticLevel {
+		self.level
+	}
+
+	///
+	/// The message thrown with the error
+	/// 
+	pub fn message(&self) -> &String {
+		&self.error_message
+	}
+
+	///
+	/// The locations wheter the error took place
+	/// 
+	pub fn locations(&self) -> &Vec<CodeLocation> {
+		&self.locations
+	}
 }
 
 ///
@@ -77,8 +116,10 @@ pub trait IntoDiagnostic {
 /// Reports diagnostics
 /// 
 pub struct DiagnosticReporter<'a> {
-	interner: &'a FileInterner,
+	interner: 		 &'a FileInterner,
 	n_errors_thrown: AtomicU64,
+	throws:   		 bool,
+	messages: 		 RefCell<Vec<Diagnostic>>
 }
 
 impl<'a> DiagnosticReporter<'a> {
@@ -87,7 +128,19 @@ impl<'a> DiagnosticReporter<'a> {
 	/// 
 	pub fn new(interner: &'a FileInterner) -> Self {
 		Self { interner,
-			   n_errors_thrown: AtomicU64::new(0) }
+			   n_errors_thrown: AtomicU64::new(0),
+			   throws: true,
+			   messages: RefCell::new(Vec::new()) }
+	}
+
+	///
+	/// Creates a diagnostic reporter for a project. This reporter can store errors.
+	/// 
+	pub fn new_stores(interner: &'a FileInterner) -> Self {
+		Self { interner,
+			   n_errors_thrown: AtomicU64::new(0),
+			   throws: false,
+			   messages: RefCell::new(Vec::new()) }
 	}
 
 	///
@@ -98,25 +151,32 @@ impl<'a> DiagnosticReporter<'a> {
 
 		let diagnostic = IntoDiagnostic::into_diagnostic(diagnostic);
 
-
-		match diagnostic.level {
-			Error => {
-				self.n_errors_thrown.fetch_add(1, Ordering::Relaxed);
-				println!("{}: {}", diagnostic.error_code.red().bold(), diagnostic.error_message.bold())
+		if self.throws {
+			match diagnostic.level {
+				Error => {
+					self.n_errors_thrown.fetch_add(1, Ordering::Relaxed);
+					println!("{}: {}", diagnostic.error_code.red().bold(), diagnostic.error_message.bold())
+				}
+				Warning => println!("{}: {}", "warning".yellow().bold(), diagnostic.error_message.bold()),
+				Info => println!("{}: {}", diagnostic.error_code.blue().bold(), diagnostic.error_message.bold()),
 			}
-			Warning => println!("{}: {}", "warning".yellow().bold(), diagnostic.error_message.bold()),
-			Info => println!("{}: {}", diagnostic.error_code.blue().bold(), diagnostic.error_message.bold()),
+
+			let mut last_file = u32::MAX;
+
+			for loc in diagnostic.locations {
+				self.print_span(&loc, diagnostic.level, last_file == loc.span.file);
+
+				last_file = loc.span.file;
+			}
+
+			println!();
+		} else {
+			if let Error = diagnostic.level {
+				self.n_errors_thrown.fetch_add(1, Ordering::Relaxed);
+			}
+
+			self.messages.borrow_mut().push(diagnostic);
 		}
-
-		let mut last_file = u32::MAX;
-
-		for loc in diagnostic.locations {
-			self.print_span(&loc, diagnostic.level, last_file == loc.span.file);
-
-			last_file = loc.span.file;
-		}
-
-		println!();
 	}
 
 	///
@@ -189,6 +249,10 @@ impl<'a> DiagnosticReporter<'a> {
 		} else {
 			Ok(())
 		}
+	}
+
+	pub fn diagnostics(self) -> Vec<Diagnostic> {
+		self.messages.into_inner()
 	}
 
 	pub fn lookup(&self, span: Span) -> LineInfo {
