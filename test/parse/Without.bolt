@@ -1,0 +1,81 @@
+func () {
+
+}
+
+func main {
+
+}
+
+func main() -> {
+
+}
+
+func main -> {
+
+}
+
+func variables() {
+	let
+	let var
+	let var x
+	let var x:
+	let var x: Int
+	let var x: Int =
+}
+
+func guarded() {
+	guard {
+
+	}
+
+	guard true
+
+	guard else {
+
+	}
+
+	guard else
+
+	guard true else
+
+	guard let
+	guard let {}
+
+	guard let n
+	guard let n {}
+
+	guard let n = {}
+	guard let = {}
+	guard let n = 5 {}
+	guard let n = 5 else
+}
+
+func loops() {
+	repeat
+
+	while
+	while {}
+	while true
+
+	while let
+	while let {}
+	while let n
+	while let n {}
+
+	while let =
+	while let = 5
+	while let = {}
+	while let = 5 {}
+
+	while let n = 5
+}
+
+func difs() {
+	if {}
+
+	if true
+
+	if true {
+
+	} else
+}

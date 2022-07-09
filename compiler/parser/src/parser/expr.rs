@@ -4,15 +4,34 @@ use crate::{lexer::SyntaxKind,
             operators::{OperatorFix, OperatorPrecedence}};
 
 pub const EXPR_RECOVERY_SET: &[SyntaxKind] = &[SyntaxKind::LetKw,
+                                               SyntaxKind::VarKw,
                                                SyntaxKind::ReturnKw,
                                                SyntaxKind::IfKw,
+                                               SyntaxKind::ElseKw,
                                                SyntaxKind::MatchKw,
                                                SyntaxKind::WhileKw,
                                                SyntaxKind::RepeatKw,
+                                               SyntaxKind::GuardKw,
                                                SyntaxKind::OpenBrace,
                                                SyntaxKind::Semicolon,
                                                SyntaxKind::OpenParen,
-                                               SyntaxKind::Period];
+                                               SyntaxKind::Period,
+                                               SyntaxKind::CloseBrace,
+                                               
+                                               SyntaxKind::PublicKw,
+                                               SyntaxKind::InternalKw,
+                                               SyntaxKind::FilePrivateKw,
+                                               SyntaxKind::PrivateKw,
+                                               SyntaxKind::StaticKw,
+                                               SyntaxKind::OperatorKw,
+                                               SyntaxKind::At,
+                                               SyntaxKind::InitKw,
+                                               SyntaxKind::FuncKw,
+                                               SyntaxKind::StructKw,
+                                               SyntaxKind::EnumKw,
+                                               SyntaxKind::CaseKw,
+                                               SyntaxKind::TypeAliasKw
+                                               ];
 
 impl<'input, 'l> Parser<'input, 'l> {
     const CLOSURE_YIELD_SYMBOL: SyntaxKind = SyntaxKind::BigArrow;

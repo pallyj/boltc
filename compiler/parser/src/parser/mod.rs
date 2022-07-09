@@ -75,6 +75,9 @@ impl<'input, 'l> Parser<'input, 'l> {
             self.bump();
         } else {
             while !self.eat(ket) {
+                if self.cursor == self.lexemes.len() {
+                    break;
+                }
                 f(self);
             }
         }
@@ -84,6 +87,9 @@ impl<'input, 'l> Parser<'input, 'l> {
     fn parse_delim_end(&mut self, node: SyntaxKind, ket: SyntaxKind, mut f: impl FnMut(&mut Self)) {
         let marker = self.start();
         while !self.eat(ket) {
+            if self.cursor == self.lexemes.len() {
+                break;
+            }
             f(self);
         }
         marker.complete(self, node);
@@ -129,7 +135,7 @@ impl<'input, 'l> Parser<'input, 'l> {
         let err = self.start();
         while !self.peek()
                 .map(|peeked_token| recovery_set.contains(&peeked_token))
-                .unwrap_or(false)
+                .unwrap_or(true)
         {
             self.bump();
         }
@@ -249,7 +255,7 @@ impl<'input, 'l> Parser<'input, 'l> {
     }
 }
 
-pub fn parse<'input>(input: &'input str, debugger: &'input DiagnosticReporter, file: usize, operator_factory: &OperatorFactory) -> Parse<'input> {
+pub fn parse<'input, 'dbg>(input: &'input str, debugger: &'dbg DiagnosticReporter, file: usize, operator_factory: &OperatorFactory) -> Parse<'input> {
     let lexemes: Vec<_> = Lexer::new(input).collect();
 
     let parser = Parser::new(&lexemes, operator_factory);
@@ -265,7 +271,7 @@ pub fn parse<'input>(input: &'input str, debugger: &'input DiagnosticReporter, f
             lexemes }
 }
 
-pub fn test<'input, F>(input: &'input str, debugger: &'input DiagnosticReporter, file: usize, operator_factory: &OperatorFactory, test: F) -> Parse<'input>
+pub fn test<'input, 'dbg, F>(input: &'input str, debugger: &'dbg DiagnosticReporter, file: usize, operator_factory: &OperatorFactory, test: F) -> Parse<'input>
     where F: Fn(&mut Parser)
 {
     let lexemes: Vec<_> = Lexer::new(input).collect();

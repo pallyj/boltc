@@ -18,16 +18,16 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use colored::Colorize;
 
 static ARROW_FUNCTION: AtomicBool = AtomicBool::new(true);
-static VAR_DECLARE: AtomicBool = AtomicBool::new(false);
+static VAR_DECLARE: AtomicBool = AtomicBool::new(true);
 static LET_MUT_DECLARE: AtomicBool = AtomicBool::new(false);
-static LET_VAR_DECLAR: AtomicBool = AtomicBool::new(false);
-static PARAM_LABEL_CONSOLIDATE: AtomicBool = AtomicBool::new(false);
-static REPEAT_LOOP: AtomicBool = AtomicBool::new(false);
-static WHILE_LOOP: AtomicBool = AtomicBool::new(false);
-static WHILE_LET_LOOP: AtomicBool = AtomicBool::new(false);
-static IF_LET: AtomicBool = AtomicBool::new(false);
-static GUARD: AtomicBool = AtomicBool::new(false);
-static GUARD_LET: AtomicBool = AtomicBool::new(false);
+static LET_VAR_DECLAR: AtomicBool = AtomicBool::new(true);
+static PARAM_LABEL_CONSOLIDATE: AtomicBool = AtomicBool::new(true);
+static REPEAT_LOOP: AtomicBool = AtomicBool::new(true);
+static WHILE_LOOP: AtomicBool = AtomicBool::new(true);
+static WHILE_LET_LOOP: AtomicBool = AtomicBool::new(true);
+static IF_LET: AtomicBool = AtomicBool::new(true);
+static GUARD: AtomicBool = AtomicBool::new(true);
+static GUARD_LET: AtomicBool = AtomicBool::new(true);
 
 pub fn has_feature(name: &'static str) -> bool {
     match name {
