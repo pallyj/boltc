@@ -802,3 +802,9 @@ impl AttributeArg {
         }
     }
 }
+
+impl std::fmt::Debug for Attribute {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "@{}", self.attribute_name)
+    }
+}

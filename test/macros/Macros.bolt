@@ -6,7 +6,6 @@ func main() {
 	@print("col: ", col)
 	@print("file: ", file)
 
-
 	@assert(true)
 	@assert(0, equals: 0)
 	@assert(1, notEqualTo: 0)

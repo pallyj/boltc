@@ -1,3 +1,4 @@
+use blir::value::GlobalVarRef;
 use itertools::Itertools;
 
 use crate::BlirLowerer;
@@ -47,5 +48,14 @@ impl<'a> BlirLowerer<'a> {
 
 			Error => panic!("compiler error: failed to catch error type"),
 		}
+	}
+
+	pub fn lower_global(&mut self, global: &GlobalVarRef) {
+		// add the global to the library
+		let ty = self.lower_ty(&global.ty());
+
+		self.builder.add_global(global.symbol().clone(), ty);
+
+		self.globals_to_init.push((global.symbol().clone(), global.default_value().clone()));
 	}
 }

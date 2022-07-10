@@ -1,10 +1,11 @@
+use core::borrow;
 use std::{collections::{HashMap}};
 
 use blir::{attributes::AttributeFactory,
            code::{CodeBlock, ExternFunctionRef, FunctionRef, MethodRef, Statement, StatementKind},
            scope::{ScopeRef, ScopeRelation, ScopeType},
            typ::{StructRef, Type, TypeKind, EnumRef},
-           value::{Closure, ClosureParam, ConstantRef, IfBranch, IfValue, Value, ValueKind, VarRef},
+           value::{Closure, ClosureParam, ConstantRef, IfBranch, IfValue, Value, ValueKind, VarRef, GlobalVarRef},
            BlirContext, Library, Symbol, Visibility, pattern::{Pattern, PatternKind}};
 use errors::{Span, DiagnosticReporter, IntoDiagnostic, Diagnostic, DiagnosticLevel, CodeLocation};
 use parser::operators::{OperatorFactory, OperatorFix};
@@ -59,6 +60,10 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 
         for constant in &library.constants {
             self.resolve_constant(constant, library.scope());
+        }
+
+        for global in &library.globals {
+            self.resolve_global(global, library.scope());
         }
 
         // Resolve types in each struct
@@ -213,6 +218,10 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
             self.resolve_variable(variable, scope);
         }
 
+        for global in &borrowed_struct.globals {
+            self.resolve_global(global, scope);
+        }
+
         for method in &borrowed_struct.methods {
             // Resolve method types
             self.resolve_method_types(method);
@@ -274,6 +283,11 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
     fn resolve_constant(&mut self, var: &ConstantRef, scope: &ScopeRef) {
         self.resolve_type(&mut var.borrow_mut().typ, scope);
         self.resolve_value(&mut var.borrow_mut().value, scope);
+    }
+
+    fn resolve_global(&mut self, var: &GlobalVarRef, scope: &ScopeRef) {
+        self.resolve_type(&mut var.ty_mut(), scope);
+        self.resolve_value(&mut var.default_value_mut(), scope);
     }
 
     fn resolve_func_types(&mut self, function: &FunctionRef) {
@@ -533,7 +547,12 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
                         value.set_kind(constant_value.kind); 
                         value.set_type(constant_value.typ);
                     }
-                    
+
+                    Symbol::Global(global) => {
+                        value.set_type(global.ty().clone());
+                        value.set_kind(ValueKind::GlobalVariable(global))
+                    }
+                            
                     Symbol::TupleField(..) => unreachable!(),
                     Symbol::EnumCase(..) => unreachable!(),
                 }

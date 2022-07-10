@@ -109,6 +109,10 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                     library.add_type(name, visibility, aliased.kind);
                 }
 
+                FileItem::VariableDef(var_def) => {
+                    library.add_global(self.lower_static_var(var_def, library.path()));
+                }
+
                 FileItem::NoOp(_) => {}
 
                 FileItem::Error => panic!(),

@@ -5,7 +5,7 @@ use mangle::Path;
 use crate::{code::{ExternFunctionRef, FunctionRef},
             scope::{ScopeRef, ScopeRelation, ScopeType},
             typ::{StructRef, TypeKind, EnumRef},
-            value::ConstantRef,
+            value::{ConstantRef, GlobalVarRef},
             Symbol, SymbolWrapper, Visibility};
 
 pub struct Library {
@@ -20,6 +20,7 @@ pub struct Library {
     pub structs:          Vec<StructRef>,
     pub enums:            Vec<EnumRef>,
     pub constants:        Vec<ConstantRef>,
+    pub globals:          Vec<GlobalVarRef>,
 
     files: Vec<ScopeRef>,
 }
@@ -34,7 +35,8 @@ impl Library {
                   structs:          Vec::new(),
                   enums:            Vec::new(),
                   constants:        Vec::new(),
-                  files:            vec![], }
+                  globals:          Vec::new(),
+                  files:            Vec::new(), }
     }
 
     pub fn new_file(&mut self) -> ScopeRef {
@@ -117,6 +119,19 @@ impl Library {
         self.scope.add_symbol(name, visibility, symbol)
     }
 
+    pub fn add_global(
+        &mut self,
+        global: GlobalVarRef) -> Option<SymbolWrapper>
+    {
+        self.globals.push(global.clone());
+
+        let visibility = global.visibility();
+        let name = global.name();
+        let symbol = Symbol::Global(global);
+
+        self.scope.add_symbol(name, visibility, symbol)
+    }
+
     pub fn scope(&self) -> &ScopeRef { &self.scope }
 
     pub fn path(&self) -> &Path { &self.path }
@@ -124,6 +139,10 @@ impl Library {
 
 impl Debug for Library {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for global in &self.globals {
+            writeln!(f, "{global:?}")?;
+        }
+
         for r#struct in &self.structs {
             writeln!(f, "{struct:?}")?;
         }

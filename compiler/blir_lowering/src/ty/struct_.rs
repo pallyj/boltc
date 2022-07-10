@@ -54,6 +54,10 @@ impl<'a> BlirLowerer<'a> {
         // todo: struct names aren't mangled
 		self.builder.add_struct_fields(&borrowed_struct.link_name, fields);
 
+		for global in &borrowed_struct.globals {
+			self.lower_global(global);
+		}
+
 		// Add each method's signature to the function
 		for method in &borrowed_struct.methods {
 			self.lower_method_signature(method);

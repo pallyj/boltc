@@ -76,6 +76,12 @@ impl Debug for LetDef {
 impl VariableDef {
     pub fn attributes(&self) -> Attributes { self.0.children().find_map(Attributes::cast).unwrap() }
 
+    pub fn is_static(&self) -> bool {
+        self.0
+            .children_with_tokens()
+            .any(|child| child.kind() == SyntaxKind::StaticKw)
+    }
+
     pub fn visibility(&self) -> Option<SyntaxKind> {
         self.0
             .children()

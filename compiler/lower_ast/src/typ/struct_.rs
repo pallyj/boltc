@@ -1,6 +1,6 @@
 use blir::{scope::ScopeRef,
            typ::{Struct, StructRef, Type, TypeKind},
-           value::{Constant, ConstantRef, Var, VarRef}};
+           value::{Constant, ConstantRef, Var, VarRef, GlobalVarRef, ValueKind}};
 use mangle::Path;
 use parser::ast::{containers::{StructDef, StructItem},
                   var::{LetDef, VariableDef}};
@@ -64,6 +64,34 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                  doc_c)
     }
 
+    pub fn lower_static_var(&mut self, var: VariableDef, parent: &Path) -> GlobalVarRef {
+        let meta = self.comments.pop().unwrap();
+        let visibility = self.lower_visibility(var.visibility());
+        let name = var.label();
+        let ty = var.typ()
+                     .map(|typ| self.lower_type(typ))
+                     .unwrap_or_else(Type::infer);
+        let default_value = if let Some(value) = var.value() {
+            self.lower_expr(value, None)
+        } else {
+            // todo: self.reporter.throw_diagnostic();
+            ValueKind::Error.infer()
+        };
+
+        let attributes = self.lower_attributes(var.attributes());
+        let span = self.span(var.range());
+
+        GlobalVarRef::new(meta,
+                          attributes,
+                          visibility,
+                          false,
+                          name,
+                          ty,
+                          default_value,
+                          span,
+                          parent)
+    }
+
     pub fn lower_struct(&mut self, def: StructDef, parent: &ScopeRef, parent_mangle: &Path) -> StructRef {
         let doc_c = self.comments.pop().unwrap();
         let visibility = self.lower_visibility(def.visibility());
@@ -107,9 +135,15 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                 }
 
                 StructItem::VariableDef(var_def) => {
-                    let var = self.lower_struct_var(var_def);
+                    if var_def.is_static() {
+                        let global = self.lower_static_var(var_def, r#struct.borrow().path());
 
-                    r#struct.add_var(var);
+                        r#struct.add_global(global);
+                    } else {
+                        let var = self.lower_struct_var(var_def);
+
+                        r#struct.add_var(var);
+                    }
                 }
 
                 StructItem::TypeAlias(type_alias) => {

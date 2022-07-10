@@ -1,0 +1,5 @@
+func main() {
+	guard let n = 0 {
+
+	return
+}

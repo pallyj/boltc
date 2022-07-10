@@ -1,0 +1,8 @@
+var index = 0;
+
+@entryPoint
+func main () {
+	while index < 10 { index += 1; }
+
+	print(index);
+}

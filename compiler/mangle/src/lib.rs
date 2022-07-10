@@ -67,6 +67,6 @@ mod path;
 mod tests;
 mod typ;
 
-pub use defs::{MangledFunction, MangledStruct, MangledEnum};
+pub use defs::{MangledFunction, MangledStruct, MangledEnum, MangledGlobal};
 pub use path::Path;
 pub use typ::MangledType;

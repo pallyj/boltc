@@ -29,6 +29,11 @@ impl<'a> ExecutionEngine<'a> {
 		}
 	}
 
+	pub fn enter(&self, name: &str, params: Vec<Value>) -> Value {
+		self.run_function(".init", vec![]);
+		self.run_function(name, params)
+	}
+
 	pub fn run_function(&self, name: &str, params: Vec<Value>) -> Value {
 		let function = self.project.get_function_named(name).expect("Function does not exist");
 

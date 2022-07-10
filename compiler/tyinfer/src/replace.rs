@@ -312,6 +312,11 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 }
             }
 
+            ValueKind::GlobalVariable(global) => {
+                let ty = global.ty().clone();
+                value.set_type(ty);
+            }
+
             _ => {}
         }
     }
@@ -451,6 +456,10 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
 
                 value.set_type(constant_value.typ);
                 value.set_kind(constant_value.kind);
+            }
+            Symbol::Global(global) => {
+                value.set_type(global.ty().clone());
+                value.set_kind(ValueKind::GlobalVariable(global))
             }
             Symbol::Function(monomorphizer) => {
                 value.set_kind(ValueKind::PolymorphicMethod { reciever:    Box::new(parent),

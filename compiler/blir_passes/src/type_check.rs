@@ -634,7 +634,12 @@ impl IntoDiagnostic for TypeCheckError {
                                 vec![ CodeLocation::new(span, None) ])
             }
             TypeCheckError::AmbiguousFunc(_) => todo!(),
-            TypeCheckError::OperatorDNE(_, _) => todo!(),
+            TypeCheckError::OperatorDNE(operator, span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "operator_dne",
+                                format!("operator `{operator}` is not define"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
             TypeCheckError::SymbolNotAValue(_, _) => todo!(),
             TypeCheckError::MemberNotAValue(_, _, _) => todo!(),
             TypeCheckError::CodeAfterUnreachable(span) =>  {

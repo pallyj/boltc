@@ -55,6 +55,7 @@ impl<'a> BlirLowerer<'a> {
  			InstanceVariable { .. } => LowerKind::Access,
 			TupleField(..) => LowerKind::Access,
 			CastEnumToVariant { .. } => LowerKind::Access,
+			GlobalVariable(_) => LowerKind::Access,
 			
 			Assign(_, _) => LowerKind::Const,
 
@@ -278,6 +279,17 @@ impl<'a> BlirLowerer<'a> {
 				let field_ty = self.lower_ty(&var_borrowed.typ);
 
 				parent.field(field_name, field_ty, Self::span_of(value.span))
+			}
+
+			GlobalVariable(global) => {
+				let global_id = self.builder
+									.global_id(&global.symbol())
+									.unwrap();
+
+				self.builder
+					.global(global_id)
+					.unwrap()
+					.place(Self::span_of(value.span))
 			}
 
 			CastEnumToVariant { enum_value, variant } => {

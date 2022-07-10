@@ -28,7 +28,7 @@ impl<'input, 'l> Parser<'input, 'l> {
         self.parse_comments();
         self.parse_attributes();
         self.parse_visibility();
-        self.eat(SyntaxKind::StaticKw); // todo: check if the static keyword can be applied
+        self.eat(SyntaxKind::StaticKw);
 
         match self.peek() {
             Some(SyntaxKind::FuncKw) |

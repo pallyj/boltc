@@ -15,6 +15,19 @@ impl<'a, 'l> TypeInferPass<'a, 'l> {
     pub fn new(context: &'a mut BlirContext, debugger: &'a mut DiagnosticReporter<'l>) -> Self { Self { context, debugger } }
 
     pub fn run_pass(&mut self, library: &mut Library) {
+        let scope = library.scope();
+
+        for global in &library.globals {
+            let (mut val, mut ty) = global.value_and_ty_mut();
+            self.infer_variable(&mut ty, &mut val, scope);
+        }
+
+        for constant in &library.constants {
+            let mut borrow_ref = constant.borrow_mut();
+            let borrow = &mut *borrow_ref;
+            self.infer_variable(&mut borrow.typ, &mut borrow.value, scope);
+        }
+
         for r#struct in library.structs.iter() {
             self.infer_struct(r#struct);
         }
@@ -26,29 +39,9 @@ impl<'a, 'l> TypeInferPass<'a, 'l> {
         for func in library.functions.iter() {
             self.infer_func(func);
         }
-
-        let scope = library.scope();
-
-        for constant in &library.constants {
-            let mut borrow_ref = constant.borrow_mut();
-            let borrow = &mut *borrow_ref;
-            self.infer_variable(&mut borrow.typ, &mut borrow.value, scope);
-        }
     }
 
     fn infer_struct(&mut self, r#struct: &StructRef) {
-        for r#struct in &r#struct.borrow().substructs {
-            self.infer_struct(r#struct);
-        }
-
-        for r#enum in &r#struct.borrow().subenums {
-            self.infer_enum(r#enum);
-        }
-
-        for method in &r#struct.borrow().methods {
-            self.infer_method(method);
-        }
-
         let scope = r#struct.borrow().scope().clone();
 
         for constant in &r#struct.borrow().constants {
@@ -63,6 +56,22 @@ impl<'a, 'l> TypeInferPass<'a, 'l> {
             if let Some(value) = &mut borrow.default_value {
                 self.infer_variable(&mut borrow.typ, value, &scope);
             }
+        }
+        
+        for global in &r#struct.borrow().globals {
+            self.infer_variable(&mut global.ty_mut(), &mut global.default_value_mut(), &scope);
+        }
+
+        for r#struct in &r#struct.borrow().substructs {
+            self.infer_struct(r#struct);
+        }
+
+        for r#enum in &r#struct.borrow().subenums {
+            self.infer_enum(r#enum);
+        }
+
+        for method in &r#struct.borrow().methods {
+            self.infer_method(method);
         }
     }
 

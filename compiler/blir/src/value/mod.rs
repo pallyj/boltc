@@ -69,6 +69,7 @@ pub enum ValueKind {
     // Variable Values
     Metatype(TypeKind),
     LocalVariable(String, bool, String),
+    GlobalVariable(GlobalVarRef),
     FunctionParam(String, bool),
     Assign(Box<Value>, Box<Value>),
 
@@ -207,6 +208,7 @@ impl Value {
 
             ValueKind::LocalVariable(_, mutating, _) => *mutating,
             ValueKind::FunctionParam(_, mutating) => *mutating,
+            ValueKind::GlobalVariable(global) => !global.is_const(),
 
             ValueKind::Named(_) => false,
             ValueKind::Member { .. } => false,
@@ -332,6 +334,7 @@ impl Debug for Value {
             } else {
                 write!(f, "{name}")
             },
+            ValueKind::GlobalVariable(global) => write!(f, "{}", global.name()),
             ValueKind::FunctionParam(name, _) => write!(f, "{name}"),
             ValueKind::UnaryIntrinsicFn(intrinsic) => write!(f, "{intrinsic:?}"),
             ValueKind::BinaryIntrinsicFn(intrinsic) => write!(f, "{intrinsic:?}"),

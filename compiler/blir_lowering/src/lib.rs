@@ -3,9 +3,9 @@
 
 use std::collections::HashMap;
 
-use blir::value::Closure;
+use blir::value::{Closure, Value};
 use errors::Span;
-use mir::{val::Place, code::BasicBlockId};
+use mir::{val::Place, code::BasicBlockId, ty::Type, instr::Terminator};
 
 mod ty;
 mod val;
@@ -20,6 +20,7 @@ pub struct BlirLowerer<'a> {
     closures: Vec<(String, Closure)>,
     // todo: move these to another struct
     function_ctx: HashMap<String, Place>,
+    globals_to_init: Vec<(String, Value)>,
 
     break_labels: HashMap<String, BasicBlockId>,
     continue_labels: HashMap<String, BasicBlockId>,
@@ -36,6 +37,7 @@ impl<'a> BlirLowerer<'a> {
         Self { builder,
                libraries,
                function_ctx: HashMap::new(),
+               globals_to_init: Vec::new(),
                closures: Vec::new(),
                break_labels: HashMap::new(),
                continue_labels: HashMap::new(),
@@ -62,6 +64,9 @@ impl<'a> BlirLowerer<'a> {
     pub fn lower(mut self) {
         let libraries = std::mem::take(&mut self.libraries);
 
+        // Create an initializer function
+        let init_function = self.builder.add_function(".init", vec![], Type::void());
+
         // Create a definition for each type
         // These need to be created first so
         // they can be used before they're defined
@@ -82,6 +87,10 @@ impl<'a> BlirLowerer<'a> {
         // to enums, and parameters to
         // functions and methods.
         for library in &libraries {
+            for global in &library.globals {
+                self.lower_global(global);
+            }
+            
             for struct_def in &library.structs {
                 // Lower the struct signature
                 self.lower_struct_signature(struct_def)
@@ -114,6 +123,7 @@ impl<'a> BlirLowerer<'a> {
 
             for enum_def in &library.enums {
                 // Lower the enum's code
+                self.lower_enum_code(enum_def);
             }
 
             for func_def in &library.functions {
@@ -128,6 +138,21 @@ impl<'a> BlirLowerer<'a> {
         for (closure_name, closure) in closures {
             self.lower_closure_code(&closure_name, &closure)
         }
+
+        self.builder.position_on_func(init_function);
+        let block = self.builder.append_block();
+        self.builder.position_at_end(block);
+
+        let globals = std::mem::take(&mut self.globals_to_init);
+
+        for (global_name, global_value) in globals {
+            let global_id = self.builder.global_id(&global_name).unwrap();
+            let global = self.builder.global(global_id).unwrap().place(Span::default());
+
+            self.lower_assign(&global, &global_value);
+        }
+
+        self.builder.build_terminator(Terminator::return_void())
     }
 
     pub (crate) fn span_of(span: Option<Span>) -> Span {

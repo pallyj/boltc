@@ -10,7 +10,7 @@ use super::{Type, TypeKind, EnumRef};
 use crate::{attributes::Attributes,
             code::{MethodRef},
             scope::{ScopeRef, ScopeRelation, ScopeType},
-            value::{ConstantRef, VarRef},
+            value::{ConstantRef, VarRef, GlobalVarRef},
             Symbol, SymbolWrapper, Visibility};
 
 pub struct Struct {
@@ -33,6 +33,7 @@ pub struct StructInner {
     pub instance_vars: Vec<VarRef>,
     pub constants:     Vec<ConstantRef>,
     pub subenums:      Vec<EnumRef>,
+    pub globals:       Vec<GlobalVarRef>,
 
     pub is_transparent:bool,
     pub is_char_repr:  bool,
@@ -64,6 +65,7 @@ impl Struct {
                                      subenums: Vec::new(),
                                      methods: Vec::new(),
                                      instance_vars: Vec::new(),
+                                     globals: Vec::new(),
                                      path: parent_path.append(&name),
                                      name,
                                      constants: Vec::new(),
@@ -150,6 +152,16 @@ impl Struct {
         let name = var_ref.name.clone();
 
         let symbol = Symbol::Constant(var);
+
+        self.borrow().scope.add_symbol(name, visibility, symbol)
+    }
+
+    pub fn add_global(&self, global: GlobalVarRef) -> Option<SymbolWrapper> {
+        self.inner.borrow_mut().globals.push(global.clone());
+
+        let visibility = global.visibility();
+        let name = global.name();
+        let symbol = Symbol::Global(global);
 
         self.borrow().scope.add_symbol(name, visibility, symbol)
     }

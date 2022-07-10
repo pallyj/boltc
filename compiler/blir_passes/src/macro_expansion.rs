@@ -37,6 +37,10 @@ impl<'a, 'l> MacroExpansionPass<'a, 'l> {
         for r#enum in &library.enums {
             self.resolve_enum(r#enum);
         }
+
+        for global in &library.globals {
+            self.resolve_value(&mut global.default_value_mut(), &scope);
+        }
     }
 
     fn resolve_enum(&mut self, r#enum: &EnumRef) {
@@ -68,6 +72,10 @@ impl<'a, 'l> MacroExpansionPass<'a, 'l> {
 
         for constant in &r#struct.borrow().constants {
             self.resolve_value(&mut constant.borrow_mut().value, &scope);
+        }
+        
+        for global in &r#struct.borrow().globals {
+            self.resolve_value(&mut global.default_value_mut(), &scope);
         }
 
         for var in &r#struct.borrow().instance_vars {

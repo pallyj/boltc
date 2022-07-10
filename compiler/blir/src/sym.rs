@@ -4,7 +4,7 @@ use itertools::Itertools;
 use crate::{code::{ExternFunctionRef, FunctionInfo, FunctionRef, MethodRef},
             scope::ScopeRelation,
             typ::{Type, TypeKind, EnumRef, CaseRef},
-            value::{ConstantRef, Value, VarRef},
+            value::{ConstantRef, Value, VarRef, GlobalVarRef},
             Visibility};
 
 #[derive(Debug, Clone)]
@@ -22,6 +22,7 @@ pub enum Symbol {
     TupleField(Type, usize),
 
     EnumCase(EnumRef, CaseRef),
+    Global(GlobalVarRef)
 }
 
 #[derive(Clone)]

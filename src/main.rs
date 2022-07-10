@@ -178,6 +178,8 @@ impl Project {
         }
         debugger.errors()?;
 
+        //println!("{:?}", libraries["test"]);
+
         let mut type_resolve_pass = blir_passes::TypeResolvePass::new(&host.attribute_factory, &host.operator_factory, &mut context, &mut debugger);
         
         for library in libraries.values_mut() {
@@ -216,7 +218,7 @@ impl Project {
         //println!("{project}");
 
         let entry = context.entry_point;
-        project.execute().run_function(&entry.unwrap(), vec![]);
+        project.execute().enter(&entry.unwrap(), vec![]);
 
         Err(())
 
