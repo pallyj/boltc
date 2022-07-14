@@ -361,18 +361,18 @@ impl Display for Type {
             Array { item, len } => write!(f, "{item}[{len}]"),
             Slice(item) => write!(f, "{item}[]"),
     
-            Error => todo!(),
+            Error => write!(f, "{{error}}"),
     
-            Metatype(_) => todo!(),
+            Metatype(ty) => write!(f, "{ty}"),
     
             Named(name) => write!(f, "{name}"),
             Member { parent, member } => write!(f, "{parent}.{member}"),
             GenericParam(name) => write!(f, "`{name}`"),
-            GenericOf { .. } => todo!(),
-            HKRawPointer => todo!(),
+            GenericOf { higher_kind, params  } => write!(f, "{}<{}>", higher_kind, params.iter().format(", ")),
+            HKRawPointer => write!(f, "RawPointer"),
     
             Infer { .. } => write!(f, "_"),
-            UnknownInfer => todo!(),
+            UnknownInfer => write!(f, "_"),
     
             SomeInteger => write!(f, "{{integer}}"),
             SomeFloat => write!(f, "{{float}}"),

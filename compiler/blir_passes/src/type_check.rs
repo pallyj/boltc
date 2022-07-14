@@ -272,7 +272,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                             let Some(arg) = arg_label
                     {
                         if param != arg {
-                            self.debugger.throw_diagnostic(TypeCheckError::MismatchedLabel(param.clone(), arg.clone()))
+                            self.debugger.throw_diagnostic(TypeCheckError::MismatchedLabel(param.clone(), arg.clone(), val.span.unwrap_or_default()))
                         }
                     }
                 }
@@ -555,7 +555,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                     if let (Some(label1), Some(label2)) = (label1, label2) {
                         if label1 != label2 {
                             // There is an error
-                            self.debugger.throw_diagnostic(TypeCheckError::MismatchedLabel(label1.clone(), label2.clone()));
+                            self.debugger.throw_diagnostic(TypeCheckError::MismatchedLabel(label1.clone(), label2.clone(), ty1.span().unwrap_or_default()));
                         }
                     }
                 }
@@ -570,7 +570,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
 enum TypeCheckError {
     CouldNotInfer(Span),
     MismatchedTypes(Type, Type),
-    MismatchedLabel(String, String),
+    MismatchedLabel(String, String, Span),
 
     CantMatchFloat(Span),
 
@@ -611,37 +611,72 @@ impl IntoDiagnostic for TypeCheckError {
                                 format!("cannot assign {t2} to {t1}"),
                                 t1.span().into_iter().chain(t2.span()).map(|span| CodeLocation::new(span, None)).collect())
             }
-            TypeCheckError::MismatchedLabel(_, _) => todo!(),
-            TypeCheckError::CantMatchFloat(_) => todo!(),
+            TypeCheckError::MismatchedLabel(expected, found, span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "mismatched_label",
+                                format!("expected label `{expected}`, found `{found}`"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
+            TypeCheckError::CantMatchFloat(span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "cant_match_float",
+                                format!("can't match on floats as they don't have equality"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
             TypeCheckError::ExpectedLabel { expected, found, span } => {
                 Diagnostic::new(DiagnosticLevel::Error,
                                 "expected_label",
                                 format!("expected label `{expected}`, found `{found}`"),
                                 vec![ CodeLocation::new(span, None) ])
             }
-            TypeCheckError::IsNotAFunc(_) => todo!(),
+            TypeCheckError::IsNotAFunc(span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "value_naf",
+                                format!("value is not a function"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
             TypeCheckError::MissingParams(span) => {
                 Diagnostic::new(DiagnosticLevel::Error,
                                 "missing_params",
                                 format!("missing parameters"),
                                 vec![ CodeLocation::new(span, None) ])
             }
-            TypeCheckError::ExtraParams(_) => todo!(),
+            TypeCheckError::ExtraParams(spans) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "extra_paramas",
+                                format!("found extra parameters"),
+                                spans.into_iter().map(|span| CodeLocation::new(span, None)).collect())
+            }
             TypeCheckError::FuncNotFound(span) => {
                 Diagnostic::new(DiagnosticLevel::Error,
                                 "func_not_found",
                                 format!("could not find function in scope"),
                                 vec![ CodeLocation::new(span, None) ])
             }
-            TypeCheckError::AmbiguousFunc(_) => todo!(),
+            TypeCheckError::AmbiguousFunc(spans) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "ambiguous_func",
+                                format!("function call is ambiguous, found"),
+                                spans.into_iter().map(|span| CodeLocation::new(span, None)).collect())
+            }
             TypeCheckError::OperatorDNE(operator, span) => {
                 Diagnostic::new(DiagnosticLevel::Error,
                                 "operator_dne",
                                 format!("operator `{operator}` is not define"),
                                 vec![ CodeLocation::new(span, None) ])
             }
-            TypeCheckError::SymbolNotAValue(_, _) => todo!(),
-            TypeCheckError::MemberNotAValue(_, _, _) => todo!(),
+            TypeCheckError::SymbolNotAValue(name, span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "sym_not_a_val",
+                                format!("symbol `{name}` is not a value"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
+            TypeCheckError::MemberNotAValue(ty, member, span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "member_not_a_val",
+                                format!("member `{member}` of {ty} is not a value"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
             TypeCheckError::CodeAfterUnreachable(span) =>  {
                 Diagnostic::new(DiagnosticLevel::Warning,
                                 "unreachable_expr",

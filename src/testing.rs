@@ -128,25 +128,25 @@ fn switch_output(expect: &JsonValue, found: Value) -> bool {
 fn get_std(std: Option<&str>) -> &[&str] {
 	match std {
 		Some("full") => &[
-			"lang/std/print.bolt",
-			"lang/bool/Bool.bolt",
-			"lang/float/Half.bolt",
-			"lang/float/Float.bolt",
-			"lang/float/Double.bolt",
-			"lang/int/Int.bolt",
-			"lang/int/UInt.bolt",
-			"lang/int/Int8.bolt",
-			"lang/int/Int16.bolt",
-			"lang/int/Int32.bolt",
-			"lang/int/Int64.bolt",
-			"lang/int/UInt8.bolt",
-			"lang/int/UInt16.bolt",
-			"lang/int/UInt32.bolt",
-			"lang/int/UInt64.bolt",
-			"lang/string/StringSlice.bolt",
-			"lang/string/Char.bolt"
+			"runtime/std/print.bolt",
+			"runtime/bool/Bool.bolt",
+			"runtime/float/Half.bolt",
+			"runtime/float/Float.bolt",
+			"runtime/float/Double.bolt",
+			"runtime/int/Int.bolt",
+			"runtime/int/UInt.bolt",
+			"runtime/int/Int8.bolt",
+			"runtime/int/Int16.bolt",
+			"runtime/int/Int32.bolt",
+			"runtime/int/Int64.bolt",
+			"runtime/int/UInt8.bolt",
+			"runtime/int/UInt16.bolt",
+			"runtime/int/UInt32.bolt",
+			"runtime/int/UInt64.bolt",
+			"runtime/string/StringSlice.bolt",
+			"runtime/string/Char.bolt"
 		],
-		Some("minimal") => &["lang/test/test.bolt"],
+		Some("minimal") => &["runtime/test/test.bolt"],
 		_ => &[],
 	}
 }

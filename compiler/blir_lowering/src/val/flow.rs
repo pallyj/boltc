@@ -194,7 +194,10 @@ impl<'a> BlirLowerer<'a> {
 						let place = self.lower_place(&scrutinee);
 						self.switch_struct(&place, &patterns, default_block, struct_ref, &scrutinee.span)
 					}
-                    _ => todo!(),
+                    _ => {
+                        println!("error: type couldn't be switched on");
+                        todo!()
+                    }
                 };
 
                 self.builder.position_at_end(default_block);

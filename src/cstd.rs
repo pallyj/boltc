@@ -66,7 +66,7 @@ impl StandardLib {
 		std::fs::create_dir_all(self.strategy.in_config_dir(PATH_TO_STD_SOURCE)).unwrap();
 		std::fs::create_dir_all(self.strategy.in_config_dir(PATH_TO_STD)).unwrap();
 
-		let template_engine = tera::Tera::new("lang/**/*.bolt.tera").unwrap();
+		let template_engine = tera::Tera::new("runtime/**/*.bolt.tera").unwrap();
 		let std_source = self.strategy.in_config_dir(PATH_TO_STD_SOURCE);
 
 		fs_extra::dir::create_all(std_source.join("int"), true).unwrap();
@@ -99,7 +99,7 @@ impl StandardLib {
 		let files_to_copy = [ "std/print.c", "std/print.bolt" ];
 
 		for file in files_to_copy {
-			std::fs::copy(format!("lang/{file}"), std_source.join(file)).unwrap();
+			std::fs::copy(format!("runtime/{file}"), std_source.join(file)).unwrap();
 		}
 
 		self.compile();

@@ -139,7 +139,7 @@ impl Project {
 	///
 	/// Gets a struct 
 	/// 
-	pub (crate) fn get_struct(&self, struct_id: StructId) -> Option<&Struct> {
+	pub fn get_struct(&self, struct_id: StructId) -> Option<&Struct> {
 		self.structs.get(struct_id.unique_idx())
 	}
 
@@ -257,6 +257,7 @@ impl Project {
 
 	///
 	/// Gets a builder for this project
+	/// 
 	/// The project can't be accessed while the builder is running
 	/// 
 	pub fn builder<'a>(&'a mut self) -> Builder<'a> {
@@ -268,6 +269,13 @@ impl Project {
 	/// 
 	pub fn execute<'a>(&'a self) -> ExecutionEngine<'a> {
 		ExecutionEngine::new(self)
+	}
+
+	///
+	/// Gets a list of the structs in the project
+	/// 
+	pub fn structs(&self) -> &Vec<Struct> {
+		&self.structs
 	}
 }
 

@@ -23,7 +23,7 @@ impl<'a> BlirLowerer<'a> {
 			Enum(enum_ref) => mir::ty::Type::c_enum(self.builder.get_enum_id(enum_ref.link_name())),
 			Tuple(items, _) => mir::ty::Type::tuple(items.iter().map(|item| self.lower_ty(item)).collect_vec()),
 			Array { item, len } => self.lower_ty(&item).array(*len),
-			StrSlice => todo!(),
+			StrSlice => panic!(),
 			Divergent => mir::ty::Type::void(),
 
 			Named(name) => panic!("compiler error: failed to catch unresolved type `{name}`"),

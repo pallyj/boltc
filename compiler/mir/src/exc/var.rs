@@ -43,7 +43,6 @@ impl Var {
 				Value::Struct(fields)
 			}
 			Enum { .. } => Value::Enum(Box::new(Value::Undef), Box::new(Value::Undef)),
-			//Pointer(_) => todo!(),
 			Tuple(tuple_items) => Value::Tuple(tuple_items.iter().map(|v| Self::init_value(v, project)).collect_vec()),
 			Array { item, count } => Value::Array(vec![Self::init_value(item, project); *count]),
 			_ => Value::Undef,

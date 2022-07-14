@@ -3,7 +3,7 @@ use crate::{defs::{MangledFunction, MangledStruct},
 
 #[test]
 fn test_struct() {
-    let int_path = Path::new("lang").append("Int");
+    let int_path = Path::new("runtime").append("Int");
     let file_error_path = Path::new("std").append("File").append("Error");
 
     assert_eq!("4lang3IntS", MangledStruct(&int_path).to_string());

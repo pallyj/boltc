@@ -65,7 +65,7 @@ fn main() {
     let mut project = Project::new(&lib_name, args.extensions.clone());
 
     // Add standard library
-    let lang = [//"test/test.bolt"
+    let lang = [//"test/testing.bolt"
                 "std/print.bolt",
                 "bool/Bool.bolt",
                 "float/Half.bolt",
@@ -178,8 +178,6 @@ impl Project {
         }
         debugger.errors()?;
 
-        //println!("{:?}", libraries["test"]);
-
         let mut type_resolve_pass = blir_passes::TypeResolvePass::new(&host.attribute_factory, &host.operator_factory, &mut context, &mut debugger);
         
         for library in libraries.values_mut() {
@@ -217,8 +215,12 @@ impl Project {
 
         //println!("{project}");
 
-        let entry = context.entry_point;
-        project.execute().enter(&entry.unwrap(), vec![]);
+        //let entry = context.entry_point;
+        //project.execute().enter(&entry.unwrap(), vec![]);
+
+        let mut mir_lowerer = mir_lowering::MirLowerer::new(project);
+        mir_lowerer.lower_project();
+        mir_lowerer.display();
 
         Err(())
 

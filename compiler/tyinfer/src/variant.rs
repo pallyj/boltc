@@ -126,12 +126,6 @@ impl Variant for TypeVariant {
     fn arity(&self) -> rusttyc::Arity { rusttyc::Arity::Fixed(0) }
 }
 
-impl Constructable for TypeVariant {
-    type Type = TypeKind;
-
-    fn construct(&self, _children: &[Self::Type]) -> Result<Self::Type, <Self as rusttyc::ContextSensitiveVariant>::Err> { todo!() }
-}
-
 
 impl Default for TypeVariant {
     fn default() -> Self {

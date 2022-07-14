@@ -71,6 +71,18 @@ impl Struct {
 		self.fields.get(field_index)
 	}
 
+	pub fn is_transparent(&self) -> bool {
+		self.is_transparent
+	}
+
+	pub fn is_packed(&self) -> bool {
+		self.is_packed
+	}
+
+	pub fn fields(&self) -> &Vec<Type> {
+		&self.fields
+	}
+
 	///
 	/// 
 	/// 

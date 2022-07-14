@@ -65,7 +65,7 @@ impl Local {
 	/// Returns a place for the local that can be used
 	/// 
 	pub fn place(&self) -> Place {
-		todo!()
+		unimplemented!()
 	}
 
 	///

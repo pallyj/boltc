@@ -15,6 +15,7 @@ blir = { path = "compiler/blir" }
 blir_passes = { path = "compiler/blir_passes" }
 blir_lowering = { path = "compiler/blir_lowering" }
 mir = { path = "compiler/mir" }
+mir_lowering = { path = "compiler/mir_lowering" }
 errors = { path = "compiler/errors" }
 bolt-ext = { path = "compiler/bolt-ext" }
 feature-gate = {path = "compiler/feature-gate"}
