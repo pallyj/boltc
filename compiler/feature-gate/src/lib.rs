@@ -64,3 +64,11 @@ pub fn enable_feature(name: &str) {
 
     println!("{} feature {} is unstable", "warning:".yellow().bold(), name.bold());
 }
+
+pub fn enable_features(features: &[String])
+{
+    for feature in features
+    {
+        enable_feature(feature)
+    }
+}

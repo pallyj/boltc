@@ -34,7 +34,7 @@ impl LocalId {
 	///
 	/// The index of this local in the current function
 	/// 
-	pub (crate) fn local_idx(&self) -> usize {
+	pub fn local_idx(&self) -> usize {
 		self.id
 	}
 }

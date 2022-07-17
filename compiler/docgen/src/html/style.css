@@ -1,0 +1,242 @@
+@import url(https://cdn.jsdelivr.net/npm/firacode@6.2.0/distr/fira_code.css);
+
+@media only screen and (max-width: 960px) {
+	.sidebar {
+		display: none;
+	}
+}
+
+body {
+	margin: 0px;
+	padding: 0px;
+}
+
+* {
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+h1 {
+	font-size: 30px !important;
+}
+
+h2 {
+	font-size: 24px !important;
+	font-weight: bold;
+}
+
+h3 {
+	font-size: 22px !important;
+}
+
+h4 {
+	font-size: 20px !important;
+}
+
+h5 {
+	font-size: 18px !important;
+}
+
+h6 {
+	font-size: 17px !important;
+}
+
+.meta {
+	font-size: 15px;
+
+	margin-left: 12px;
+
+	color: #000000bf;
+}
+
+.meta h3 {
+	color: hsl(230, 50%, 54%);
+}
+
+.meta h3::after {
+	display: block;
+
+	content: '';
+
+	height: 1px;
+	max-width: 400px;
+
+	background-color: hsl(230, 50%, 54%);
+}
+
+.meta h4 {
+	color: hsl(230, 50%, 54%);
+}
+
+.meta h4::after {
+	display: block;
+
+	content: '';
+
+	height: 1px;
+	max-width: 400px;
+
+	background-color: hsl(230, 50%, 54%);
+}
+
+.meta h5 {
+	color: hsl(230, 50%, 54%);
+}
+
+.meta h5::after {
+	display: block;
+
+	content: '';
+
+	height: 1px;
+	max-width: 400px;
+
+	background-color: hsl(230, 50%, 54%);
+}
+
+.meta h6 {
+	color: hsl(230, 50%, 54%);
+}
+
+.meta h6::after {
+	display: block;
+
+	content: '';
+
+	height: 1px;
+	max-width: 400px;
+
+	background-color: hsl(230, 50%, 54%);
+}
+
+.keyword {
+	color: #F37D14;
+	font-weight: normal;
+
+	font-size: inherit;
+}
+
+.def {
+	min-width: 40%;
+
+	padding: 4px;
+
+	padding-left: 0;
+
+	font-size: 14px;
+
+	font-family: 'Fira Code', monospace;
+}
+
+pre {
+	background-color: #0000001f;
+
+	padding: 12px;
+
+	display: inline-block;
+}
+
+.ident {
+	color: #793F0C;
+}
+
+.named_type {
+	color: #0912DE;
+	text-decoration: none;
+}
+
+.named_type:visited {
+	color: #0912DE;
+	text-decoration: none;
+}
+
+a.struct_link {
+	color: #0912DE;
+	text-decoration: none;
+}
+
+a.struct_link:visited {
+	color: #0912DE;
+	text-decoration: none;
+}
+
+.header {
+	position: fixed;
+
+	width: 100%;
+	height: 48px;
+
+	top: 0;
+	left: 0;
+
+	background-color: hsl(40, 49%, 78%);
+}
+
+.docs {
+	position: relative;
+	padding: 24px;
+
+	top: 48px;
+	width: 50%;
+	min-width: 400px;
+
+	left: 50%;
+
+	transform: translateX(-50%);
+}
+
+.header::before {
+	display: inline-block;
+
+	content: '';
+
+	width: 24px;
+	height: 48px;
+
+	padding-left: 12px;
+	padding-right: 12px;
+
+	background: hsl(40, 49%, 96%) url('./logo.svg');
+	background-size: 48px 48px;
+}
+
+a {
+	font-size: 15px;
+}
+
+.desc {
+	font-size: 15px;
+	
+	color: #000000bf;
+}
+
+.sidebar {
+	position: fixed;
+
+	top: 48px;
+	bottom: 0;
+	left: 0;
+	width: 250px;
+
+	background-color: hsl(40, 49%, 96%);
+}
+
+.breadcrumbs {
+	padding: 12px;
+}
+
+.backtick {
+	display: block;
+	padding: 4px;
+
+	color: #0000007f;
+
+	text-decoration: none;
+}
+
+.selftick {
+	display: block;
+	padding: 4px;
+
+	font-weight: bold;
+	font-size: 14px;
+}

@@ -74,6 +74,7 @@ impl StandardLib {
 		fs_extra::dir::create_all(std_source.join("bool"), true).unwrap();
 		fs_extra::dir::create_all(std_source.join("string"), true).unwrap();
 		fs_extra::dir::create_all(std_source.join("std"), true).unwrap();
+		fs_extra::dir::create_all(std_source.join("test"), true).unwrap();
 
 		for int in INTS {
 			let file = std::fs::File::create(std_source.join(format!("int/{}.bolt", int.name))).unwrap();
@@ -96,7 +97,7 @@ impl StandardLib {
 		let string_file = std::fs::File::create(std_source.join("string/String.bolt")).unwrap();
 		template_engine.render_to("string/String.bolt.tera", &Context::new(), string_file).unwrap();
 
-		let files_to_copy = [ "std/print.c", "std/print.bolt" ];
+		let files_to_copy = [ "std/print.c", "std/print.bolt", "test/testing.bolt" ];
 
 		for file in files_to_copy {
 			std::fs::copy(format!("runtime/{file}"), std_source.join(file)).unwrap();

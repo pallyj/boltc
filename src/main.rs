@@ -5,17 +5,20 @@ mod cstd;
 mod extension_host;
 mod testing;
 
-use std::{process::Command, collections::HashMap};
+use std::{process::Command, collections::HashMap, mem};
 
 use args::{Args};
 use blir::{BlirContext, Library};
 use blir_lowering::BlirLowerer;
+use blir_passes::{MacroExpansionPass, TypeCheckPass, ClosureResolvePass, TypeInferPass, TypeResolvePass};
 use clap::StructOpt;
 //use codegen::config::{BuildConfig, BuildOutput, BuildProfile};
 use colored::Colorize;
 use errors::{fileinterner::FileInterner, DiagnosticReporter};
 use extension_host::{ExtensionHost, ExtensionError};
 use lower_ast::AstLowerer;
+use mir::exc::ExecutionEngine;
+use mir_lowering::MirLowerer;
 //use lower_blir::BlirLowerer;
 use parser::{parser::parse};
 
@@ -33,393 +36,318 @@ codegen: 307ms
 fn main() {
     let args = Args::parse();
 
-    if !args.validate() { return; }
-
-    let standard = cstd::StandardLib::default();
-
-    if args.files.first().map(|first| first == "run-tests").unwrap_or(false) {
-        testing::run_tests();
+    if !args.validate() {
+        println!( "{} invalid args", "error:".red().bold() );
         return;
     }
 
-    if args.files.first().map(|first| first == "install").unwrap_or(false) {
-        standard.install();
-        return;
-    }
-
-    if !standard.is_installed() {
-        standard.install();
-    }
-
-    for feature in &args.feature {
-        feature_gate::enable_feature(feature);
-    }
-
-    let lib_name = if let Some(lib) = args.lib.clone() {
-        lib
-    } else {
-        println!("{} no project name specified", "error:".red().bold());
-        return
+    let Some(lib_name) = args.lib.clone() else {
+        panic!("{} missing project name", "error:".red().bold());
     };
 
-    let mut project = Project::new(&lib_name, args.extensions.clone());
-
-    // Add standard library
-    let lang = [//"test/testing.bolt"
-                "std/print.bolt",
-                "bool/Bool.bolt",
-                "float/Half.bolt",
-                "float/Float.bolt",
-                "float/Double.bolt",
-                "int/Int.bolt",
-                "int/UInt.bolt",
-                "int/Int8.bolt",
-                "int/Int16.bolt",
-                "int/Int32.bolt",
-                "int/Int64.bolt",
-                "int/UInt8.bolt",
-                "int/UInt16.bolt",
-                "int/UInt32.bolt",
-                "int/UInt64.bolt",
-                "string/String.bolt",
-                "string/Char.bolt"];
-
-    let lib_path = standard.get_source_path();
-    let lib_path_str = lib_path.as_os_str().to_string_lossy();
-
-    for file in lang {
-        project.open_file(&format!("{}/{file}", lib_path_str), "runtime");
-    }
-
-    for file in &args.files {
-        project.open_file(file, &lib_name);
-    }
-
-    let Ok(entry_point) = project.compile(&args) else {
-        return
-    };
-
-    let lib = standard.get_lib_path();
-    let lib_str = lib.as_os_str().to_string_lossy();
-    // Link with the c standard library
-    let stderr =
-    Command::new("clang").args(["-L",
-                                &lib_str,
-                                "-lstd",
-                                &format!("bin/lib{}.o", lib_name),
-                                "-e",
-                                &format!("_{}", entry_point),
-                                "-o",
-                                &format!("bin/{}", lib_name)])
-                            .output()
-                            .unwrap()
-                            .stderr;
-
-    if stderr.is_empty() {
-        Command::new(&format!("bin/{}", lib_name)).spawn().unwrap();
-    } else {
-        println!("{} {}", "error:".red().bold(), unsafe { String::from_utf8_unchecked(stderr) });
-    }
+    run(args);
 }
 
-pub struct Project {
+fn run(args: Args) -> Result<(), ()>
+{
+    feature_gate::enable_features(&args.feature);
+
+    let mut project = Project::new(&args.lib.unwrap());
+    project.add_runtime();
+
+    match args.files.first()
+    {
+        Some(s) if s.as_str() == "run-tests" => {
+            testing::run_tests();
+        }
+        Some(s) if s.as_str() == "install" => {
+            let standard = cstd::StandardLib::default();
+
+            standard.install();
+        }
+        Some(s) if s.as_str() == "doc" => {
+            project.open_files(&args.files[1..]); // open files
+            project.compile_to_blir()?; // compile to blir
+            project.run_passes()?; // run passes
+            project.document(); // and then create documentation
+        }
+        Some(s) if s.as_str() == "emu" => {
+            project.open_files(&args.files[1..]); // open files
+            project.compile_to_blir()?; // compile to blir
+            project.run_passes()?; // run passes
+            project.compile_to_mir(); // compile to mir
+            project.emulate(); // run in emulator
+        }
+        _ => {
+            project.open_files(&args.files[1..]); // open files
+            project.compile_to_blir()?; // compile to blir
+            project.run_passes()?; // run passes
+            project.compile_to_mir(); // compile to mir
+            project.compile_to_llvm(); // lower to llvm
+            // link the executable
+        }
+    }
+
+    Ok(())
+}
+
+pub struct Project
+{
+    project_name: String,
     interner: FileInterner,
     extensions: Vec<String>,
+    file_access_errors: Vec<String>,
+    project_state: ProjectState,
+    host: ExtensionHost,
+    context: BlirContext,
 }
 
-impl Project {
-    pub fn new(name: &str, extensions: Vec<String>) -> Project {
-        Project { interner: FileInterner::new(),
-                  extensions }
+impl Project
+{
+    pub fn new(project_name: &str) -> Project
+    {
+        Project
+        {
+            project_name: project_name.into(),
+            interner: FileInterner::new(),
+            extensions: Vec::new(),
+            file_access_errors: Vec::new(),
+            project_state: ProjectState::Initialize,
+            host: ExtensionHost::new(),
+            context: BlirContext::new(),
+        }
     }
 
-    pub fn open_file(&mut self, file: &str, in_project: &str) { self.interner.open_file(file, in_project); }
+    pub fn add_runtime(&mut self)
+    {
+        let runtime = ["std/print.bolt",
+                       "bool/Bool.bolt",
+                       "float/Half.bolt",
+                       "float/Float.bolt",
+                       "float/Double.bolt",
+                       "int/Int.bolt",
+                       "int/UInt.bolt",
+                       "int/Int8.bolt",
+                       "int/Int16.bolt",
+                       "int/Int32.bolt",
+                       "int/Int64.bolt",
+                       "int/UInt8.bolt",
+                       "int/UInt16.bolt",
+                       "int/UInt32.bolt",
+                       "int/UInt64.bolt",
+                       "string/String.bolt",
+                       "string/Char.bolt"];
 
-    pub fn compile(&mut self, args: &Args) -> Result<String, ()> {
-        let mut debugger = DiagnosticReporter::new(&self.interner);
+        let standard = cstd::StandardLib::default();
 
-        let mut host = ExtensionHost::new();
+        let lib_path = standard.get_source_path();
+        let lib_path_str = lib_path.as_os_str().to_string_lossy();
 
-        for extension in &self.extensions {
-            if let Err(_) = unsafe { host.load_extension(extension) } {
-                debugger.throw_diagnostic(ExtensionError::LoadFailed(extension.clone()));
+        for file in runtime {
+            self.open_file(&format!("{}/{file}", lib_path_str), "runtime");
+        }
+    }
+
+    pub fn add_test_runtime(&mut self)
+    {
+        let runtime = ["test/testing.bolt"];
+
+        let standard = cstd::StandardLib::default();
+
+        let lib_path = standard.get_source_path();
+        let lib_path_str = lib_path.as_os_str().to_string_lossy();
+
+        for file in runtime {
+            self.open_file(&format!("{}/{file}", lib_path_str), "runtime");
+        }
+    }
+
+    pub fn open_files(&mut self, files: &[String])
+    {
+        let project_name = self.project_name.clone();
+        for file in files
+        {
+            self.open_file(file, &project_name);
+        }
+    }
+
+    fn open_file(&mut self, file: &str, project: &str)
+    {
+        // check if the file exists
+        if !std::path::Path::new(file).exists()
+        {
+            self.file_access_errors.push(file.to_string());
+            return
+        }
+
+        self.interner.open_file(file, project);
+    }
+
+    pub fn compile_to_blir(&mut self) -> Result<(), ()>
+    {
+        // Set up a debugger for compiling to blir
+        let mut reporter = DiagnosticReporter::new(&self.interner);
+
+        // Load extensions
+        for extension in &self.extensions
+        {
+            unsafe { self.host.load_extension(extension) }
+                .map_err(|_| {
+                     reporter.throw_diagnostic(ExtensionError::LoadFailed(extension.clone()))
+                });
+        }
+
+        // Separate the interner's files into libraries
+        let (mut libraries, mut scopes) = (HashMap::new(), HashMap::new());
+
+        for file in self.interner.iter()
+        {
+            let project = file.1.project();
+
+            if libraries.contains_key(project)
+            {
+                continue
             }
+
+            let library = Library::new(project);
+
+            scopes.insert(project.to_string(), library.scope().clone());
+            libraries.insert(project.to_string(), library);
         }
 
-        let mut libraries = HashMap::new();
-        let mut scopes = HashMap::new();
+        // Parse each file
+        for file in self.interner.iter()
+        {
+            let parsed = parse(file.1.text(),
+                               &reporter,
+                               file.0,
+                               &self.host.operator_factory);
 
-        for file in self.interner.iter() {
-            if !libraries.contains_key(file.1.project()) {
-                let library = Library::new(file.1.project());
-                scopes.insert(file.1.project().to_string(), library.scope().clone());
-                libraries.insert(file.1.project().to_string(), library);
-            }
+            reporter.errors()?;
+
+            let library = libraries.get_mut(file.1.project()).unwrap();
+
+            AstLowerer::new(
+                parsed,
+                &mut reporter,
+                &self.host.operator_factory,
+                &scopes)
+                .lower_file(library);
         }
 
-        for file in self.interner.iter() {
-            let parse = parse(file.1.text(), &mut debugger, file.0, &host.operator_factory);
+        self.project_state = ProjectState::Blir(libraries);
 
-            if debugger.errors().is_err() {
-                continue;
-            }
+        Ok(())
+    }
 
-            AstLowerer::new(parse, &mut debugger, &host.operator_factory, &scopes)
-                .lower_file(libraries.get_mut(file.1.project()).unwrap());
-        }
-        debugger.errors()?;
+    pub fn run_passes(&mut self) -> Result<(), ()>
+    {
+        let ProjectState::Blir(mut libraries) = mem::take(&mut self.project_state) else { panic!() };
+        let mut reporter = DiagnosticReporter::new(&self.interner);
 
-        let mut context = BlirContext::new();
+        // Expand macros
+        let mut macro_expansion_pass = MacroExpansionPass::new(&self.host.attribute_factory, &mut reporter);
+        libraries.values_mut()
+                 .for_each(|library| macro_expansion_pass.run_pass(library));
+        reporter.errors()?;
 
-        let mut macro_expand_pass = blir_passes::MacroExpansionPass::new(&host.attribute_factory, &mut debugger);
-        
-        for library in libraries.values_mut() {
-            macro_expand_pass.run_pass(library);
-        }
-        debugger.errors()?;
+        // Resolve types and values
+        let mut resolve_pass = TypeResolvePass::new(&self.host.attribute_factory,
+                                                &self.host.operator_factory,
+                                                &mut self.context,
+                                                &mut reporter);
+        libraries.values_mut()
+                 .for_each(|library| resolve_pass.run_pass(library));
+        reporter.errors()?;
 
-        let mut type_resolve_pass = blir_passes::TypeResolvePass::new(&host.attribute_factory, &host.operator_factory, &mut context, &mut debugger);
-        
-        for library in libraries.values_mut() {
-            type_resolve_pass.run_pass(library);
-        }
-        debugger.errors()?;
+        // Infer types
+        let mut infer_pass = TypeInferPass::new(&mut self.context, &mut reporter);
+        libraries.values_mut()
+                 .for_each(|library| infer_pass.run_pass(library));
+        reporter.errors()?;
 
-        //println!("{:?}", libraries["test"]);
-        
-        let mut type_infer_pass = blir_passes::TypeInferPass::new(&mut context, &mut debugger);
-        
-        for library in libraries.values_mut() {
-            type_infer_pass.run_pass(library);
-        }
-        debugger.errors()?;
+        // Resolve closures
+        let mut closure_resolve_pass = ClosureResolvePass::new(&self.host.attribute_factory,
+                                                           &self.host.operator_factory,
+                                                           &mut self.context,
+                                                           &mut reporter);
+        libraries.values_mut()
+                 .for_each(|library| closure_resolve_pass.run_pass(library));
+        reporter.errors()?;
 
-        let mut closure_resolve_pass = blir_passes::ClosureResolvePass::new(&host.attribute_factory, &host.operator_factory, &mut context, &mut debugger);
-        
-        for library in libraries.values_mut() {
-            closure_resolve_pass.run_pass(library);
-        }
-        debugger.errors()?;
+        // Check types
+        let mut type_check_pass = TypeCheckPass::new(&mut reporter);
+        libraries.values_mut()
+                 .for_each(|library| type_check_pass.run_pass(library));
+        reporter.errors()?;
 
-        //println!("{:?}", libraries["test"]);
+        self.project_state = ProjectState::ProcessedBlir(libraries);
 
-        let mut type_check_pass = blir_passes::TypeCheckPass::new(&mut debugger);
+        Ok(())
+    }
 
-        for library in libraries.values_mut() {
-            type_check_pass.run_pass(library);
-        }
-        debugger.errors()?;
+    pub fn compile_to_mir(&mut self)
+    {
+        let ProjectState::ProcessedBlir(mut libraries) = mem::take(&mut self.project_state) else { panic!() };
 
-        let mut project = mir::Project::new("test");
+        let mut project = mir::Project::new(&self.project_name);
         BlirLowerer::new(&mut project, libraries.into_values().collect()).lower();
 
-        //println!("{project}");
-
-        //let entry = context.entry_point;
-        //project.execute().enter(&entry.unwrap(), vec![]);
-
-        let mut mir_lowerer = mir_lowering::MirLowerer::new(project);
-        mir_lowerer.lower_project();
-        mir_lowerer.display();
-
-        Err(())
-
-        //let post_type_check = std::time::Instant::now();
-
-        /*let mut lowerer = BlirLowerer::new(self.library.take().unwrap(), &mut debugger);
-        lowerer.lower();
-
-        let library = lowerer.finish();
-
-        //let post_lower_blir = std::time::Instant::now();
-
-        //println!("{library}");
-
-        let build_profile = match args.optimization_level {
-            0 => BuildProfile::Debug,
-            1 => BuildProfile::Less,
-            2 => BuildProfile::Normal,
-            3 => BuildProfile::Aggressive,
-            _ => unreachable!(),
-        };
-
-        let output = match args.emit {
-            Emit::Asm => BuildOutput::ASM,
-            Emit::Llvm => BuildOutput::LLVM,
-            Emit::Object => BuildOutput::Object,
-        };
-
-        let config = BuildConfig::new(build_profile, output, None);
-
-        codegen::compile(library, config);
-
-        //let post_llvm = std::time::Instant::now();
-
-        /*println!(r#"
-    parse took {} ms
-    blir took {} ms
-    resolve took {} ms
-    infer took {} ms
-    check took {} ms
-    closures took {} ms
-    blirsssa took {} ms
-    llvm took {} ms"#,
-    parse_time.as_millis(),
-    lower_time.as_millis(),
-    (post_type_resolve - post_parse).as_millis(),
-    (post_type_infer - post_type_resolve).as_millis(),
-    (post_closure_resolve - post_type_infer).as_millis(),
-    (post_type_check - post_closure_resolve).as_millis(),
-    (post_lower_blir - post_closure_resolve).as_millis(),
-    (post_llvm - post_lower_blir).as_millis());*/
-
-        (!debugger.has_errors(), context.entry_point)*/
+        self.project_state = ProjectState::Mir(project);
     }
 
-    pub fn docgen(self, args: &Args) -> Result<String, ()> {
-        let mut debugger = DiagnosticReporter::new(&self.interner);
+    pub fn compile_to_llvm(&mut self)
+    {
+        let ProjectState::Mir(mut project) = mem::take(&mut self.project_state) else { panic!() };
 
-        let mut host = ExtensionHost::new();
+        let mut mir_lowerer = MirLowerer::new(project);
+        mir_lowerer.lower_project();
+    }
 
-        for extension in &self.extensions {
-            if let Err(_) = unsafe { host.load_extension(extension) } {
-                debugger.throw_diagnostic(ExtensionError::LoadFailed(extension.clone()));
-            }
-        }
+    pub fn emulate(&mut self) -> mir::exc::val::Value
+    {
+        let ProjectState::Mir(mut project) = mem::take(&mut self.project_state) else { panic!() };
 
-        let mut libraries = HashMap::new();
-        let mut scopes = HashMap::new();
+        let entry = self.context.entry_point.as_ref();
+        project.execute().enter(&entry.unwrap(), vec![])
+    }
 
-        for file in self.interner.iter() {
-            if !libraries.contains_key(file.1.project()) {
-                let library = Library::new(file.1.project());
-                scopes.insert(file.1.project().to_string(), library.scope().clone());
-                libraries.insert(file.1.project().to_string(), library);
-            }
-        }
 
-        for file in self.interner.iter() {
-            let parse = parse(file.1.text(), &mut debugger, file.0, &host.operator_factory);
+    pub fn document(mut self) {
+        let ProjectState::ProcessedBlir(mut libraries) = mem::take(&mut self.project_state) else { panic!() };
 
-            if debugger.errors().is_err() {
-                continue;
-            }
-
-            AstLowerer::new(parse, &mut debugger, &host.operator_factory, &scopes)
-                .lower_file(libraries.get_mut(file.1.project()).unwrap());
-        }
-        debugger.errors()?;
-
-        let mut context = BlirContext::new();
-
-        let mut type_resolve_pass = blir_passes::TypeResolvePass::new(&host.attribute_factory, &host.operator_factory, &mut context, &mut debugger);
-        
-        for library in libraries.values_mut() {
-            type_resolve_pass.run_pass(library);
-        }
-        debugger.errors()?;
-
-        
-        let mut type_infer_pass = blir_passes::TypeInferPass::new(&mut context, &mut debugger);
-        
-        for library in libraries.values_mut() {
-            type_infer_pass.run_pass(library);
-        }
-        debugger.errors()?;
-
-        let mut closure_resolve_pass = blir_passes::ClosureResolvePass::new(&host.attribute_factory, &host.operator_factory, &mut context, &mut debugger);
-        
-        for library in libraries.values_mut() {
-            closure_resolve_pass.run_pass(library);
-        }
-        debugger.errors()?;
-
-        let mut type_check_pass = blir_passes::TypeCheckPass::new(&mut debugger);
-
-        for library in libraries.values_mut() {
-            type_check_pass.run_pass(library);
-        }
-        debugger.errors()?;
-
-        let mut bundle = docgen::Bundle::new(args.lib.clone().unwrap());
+        let mut bundle = docgen::Bundle::new(self.project_name.clone());
 
         for library in libraries.into_values() {
             bundle.add_library(library);
         }
         bundle.hide_internals();
         bundle.save();
-
-        Err(())
     }
 
-    pub fn compile_test(&mut self) -> Result<(String, mir::Project), ()> {
-        let mut debugger = DiagnosticReporter::new(&self.interner);
+    pub fn entry_point(&self) -> Option<&String>
+    {
+        self.context.entry_point.as_ref()
+    }
 
-        let mut host = ExtensionHost::new();
+    pub fn create_execution_engine<'a>(&'a mut self) -> ExecutionEngine<'a>
+    {
+        let ProjectState::Mir(project) = &mut self.project_state else { panic!() };
 
-        for extension in &self.extensions {
-            if let Err(_) = unsafe { host.load_extension(extension) } {
-                debugger.throw_diagnostic(ExtensionError::LoadFailed(extension.clone()));
-            }
-        }
+        project.execute()
+    }
+}
 
-        let mut libraries = HashMap::new();
-        let mut scopes = HashMap::new();
+pub enum ProjectState {
+    Initialize,
+    Blir(HashMap<String, Library>),
+    ProcessedBlir(HashMap<String, Library>),
+    Mir(mir::Project),
+    Llvm(mir_lowering::MirLowerer),
+}
 
-        for file in self.interner.iter() {
-            if !libraries.contains_key(file.1.project()) {
-                let library = Library::new(file.1.project());
-                scopes.insert(file.1.project().to_string(), library.scope().clone());
-                libraries.insert(file.1.project().to_string(), library);
-            }
-        }
-
-        for file in self.interner.iter() {
-            let parse = parse(file.1.text(), &mut debugger, file.0, &host.operator_factory);
-
-            if debugger.errors().is_err() {
-                continue;
-            }
-
-            AstLowerer::new(parse, &mut debugger, &host.operator_factory, &scopes)
-                .lower_file(libraries.get_mut(file.1.project()).unwrap());
-        }
-        debugger.errors()?;
-
-        let mut context = BlirContext::new();
-
-        let mut type_resolve_pass = blir_passes::TypeResolvePass::new(&host.attribute_factory, &host.operator_factory, &mut context, &mut debugger);
-        
-        for library in libraries.values_mut() {
-            type_resolve_pass.run_pass(library);
-        }
-        debugger.errors()?;
-
-        
-        let mut type_infer_pass = blir_passes::TypeInferPass::new(&mut context, &mut debugger);
-        
-        for library in libraries.values_mut() {
-            type_infer_pass.run_pass(library);
-        }
-        debugger.errors()?;
-
-        let mut closure_resolve_pass = blir_passes::ClosureResolvePass::new(&host.attribute_factory, &host.operator_factory, &mut context, &mut debugger);
-        
-        for library in libraries.values_mut() {
-            closure_resolve_pass.run_pass(library);
-        }
-        debugger.errors()?;
-
-        let mut type_check_pass = blir_passes::TypeCheckPass::new(&mut debugger);
-
-        for library in libraries.values_mut() {
-            type_check_pass.run_pass(library);
-        }
-        debugger.errors()?;
-
-        let mut project = mir::Project::new("test");
-        BlirLowerer::new(&mut project, libraries.into_values().collect()).lower();
-
-        return Ok((context.entry_point.unwrap(), project))
+impl Default for ProjectState {
+    fn default() -> Self {
+        Self::Initialize
     }
 }

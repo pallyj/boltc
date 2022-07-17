@@ -4,6 +4,8 @@ use colored::Colorize;
 use json::JsonValue;
 use mir::exc::val::Value;
 
+use crate::Project;
+
 pub fn run_tests()  {
 	use std::fs;
 
@@ -57,15 +59,15 @@ fn run_test(path: &Path, test: &JsonValue) {
 
 		print!("test {test_name} ...");
 
-		let mut project = super::Project::new("test", vec![]);
+		let mut project = super::Project::new("test");
 
 		project.open_file(path.join(include).as_os_str().to_str().unwrap(), "test");
 		for std_file in get_std(test["std"].as_str()) {
 			project.open_file(std_file, "test");
 		}
+
 		if test.has_key("expect") {
-			if let Ok((entry_point, project)) = project.compile_test() {
-				let exc = project.execute();
+			if let Ok((exc, entry_point)) = compile_test(&mut project) {
 				for run in test["expect"].members() {
 					let inputs = run["inputs"].members().map(|member| {
 						let v = if let Some(n) = member.as_u64() {
@@ -83,7 +85,7 @@ fn run_test(path: &Path, test: &JsonValue) {
 						Value::Struct(hm)
 					}).collect();
 
-					let output = exc.run_function(&entry_point, inputs);
+					let output = exc.enter(&entry_point, inputs);
 
 					if !switch_output(&run["output"], output) {
 						break
@@ -149,4 +151,13 @@ fn get_std(std: Option<&str>) -> &[&str] {
 		Some("minimal") => &["runtime/test/test.bolt"],
 		_ => &[],
 	}
+}
+
+fn compile_test(project: &mut Project) -> Result<(mir::exc::ExecutionEngine, String), ()>
+{
+	project.compile_to_blir()?;
+	project.run_passes()?;
+	project.compile_to_mir();
+	let entry_point = project.entry_point().cloned().unwrap();
+	Ok((project.create_execution_engine(), entry_point))
 }

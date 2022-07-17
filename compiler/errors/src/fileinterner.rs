@@ -10,7 +10,6 @@ impl FileInterner {
     pub fn get_line_info<'a>(&'a self, file: usize, pos: usize) -> LineInfo<'a> { self.files[file].get_line_info(pos) }
 
     pub fn open_file(&mut self, path: &str, project: &str) {
-        // todo: check if the file exists
         let mut file = std::fs::File::open(path).unwrap();
 
         let mut code = String::new();

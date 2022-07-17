@@ -49,7 +49,7 @@ impl ExternFunction {
 	///
 	/// The parameters a function takes
 	/// 
-	pub fn params(&self) -> &[Type] {
+	pub fn params(&self) -> &Vec<Type> {
 		&self.params
 	}
 

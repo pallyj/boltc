@@ -66,9 +66,16 @@ impl Enum {
 
 	///
 	/// Returns the type of a variant of an enum
-	/// 
+	///  
 	pub fn get_variant_type(&self, tag: u64) -> Option<Type> {
 		self.variants.get(&tag).cloned()
+	}
+
+	///
+	/// 
+	/// 
+	pub fn variants(&self) -> impl Iterator<Item = (&u64, &Type)> {
+		self.variants.iter()
 	}
 
 	pub (crate) fn write(

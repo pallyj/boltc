@@ -11,6 +11,9 @@ use crate::func::{Function, FunctionParameter};
 use crate::struct_::{Struct, StructField};
 use crate::ty::Type;
 
+const STYLE_CSS: &str = include_str!("style.css");
+const LOGO_SVG: &str = include_str!("logo.svg");
+
 pub fn render_docs(bundle: Bundle) {
 	let root = std::env::current_dir().unwrap().join("bin/docs");
 
@@ -39,6 +42,12 @@ html {
 	};
 	let mut file = File::create(root.join("index.html")).unwrap();
 	file.write_all(html.into_string().as_bytes()).unwrap();
+
+	let mut style_css = File::create(root.join("style.css")).unwrap();
+	style_css.write_all(STYLE_CSS.as_bytes()).unwrap();
+
+	let mut logo_svg = File::create(root.join("logo.svg")).unwrap();
+	logo_svg.write_all(LOGO_SVG.as_bytes()).unwrap();
 }
 
 fn save_struct(structure: &Struct, path: &Path, root: &Path, rel_path: &str) {

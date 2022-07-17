@@ -1,0 +1,21 @@
+import intrinsics
+
+/*func returnInt() -> i64 {
+	1
+}
+
+func returnFloat() -> f64 {
+	10.0
+}
+
+func testMatch() -> i64
+{
+	let i = 0;
+
+	match i {
+		1 => 1,
+		2 => 4,
+		3 => 9,
+		_ => 0
+	}
+}*/

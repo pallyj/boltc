@@ -1,10 +1,10 @@
 use itertools::Itertools;
 
-use crate::MirLowerer;
+use crate::MirLowerContext;
 
-impl MirLowerer
+impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 {
-	pub fn create_struct(&mut self, struct_def: &mir::ty::Struct)
+	pub fn create_struct(&self, struct_def: &mir::ty::Struct)
 	{
 		if struct_def.is_transparent() {
 			return
@@ -17,7 +17,7 @@ impl MirLowerer
 	}
 
 	pub fn fill_struct_fields(
-		&mut self,
+		&self,
 		struct_def: &mir::ty::Struct)
 	{
 		if struct_def.is_transparent() {

@@ -13,6 +13,7 @@ pub struct FunctionId {
 ///
 /// Represents a function, with a name, parameters, a return_type and a collection of `BasicBlocks`
 /// 
+#[derive(Debug, Clone)]
 pub struct Function {
 	id: FunctionId,
 
@@ -61,14 +62,19 @@ impl Function {
 	///
 	/// Gets the locals in the function
 	/// 
-	pub fn locals(&self) -> &[Local] {
+	pub fn locals(&self) -> &Vec<Local> {
 		&self.locals
+	}
+
+	pub fn basic_blocks(&self) -> &Vec<BasicBlockId>
+	{
+		&self.basic_blocks
 	}
 
 	///
 	/// The parameters a function takes
 	/// 
-	pub fn params(&self) -> &[Type] {
+	pub fn params(&self) -> &Vec<Type> {
 		&self.params
 	}
 

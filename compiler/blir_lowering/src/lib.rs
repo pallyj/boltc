@@ -86,6 +86,8 @@ impl<'a> BlirLowerer<'a> {
         // Adds fields to structs, variants
         // to enums, and parameters to
         // functions and methods.
+
+
         for library in &libraries {
             for global in &library.globals {
                 self.lower_global(global);

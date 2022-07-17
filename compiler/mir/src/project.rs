@@ -1,4 +1,4 @@
-use std::{fmt::Display, collections::HashMap};
+use std::{fmt::Display, collections::HashMap, sync::atomic::{AtomicBool, Ordering}};
 
 use crate::{code::{BasicBlock, BasicBlockId, FunctionId, Function, ExternFunction, ExternFunctionId}, ty::{Type, Struct, StructId, Enum, EnumId}, Builder, exc::ExecutionEngine, val::{Global, GlobalId}};
 
@@ -63,6 +63,20 @@ impl Project {
 	pub (crate) fn add_function(&mut self, name: &str, params: Vec<Type>, return_type: Type) -> FunctionId {
 		let function_id = FunctionId::new(self.functions.len());
 		let function = Function::new(function_id, name, params, return_type);
+
+		if name == "7runtime3Int3addF7runtime3IntS7runtime3IntSE00" {
+			static COUNTER: AtomicBool = AtomicBool::new(false);
+
+			if COUNTER.load(Ordering::Relaxed)
+			{
+				panic!()
+			}
+			else
+			{
+				COUNTER.store(true, Ordering::Relaxed)	
+			}
+			//panic!()
+		}
 
 		self.functions.push(function);
 		self.function_names.insert(name.to_string(), function_id);
@@ -166,10 +180,17 @@ impl Project {
 	}
 
 	///
-	/// Gets a struct 
+	/// Gets an enum
 	/// 
-	pub (crate) fn get_enum(&self, enum_id: EnumId) -> Option<&Enum> {
+	pub fn get_enum(&self, enum_id: EnumId) -> Option<&Enum> {
 		self.enums.get(enum_id.unique_idx())
+	}
+
+	///
+	/// Gets a list of enums in the project
+	/// 
+	pub fn enums(&self) -> &Vec<Enum> {
+		&self.enums
 	}
 
 	///
@@ -193,7 +214,7 @@ impl Project {
 	///
 	/// Gets the basic block at an index
 	/// 
-	pub (crate) fn basic_block(&self, block_id: BasicBlockId) -> Option<&BasicBlock> {
+	pub fn basic_block(&self, block_id: BasicBlockId) -> Option<&BasicBlock> {
 		self.basic_blocks.get(block_id.unique_idx())
 	}
 
@@ -276,6 +297,20 @@ impl Project {
 	/// 
 	pub fn structs(&self) -> &Vec<Struct> {
 		&self.structs
+	}
+
+	///
+	/// Gets a list of the functions in the project
+	/// 
+	pub fn functions(&self) -> &Vec<Function> {
+		&self.functions
+	}
+
+	///
+	/// Gets a list of the extern functions in the project
+	/// 
+	pub fn extern_functions(&self) -> &Vec<ExternFunction> {
+		&self.extern_functions
 	}
 }
 
