@@ -184,6 +184,7 @@ pub struct FunctionInfo {
 
     always_link: bool,
     is_method:   bool,
+    is_entry_point: bool,
 
     is_hidden: bool,
 
@@ -200,6 +201,7 @@ impl FunctionInfo {
 
                always_link: false,
                is_method,
+               is_entry_point: false,
 
                is_hidden: false,
             
@@ -234,5 +236,13 @@ impl FunctionInfo {
 
     pub fn hide(&mut self) {
         self.is_hidden = true;
+    }
+
+    pub fn is_entry_point(&self) -> bool {
+        self.is_entry_point
+    }
+
+    pub fn set_entry_point(&mut self) {
+        self.is_entry_point = true;
     }
 }

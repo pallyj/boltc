@@ -1,8 +1,9 @@
-var index = 0;
+var index = 5;
 
 @entryPoint
 func main () {
-	while index < 10 { index += 1; }
+	index += 10;
+	//while index < 10 { index += 1; }
 
 	print(index);
 }

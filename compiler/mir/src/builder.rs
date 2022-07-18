@@ -25,8 +25,8 @@ impl<'a> Builder<'a> {
 	///
 	/// Adds a function to the underlying project, returning its `FunctionId`
 	/// 
-	pub fn add_function(&mut self, name: &str, params: Vec<Type>, return_type: Type) -> FunctionId {
-		self.project.add_function(name, params, return_type)
+	pub fn add_function(&mut self, name: &str, params: Vec<Type>, return_type: Type, is_entry_point: bool) -> FunctionId {
+		self.project.add_function(name, params, return_type, is_entry_point)
 	}
 
 	///

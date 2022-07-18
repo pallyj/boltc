@@ -3,7 +3,7 @@ pub mod enum_;
 
 use std::ops::Add;
 
-use inkwell::{types::{IntType, FloatType, BasicTypeEnum, BasicType, PointerType, ArrayType, FunctionType, StructType, BasicMetadataTypeEnum}, AddressSpace};
+use inkwell::{types::{IntType, FloatType, BasicTypeEnum, BasicType, PointerType, ArrayType, FunctionType, StructType, BasicMetadataTypeEnum, AnyTypeEnum}, AddressSpace};
 use itertools::Itertools;
 use mir::ty::{StructId, EnumId, TypeKind};
 
@@ -112,15 +112,17 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 	/// 
 	pub fn lower_func_ty(&self, return_type: mir::ty::Type, params: Vec<mir::ty::Type>) -> FunctionType<'ctx>
 	{
-		let return_type_lowered = self.lower_ty(return_type);
-
 		let params_lowered: Vec<BasicMetadataTypeEnum> =
 			params.into_iter()
 				  .map(|param| self.lower_ty(param))
 				  .map(|param| param.as_basic_type_enum().into())
 				  .collect_vec();
 
-		return_type_lowered.fn_type(&params_lowered, false)
+		match return_type.kind()
+		{
+			TypeKind::Tuple(items) if items.len() == 0 => self.context.void_type().fn_type(&params_lowered, false),
+			_ => self.lower_ty(return_type).fn_type(&params_lowered, false)
+		}
 	}
 
 	fn lower_tuple_ty(&self, items: Vec<mir::ty::Type>) -> StructType<'ctx>

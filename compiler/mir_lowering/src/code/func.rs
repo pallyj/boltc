@@ -1,6 +1,6 @@
 use inkwell::{module::Linkage, values::PointerValue, basic_block::BasicBlock};
 use itertools::Itertools;
-use mir::{instr::{Terminator, TerminatorKind, LocalId, Instruction}, code::BasicBlockId};
+use mir::{instr::{Terminator, TerminatorKind, LocalId, Instruction}, code::BasicBlockId, ty::TypeKind};
 
 use crate::{MirLowerContext, code::func};
 
@@ -31,6 +31,14 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 		// Create locals for the function
 		let local_builder = self.context.append_basic_block(llvm_function, "bb");
 		self.builder.position_at_end(local_builder);
+
+		if func.is_entry_point()
+		{
+			if let Some(init) = self.module.get_function(".init")
+			{
+				self.builder.build_call(init, &[], "cv");
+			}
+		}
 
 		let params = func.params()
 						 .iter()
@@ -138,11 +146,19 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 
 				self.builder.build_switch(llvm_scrutinee, llvm_default, &cases);
 			},
-			ReturnVoid => { self.builder.build_return(Some(&self.context.struct_type(&[], false).const_zero())); },
+			ReturnVoid => { self.builder.build_return(None); },
 			Return { value } => {
-				let val = self.lower_rvalue(value, function);
+				match value.ty().kind()
+				{
+					TypeKind::Tuple(items) if items.is_empty() => {
+						self.builder.build_return(None);
+					}
+					_ => {
+						let val = self.lower_rvalue(value, function);
 
-				self.builder.build_return(Some(&val));
+						self.builder.build_return(Some(&val));
+					}
+				}
 			}
 			Panic => {
 				self.builder.build_unreachable();

@@ -806,27 +806,72 @@ impl IntoDiagnostic for Error {
                                 format!("expected 1 generic parameter, found {count}"),
                                 vec![CodeLocation::new(span, None)])
             }
-            Error::ClosureIsNotAFunc => todo!(),
+            Error::ClosureIsNotAFunc => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "closure_not_a_func",
+                                format!("closure is not a function"),
+                                vec![])
+            }
             Error::SymbolNotFound(name, span) => {
                 Diagnostic::new(DiagnosticLevel::Error,
                                 "sym_not_found",
                                 format!("symbol `{name}` not found"),
                                 vec![ CodeLocation::new(span, None) ])
             }
-            Error::SymbolNotAType(_, _) => todo!(),
-            Error::ExpectedTypeFound(_) => todo!(),
+            Error::SymbolNotAType(name, span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "symbol_not_a_type",
+                                format!("symbol `{name}` is not a type"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
+            Error::ExpectedTypeFound(name) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "expected_type",
+                                format!("expected type, found {name}"),
+                                vec![ ])
+            }
             Error::MemberNotFound { parent_ty, member, span } => {
                 Diagnostic::new(DiagnosticLevel::Error,
                                 "mem_not_found",
                                 format!("{parent_ty} doesn't have member `{member}`"),
                                 vec![ CodeLocation::new(span, None) ])
             }
-            Error::MemberNotATy { parent_ty, member, span } => todo!(),
-            Error::OperatorExpectedParams(_, _, _) => todo!(),
-            Error::OperatorNotFound(_, _) => todo!(),
-            Error::WrongEnumType(_, _) => todo!(),
-            Error::TagAlreadyUsed(_, _) => todo!(),
-            Error::PrivateSymbol { name, span, suggestion } => todo!(),
+            Error::MemberNotATy { parent_ty, member, span } => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "member_not_a_type",
+                                format!("member `{member}` of {parent_ty} is not a type"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
+            Error::OperatorExpectedParams(operator, n, span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "operator_expected",
+                                format!("operator `{operator}` expected {n} parameters"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
+            Error::OperatorNotFound(operator, span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "operator_not_found",
+                                format!("operator `{operator}` not found"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
+            Error::WrongEnumType(ty, span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "wrong_enum_type",
+                                format!("wrong enum type {ty}"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
+            Error::TagAlreadyUsed(n, spans) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "tag_used",
+                                format!("tag {n} has already been used"),
+                                spans.into_iter().map(|span| CodeLocation::new(span, Some("choose one of these".into()))).collect())
+            }
+            Error::PrivateSymbol { name, span, suggestion: _ } => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "private_sym",
+                                format!("symbol `{name}` is private"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
         }
     }
 }

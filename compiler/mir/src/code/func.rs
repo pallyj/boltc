@@ -27,13 +27,15 @@ pub struct Function {
 	locals: Vec<Local>,
 
 	n_locals: usize,
+
+	is_entry_point: bool,
 }
 
 impl Function {
 	///
 	/// Creates a new function
 	/// 
-	pub (crate) fn new(id: FunctionId, name: &str, params: Vec<Type>, return_type: Type) -> Function {
+	pub (crate) fn new(id: FunctionId, name: &str, params: Vec<Type>, return_type: Type, is_entry_point: bool) -> Function {
 		let n_locals = params.len();
 		Function {
 			id,
@@ -42,7 +44,8 @@ impl Function {
 			return_type,
 			basic_blocks: vec![],
 			locals: vec![],
-			n_locals }
+			n_locals,
+			is_entry_point }
 	}
 
 	///
@@ -116,6 +119,10 @@ impl Function {
 		self.n_locals += 1;
 
 		return local_id
+	}
+
+	pub fn is_entry_point(&self) -> bool {
+		self.is_entry_point
 	}
 
 	///

@@ -27,7 +27,9 @@ impl<'a> BlirLowerer<'a> {
 											.collect_vec();
 		let return_type = self.lower_ty(borrowed_func.info.return_type());
 
-		self.builder.add_function(func_name, parameters, return_type);
+		let is_entry_point = func.info().is_entry_point();
+
+		self.builder.add_function(func_name, parameters, return_type, is_entry_point);
 	}
 
 	/// 
@@ -52,7 +54,7 @@ impl<'a> BlirLowerer<'a> {
 			}
 		}
 
-		self.builder.add_function(method_name, parameters.clone(), (*return_type).clone());
+		self.builder.add_function(method_name, parameters.clone(), (*return_type).clone(), false);
 	}
 
 	///

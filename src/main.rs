@@ -4,10 +4,11 @@ mod args;
 mod cstd;
 mod extension_host;
 mod testing;
+mod link;
 
 use std::{process::Command, collections::HashMap, mem};
 
-use args::{Args};
+use args::{Args, Emit};
 use blir::{BlirContext, Library};
 use blir_lowering::BlirLowerer;
 use blir_passes::{MacroExpansionPass, TypeCheckPass, ClosureResolvePass, TypeInferPass, TypeResolvePass};
@@ -18,31 +19,17 @@ use errors::{fileinterner::FileInterner, DiagnosticReporter};
 use extension_host::{ExtensionHost, ExtensionError};
 use lower_ast::AstLowerer;
 use mir::exc::ExecutionEngine;
-use mir_lowering::MirLowerer;
+use mir_lowering::{MirLowerer, BuildConfig, BuildOutput};
 //use lower_blir::BlirLowerer;
 use parser::{parser::parse};
 
-/*
 
-parse: 59ms
-lower ast: 76ms
-resolve: 26ms
-check: 0ms
-closures: 0ms
-lower blir: 27ms
-codegen: 307ms
-
-*/
 fn main() {
     let args = Args::parse();
 
-    if !args.validate() {
-        println!( "{} invalid args", "error:".red().bold() );
-        return;
-    }
-
     let Some(lib_name) = args.lib.clone() else {
-        panic!("{} missing project name", "error:".red().bold());
+        println!("{} {}", "error:".red().bold(), "missing project name".bold());
+        return
     };
 
     run(args);
@@ -52,7 +39,7 @@ fn run(args: Args) -> Result<(), ()>
 {
     feature_gate::enable_features(&args.feature);
 
-    let mut project = Project::new(&args.lib.unwrap());
+    let mut project = Project::new(args.lib.as_ref().unwrap());
     project.add_runtime();
 
     match args.files.first()
@@ -63,15 +50,19 @@ fn run(args: Args) -> Result<(), ()>
         Some(s) if s.as_str() == "install" => {
             let standard = cstd::StandardLib::default();
 
+            println!("{:?}", standard.get_lib_path());
+
             standard.install();
         }
         Some(s) if s.as_str() == "doc" => {
+            if !args.validate() { return Err(()); }
             project.open_files(&args.files[1..]); // open files
             project.compile_to_blir()?; // compile to blir
             project.run_passes()?; // run passes
             project.document(); // and then create documentation
         }
         Some(s) if s.as_str() == "emu" => {
+            if !args.validate() { return Err(()); }
             project.open_files(&args.files[1..]); // open files
             project.compile_to_blir()?; // compile to blir
             project.run_passes()?; // run passes
@@ -79,11 +70,12 @@ fn run(args: Args) -> Result<(), ()>
             project.emulate(); // run in emulator
         }
         _ => {
-            project.open_files(&args.files[1..]); // open files
+            if !args.validate() { return Err(()); }
+            project.open_files(&args.files); // open files
             project.compile_to_blir()?; // compile to blir
             project.run_passes()?; // run passes
             project.compile_to_mir(); // compile to mir
-            project.compile_to_llvm(); // lower to llvm
+            project.compile_to_llvm(&args); // lower to llvm
             // link the executable
         }
     }
@@ -296,12 +288,28 @@ impl Project
         self.project_state = ProjectState::Mir(project);
     }
 
-    pub fn compile_to_llvm(&mut self)
+    pub fn compile_to_llvm(&mut self, args: &Args)
     {
         let ProjectState::Mir(mut project) = mem::take(&mut self.project_state) else { panic!() };
 
         let mut mir_lowerer = MirLowerer::new(project);
-        mir_lowerer.lower_project();
+
+        let build_output = match args.emit {
+            Emit::Llvm => BuildOutput::Llvm,
+            Emit::Asm => BuildOutput::Assembly,
+            Emit::Object => BuildOutput::Object,
+        };
+
+        let build_config = BuildConfig::new(args.output_file.as_ref().unwrap(), build_output, args.optimization_level as u32);
+
+        if let Some(temp_path) = mir_lowerer.lower_project(build_config)
+        {
+            if let Some(entry_point) = &self.context.entry_point {
+                link::with_args(&temp_path, args, &entry_point)
+            } else {
+                println!("{} {}", "error:".red().bold(), "no entry point provided".bold());
+            }
+        }
     }
 
     pub fn emulate(&mut self) -> mir::exc::val::Value

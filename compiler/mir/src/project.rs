@@ -60,23 +60,9 @@ impl Project {
 	/// Adds a function to the project
 	/// 
 	/// 
-	pub (crate) fn add_function(&mut self, name: &str, params: Vec<Type>, return_type: Type) -> FunctionId {
+	pub (crate) fn add_function(&mut self, name: &str, params: Vec<Type>, return_type: Type, is_entry_point: bool) -> FunctionId {
 		let function_id = FunctionId::new(self.functions.len());
-		let function = Function::new(function_id, name, params, return_type);
-
-		if name == "7runtime3Int3addF7runtime3IntS7runtime3IntSE00" {
-			static COUNTER: AtomicBool = AtomicBool::new(false);
-
-			if COUNTER.load(Ordering::Relaxed)
-			{
-				panic!()
-			}
-			else
-			{
-				COUNTER.store(true, Ordering::Relaxed)	
-			}
-			//panic!()
-		}
+		let function = Function::new(function_id, name, params, return_type, is_entry_point);
 
 		self.functions.push(function);
 		self.function_names.insert(name.to_string(), function_id);
@@ -237,7 +223,7 @@ impl Project {
 	///
 	/// Gets a reference to a `Global` from its id
 	/// 
-	pub (crate) fn global(&self, id: GlobalId) -> Option<&Global> {
+	pub fn global(&self, id: GlobalId) -> Option<&Global> {
 		self.globals.get(id.index())
 	}
 
@@ -246,6 +232,11 @@ impl Project {
 	/// 
 	pub (crate) fn global_mut(&mut self, id: GlobalId) -> Option<&mut Global> {
 		self.globals.get_mut(id.index())
+	}
+
+	pub fn globals(&self) -> &Vec<Global>
+	{
+		&self.globals
 	}
 
 	///

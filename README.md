@@ -56,10 +56,10 @@ The Bolt compiler is optimized for blazing fast speed. Bolt is written quickly, 
 
 ## Benchmarks
 
-| Name          | Bolt 0.4.0 | C      | Rust   | Javascript |
-|---------------|------------|--------|--------|------------|
-| factorial/sec | 7.9M	     | 8.0M   | 1.6M   | 310k		|
-| speedup       | 1x		 | 0.98x  | 4.9x   | 25x		|
+| Name          | Bolt 0.4.0 | Bolt 0.6 | C      | Rust   | Javascript |
+|---------------|------------|----------|--------|--------|------------|
+| factorial/sec | 7.9M	     | 2.5M     | 8.0M   | 1.6M   | 310k	   |
+| speedup       | 1x		 |          | 0.98x  | 4.9x   | 25x		   |
 
 Even in its early stages, Bolt is blazing fast. Bolt runs the factorials example 25 times faster than nodejs (!), 4.9 faster than rust, and with the margin of error from C.
 

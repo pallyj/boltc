@@ -1,10 +1,11 @@
 #![feature(let_else)]
 
-use std::{collections::HashMap, marker::PhantomData};
+use std::{collections::HashMap, marker::PhantomData, path::Path};
 
-use inkwell::{passes::{PassManagerBuilder, PassManager}, builder, OptimizationLevel, module::Module};
+use inkwell::{passes::{PassManagerBuilder, PassManager}, builder, OptimizationLevel, module::Module, targets::{TargetTriple, Target, TargetMachine, FileType, CodeModel, RelocMode}};
 use itertools::Itertools;
 use mir::ty::StructId;
+use tempfile::{NamedTempFile, TempPath};
 
 mod ty;
 mod code;
@@ -21,7 +22,7 @@ impl MirLowerer
         Self { project }
     }
 
-    pub fn lower_project(mut self)
+    pub fn lower_project(mut self, config: BuildConfig) -> Option<TempPath>
     {
         let context = inkwell::context::Context::create();
 
@@ -29,18 +30,57 @@ impl MirLowerer
         context.lower_project();
 
 
-        /*let pass_manager_builder = PassManagerBuilder::create();
+        let pass_manager_builder = PassManagerBuilder::create();
         pass_manager_builder.set_optimization_level(OptimizationLevel::Aggressive);
 
         let pass_manager: PassManager<Module> = PassManager::create(());
         pass_manager.add_always_inliner_pass();
+        pass_manager.add_loop_unroll_pass();
         pass_manager_builder.populate_module_pass_manager(&pass_manager);
 
-        pass_manager.run_on(&context.module);*/
+        pass_manager.run_on(&context.module);
 
-        //context.display();
+        if let BuildOutput::Llvm = config.build_output
+        {
+            context.module.print_to_file(&config.output_file).unwrap();
+            return None
+        }
 
-        context.module.print_to_file("module.ll").unwrap()
+        let optimization_level = match config.optimization_level
+        {
+            0 => OptimizationLevel::None,
+            1 => OptimizationLevel::Less,
+            2 => OptimizationLevel::Default,
+            3 => OptimizationLevel::Aggressive,
+            _ => unreachable!(),
+        };
+
+        let target_triple = TargetMachine::get_default_triple();
+        let target = Target::from_triple(&target_triple).unwrap();
+        let target_machine = target.create_target_machine(&target_triple,
+                                                      TargetMachine::get_host_cpu_name().to_str().unwrap(),
+                                                      "+avx2",
+                                                      optimization_level,
+                                                      RelocMode::Static,
+                                                      CodeModel::Default).unwrap();
+
+        let file_type = match config.build_output {
+            BuildOutput::Assembly => {
+                target_machine.write_to_file(&context.module, FileType::Assembly, Path::new(&config.output_file)).unwrap();
+            }
+            BuildOutput::Object => {
+                let temp_file = NamedTempFile::new().unwrap();
+
+                let path = temp_file.into_temp_path();
+
+                target_machine.write_to_file(&context.module, FileType::Object, &path).unwrap();
+
+                return Some(path);
+            }
+            _ => unreachable!()
+        };
+        
+        return None;
     }
 }
 
@@ -82,6 +122,11 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 
     pub fn lower_project(&self)
     {
+        // Create global definitions
+        for global in self.project.globals() {
+            self.create_global(global)
+        }
+
         // Create struct definitions
         for structure in self.project.structs() {
             self.create_struct(structure)
@@ -122,4 +167,30 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
     {
         self.module.print_to_stderr();
     }
+}
+
+pub struct BuildConfig
+{
+    output_file: String,
+    build_output: BuildOutput,
+    optimization_level: u32,
+}
+
+impl BuildConfig
+{
+    pub fn new(output_file: &str, build_output: BuildOutput, optimization_level: u32) -> Self
+    {
+        Self {
+            output_file: output_file.to_string(),
+            build_output,
+            optimization_level
+        }
+    }
+}
+
+pub enum BuildOutput
+{
+    Llvm,
+    Assembly,
+    Object
 }

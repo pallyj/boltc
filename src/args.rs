@@ -18,9 +18,8 @@ pub struct Args {
     #[clap(short = 'O', default_value = "0")]
     pub optimization_level: usize,
 
-    /*
     #[clap(short = 'o')]
-    pub output_file: Option<String>,*/
+    pub output_file: Option<String>,
 
     #[clap(long, arg_enum, default_value = "object")]
     pub emit: Emit,
@@ -36,6 +35,11 @@ impl Args {
         if self.optimization_level > 3 {
             println!("{} optimization level {} is too high, use 0, 1, 2 or 3", "error:".red().bold(), self.optimization_level);
             is_valid = false;
+        }
+
+        if self.output_file.is_none() {
+           println!("{} no output file specified", "error:".red().bold());
+           is_valid = false;
         }
 
         return is_valid

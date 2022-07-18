@@ -75,7 +75,12 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 			Local(local_id) => {
 				function.get_local(*local_id)
 			}
-			Global(_) => todo!(),
+			Global(global_id) => {
+				let global = self.project.global(*global_id).unwrap();
+				let llvm_global = self.module.get_global(global.name()).unwrap();
+
+				llvm_global.as_pointer_value()
+			}
 			StructField(place, field_name) => {
 				let llvm_place = self.lower_place(place, function);
 
@@ -323,7 +328,7 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 				self.builder.build_call(function, &args, "call")
 					.try_as_basic_value()
 					.left()
-					.unwrap()
+					.unwrap_or_else(|| self.context.struct_type(&[], false).const_named_struct(&[]).into())
 			}
 
 			_ => {
@@ -339,7 +344,7 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 				self.builder.build_call(callable_function, &args, "call")
 					.try_as_basic_value()
 					.left()
-					.unwrap()
+					.unwrap_or_else(|| self.context.struct_type(&[], false).const_named_struct(&[]).into())
 			}
 		}
 	}

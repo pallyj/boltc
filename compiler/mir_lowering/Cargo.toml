@@ -9,3 +9,4 @@ edition = "2021"
 mir = { path = "../mir" }
 inkwell = { git = "https://github.com/TheDan64/inkwell", branch = "master", features = ["llvm14-0"] }
 itertools = "0.10.3"
+tempfile = "3.3.0"

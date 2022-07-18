@@ -177,6 +177,7 @@ impl FuncAttribute for EntryPointAttribute {
     fn name(&self) -> &'static str { "entryPoint" }
 
     fn apply(&self, args: &AttributeArgs, info: &mut FunctionInfo, context: &mut BlirContext, _debugger: &mut DiagnosticReporter) {
+        info.set_entry_point();
         let _ = context.entry_point.insert(info.link_name().clone());
     }
 }

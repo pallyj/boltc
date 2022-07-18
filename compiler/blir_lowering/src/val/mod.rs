@@ -584,7 +584,7 @@ impl<'a> BlirLowerer<'a> {
 			panic!()
 		};
 
-		let function_id = self.builder.add_function(&closure_mangled_name, parameters.to_vec(), return_type.as_ref().clone());		
+		let function_id = self.builder.add_function(&closure_mangled_name, parameters.to_vec(), return_type.as_ref().clone(), false);		
 
         self.closures.push((closure_mangled_name, closure.clone()));
 

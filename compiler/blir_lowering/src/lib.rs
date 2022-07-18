@@ -65,7 +65,7 @@ impl<'a> BlirLowerer<'a> {
         let libraries = std::mem::take(&mut self.libraries);
 
         // Create an initializer function
-        let init_function = self.builder.add_function(".init", vec![], Type::void());
+        let init_function = self.builder.add_function(".init", vec![], Type::void(), false);
 
         // Create a definition for each type
         // These need to be created first so
