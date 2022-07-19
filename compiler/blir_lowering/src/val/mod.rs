@@ -8,9 +8,9 @@ use itertools::Itertools;
 use mir::{val::{RValue, Place, SoloIntrinsic, DuoIntrinsic}};
 use rand::Rng;
 
-use crate::BlirLowerer;
+use crate::{BlirLowerer, err::LoweringErrorKind};
 
-impl<'a> BlirLowerer<'a> {
+impl<'a, 'b> BlirLowerer<'a, 'b> {
 	pub fn lower_kind(&self, value: &Value) -> LowerKind {
 		use ValueKind::*;
 		
@@ -142,7 +142,8 @@ impl<'a> BlirLowerer<'a> {
 									.map(|(arg, is_shared)| {
 										if *is_shared {
 											if !arg.is_mutable() {
-												println!("error: value is immutable")
+												self.reporter.throw_diagnostic(LoweringErrorKind::ImmutableParam
+                                     						 .with_span(arg.span.unwrap_or_default()));
 											}
 											self.lower_place(arg).get_ref(Self::span_of(arg.span))
 										} else {
@@ -213,7 +214,8 @@ impl<'a> BlirLowerer<'a> {
 
 			Assign(place, value) => {
 				if !place.is_mutable() {
-					println!("error: {place:?} is not mutable");
+					self.reporter.throw_diagnostic(LoweringErrorKind::ImmutablePlace
+                                     						 .with_span(place.span.unwrap_or_default()));
 				}
 
 				let place = self.lower_place(place);
@@ -320,7 +322,10 @@ impl<'a> BlirLowerer<'a> {
 							}
 
 							_ => {
-								panic!("error: cannot index into array with type {}", args.args[1].typ);
+								self.reporter.throw_diagnostic(LoweringErrorKind::InvalidIndex(args.args[1].typ.clone())
+											 .with_span(args.args[1].span.unwrap_or_default()));
+
+								RValue::const_int(0, mir::ty::Type::int(16), Default::default())
 							}
 						}; //self.lower_rvalue(&args.args[1]);
 
@@ -512,7 +517,8 @@ impl<'a> BlirLowerer<'a> {
 				let recv = self.lower_place(&reciever);
 
 				if method.is_mutating() && !reciever.is_mutable() {
-					println!("error: mutating method called on immutable value");
+					self.reporter.throw_diagnostic(LoweringErrorKind::ImmutableReciever(method.info().span())
+                                     						 .with_span(reciever.span.unwrap_or_default()));
 				}
 
 				// todo: if method takes self ref

@@ -3,11 +3,11 @@ use errors::Span;
 use mir::{val::RValue, instr::Terminator};
 use patmat::{PatternMatrix};
 
-use crate::{BlirLowerer};
+use crate::{BlirLowerer, err::LoweringErrorKind};
 
 mod func;
 
-impl<'a> BlirLowerer<'a> {
+impl<'a, 'b> BlirLowerer<'a, 'b> {
 	pub fn lower_code_block(
 		&mut self,
 		code: &CodeBlock) -> Option<RValue>
@@ -18,8 +18,6 @@ impl<'a> BlirLowerer<'a> {
 			last_value = self.lower_statement(smt);
 			if smt.diverges() { break }
 		}
-
-		// todo: and then add warnings
 
 		return last_value;
 	}
@@ -47,18 +45,18 @@ impl<'a> BlirLowerer<'a> {
 
 					let mut rows = pattern_matrix.rows();
 					let Some(first_row) = rows.next() else {
-						println!("error: no row in pattern in irrefutable let");
+						self.reporter.throw_diagnostic(LoweringErrorKind::NoPatternInLet.with_span(pattern.span));
 						return None;
 					};
 					if rows.next().is_some() {
-						println!("error: more than one row in pattern in irrefutable let");
+						self.reporter.throw_diagnostic(LoweringErrorKind::SplitPatternInLet.with_span(pattern.span));
 						return None;
 					}
 					// Check that it is refutable
 					for col in first_row.columns() {
 						// The pattern is refutable
 						if !col.matches_any() {
-							println!("error: refutable pattern in let binding");
+							self.reporter.throw_diagnostic(LoweringErrorKind::RefutablePatternInLet.with_span(pattern.span));
 
 							// Create a binding to prevent errors
 							for (bind_name, bind_value) in first_row.bindings() {
@@ -83,18 +81,18 @@ impl<'a> BlirLowerer<'a> {
 
 					let mut rows = pattern_matrix.rows();
 					let Some(first_row) = rows.next() else {
-						println!("error: no row in pattern in irrefutable let");
+						self.reporter.throw_diagnostic(LoweringErrorKind::NoPatternInLet.with_span(pattern.span));
 						return None;
 					};
 					if rows.next().is_some() {
-						println!("error: more than one row in pattern in irrefutable let");
+						self.reporter.throw_diagnostic(LoweringErrorKind::SplitPatternInLet.with_span(pattern.span));
 						return None;
 					}
 					// Check that it is refutable
 					for col in first_row.columns() {
 						// The pattern is refutable
 						if !col.matches_any() {
-							println!("error: refutable pattern in let binding");
+							self.reporter.throw_diagnostic(LoweringErrorKind::RefutablePatternInLet.with_span(pattern.span));
 							break;
 						}
 					}
@@ -135,7 +133,8 @@ impl<'a> BlirLowerer<'a> {
 
 					self.builder.build_terminator(Terminator::goto(bb));
 				} else {
-					println!("error: loop {} doesn't exist", label);
+					self.reporter.throw_diagnostic(LoweringErrorKind::LoopDoesNotExist.with_span(smt.span.unwrap_or_default()));
+
 					self.builder.build_terminator(Terminator::panic());
 				}
 				
@@ -145,7 +144,8 @@ impl<'a> BlirLowerer<'a> {
 				if let Some(bb) = self.continue_labels.get(label) {
 					self.builder.build_terminator(Terminator::goto(*bb));
 				} else {
-					println!("error: loop {} doesn't exist", label);
+					self.reporter.throw_diagnostic(LoweringErrorKind::LoopDoesNotExist.with_span(smt.span.unwrap_or_default()));
+					
 					self.builder.build_terminator(Terminator::panic());
 				}
 				None

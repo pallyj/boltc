@@ -3,7 +3,7 @@ use itertools::Itertools;
 
 use crate::BlirLowerer;
 
-impl<'a> BlirLowerer<'a> {
+impl<'a, 'b> BlirLowerer<'a, 'b> {
 	///
 	/// 
 	/// 

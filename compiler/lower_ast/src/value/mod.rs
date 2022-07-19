@@ -415,8 +415,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                             let (is_negative, count) = self.lower_integer(&value);
 
                             if is_negative {
-                                // throw an error
-                                println!("error: negative array length")
+                                self.reporter.throw_diagnostic(Error::NegativeArrayLength(count).at(value.span.unwrap_or_default()));
                             }
 
                             let typ = TypeKind::Array { item: Box::new(Type::infer()), len: count as usize }.spanned(span);

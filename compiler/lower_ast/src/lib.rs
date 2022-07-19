@@ -9,6 +9,8 @@ use parser::{ast::{file::FileItem, Parse, Root},
              operators::OperatorFactory};
 use rowan::TextRange;
 
+use crate::err::Error;
+
 mod code;
 mod typ;
 mod value;
@@ -68,8 +70,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                     else if let Some(import_scope) = self.scopes.get(&import_def.import_library()) {
                         parent.import(import_scope.clone())
                     } else {
-                        println!("error: library {} doesn't exist", import_def.import_library());
-                        // todo: throw an error
+                        self.reporter.throw_diagnostic(Error::LibraryDoesNotExist(import_def.import_library()).at(self.span(import_def.range())))
                     }
                 }
 

@@ -6,7 +6,7 @@ use crate::BlirLowerer;
 mod struct_;
 mod enum_;
 
-impl<'a> BlirLowerer<'a> {
+impl<'a, 'b> BlirLowerer<'a, 'b> {
 	pub fn lower_ty(&mut self, ty: &blir::typ::Type) -> mir::ty::Type {
 		use blir::typ::TypeKind::*;
 		

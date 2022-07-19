@@ -8,6 +8,9 @@ pub (crate) enum Error {
 	BreakOutsideLoop,
 	ContinueOutsideLoop,
 
+	NegativeArrayLength(u64),
+	LibraryDoesNotExist(String),
+
 	NoTrailingClosure,
 }
 
@@ -73,6 +76,20 @@ impl IntoDiagnostic for SpannedError {
 								"trailing_non_func",
 								String::from("cannot used trailing closure with non-function"),
 								vec![ CodeLocation::new(self.span, None) ])
+			}
+
+			Error::NegativeArrayLength(len) => {
+				Diagnostic::new(DiagnosticLevel::Error,
+								"negative_arr_len",
+								format!("found array with negative length -{len}"),
+								vec![ CodeLocation::new(self.span, None) ])
+			}
+
+			Error::LibraryDoesNotExist(library) => {
+				Diagnostic::new(DiagnosticLevel::Error,
+								"library_dne",
+								format!("couldn't find library {library}"),
+								vec![ CodeLocation::new(self.span, Some("did you mean to import this library?".into())) ])
 			}
 		}
     }

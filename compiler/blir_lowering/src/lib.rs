@@ -4,21 +4,24 @@
 use std::collections::HashMap;
 
 use blir::value::{Closure, Value};
-use errors::Span;
+use errors::{Span, DiagnosticReporter};
 use mir::{val::Place, code::BasicBlockId, ty::Type, instr::Terminator};
 
 mod ty;
 mod val;
 mod code;
+mod err;
 
 ///
 /// 
 /// 
-pub struct BlirLowerer<'a> {
+pub struct BlirLowerer<'a, 'b> {
     builder: mir::Builder<'a>,
     libraries: Vec<blir::Library>,
     closures: Vec<(String, Closure)>,
-    // todo: move these to another struct
+    reporter: &'b mut DiagnosticReporter<'a>,
+
+
     function_ctx: HashMap<String, Place>,
     globals_to_init: Vec<(String, Value)>,
 
@@ -27,15 +30,16 @@ pub struct BlirLowerer<'a> {
     loop_places: HashMap<String, Place>,
 }
 
-impl<'a> BlirLowerer<'a> {
+impl<'a, 'b> BlirLowerer<'a, 'b> {
     ///
     /// 
     /// 
-    pub fn new(project: &'a mut mir::Project, libraries: Vec<blir::Library>) -> Self {
+    pub fn new(project: &'a mut mir::Project, reporter: &'b mut DiagnosticReporter<'a>, libraries: Vec<blir::Library>) -> Self {
         let builder = project.builder();
 
         Self { builder,
                libraries,
+               reporter,
                function_ctx: HashMap::new(),
                globals_to_init: Vec::new(),
                closures: Vec::new(),

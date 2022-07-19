@@ -4,7 +4,7 @@ mod enum_;
 use blir::typ::{Type, TypeKind};
 use parser::ast::typ::Type as AstType;
 
-use crate::AstLowerer;
+use crate::{AstLowerer, err::Error};
 
 impl<'a, 'b> AstLowerer<'a, 'b> {
     pub(crate) fn lower_type(&mut self, typ: AstType) -> Type {
@@ -65,8 +65,7 @@ impl<'a, 'b> AstLowerer<'a, 'b> {
                 let (is_negative, len) = self.lower_integer(&lowered_expr);
 
                 if is_negative {
-                    // throw an error
-                    println!("error: negative array length")
+                    self.reporter.throw_diagnostic(Error::NegativeArrayLength(len).at(self.span(array_type.range())));
                 }
 
                 TypeKind::Array { item: Box::new(item), len: len as usize }

@@ -5,11 +5,11 @@ use errors::Span;
 use mir::{val::{Place, RValue}, instr::{Terminator, SwitchArm}, code::BasicBlockId};
 use patmat::{DecisionTree, Maranget, PatternMatrix};
 
-use crate::BlirLowerer;
+use crate::{BlirLowerer, err::LoweringErrorKind};
 
 static COUNTER: AtomicUsize = AtomicUsize::new(0);
 
-impl<'a> BlirLowerer<'a> {
+impl<'a, 'b> BlirLowerer<'a, 'b> {
 	pub fn lower_if_value(
 		&mut self,
 		if_value: &IfValue,
@@ -195,8 +195,9 @@ impl<'a> BlirLowerer<'a> {
 						self.switch_struct(&place, &patterns, default_block, struct_ref, &scrutinee.span)
 					}
                     _ => {
-                        println!("error: type couldn't be switched on");
-                        todo!()
+                        self.reporter.throw_diagnostic(LoweringErrorKind::CantSwitchOn(scrutinee.typ.clone())
+                                     .with_span(scrutinee.typ.span.unwrap_or_default()));
+                        return;
                     }
                 };
 

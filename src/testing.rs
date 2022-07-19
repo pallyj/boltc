@@ -157,7 +157,7 @@ fn compile_test(project: &mut Project) -> Result<(mir::exc::ExecutionEngine, Str
 {
 	project.compile_to_blir()?;
 	project.run_passes()?;
-	project.compile_to_mir();
+	project.compile_to_mir()?;
 	let entry_point = project.entry_point().cloned().unwrap();
 	Ok((project.create_execution_engine(), entry_point))
 }

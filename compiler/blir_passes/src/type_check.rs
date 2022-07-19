@@ -356,13 +356,11 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                     }
 
                     if *len != sequence.len() {
-                        println!("error: lengths don't match")
+                        self.debugger.throw_diagnostic(TypeCheckError::ArrayLengthsDontMatch(*len as u64, sequence.len() as u64, value.span.unwrap_or_default()));
                     }
                 } else {
-                    // error
-                    println!("error: array has type");
+                    self.debugger.throw_diagnostic(TypeCheckError::ArrayHasWrongType(value.span.unwrap_or_default()));
                 }
-                // todo: check that count is equal to the type length
             }
 
             ValueKind::RepeatingLiteral { repeating, count } => {
@@ -371,14 +369,14 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                     self.check_type(&repeating.typ, item);
                     if let Some(repeating_count) = count {
                         if *repeating_count != *len as u64 {
-                            println!("error: lengths don't match")
+                            self.debugger.throw_diagnostic(TypeCheckError::ArrayLengthsDontMatch(*len as u64, *repeating_count, value.span.unwrap_or_default()));
                         }
                     } else {
-                        println!("error: couldn't infer count for ");
+                        self.debugger.throw_diagnostic(TypeCheckError::ArrayNoCount(value.span.unwrap_or_default()))
                     }
                 } else {
                     // error
-                    println!("error: array has type");
+                    self.debugger.throw_diagnostic(TypeCheckError::ArrayHasWrongType(value.span.unwrap_or_default()));
                 }
             }
 
@@ -591,6 +589,10 @@ enum TypeCheckError {
     CodeAfterUnreachable(Span),
     UnreachableCode(Span),
 
+    ArrayLengthsDontMatch(u64, u64, Span),
+    ArrayHasWrongType(Span),
+    ArrayNoCount(Span),
+
     UnexpectedShared(Span),
     ExpectedShared(Span),
 }
@@ -701,6 +703,24 @@ impl IntoDiagnostic for TypeCheckError {
                                 "expected_shared",
                                 format!("argument should be marked as `shared`"),
                                 vec![ CodeLocation::new(span, Some("add a `shared` keyword".into())) ])
+            }
+            TypeCheckError::ArrayLengthsDontMatch(len1, len2, span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "expected_arr_len",
+                                format!("expected array with length {len1}, found {len2}"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
+            TypeCheckError::ArrayHasWrongType(span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "expected_arr_ty",
+                                format!("expected array type"),
+                                vec![ CodeLocation::new(span, None) ])
+            }
+            TypeCheckError::ArrayNoCount(span) => {
+                Diagnostic::new(DiagnosticLevel::Error,
+                                "expected_arr_len",
+                                format!("couldn't infer array length"),
+                                vec![ CodeLocation::new(span, None) ])
             }
         }
     }

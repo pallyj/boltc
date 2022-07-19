@@ -66,7 +66,7 @@ fn run(args: Args) -> Result<(), ()>
             project.open_files(&args.files[1..]); // open files
             project.compile_to_blir()?; // compile to blir
             project.run_passes()?; // run passes
-            project.compile_to_mir(); // compile to mir
+            project.compile_to_mir()?; // compile to mir
             project.emulate(); // run in emulator
         }
         _ => {
@@ -74,7 +74,7 @@ fn run(args: Args) -> Result<(), ()>
             project.open_files(&args.files); // open files
             project.compile_to_blir()?; // compile to blir
             project.run_passes()?; // run passes
-            project.compile_to_mir(); // compile to mir
+            project.compile_to_mir()?; // compile to mir
             project.compile_to_llvm(&args); // lower to llvm
             // link the executable
         }
@@ -278,14 +278,18 @@ impl Project
         Ok(())
     }
 
-    pub fn compile_to_mir(&mut self)
+    pub fn compile_to_mir(&mut self) -> Result<(), ()>
     {
         let ProjectState::ProcessedBlir(mut libraries) = mem::take(&mut self.project_state) else { panic!() };
+        let mut reporter = DiagnosticReporter::new(&self.interner);
 
         let mut project = mir::Project::new(&self.project_name);
-        BlirLowerer::new(&mut project, libraries.into_values().collect()).lower();
+        BlirLowerer::new(&mut project, &mut reporter, libraries.into_values().collect()).lower();
+
+        reporter.errors()?;
 
         self.project_state = ProjectState::Mir(project);
+        Ok(())
     }
 
     pub fn compile_to_llvm(&mut self, args: &Args)

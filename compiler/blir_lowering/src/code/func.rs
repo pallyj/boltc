@@ -5,7 +5,7 @@ use mir::{instr::Terminator, val::Place};
 
 use crate::BlirLowerer;
 
-impl<'a> BlirLowerer<'a> {
+impl<'a, 'b> BlirLowerer<'a, 'b> {
 	///
 	/// Adds the signature of a function to a project
 	/// 
