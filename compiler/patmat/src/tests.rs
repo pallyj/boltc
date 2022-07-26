@@ -43,8 +43,8 @@ fn test_basic_example() {
 	]).anon(); 
 
 	let match_value = ValueKind::Tuple(vec![
-		ValueKind::LocalVariable("a".to_string()).anon(integer_type.clone()),
-		ValueKind::LocalVariable("b".to_string()).anon(integer_type.clone()),
+		ValueKind::LocalVariable("a".to_string(), true, "a".to_string()).anon(integer_type.clone()),
+		ValueKind::LocalVariable("b".to_string(), true, "b".to_string()).anon(integer_type.clone()),
 	]).anon(tuple_type.clone());
 
 	let pat1 = PatternKind::Tuple { items: vec![
@@ -57,7 +57,7 @@ fn test_basic_example() {
 		PatternKind::Wildcard.with(Span::empty(), integer_type.clone()),
 	],
 	labels: vec![None, None] }.with(Span::empty(), tuple_type.clone());
-	let pat3 = PatternKind::Bind("x".to_string()).with(Span::empty(), tuple_type.clone());
+	let pat3 = PatternKind::Bind("x".to_string(), true).with(Span::empty(), tuple_type.clone());
 
 	let matrix = PatternMatrix::construct(
 		match_value,

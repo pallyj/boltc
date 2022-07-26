@@ -135,7 +135,7 @@ impl Monomorphizer {
     pub fn filter_labels(&mut self, labels: &Vec<Option<String>>, labels2: &Vec<Option<String>>) {
         //self.functions.retain(|sig| labels_match(&sig.info(), labels));
 
-        let drained = self.functions.drain_filter(|sig| !labels_match(&sig.info(), labels, labels2)).collect_vec();
+        let _drained = self.functions.drain_filter(|sig| !labels_match(&sig.info(), labels, labels2)).collect_vec();
 
         /*if self.functions.len() == 0 {
             drained.pop().map(|element| self.functions.push(element));
@@ -143,7 +143,7 @@ impl Monomorphizer {
     }
 
     pub fn filter_types(&mut self, types: &Vec<Type>) {
-        let drained = self.functions.drain_filter(|sig| !types_match(&sig.info(), types)).collect_vec();
+        let _drained = self.functions.drain_filter(|sig| !types_match(&sig.info(), types)).collect_vec();
 
         /*if self.functions.len() == 0 {
             drained.pop().map(|element| self.functions.push(element));

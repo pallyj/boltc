@@ -2,7 +2,7 @@
 
 <img src="https://github.com/pallyj/boltc/blob/main/assets/logo.svg?raw=true" width="256" height="256"/>
 
-Bolt is a powerful coding language designed for expressiveness and speed. Bolt combines the ease-of-use of functional programming with the speed of C to make the ultimate language, suitable for any use-case. Bolt is inspired by Swift, Rust, Kotlin, and OCaml. The current version features:
+Bolt is a new progamming language designed for speed and beautiful code. Bolt combines the constructs of functional languages with the syntax and speed of C-like languages. Writing code in Bolt is easy for both newcomers and advanced programmers. Bolt takes inspiration from Swift, Rust, Kotlin, and OCaml. Features of the current (early alpha) version are:
 
 - immutable-by-default variables
 - first-class functions
@@ -18,21 +18,11 @@ Bolt is a powerful coding language designed for expressiveness and speed. Bolt c
 - overloadable operators
 - compiler extensions
 
-The first releases of Bolt target:
-
-- Fast prototyping
-- Scripting
-- Webpages
-
-We are looking to expand into:
-
-- UI Development
-- Distributed computing
-- Servers
+Bolt will be usable for any purpose, but in its early version, it specifically targets fast prototyping, scripting, and writing webpages with wasm. After the 1.0 release, Bolt's development will focus on gui applications, distributed computing, and high-reliability servers.
 
 Check out the [wiki](https://github.com/pallyj/boltc/wiki) for more details, or the documentation for our [runtime](https://pallyj.github.io/boltdoc/runtime/)!
 
-The Bolt Language focuses on
+The Bolt Language was designed with 4 goals in mind:
 
 - Safety
 - Expressiveness
@@ -56,16 +46,15 @@ The Bolt compiler is optimized for blazing fast speed. Bolt is written quickly, 
 
 ## Benchmarks
 
-| Name          | Bolt 0.4.0 | Bolt 0.6 | C      | Rust   | Javascript |
-|---------------|------------|----------|--------|--------|------------|
-| factorial/sec | 7.9M	     | 2.5M     | 8.0M   | 1.6M   | 310k	   |
-| speedup       | 1x		 |          | 0.98x  | 4.9x   | 25x		   |
+| Name          | Bolt 0.6 | C      | Rust   | Javascript |
+|---------------|----------|--------|--------|------------|
+| factorial/sec | 2.5M     | 8.0M   | 1.6M   | 310k	  	  |
+| speedup       | 1x       | 0.31x  | 4.9x   | 25x		  |
+| mandlebrot	| 52.06	   |        | 3.78   |			  |
 
-Even in its early stages, Bolt is blazing fast. Bolt runs the factorials example 25 times faster than nodejs (!), 4.9 faster than rust, and with the margin of error from C.
+Bolt's performance is not great in its early stages. With optimizations, it should experience huge speedups.
 
-Bolt will be as fast C in CPU-bound tasks, faster than Rust and Javascript in IO-bound tasks, and significantly faster than javascript in memory-bound tasks.
-
-## Using
+## Building
 
 First, we need to download the Bolt source code. Open a command prompt and type
 
@@ -107,10 +96,7 @@ boltc examples/guessing_game/game.bolt --lib=game
 - Arrays
 - Boltdoc
 - Macros
-
-- Completeness checks
 - Global Variables
-- Bolt playgroud
 
 ### Bolt 0.5
 

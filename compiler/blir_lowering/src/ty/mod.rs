@@ -1,8 +1,7 @@
 use blir::value::GlobalVarRef;
-use errors::Diagnostic;
 use itertools::Itertools;
 
-use crate::{BlirLowerer, err::LoweringErrorKind};
+use crate::{BlirLowerer};
 
 mod struct_;
 mod enum_;

@@ -770,6 +770,7 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 }
 
 
+#[allow(dead_code)]
 enum Error {
     ClosureIsNotAFunc,
     RPExpectsGenericParam { count: usize, span: Span },

@@ -361,6 +361,7 @@ impl StructAttribute for CharExpressibleAttribute {
     }
 }
 
+#[allow(dead_code)]
 enum AttributeError {
     DoesNotExist(String),
 
@@ -417,7 +418,7 @@ impl IntoDiagnostic for AttributeErrorSpanned {
                                 format!("transparent structs need one field, this one has {}", vsl),
                                 locs)
             }
-            AttributeError::WrongVarType { struct_name, var_type, var_span, primitive_name } => {
+            AttributeError::WrongVarType { struct_name: _, var_type, var_span, primitive_name } => {
                 Diagnostic::new(DiagnosticLevel::Error,
                                 "prim_wrong_ty",
                                 format!("{{{primitive_name}}} primitive can't be represented by {var_type}"),

@@ -1,10 +1,12 @@
 @entryPoint
 func main() {
-	let size = 160;
+	let size = 1600;
 
 	let level = 1;
 
 	let var i = -(size / 2);
+
+	let s = Float(size / 2);
 
 	while (i < (size / 2))
 	{
@@ -13,8 +15,8 @@ func main() {
 		while (j < (size / 2)) {
 			let fj: Float = Float(i); // error inits dont have a type
 			let fi: Float = Float(j);
-			let x = fj / 40.0
-			let y = fi / 40.0
+			let x = fj / s
+			let y = fi / s
 
 			let dist = getDistance(x, y)
 

@@ -1,7 +1,8 @@
-; ModuleID = 'tester'
-source_filename = "tester"
+; ModuleID = 'mandlebrot'
+source_filename = "mandlebrot"
 target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 
+%"7runtime6StringS" = type { i8*, i64 }
 %"7runtime4Bool8OptionalV" = type { i32, {}, [1 x i8] }
 %"7runtime3Int5RangeS" = type { i64, i64 }
 %"7runtime3Int11ClosedRangeS" = type { i64, i64 }
@@ -33,9 +34,11 @@ target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 %"7runtime6UInt645RangeS" = type { i64, i64 }
 %"7runtime6UInt6411ClosedRangeS" = type { i64, i64 }
 %"7runtime6UInt648OptionalV" = type { i32, {}, [8 x i8] }
-%"7runtime6StringS" = type { i8*, i64 }
 %"7runtime6String8OptionalV" = type { i32, {}, [16 x i8] }
 %"7runtime4Char8OptionalV" = type { i32, {}, [4 x i8] }
+
+@gstr = private unnamed_addr constant [3 x i8] c"**\00", align 1
+@gstr.1 = private unnamed_addr constant [3 x i8] c"  \00", align 1
 
 declare void @printInt8(i8) local_unnamed_addr
 
@@ -73,8 +76,196 @@ bb:
   ret void
 }
 
+define void @"10mandlebrot4mainFE"() local_unnamed_addr {
+bb:
+  %_0 = alloca i64, align 8
+  %_1 = alloca i64, align 8
+  %_4 = alloca i64, align 8
+  %_5 = alloca float, align 4
+  %_7 = alloca i64, align 8
+  %_10 = alloca i64, align 8
+  %_13 = alloca i64, align 8
+  %_16 = alloca i64, align 8
+  %_17 = alloca float, align 4
+  %_18 = alloca float, align 4
+  %_24 = alloca %"7runtime6StringS", align 8
+  %_25 = alloca i1, align 1
+  %_27 = alloca %"7runtime6StringS", align 8
+  %_28 = alloca i1, align 1
+  %_29 = alloca i64, align 8
+  %_31 = alloca i64, align 8
+  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_0, i64 1600)
+  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_1, i64 1)
+  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_4, i64 2)
+  %copy = load i64, i64* %_0, align 8
+  %copy1 = load i64, i64* %_4, align 8
+  %call = tail call i64 @"7runtime3Int3divF7runtime3IntS7runtime3IntSE00"(i64 %copy, i64 %copy1)
+  %call3 = tail call i64 @"7runtime3Int6negateF7runtime3IntSE0"(i64 %call)
+  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_7, i64 2)
+  %copy5 = load i64, i64* %_7, align 8
+  %call6 = tail call i64 @"7runtime3Int3divF7runtime3IntS7runtime3IntSE00"(i64 %copy, i64 %copy5)
+  call void @"7runtime5Float4initF7runtime3IntSE0"(float* nonnull %_5, i64 %call6)
+  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_10, i64 2)
+  %copy962 = load i64, i64* %_10, align 8
+  %call1063 = tail call i64 @"7runtime3Int3divF7runtime3IntS7runtime3IntSE00"(i64 %copy, i64 %copy962)
+  %call1364 = tail call i1 @"7runtime3Int8lessThanF7runtime3IntS7runtime3IntSE00"(i64 %call3, i64 %call1063)
+  br i1 %call1364, label %bb4.lr.ph, label %bb18
+
+bb4.lr.ph:                                        ; preds = %bb
+  %copy30 = load float, float* %_5, align 4
+  %copy39 = load i64, i64* %_1, align 8
+  %copy44.elt = getelementptr inbounds %"7runtime6StringS", %"7runtime6StringS"* %_24, i64 0, i32 0
+  %copy44.elt52 = getelementptr inbounds %"7runtime6StringS", %"7runtime6StringS"* %_24, i64 0, i32 1
+  %copy42.elt = getelementptr inbounds %"7runtime6StringS", %"7runtime6StringS"* %_27, i64 0, i32 0
+  %copy42.elt55 = getelementptr inbounds %"7runtime6StringS", %"7runtime6StringS"* %_27, i64 0, i32 1
+  br label %bb4
+
+bb4:                                              ; preds = %bb4.lr.ph, %bb16
+  %_2.065 = phi i64 [ %call3, %bb4.lr.ph ], [ %call51, %bb16 ]
+  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_13, i64 2)
+  %copy16 = load i64, i64* %_13, align 8
+  %call17 = tail call i64 @"7runtime3Int3divF7runtime3IntS7runtime3IntSE00"(i64 %copy, i64 %copy16)
+  %call19 = tail call i64 @"7runtime3Int6negateF7runtime3IntSE0"(i64 %call17)
+  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_16, i64 2)
+  %copy2158 = load i64, i64* %_16, align 8
+  %call2259 = tail call i64 @"7runtime3Int3divF7runtime3IntS7runtime3IntSE00"(i64 %copy, i64 %copy2158)
+  %call2560 = tail call i1 @"7runtime3Int8lessThanF7runtime3IntS7runtime3IntSE00"(i64 %call19, i64 %call2259)
+  br i1 %call2560, label %bb9, label %bb16
+
+bb9:                                              ; preds = %bb4, %bb14
+  %_11.061 = phi i64 [ %call48, %bb14 ], [ %call19, %bb4 ]
+  call void @"7runtime5Float4initF7runtime3IntSE0"(float* nonnull %_17, i64 %_2.065)
+  call void @"7runtime5Float4initF7runtime3IntSE0"(float* nonnull %_18, i64 %_11.061)
+  %copy29 = load float, float* %_17, align 4
+  %call31 = tail call float @"7runtime5Float3divF7runtime5FloatS7runtime5FloatSE00"(float %copy29, float %copy30)
+  %copy32 = load float, float* %_18, align 4
+  %call34 = tail call float @"7runtime5Float3divF7runtime5FloatS7runtime5FloatSE00"(float %copy32, float %copy30)
+  %call37 = tail call i64 @"10mandlebrot11getDistanceF7runtime5FloatS7runtime5FloatSE00"(float %call31, float %call34)
+  %call40 = tail call i1 @"7runtime3Int11greaterThanF7runtime3IntS7runtime3IntSE00"(i64 %call37, i64 %copy39)
+  br i1 %call40, label %bb12, label %bb13
+
+bb12:                                             ; preds = %bb9
+  call void @"7runtime6String4initFtiE3ptr3len"(%"7runtime6StringS"* nonnull %_27, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @gstr, i64 0, i64 0), i64 2)
+  call void @"7runtime4Bool4initFbE4repr"(i1* nonnull %_28, i1 false)
+  %copy42.unpack = load i8*, i8** %copy42.elt, align 8
+  %0 = insertvalue %"7runtime6StringS" undef, i8* %copy42.unpack, 0
+  %copy42.unpack56 = load i64, i64* %copy42.elt55, align 8
+  %copy4257 = insertvalue %"7runtime6StringS" %0, i64 %copy42.unpack56, 1
+  %copy43 = load i1, i1* %_28, align 1
+  tail call void @"7runtime5printF7runtime6StringS7runtime4BoolSE07newline"(%"7runtime6StringS" %copy4257, i1 %copy43)
+  br label %bb14
+
+bb13:                                             ; preds = %bb9
+  call void @"7runtime6String4initFtiE3ptr3len"(%"7runtime6StringS"* nonnull %_24, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @gstr.1, i64 0, i64 0), i64 2)
+  call void @"7runtime4Bool4initFbE4repr"(i1* nonnull %_25, i1 false)
+  %copy44.unpack = load i8*, i8** %copy44.elt, align 8
+  %1 = insertvalue %"7runtime6StringS" undef, i8* %copy44.unpack, 0
+  %copy44.unpack53 = load i64, i64* %copy44.elt52, align 8
+  %copy4454 = insertvalue %"7runtime6StringS" %1, i64 %copy44.unpack53, 1
+  %copy45 = load i1, i1* %_25, align 1
+  tail call void @"7runtime5printF7runtime6StringS7runtime4BoolSE07newline"(%"7runtime6StringS" %copy4454, i1 %copy45)
+  br label %bb14
+
+bb14:                                             ; preds = %bb12, %bb13
+  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_29, i64 1)
+  %copy47 = load i64, i64* %_29, align 8
+  %call48 = tail call i64 @"7runtime3Int3addF7runtime3IntS7runtime3IntSE00"(i64 %_11.061, i64 %copy47)
+  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_16, i64 2)
+  %copy21 = load i64, i64* %_16, align 8
+  %call22 = tail call i64 @"7runtime3Int3divF7runtime3IntS7runtime3IntSE00"(i64 %copy, i64 %copy21)
+  %call25 = tail call i1 @"7runtime3Int8lessThanF7runtime3IntS7runtime3IntSE00"(i64 %call48, i64 %call22)
+  br i1 %call25, label %bb9, label %bb16
+
+bb16:                                             ; preds = %bb14, %bb4
+  tail call void @printLine()
+  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_31, i64 1)
+  %copy50 = load i64, i64* %_31, align 8
+  %call51 = tail call i64 @"7runtime3Int3addF7runtime3IntS7runtime3IntSE00"(i64 %_2.065, i64 %copy50)
+  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_10, i64 2)
+  %copy9 = load i64, i64* %_10, align 8
+  %call10 = tail call i64 @"7runtime3Int3divF7runtime3IntS7runtime3IntSE00"(i64 %copy, i64 %copy9)
+  %call13 = tail call i1 @"7runtime3Int8lessThanF7runtime3IntS7runtime3IntSE00"(i64 %call51, i64 %call10)
+  br i1 %call13, label %bb4, label %bb18
+
+bb18:                                             ; preds = %bb16, %bb
+  ret void
+}
+
+; Function Attrs: nofree norecurse nosync nounwind writeonly
+define i64 @"10mandlebrot11getDistanceF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #1 {
+bb:
+  %_4 = alloca float, align 4
+  %_7 = alloca float, align 4
+  %_9 = alloca { float, float }, align 8
+  %_11 = alloca { float, float }, align 8
+  %_12 = alloca i64, align 8
+  %_14 = alloca i64, align 8
+  %_22 = alloca float, align 4
+  %_24 = alloca i64, align 8
+  %_25 = alloca i64, align 8
+  call void @"7runtime5Float4initFfE4repr"(float* nonnull %_4, float 5.000000e-01)
+  %copy3 = load float, float* %_4, align 4
+  %call = tail call float @"7runtime5Float3subF7runtime5FloatS7runtime5FloatSE00"(float %1, float %copy3)
+  call void @"7runtime5Float4initFfE4repr"(float* nonnull %_7, float 5.000000e-01)
+  %copy10 = load float, float* %_7, align 4
+  %call11 = tail call float @"7runtime5Float3subF7runtime5FloatS7runtime5FloatSE00"(float %1, float %copy10)
+  %tuple.item14 = getelementptr inbounds { float, float }, { float, float }* %_9, i64 0, i32 0
+  call void @"7runtime5Float4initFfE4repr"(float* nonnull %tuple.item14, float 0.000000e+00)
+  %tuple.item15 = getelementptr inbounds { float, float }, { float, float }* %_9, i64 0, i32 1
+  call void @"7runtime5Float4initFfE4repr"(float* nonnull %tuple.item15, float 0.000000e+00)
+  %copy17 = load float, float* %tuple.item14, align 8
+  %tuple.item18 = getelementptr inbounds { float, float }, { float, float }* %_11, i64 0, i32 0
+  call void @"7runtime5Float4initFfE4repr"(float* nonnull %tuple.item18, float 0.000000e+00)
+  %tuple.item19 = getelementptr inbounds { float, float }, { float, float }* %_11, i64 0, i32 1
+  call void @"7runtime5Float4initFfE4repr"(float* nonnull %tuple.item19, float 0.000000e+00)
+  %copy21 = load float, float* %tuple.item19, align 4
+  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_12, i64 0)
+  %_12.promoted = load i64, i64* %_12, align 8
+  br label %bb2
+
+bb2:                                              ; preds = %bb5, %bb
+  %call2461 = phi i64 [ %_12.promoted, %bb ], [ %call24, %bb5 ]
+  %_8.0 = phi float [ %copy17, %bb ], [ %call45, %bb5 ]
+  %_10.0 = phi float [ %copy21, %bb ], [ %call39, %bb5 ]
+  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_14, i64 1)
+  %copy23 = load i64, i64* %_14, align 8
+  %call24 = tail call i64 @"7runtime3Int3addF7runtime3IntS7runtime3IntSE00"(i64 %call2461, i64 %copy23)
+  %call27 = tail call float @"7runtime5Float3mulF7runtime5FloatS7runtime5FloatSE00"(float %_10.0, float %_8.0)
+  %call30 = tail call float @"7runtime5Float3mulF7runtime5FloatS7runtime5FloatSE00"(float %_10.0, float %_10.0)
+  %call33 = tail call float @"7runtime5Float3mulF7runtime5FloatS7runtime5FloatSE00"(float %_8.0, float %_8.0)
+  %call36 = tail call float @"7runtime5Float3subF7runtime5FloatS7runtime5FloatSE00"(float %call30, float %call33)
+  %call39 = tail call float @"7runtime5Float3addF7runtime5FloatS7runtime5FloatSE00"(float %call36, float %call11)
+  %call42 = tail call float @"7runtime5Float3addF7runtime5FloatS7runtime5FloatSE00"(float %call27, float %call27)
+  %call45 = tail call float @"7runtime5Float3addF7runtime5FloatS7runtime5FloatSE00"(float %call42, float %0)
+  %call48 = tail call float @"7runtime5Float3addF7runtime5FloatS7runtime5FloatSE00"(float %call33, float %call30)
+  call void @"7runtime5Float4initFfE4repr"(float* nonnull %_22, float 1.600000e+01)
+  %copy50 = load float, float* %_22, align 4
+  %call51 = tail call i1 @"7runtime5Float11greaterThanF7runtime5FloatS7runtime5FloatSE00"(float %call48, float %copy50)
+  br i1 %call51, label %common.ret.loopexit, label %bb5
+
+common.ret.loopexit:                              ; preds = %bb2
+  store i64 %call24, i64* %_12, align 8
+  br label %common.ret
+
+common.ret:                                       ; preds = %common.ret.loopexit, %bb7
+  %common.ret.op = phi i64 [ %copy58, %bb7 ], [ %call24, %common.ret.loopexit ]
+  ret i64 %common.ret.op
+
+bb5:                                              ; preds = %bb2
+  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_24, i64 1000)
+  %copy55 = load i64, i64* %_24, align 8
+  %call56 = tail call i1 @"7runtime3Int11greaterThanF7runtime3IntS7runtime3IntSE00"(i64 %call24, i64 %copy55)
+  br i1 %call56, label %bb7, label %bb2
+
+bb7:                                              ; preds = %bb5
+  store i64 %call24, i64* %_12, align 8
+  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_25, i64 0)
+  %copy58 = load i64, i64* %_25, align 8
+  br label %common.ret
+}
+
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Bool3andF7runtime4BoolS7runtime4BoolSE00"(i1 %0, i1 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Bool3andF7runtime4BoolS7runtime4BoolSE00"(i1 %0, i1 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %iand = and i1 %0, %1
@@ -84,7 +275,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Bool2orF7runtime4BoolS7runtime4BoolSE00"(i1 %0, i1 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Bool2orF7runtime4BoolS7runtime4BoolSE00"(i1 %0, i1 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %ior = or i1 %0, %1
@@ -94,7 +285,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Bool6invertF7runtime4BoolSE0"(i1 %0) local_unnamed_addr #1 {
+define i1 @"7runtime4Bool6invertF7runtime4BoolSE0"(i1 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i1, align 1
   %iinv = xor i1 %0, true
@@ -104,7 +295,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Bool5equalF7runtime4BoolS7runtime4BoolSE00"(i1 %0, i1 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Bool5equalF7runtime4BoolS7runtime4BoolSE00"(i1 %0, i1 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %2 = xor i1 %0, %1
@@ -115,7 +306,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Bool8notEqualF7runtime4BoolS7runtime4BoolSE00"(i1 %0, i1 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Bool8notEqualF7runtime4BoolS7runtime4BoolSE00"(i1 %0, i1 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %neq = xor i1 %0, %1
@@ -125,7 +316,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4Bool4initFbE4repr"(i1* nocapture writeonly %0, i1 %1) local_unnamed_addr #1 {
+define void @"7runtime4Bool4initFbE4repr"(i1* nocapture writeonly %0, i1 %1) local_unnamed_addr #2 {
 bb:
   store i1 %1, i1* %0, align 1
   ret void
@@ -185,7 +376,7 @@ bb5:                                              ; preds = %bb, %bb3
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define half @"7runtime4Half3addF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #1 {
+define half @"7runtime4Half3addF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca half, align 2
   %fadd = fadd half %0, %1
@@ -195,7 +386,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define half @"7runtime4Half3subF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #1 {
+define half @"7runtime4Half3subF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca half, align 2
   %fsub = fsub half %0, %1
@@ -205,7 +396,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define half @"7runtime4Half3mulF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #1 {
+define half @"7runtime4Half3mulF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca half, align 2
   %fmul = fmul half %0, %1
@@ -215,7 +406,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define half @"7runtime4Half3divF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #1 {
+define half @"7runtime4Half3divF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca half, align 2
   %fdiv = fdiv half %0, %1
@@ -225,7 +416,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define half @"7runtime4Half3modF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #1 {
+define half @"7runtime4Half3modF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca half, align 2
   %frem = frem half %0, %1
@@ -235,7 +426,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Half5equalF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Half5equalF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %feq = fcmp oeq half %0, %1
@@ -245,7 +436,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Half8notEqualF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Half8notEqualF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %fneq = fcmp one half %0, %1
@@ -255,7 +446,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Half8lessThanF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Half8lessThanF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %flt = fcmp olt half %0, %1
@@ -265,7 +456,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Half11greaterThanF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Half11greaterThanF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %fgt = fcmp ogt half %0, %1
@@ -275,7 +466,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Half10lessThanEqF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Half10lessThanEqF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %flte = fcmp ole half %0, %1
@@ -285,7 +476,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Half13greaterThanEqF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Half13greaterThanEqF7runtime4HalfS7runtime4HalfSE00"(half %0, half %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %fgte = fcmp oge half %0, %1
@@ -295,7 +486,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define half @"7runtime4Half6negateF7runtime4HalfSE0"(half %0) local_unnamed_addr #1 {
+define half @"7runtime4Half6negateF7runtime4HalfSE0"(half %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca half, align 2
   %fneg = fneg half %0
@@ -311,7 +502,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4Half4initF7runtime5FloatSE10truncating"(half* nocapture writeonly %0, float %1) local_unnamed_addr #1 {
+define void @"7runtime4Half4initF7runtime5FloatSE10truncating"(half* nocapture writeonly %0, float %1) local_unnamed_addr #2 {
 bb:
   %ftrunc16 = fptrunc float %1 to half
   store half %ftrunc16, half* %0, align 2
@@ -319,7 +510,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4Half4initF7runtime6DoubleSE10truncating"(half* nocapture writeonly %0, double %1) local_unnamed_addr #1 {
+define void @"7runtime4Half4initF7runtime6DoubleSE10truncating"(half* nocapture writeonly %0, double %1) local_unnamed_addr #2 {
 bb:
   %ftrunc16 = fptrunc double %1 to half
   store half %ftrunc16, half* %0, align 2
@@ -327,7 +518,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4Half4initF7runtime6UInt64SE0"(half* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime4Half4initF7runtime6UInt64SE0"(half* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %icnvf16 = uitofp i64 %1 to half
   store half %icnvf16, half* %0, align 2
@@ -335,7 +526,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4Half4initF7runtime5Int64SE0"(half* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime4Half4initF7runtime5Int64SE0"(half* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %icnvf16 = sitofp i64 %1 to half
   store half %icnvf16, half* %0, align 2
@@ -343,7 +534,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4Half4initF7runtime4UIntSE0"(half* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime4Half4initF7runtime4UIntSE0"(half* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %icnvf16 = uitofp i64 %1 to half
   store half %icnvf16, half* %0, align 2
@@ -351,7 +542,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4Half4initF7runtime3IntSE0"(half* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime4Half4initF7runtime3IntSE0"(half* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %icnvf16 = sitofp i64 %1 to half
   store half %icnvf16, half* %0, align 2
@@ -359,14 +550,14 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4Half4initFhE4repr"(half* nocapture writeonly %0, half %1) local_unnamed_addr #1 {
+define void @"7runtime4Half4initFhE4repr"(half* nocapture writeonly %0, half %1) local_unnamed_addr #2 {
 bb:
   store half %1, half* %0, align 2
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define float @"7runtime5Float3addF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #1 {
+define float @"7runtime5Float3addF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca float, align 4
   %fadd = fadd float %0, %1
@@ -376,7 +567,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define float @"7runtime5Float3subF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #1 {
+define float @"7runtime5Float3subF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca float, align 4
   %fsub = fsub float %0, %1
@@ -386,7 +577,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define float @"7runtime5Float3mulF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #1 {
+define float @"7runtime5Float3mulF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca float, align 4
   %fmul = fmul float %0, %1
@@ -396,7 +587,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define float @"7runtime5Float3divF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #1 {
+define float @"7runtime5Float3divF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca float, align 4
   %fdiv = fdiv float %0, %1
@@ -406,7 +597,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define float @"7runtime5Float3modF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #1 {
+define float @"7runtime5Float3modF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca float, align 4
   %frem = frem float %0, %1
@@ -416,7 +607,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Float5equalF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Float5equalF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %feq = fcmp oeq float %0, %1
@@ -426,7 +617,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Float8notEqualF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Float8notEqualF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %fneq = fcmp one float %0, %1
@@ -436,7 +627,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Float8lessThanF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Float8lessThanF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %flt = fcmp olt float %0, %1
@@ -446,7 +637,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Float11greaterThanF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Float11greaterThanF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %fgt = fcmp ogt float %0, %1
@@ -456,7 +647,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Float10lessThanEqF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Float10lessThanEqF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %flte = fcmp ole float %0, %1
@@ -466,7 +657,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Float13greaterThanEqF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Float13greaterThanEqF7runtime5FloatS7runtime5FloatSE00"(float %0, float %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %fgte = fcmp oge float %0, %1
@@ -476,7 +667,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define float @"7runtime5Float6negateF7runtime5FloatSE0"(float %0) local_unnamed_addr #1 {
+define float @"7runtime5Float6negateF7runtime5FloatSE0"(float %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca float, align 4
   %fneg = fneg float %0
@@ -492,7 +683,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Float4initF7runtime4HalfSE0"(float* nocapture writeonly %0, half %1) local_unnamed_addr #1 {
+define void @"7runtime5Float4initF7runtime4HalfSE0"(float* nocapture writeonly %0, half %1) local_unnamed_addr #2 {
 bb:
   %fext32 = fpext half %1 to float
   store float %fext32, float* %0, align 4
@@ -500,7 +691,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Float4initF7runtime6DoubleSE10truncating"(float* nocapture writeonly %0, double %1) local_unnamed_addr #1 {
+define void @"7runtime5Float4initF7runtime6DoubleSE10truncating"(float* nocapture writeonly %0, double %1) local_unnamed_addr #2 {
 bb:
   %ftrunc32 = fptrunc double %1 to float
   store float %ftrunc32, float* %0, align 4
@@ -508,7 +699,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Float4initF7runtime6UInt64SE0"(float* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime5Float4initF7runtime6UInt64SE0"(float* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %icnvf32 = uitofp i64 %1 to float
   store float %icnvf32, float* %0, align 4
@@ -516,7 +707,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Float4initF7runtime5Int64SE0"(float* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime5Float4initF7runtime5Int64SE0"(float* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %icnvf32 = sitofp i64 %1 to float
   store float %icnvf32, float* %0, align 4
@@ -524,7 +715,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Float4initF7runtime4UIntSE0"(float* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime5Float4initF7runtime4UIntSE0"(float* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %icnvf32 = uitofp i64 %1 to float
   store float %icnvf32, float* %0, align 4
@@ -532,7 +723,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Float4initF7runtime3IntSE0"(float* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime5Float4initF7runtime3IntSE0"(float* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %icnvf32 = sitofp i64 %1 to float
   store float %icnvf32, float* %0, align 4
@@ -540,14 +731,14 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Float4initFfE4repr"(float* nocapture writeonly %0, float %1) local_unnamed_addr #1 {
+define void @"7runtime5Float4initFfE4repr"(float* nocapture writeonly %0, float %1) local_unnamed_addr #2 {
 bb:
   store float %1, float* %0, align 4
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define double @"7runtime6Double3addF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #1 {
+define double @"7runtime6Double3addF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca double, align 8
   %fadd = fadd double %0, %1
@@ -557,7 +748,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define double @"7runtime6Double3subF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #1 {
+define double @"7runtime6Double3subF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca double, align 8
   %fsub = fsub double %0, %1
@@ -567,7 +758,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define double @"7runtime6Double3mulF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #1 {
+define double @"7runtime6Double3mulF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca double, align 8
   %fmul = fmul double %0, %1
@@ -577,7 +768,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define double @"7runtime6Double3divF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #1 {
+define double @"7runtime6Double3divF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca double, align 8
   %fdiv = fdiv double %0, %1
@@ -587,7 +778,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define double @"7runtime6Double3modF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #1 {
+define double @"7runtime6Double3modF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca double, align 8
   %frem = frem double %0, %1
@@ -597,7 +788,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6Double5equalF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #1 {
+define i1 @"7runtime6Double5equalF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %feq = fcmp oeq double %0, %1
@@ -607,7 +798,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6Double8notEqualF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #1 {
+define i1 @"7runtime6Double8notEqualF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %fneq = fcmp one double %0, %1
@@ -617,7 +808,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6Double8lessThanF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #1 {
+define i1 @"7runtime6Double8lessThanF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %flt = fcmp olt double %0, %1
@@ -627,7 +818,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6Double11greaterThanF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #1 {
+define i1 @"7runtime6Double11greaterThanF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %fgt = fcmp ogt double %0, %1
@@ -637,7 +828,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6Double10lessThanEqF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #1 {
+define i1 @"7runtime6Double10lessThanEqF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %flte = fcmp ole double %0, %1
@@ -647,7 +838,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6Double13greaterThanEqF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #1 {
+define i1 @"7runtime6Double13greaterThanEqF7runtime6DoubleS7runtime6DoubleSE00"(double %0, double %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %fgte = fcmp oge double %0, %1
@@ -657,7 +848,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define double @"7runtime6Double6negateF7runtime6DoubleSE0"(double %0) local_unnamed_addr #1 {
+define double @"7runtime6Double6negateF7runtime6DoubleSE0"(double %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca double, align 8
   %fneg = fneg double %0
@@ -673,7 +864,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6Double4initF7runtime4HalfSE0"(double* nocapture writeonly %0, half %1) local_unnamed_addr #1 {
+define void @"7runtime6Double4initF7runtime4HalfSE0"(double* nocapture writeonly %0, half %1) local_unnamed_addr #2 {
 bb:
   %fext64 = fpext half %1 to double
   store double %fext64, double* %0, align 8
@@ -681,7 +872,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6Double4initF7runtime5FloatSE0"(double* nocapture writeonly %0, float %1) local_unnamed_addr #1 {
+define void @"7runtime6Double4initF7runtime5FloatSE0"(double* nocapture writeonly %0, float %1) local_unnamed_addr #2 {
 bb:
   %fext64 = fpext float %1 to double
   store double %fext64, double* %0, align 8
@@ -689,7 +880,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6Double4initF7runtime6UInt64SE0"(double* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime6Double4initF7runtime6UInt64SE0"(double* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %icnvf64 = uitofp i64 %1 to double
   store double %icnvf64, double* %0, align 8
@@ -697,7 +888,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6Double4initF7runtime5Int64SE0"(double* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime6Double4initF7runtime5Int64SE0"(double* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %icnvf64 = sitofp i64 %1 to double
   store double %icnvf64, double* %0, align 8
@@ -705,7 +896,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6Double4initF7runtime4UIntSE0"(double* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime6Double4initF7runtime4UIntSE0"(double* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %icnvf64 = uitofp i64 %1 to double
   store double %icnvf64, double* %0, align 8
@@ -713,7 +904,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6Double4initF7runtime3IntSE0"(double* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime6Double4initF7runtime3IntSE0"(double* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %icnvf64 = sitofp i64 %1 to double
   store double %icnvf64, double* %0, align 8
@@ -721,14 +912,14 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6Double4initFdE4repr"(double* nocapture writeonly %0, double %1) local_unnamed_addr #1 {
+define void @"7runtime6Double4initFdE4repr"(double* nocapture writeonly %0, double %1) local_unnamed_addr #2 {
 bb:
   store double %1, double* %0, align 8
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime3Int3addF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime3Int3addF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %iadd = add i64 %1, %0
@@ -738,7 +929,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime3Int3subF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime3Int3subF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %isub = sub i64 %0, %1
@@ -748,7 +939,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime3Int3mulF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime3Int3mulF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %imul = mul i64 %1, %0
@@ -758,7 +949,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime3Int3divF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime3Int3divF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i64, align 8
   %_4 = alloca i64, align 8
@@ -772,7 +963,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime3Int3modF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime3Int3modF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i64, align 8
   %_4 = alloca i64, align 8
@@ -786,7 +977,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime3Int5bitOrF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime3Int5bitOrF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %ior = or i64 %1, %0
@@ -796,7 +987,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime3Int6bitXorF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime3Int6bitXorF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %ixor = xor i64 %1, %0
@@ -806,7 +997,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime3Int6bitAndF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime3Int6bitAndF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %iand = and i64 %1, %0
@@ -816,7 +1007,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime3Int9shiftLeftF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime3Int9shiftLeftF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %ishl = shl i64 %0, %1
@@ -826,7 +1017,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime3Int10shiftRightF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime3Int10shiftRightF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %ishr = ashr i64 %0, %1
@@ -836,7 +1027,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime3Int5equalF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime3Int5equalF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %eq = icmp eq i64 %0, %1
@@ -846,7 +1037,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime3Int8notEqualF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime3Int8notEqualF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %neq = icmp ne i64 %0, %1
@@ -856,7 +1047,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime3Int8lessThanF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime3Int8lessThanF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lt = icmp slt i64 %0, %1
@@ -866,7 +1057,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime3Int11greaterThanF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime3Int11greaterThanF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gt = icmp sgt i64 %0, %1
@@ -876,7 +1067,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime3Int10lessThanEqF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime3Int10lessThanEqF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lte = icmp sle i64 %0, %1
@@ -886,7 +1077,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime3Int13greaterThanEqF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime3Int13greaterThanEqF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gte = icmp sge i64 %0, %1
@@ -902,7 +1093,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime3Int5RangeS" @"7runtime3Int9openRangeF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define %"7runtime3Int5RangeS" @"7runtime3Int9openRangeF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime3Int5RangeS", align 8
   call void @"7runtime3Int5Range4initF7runtime3IntS7runtime3IntSE4from2to"(%"7runtime3Int5RangeS"* nonnull %_2, i64 %0, i64 %1)
@@ -916,7 +1107,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime3Int11ClosedRangeS" @"7runtime3Int11closedRangeF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define %"7runtime3Int11ClosedRangeS" @"7runtime3Int11closedRangeF7runtime3IntS7runtime3IntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime3Int11ClosedRangeS", align 8
   call void @"7runtime3Int11ClosedRange4initF7runtime3IntS7runtime3IntSE4from2to"(%"7runtime3Int11ClosedRangeS"* nonnull %_2, i64 %0, i64 %1)
@@ -930,7 +1121,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime3Int6negateF7runtime3IntSE0"(i64 %0) local_unnamed_addr #1 {
+define i64 @"7runtime3Int6negateF7runtime3IntSE0"(i64 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i64, align 8
   %ineg = sub i64 0, %0
@@ -940,7 +1131,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime3Int6invertF7runtime3IntSE0"(i64 %0) local_unnamed_addr #1 {
+define i64 @"7runtime3Int6invertF7runtime3IntSE0"(i64 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i64, align 8
   %iinv = xor i64 %0, -1
@@ -950,7 +1141,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime3Int4initF7runtime5FloatSE5floor"(i64* nocapture writeonly %0, float %1) local_unnamed_addr #1 {
+define void @"7runtime3Int4initF7runtime5FloatSE5floor"(i64* nocapture writeonly %0, float %1) local_unnamed_addr #2 {
 bb:
   %fcnvi = fptosi float %1 to i64
   store i64 %fcnvi, i64* %0, align 8
@@ -958,7 +1149,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime3Int4initF7runtime6DoubleSE5floor"(i64* nocapture writeonly %0, double %1) local_unnamed_addr #1 {
+define void @"7runtime3Int4initF7runtime6DoubleSE5floor"(i64* nocapture writeonly %0, double %1) local_unnamed_addr #2 {
 bb:
   %fcnvi = fptosi double %1 to i64
   store i64 %fcnvi, i64* %0, align 8
@@ -966,7 +1157,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime3Int4initF7runtime4HalfSE5floor"(i64* nocapture writeonly %0, half %1) local_unnamed_addr #1 {
+define void @"7runtime3Int4initF7runtime4HalfSE5floor"(i64* nocapture writeonly %0, half %1) local_unnamed_addr #2 {
 bb:
   %fcnvi = fptosi half %1 to i64
   store i64 %fcnvi, i64* %0, align 8
@@ -974,7 +1165,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime3Int4initF7runtime5UInt8SE0"(i64* nocapture writeonly %0, i8 %1) local_unnamed_addr #1 {
+define void @"7runtime3Int4initF7runtime5UInt8SE0"(i64* nocapture writeonly %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = zext i8 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -982,7 +1173,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime3Int4initF7runtime4Int8SE0"(i64* nocapture writeonly %0, i8 %1) local_unnamed_addr #1 {
+define void @"7runtime3Int4initF7runtime4Int8SE0"(i64* nocapture writeonly %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = sext i8 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -990,7 +1181,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime3Int4initF7runtime6UInt16SE0"(i64* nocapture writeonly %0, i16 %1) local_unnamed_addr #1 {
+define void @"7runtime3Int4initF7runtime6UInt16SE0"(i64* nocapture writeonly %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = zext i16 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -998,7 +1189,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime3Int4initF7runtime5Int16SE0"(i64* nocapture writeonly %0, i16 %1) local_unnamed_addr #1 {
+define void @"7runtime3Int4initF7runtime5Int16SE0"(i64* nocapture writeonly %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = sext i16 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -1006,7 +1197,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime3Int4initF7runtime6UInt32SE0"(i64* nocapture writeonly %0, i32 %1) local_unnamed_addr #1 {
+define void @"7runtime3Int4initF7runtime6UInt32SE0"(i64* nocapture writeonly %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = zext i32 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -1014,7 +1205,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime3Int4initF7runtime5Int32SE0"(i64* nocapture writeonly %0, i32 %1) local_unnamed_addr #1 {
+define void @"7runtime3Int4initF7runtime5Int32SE0"(i64* nocapture writeonly %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = sext i32 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -1022,35 +1213,35 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime3Int4initF7runtime6UInt64SE7bitcast"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime3Int4initF7runtime6UInt64SE7bitcast"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   store i64 %1, i64* %0, align 8
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime3Int4initF7runtime4UIntSE7bitcast"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime3Int4initF7runtime4UIntSE7bitcast"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   store i64 %1, i64* %0, align 8
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime3Int4initF7runtime5Int64SE0"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime3Int4initF7runtime5Int64SE0"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   store i64 %1, i64* %0, align 8
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime3Int4initFiE4repr"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime3Int4initFiE4repr"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   store i64 %1, i64* %0, align 8
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime3Int11ClosedRange4initF7runtime3IntS7runtime3IntSE4from2to"(%"7runtime3Int11ClosedRangeS"* nocapture writeonly %0, i64 %1, i64 %2) local_unnamed_addr #1 {
+define void @"7runtime3Int11ClosedRange4initF7runtime3IntS7runtime3IntSE4from2to"(%"7runtime3Int11ClosedRangeS"* nocapture writeonly %0, i64 %1, i64 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime3Int11ClosedRangeS", %"7runtime3Int11ClosedRangeS"* %0, i64 0, i32 0
   store i64 %1, i64* %gep, align 8
@@ -1074,7 +1265,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime3Int5Range4initF7runtime3IntS7runtime3IntSE4from2to"(%"7runtime3Int5RangeS"* nocapture writeonly %0, i64 %1, i64 %2) local_unnamed_addr #1 {
+define void @"7runtime3Int5Range4initF7runtime3IntS7runtime3IntSE4from2to"(%"7runtime3Int5RangeS"* nocapture writeonly %0, i64 %1, i64 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime3Int5RangeS", %"7runtime3Int5RangeS"* %0, i64 0, i32 0
   store i64 %1, i64* %gep, align 8
@@ -1260,7 +1451,7 @@ bb5:                                              ; preds = %bb, %bb3
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime4UInt3addF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime4UInt3addF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %iadd = add i64 %1, %0
@@ -1270,7 +1461,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime4UInt3subF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime4UInt3subF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %isub = sub i64 %0, %1
@@ -1280,7 +1471,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime4UInt3mulF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime4UInt3mulF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %imul = mul i64 %1, %0
@@ -1290,7 +1481,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime4UInt3divF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime4UInt3divF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i64, align 8
   %_4 = alloca i64, align 8
@@ -1304,7 +1495,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime4UInt3modF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime4UInt3modF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i64, align 8
   %_4 = alloca i64, align 8
@@ -1318,7 +1509,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime4UInt5bitOrF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime4UInt5bitOrF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %ior = or i64 %1, %0
@@ -1328,7 +1519,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime4UInt6bitXorF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime4UInt6bitXorF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %ixor = xor i64 %1, %0
@@ -1338,7 +1529,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime4UInt6bitAndF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime4UInt6bitAndF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %iand = and i64 %1, %0
@@ -1348,7 +1539,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime4UInt9shiftLeftF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime4UInt9shiftLeftF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %ishl = shl i64 %0, %1
@@ -1358,7 +1549,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime4UInt10shiftRightF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime4UInt10shiftRightF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %ishr = lshr i64 %0, %1
@@ -1368,7 +1559,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4UInt5equalF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4UInt5equalF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %eq = icmp eq i64 %0, %1
@@ -1378,7 +1569,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4UInt8notEqualF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4UInt8notEqualF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %neq = icmp ne i64 %0, %1
@@ -1388,7 +1579,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4UInt8lessThanF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4UInt8lessThanF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lt = icmp ult i64 %0, %1
@@ -1398,7 +1589,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4UInt11greaterThanF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4UInt11greaterThanF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gt = icmp ugt i64 %0, %1
@@ -1408,7 +1599,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4UInt10lessThanEqF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4UInt10lessThanEqF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lte = icmp ule i64 %0, %1
@@ -1418,7 +1609,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4UInt13greaterThanEqF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4UInt13greaterThanEqF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gte = icmp uge i64 %0, %1
@@ -1434,7 +1625,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime4UInt5RangeS" @"7runtime4UInt9openRangeF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define %"7runtime4UInt5RangeS" @"7runtime4UInt9openRangeF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime4UInt5RangeS", align 8
   call void @"7runtime4UInt5Range4initF7runtime4UIntS7runtime4UIntSE4from2to"(%"7runtime4UInt5RangeS"* nonnull %_2, i64 %0, i64 %1)
@@ -1448,7 +1639,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime4UInt11ClosedRangeS" @"7runtime4UInt11closedRangeF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define %"7runtime4UInt11ClosedRangeS" @"7runtime4UInt11closedRangeF7runtime4UIntS7runtime4UIntSE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime4UInt11ClosedRangeS", align 8
   call void @"7runtime4UInt11ClosedRange4initF7runtime4UIntS7runtime4UIntSE4from2to"(%"7runtime4UInt11ClosedRangeS"* nonnull %_2, i64 %0, i64 %1)
@@ -1462,7 +1653,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime4UInt6negateF7runtime4UIntSE0"(i64 %0) local_unnamed_addr #1 {
+define i64 @"7runtime4UInt6negateF7runtime4UIntSE0"(i64 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i64, align 8
   %ineg = sub i64 0, %0
@@ -1472,7 +1663,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime4UInt6invertF7runtime4UIntSE0"(i64 %0) local_unnamed_addr #1 {
+define i64 @"7runtime4UInt6invertF7runtime4UIntSE0"(i64 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i64, align 8
   %iinv = xor i64 %0, -1
@@ -1482,7 +1673,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4UInt4initF7runtime5FloatSE5floor"(i64* nocapture writeonly %0, float %1) local_unnamed_addr #1 {
+define void @"7runtime4UInt4initF7runtime5FloatSE5floor"(i64* nocapture writeonly %0, float %1) local_unnamed_addr #2 {
 bb:
   %fcnvi = fptosi float %1 to i64
   store i64 %fcnvi, i64* %0, align 8
@@ -1490,7 +1681,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4UInt4initF7runtime6DoubleSE5floor"(i64* nocapture writeonly %0, double %1) local_unnamed_addr #1 {
+define void @"7runtime4UInt4initF7runtime6DoubleSE5floor"(i64* nocapture writeonly %0, double %1) local_unnamed_addr #2 {
 bb:
   %fcnvi = fptosi double %1 to i64
   store i64 %fcnvi, i64* %0, align 8
@@ -1498,7 +1689,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4UInt4initF7runtime4HalfSE5floor"(i64* nocapture writeonly %0, half %1) local_unnamed_addr #1 {
+define void @"7runtime4UInt4initF7runtime4HalfSE5floor"(i64* nocapture writeonly %0, half %1) local_unnamed_addr #2 {
 bb:
   %fcnvi = fptosi half %1 to i64
   store i64 %fcnvi, i64* %0, align 8
@@ -1506,7 +1697,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4UInt4initF7runtime5UInt8SE0"(i64* nocapture writeonly %0, i8 %1) local_unnamed_addr #1 {
+define void @"7runtime4UInt4initF7runtime5UInt8SE0"(i64* nocapture writeonly %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = zext i8 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -1514,7 +1705,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4UInt4initF7runtime6UInt16SE0"(i64* nocapture writeonly %0, i16 %1) local_unnamed_addr #1 {
+define void @"7runtime4UInt4initF7runtime6UInt16SE0"(i64* nocapture writeonly %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = zext i16 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -1522,7 +1713,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4UInt4initF7runtime6UInt32SE0"(i64* nocapture writeonly %0, i32 %1) local_unnamed_addr #1 {
+define void @"7runtime4UInt4initF7runtime6UInt32SE0"(i64* nocapture writeonly %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = zext i32 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -1530,35 +1721,35 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4UInt4initF7runtime5Int64SE7bitcast"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime4UInt4initF7runtime5Int64SE7bitcast"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   store i64 %1, i64* %0, align 8
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4UInt4initF7runtime3IntSE7bitcast"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime4UInt4initF7runtime3IntSE7bitcast"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   store i64 %1, i64* %0, align 8
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4UInt4initF7runtime6UInt64SE0"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime4UInt4initF7runtime6UInt64SE0"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   store i64 %1, i64* %0, align 8
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4UInt4initFiE4repr"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime4UInt4initFiE4repr"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   store i64 %1, i64* %0, align 8
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4UInt11ClosedRange4initF7runtime4UIntS7runtime4UIntSE4from2to"(%"7runtime4UInt11ClosedRangeS"* nocapture writeonly %0, i64 %1, i64 %2) local_unnamed_addr #1 {
+define void @"7runtime4UInt11ClosedRange4initF7runtime4UIntS7runtime4UIntSE4from2to"(%"7runtime4UInt11ClosedRangeS"* nocapture writeonly %0, i64 %1, i64 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime4UInt11ClosedRangeS", %"7runtime4UInt11ClosedRangeS"* %0, i64 0, i32 0
   store i64 %1, i64* %gep, align 8
@@ -1582,7 +1773,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4UInt5Range4initF7runtime4UIntS7runtime4UIntSE4from2to"(%"7runtime4UInt5RangeS"* nocapture writeonly %0, i64 %1, i64 %2) local_unnamed_addr #1 {
+define void @"7runtime4UInt5Range4initF7runtime4UIntS7runtime4UIntSE4from2to"(%"7runtime4UInt5RangeS"* nocapture writeonly %0, i64 %1, i64 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime4UInt5RangeS", %"7runtime4UInt5RangeS"* %0, i64 0, i32 0
   store i64 %1, i64* %gep, align 8
@@ -1768,7 +1959,7 @@ bb5:                                              ; preds = %bb, %bb3
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime4Int83addF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime4Int83addF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i8, align 1
   %iadd = add i8 %1, %0
@@ -1778,7 +1969,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime4Int83subF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime4Int83subF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i8, align 1
   %isub = sub i8 %0, %1
@@ -1788,7 +1979,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime4Int83mulF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime4Int83mulF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i8, align 1
   %imul = mul i8 %1, %0
@@ -1798,7 +1989,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime4Int83divF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime4Int83divF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i8, align 1
   %_4 = alloca i8, align 1
@@ -1812,7 +2003,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime4Int83modF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime4Int83modF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i8, align 1
   %_4 = alloca i8, align 1
@@ -1826,7 +2017,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime4Int85bitOrF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime4Int85bitOrF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i8, align 1
   %ior = or i8 %1, %0
@@ -1836,7 +2027,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime4Int86bitXorF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime4Int86bitXorF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i8, align 1
   %ixor = xor i8 %1, %0
@@ -1846,7 +2037,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime4Int86bitAndF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime4Int86bitAndF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i8, align 1
   %iand = and i8 %1, %0
@@ -1856,7 +2047,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime4Int89shiftLeftF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime4Int89shiftLeftF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i8, align 1
   %ishl = shl i8 %0, %1
@@ -1866,7 +2057,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime4Int810shiftRightF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime4Int810shiftRightF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i8, align 1
   %ishr = ashr i8 %0, %1
@@ -1876,7 +2067,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Int85equalF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Int85equalF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %eq = icmp eq i8 %0, %1
@@ -1886,7 +2077,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Int88notEqualF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Int88notEqualF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %neq = icmp ne i8 %0, %1
@@ -1896,7 +2087,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Int88lessThanF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Int88lessThanF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lt = icmp slt i8 %0, %1
@@ -1906,7 +2097,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Int811greaterThanF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Int811greaterThanF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gt = icmp sgt i8 %0, %1
@@ -1916,7 +2107,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Int810lessThanEqF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Int810lessThanEqF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lte = icmp sle i8 %0, %1
@@ -1926,7 +2117,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Int813greaterThanEqF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Int813greaterThanEqF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gte = icmp sge i8 %0, %1
@@ -1942,7 +2133,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime4Int85RangeS" @"7runtime4Int89openRangeF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define %"7runtime4Int85RangeS" @"7runtime4Int89openRangeF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime4Int85RangeS", align 8
   call void @"7runtime4Int85Range4initF7runtime4Int8S7runtime4Int8SE4from2to"(%"7runtime4Int85RangeS"* nonnull %_2, i8 %0, i8 %1)
@@ -1956,7 +2147,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime4Int811ClosedRangeS" @"7runtime4Int811closedRangeF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define %"7runtime4Int811ClosedRangeS" @"7runtime4Int811closedRangeF7runtime4Int8S7runtime4Int8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime4Int811ClosedRangeS", align 8
   call void @"7runtime4Int811ClosedRange4initF7runtime4Int8S7runtime4Int8SE4from2to"(%"7runtime4Int811ClosedRangeS"* nonnull %_2, i8 %0, i8 %1)
@@ -1970,7 +2161,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime4Int86negateF7runtime4Int8SE0"(i8 %0) local_unnamed_addr #1 {
+define i8 @"7runtime4Int86negateF7runtime4Int8SE0"(i8 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i8, align 1
   %ineg = sub i8 0, %0
@@ -1980,7 +2171,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime4Int86invertF7runtime4Int8SE0"(i8 %0) local_unnamed_addr #1 {
+define i8 @"7runtime4Int86invertF7runtime4Int8SE0"(i8 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i8, align 1
   %iinv = xor i8 %0, -1
@@ -1990,7 +2181,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4Int84initF7runtime5Int16SE10truncating"(i8* nocapture writeonly %0, i16 %1) local_unnamed_addr #1 {
+define void @"7runtime4Int84initF7runtime5Int16SE10truncating"(i8* nocapture writeonly %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %itrunc8 = trunc i16 %1 to i8
   store i8 %itrunc8, i8* %0, align 1
@@ -1998,7 +2189,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4Int84initF7runtime5Int32SE10truncating"(i8* nocapture writeonly %0, i32 %1) local_unnamed_addr #1 {
+define void @"7runtime4Int84initF7runtime5Int32SE10truncating"(i8* nocapture writeonly %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %itrunc8 = trunc i32 %1 to i8
   store i8 %itrunc8, i8* %0, align 1
@@ -2006,7 +2197,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4Int84initF7runtime5Int64SE10truncating"(i8* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime4Int84initF7runtime5Int64SE10truncating"(i8* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %itrunc8 = trunc i64 %1 to i8
   store i8 %itrunc8, i8* %0, align 1
@@ -2014,21 +2205,21 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4Int84initF7runtime5UInt8SE7bitcast"(i8* nocapture writeonly %0, i8 %1) local_unnamed_addr #1 {
+define void @"7runtime4Int84initF7runtime5UInt8SE7bitcast"(i8* nocapture writeonly %0, i8 %1) local_unnamed_addr #2 {
 bb:
   store i8 %1, i8* %0, align 1
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4Int84initFaE4repr"(i8* nocapture writeonly %0, i8 %1) local_unnamed_addr #1 {
+define void @"7runtime4Int84initFaE4repr"(i8* nocapture writeonly %0, i8 %1) local_unnamed_addr #2 {
 bb:
   store i8 %1, i8* %0, align 1
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4Int811ClosedRange4initF7runtime4Int8S7runtime4Int8SE4from2to"(%"7runtime4Int811ClosedRangeS"* nocapture writeonly %0, i8 %1, i8 %2) local_unnamed_addr #1 {
+define void @"7runtime4Int811ClosedRange4initF7runtime4Int8S7runtime4Int8SE4from2to"(%"7runtime4Int811ClosedRangeS"* nocapture writeonly %0, i8 %1, i8 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime4Int811ClosedRangeS", %"7runtime4Int811ClosedRangeS"* %0, i64 0, i32 0
   store i8 %1, i8* %gep, align 1
@@ -2052,7 +2243,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4Int85Range4initF7runtime4Int8S7runtime4Int8SE4from2to"(%"7runtime4Int85RangeS"* nocapture writeonly %0, i8 %1, i8 %2) local_unnamed_addr #1 {
+define void @"7runtime4Int85Range4initF7runtime4Int8S7runtime4Int8SE4from2to"(%"7runtime4Int85RangeS"* nocapture writeonly %0, i8 %1, i8 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime4Int85RangeS", %"7runtime4Int85RangeS"* %0, i64 0, i32 0
   store i8 %1, i8* %gep, align 1
@@ -2119,7 +2310,7 @@ bb5:                                              ; preds = %bb, %bb3
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime5Int163addF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime5Int163addF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i16, align 2
   %iadd = add i16 %1, %0
@@ -2129,7 +2320,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime5Int163subF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime5Int163subF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i16, align 2
   %isub = sub i16 %0, %1
@@ -2139,7 +2330,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime5Int163mulF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime5Int163mulF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i16, align 2
   %imul = mul i16 %1, %0
@@ -2149,7 +2340,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime5Int163divF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime5Int163divF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i16, align 2
   %_4 = alloca i16, align 2
@@ -2163,7 +2354,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime5Int163modF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime5Int163modF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i16, align 2
   %_4 = alloca i16, align 2
@@ -2177,7 +2368,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime5Int165bitOrF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime5Int165bitOrF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i16, align 2
   %ior = or i16 %1, %0
@@ -2187,7 +2378,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime5Int166bitXorF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime5Int166bitXorF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i16, align 2
   %ixor = xor i16 %1, %0
@@ -2197,7 +2388,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime5Int166bitAndF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime5Int166bitAndF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i16, align 2
   %iand = and i16 %1, %0
@@ -2207,7 +2398,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime5Int169shiftLeftF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime5Int169shiftLeftF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i16, align 2
   %ishl = shl i16 %0, %1
@@ -2217,7 +2408,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime5Int1610shiftRightF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime5Int1610shiftRightF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i16, align 2
   %ishr = ashr i16 %0, %1
@@ -2227,7 +2418,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int165equalF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int165equalF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %eq = icmp eq i16 %0, %1
@@ -2237,7 +2428,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int168notEqualF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int168notEqualF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %neq = icmp ne i16 %0, %1
@@ -2247,7 +2438,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int168lessThanF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int168lessThanF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lt = icmp slt i16 %0, %1
@@ -2257,7 +2448,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int1611greaterThanF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int1611greaterThanF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gt = icmp sgt i16 %0, %1
@@ -2267,7 +2458,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int1610lessThanEqF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int1610lessThanEqF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lte = icmp sle i16 %0, %1
@@ -2277,7 +2468,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int1613greaterThanEqF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int1613greaterThanEqF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gte = icmp sge i16 %0, %1
@@ -2293,7 +2484,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime5Int165RangeS" @"7runtime5Int169openRangeF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define %"7runtime5Int165RangeS" @"7runtime5Int169openRangeF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime5Int165RangeS", align 8
   call void @"7runtime5Int165Range4initF7runtime5Int16S7runtime5Int16SE4from2to"(%"7runtime5Int165RangeS"* nonnull %_2, i16 %0, i16 %1)
@@ -2307,7 +2498,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime5Int1611ClosedRangeS" @"7runtime5Int1611closedRangeF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define %"7runtime5Int1611ClosedRangeS" @"7runtime5Int1611closedRangeF7runtime5Int16S7runtime5Int16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime5Int1611ClosedRangeS", align 8
   call void @"7runtime5Int1611ClosedRange4initF7runtime5Int16S7runtime5Int16SE4from2to"(%"7runtime5Int1611ClosedRangeS"* nonnull %_2, i16 %0, i16 %1)
@@ -2321,7 +2512,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime5Int166negateF7runtime5Int16SE0"(i16 %0) local_unnamed_addr #1 {
+define i16 @"7runtime5Int166negateF7runtime5Int16SE0"(i16 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i16, align 2
   %ineg = sub i16 0, %0
@@ -2331,7 +2522,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime5Int166invertF7runtime5Int16SE0"(i16 %0) local_unnamed_addr #1 {
+define i16 @"7runtime5Int166invertF7runtime5Int16SE0"(i16 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i16, align 2
   %iinv = xor i16 %0, -1
@@ -2341,7 +2532,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int164initF7runtime5UInt8SE0"(i16* nocapture writeonly %0, i8 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int164initF7runtime5UInt8SE0"(i16* nocapture writeonly %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %izext16 = zext i8 %1 to i16
   store i16 %izext16, i16* %0, align 2
@@ -2349,7 +2540,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int164initF7runtime4Int8SE0"(i16* nocapture writeonly %0, i8 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int164initF7runtime4Int8SE0"(i16* nocapture writeonly %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %izext16 = sext i8 %1 to i16
   store i16 %izext16, i16* %0, align 2
@@ -2357,7 +2548,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int164initF7runtime5Int32SE10truncating"(i16* nocapture writeonly %0, i32 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int164initF7runtime5Int32SE10truncating"(i16* nocapture writeonly %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %itrunc16 = trunc i32 %1 to i16
   store i16 %itrunc16, i16* %0, align 2
@@ -2365,7 +2556,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int164initF7runtime5Int64SE10truncating"(i16* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int164initF7runtime5Int64SE10truncating"(i16* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %itrunc16 = trunc i64 %1 to i16
   store i16 %itrunc16, i16* %0, align 2
@@ -2373,21 +2564,21 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int164initF7runtime6UInt16SE7bitcast"(i16* nocapture writeonly %0, i16 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int164initF7runtime6UInt16SE7bitcast"(i16* nocapture writeonly %0, i16 %1) local_unnamed_addr #2 {
 bb:
   store i16 %1, i16* %0, align 2
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int164initFlE4repr"(i16* nocapture writeonly %0, i16 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int164initFlE4repr"(i16* nocapture writeonly %0, i16 %1) local_unnamed_addr #2 {
 bb:
   store i16 %1, i16* %0, align 2
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int1611ClosedRange4initF7runtime5Int16S7runtime5Int16SE4from2to"(%"7runtime5Int1611ClosedRangeS"* nocapture writeonly %0, i16 %1, i16 %2) local_unnamed_addr #1 {
+define void @"7runtime5Int1611ClosedRange4initF7runtime5Int16S7runtime5Int16SE4from2to"(%"7runtime5Int1611ClosedRangeS"* nocapture writeonly %0, i16 %1, i16 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime5Int1611ClosedRangeS", %"7runtime5Int1611ClosedRangeS"* %0, i64 0, i32 0
   store i16 %1, i16* %gep, align 2
@@ -2411,7 +2602,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int165Range4initF7runtime5Int16S7runtime5Int16SE4from2to"(%"7runtime5Int165RangeS"* nocapture writeonly %0, i16 %1, i16 %2) local_unnamed_addr #1 {
+define void @"7runtime5Int165Range4initF7runtime5Int16S7runtime5Int16SE4from2to"(%"7runtime5Int165RangeS"* nocapture writeonly %0, i16 %1, i16 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime5Int165RangeS", %"7runtime5Int165RangeS"* %0, i64 0, i32 0
   store i16 %1, i16* %gep, align 2
@@ -2497,7 +2688,7 @@ bb5:                                              ; preds = %bb, %bb3
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime5Int323addF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime5Int323addF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i32, align 4
   %iadd = add i32 %1, %0
@@ -2507,7 +2698,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime5Int323subF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime5Int323subF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i32, align 4
   %isub = sub i32 %0, %1
@@ -2517,7 +2708,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime5Int323mulF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime5Int323mulF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i32, align 4
   %imul = mul i32 %1, %0
@@ -2527,7 +2718,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime5Int323divF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime5Int323divF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i32, align 4
   %_4 = alloca i32, align 4
@@ -2541,7 +2732,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime5Int323modF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime5Int323modF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i32, align 4
   %_4 = alloca i32, align 4
@@ -2555,7 +2746,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime5Int325bitOrF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime5Int325bitOrF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i32, align 4
   %ior = or i32 %1, %0
@@ -2565,7 +2756,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime5Int326bitXorF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime5Int326bitXorF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i32, align 4
   %ixor = xor i32 %1, %0
@@ -2575,7 +2766,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime5Int326bitAndF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime5Int326bitAndF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i32, align 4
   %iand = and i32 %1, %0
@@ -2585,7 +2776,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime5Int329shiftLeftF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime5Int329shiftLeftF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i32, align 4
   %ishl = shl i32 %0, %1
@@ -2595,7 +2786,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime5Int3210shiftRightF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime5Int3210shiftRightF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i32, align 4
   %ishr = ashr i32 %0, %1
@@ -2605,7 +2796,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int325equalF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int325equalF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %eq = icmp eq i32 %0, %1
@@ -2615,7 +2806,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int328notEqualF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int328notEqualF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %neq = icmp ne i32 %0, %1
@@ -2625,7 +2816,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int328lessThanF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int328lessThanF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lt = icmp slt i32 %0, %1
@@ -2635,7 +2826,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int3211greaterThanF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int3211greaterThanF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gt = icmp sgt i32 %0, %1
@@ -2645,7 +2836,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int3210lessThanEqF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int3210lessThanEqF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lte = icmp sle i32 %0, %1
@@ -2655,7 +2846,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int3213greaterThanEqF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int3213greaterThanEqF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gte = icmp sge i32 %0, %1
@@ -2671,7 +2862,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime5Int325RangeS" @"7runtime5Int329openRangeF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define %"7runtime5Int325RangeS" @"7runtime5Int329openRangeF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime5Int325RangeS", align 8
   call void @"7runtime5Int325Range4initF7runtime5Int32S7runtime5Int32SE4from2to"(%"7runtime5Int325RangeS"* nonnull %_2, i32 %0, i32 %1)
@@ -2685,7 +2876,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime5Int3211ClosedRangeS" @"7runtime5Int3211closedRangeF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define %"7runtime5Int3211ClosedRangeS" @"7runtime5Int3211closedRangeF7runtime5Int32S7runtime5Int32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime5Int3211ClosedRangeS", align 8
   call void @"7runtime5Int3211ClosedRange4initF7runtime5Int32S7runtime5Int32SE4from2to"(%"7runtime5Int3211ClosedRangeS"* nonnull %_2, i32 %0, i32 %1)
@@ -2699,7 +2890,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime5Int326negateF7runtime5Int32SE0"(i32 %0) local_unnamed_addr #1 {
+define i32 @"7runtime5Int326negateF7runtime5Int32SE0"(i32 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i32, align 4
   %ineg = sub i32 0, %0
@@ -2709,7 +2900,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime5Int326invertF7runtime5Int32SE0"(i32 %0) local_unnamed_addr #1 {
+define i32 @"7runtime5Int326invertF7runtime5Int32SE0"(i32 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i32, align 4
   %iinv = xor i32 %0, -1
@@ -2719,7 +2910,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int324initF7runtime5UInt8SE0"(i32* nocapture writeonly %0, i8 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int324initF7runtime5UInt8SE0"(i32* nocapture writeonly %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %izext32 = zext i8 %1 to i32
   store i32 %izext32, i32* %0, align 4
@@ -2727,7 +2918,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int324initF7runtime4Int8SE0"(i32* nocapture writeonly %0, i8 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int324initF7runtime4Int8SE0"(i32* nocapture writeonly %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %izext32 = sext i8 %1 to i32
   store i32 %izext32, i32* %0, align 4
@@ -2735,7 +2926,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int324initF7runtime6UInt16SE0"(i32* nocapture writeonly %0, i16 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int324initF7runtime6UInt16SE0"(i32* nocapture writeonly %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %izext32 = zext i16 %1 to i32
   store i32 %izext32, i32* %0, align 4
@@ -2743,7 +2934,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int324initF7runtime5Int16SE0"(i32* nocapture writeonly %0, i16 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int324initF7runtime5Int16SE0"(i32* nocapture writeonly %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %izext32 = sext i16 %1 to i32
   store i32 %izext32, i32* %0, align 4
@@ -2751,7 +2942,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int324initF7runtime5Int64SE10truncating"(i32* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int324initF7runtime5Int64SE10truncating"(i32* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %itrunc32 = trunc i64 %1 to i32
   store i32 %itrunc32, i32* %0, align 4
@@ -2759,21 +2950,21 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int324initF7runtime6UInt32SE7bitcast"(i32* nocapture writeonly %0, i32 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int324initF7runtime6UInt32SE7bitcast"(i32* nocapture writeonly %0, i32 %1) local_unnamed_addr #2 {
 bb:
   store i32 %1, i32* %0, align 4
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int324initFjE4repr"(i32* nocapture writeonly %0, i32 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int324initFjE4repr"(i32* nocapture writeonly %0, i32 %1) local_unnamed_addr #2 {
 bb:
   store i32 %1, i32* %0, align 4
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int3211ClosedRange4initF7runtime5Int32S7runtime5Int32SE4from2to"(%"7runtime5Int3211ClosedRangeS"* nocapture writeonly %0, i32 %1, i32 %2) local_unnamed_addr #1 {
+define void @"7runtime5Int3211ClosedRange4initF7runtime5Int32S7runtime5Int32SE4from2to"(%"7runtime5Int3211ClosedRangeS"* nocapture writeonly %0, i32 %1, i32 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime5Int3211ClosedRangeS", %"7runtime5Int3211ClosedRangeS"* %0, i64 0, i32 0
   store i32 %1, i32* %gep, align 4
@@ -2797,7 +2988,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int325Range4initF7runtime5Int32S7runtime5Int32SE4from2to"(%"7runtime5Int325RangeS"* nocapture writeonly %0, i32 %1, i32 %2) local_unnamed_addr #1 {
+define void @"7runtime5Int325Range4initF7runtime5Int32S7runtime5Int32SE4from2to"(%"7runtime5Int325RangeS"* nocapture writeonly %0, i32 %1, i32 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime5Int325RangeS", %"7runtime5Int325RangeS"* %0, i64 0, i32 0
   store i32 %1, i32* %gep, align 4
@@ -2917,7 +3108,7 @@ bb5:                                              ; preds = %bb, %bb3
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime5Int643addF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime5Int643addF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %iadd = add i64 %1, %0
@@ -2927,7 +3118,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime5Int643subF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime5Int643subF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %isub = sub i64 %0, %1
@@ -2937,7 +3128,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime5Int643mulF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime5Int643mulF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %imul = mul i64 %1, %0
@@ -2947,7 +3138,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime5Int643divF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime5Int643divF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i64, align 8
   %_4 = alloca i64, align 8
@@ -2961,7 +3152,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime5Int643modF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime5Int643modF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i64, align 8
   %_4 = alloca i64, align 8
@@ -2975,7 +3166,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime5Int645bitOrF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime5Int645bitOrF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %ior = or i64 %1, %0
@@ -2985,7 +3176,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime5Int646bitXorF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime5Int646bitXorF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %ixor = xor i64 %1, %0
@@ -2995,7 +3186,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime5Int646bitAndF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime5Int646bitAndF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %iand = and i64 %1, %0
@@ -3005,7 +3196,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime5Int649shiftLeftF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime5Int649shiftLeftF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %ishl = shl i64 %0, %1
@@ -3015,7 +3206,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime5Int6410shiftRightF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime5Int6410shiftRightF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %ishr = ashr i64 %0, %1
@@ -3025,7 +3216,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int645equalF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int645equalF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %eq = icmp eq i64 %0, %1
@@ -3035,7 +3226,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int648notEqualF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int648notEqualF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %neq = icmp ne i64 %0, %1
@@ -3045,7 +3236,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int648lessThanF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int648lessThanF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lt = icmp slt i64 %0, %1
@@ -3055,7 +3246,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int6411greaterThanF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int6411greaterThanF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gt = icmp sgt i64 %0, %1
@@ -3065,7 +3256,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int6410lessThanEqF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int6410lessThanEqF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lte = icmp sle i64 %0, %1
@@ -3075,7 +3266,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5Int6413greaterThanEqF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5Int6413greaterThanEqF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gte = icmp sge i64 %0, %1
@@ -3091,7 +3282,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime5Int645RangeS" @"7runtime5Int649openRangeF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define %"7runtime5Int645RangeS" @"7runtime5Int649openRangeF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime5Int645RangeS", align 8
   call void @"7runtime5Int645Range4initF7runtime5Int64S7runtime5Int64SE4from2to"(%"7runtime5Int645RangeS"* nonnull %_2, i64 %0, i64 %1)
@@ -3105,7 +3296,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime5Int6411ClosedRangeS" @"7runtime5Int6411closedRangeF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define %"7runtime5Int6411ClosedRangeS" @"7runtime5Int6411closedRangeF7runtime5Int64S7runtime5Int64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime5Int6411ClosedRangeS", align 8
   call void @"7runtime5Int6411ClosedRange4initF7runtime5Int64S7runtime5Int64SE4from2to"(%"7runtime5Int6411ClosedRangeS"* nonnull %_2, i64 %0, i64 %1)
@@ -3119,7 +3310,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime5Int646negateF7runtime5Int64SE0"(i64 %0) local_unnamed_addr #1 {
+define i64 @"7runtime5Int646negateF7runtime5Int64SE0"(i64 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i64, align 8
   %ineg = sub i64 0, %0
@@ -3129,7 +3320,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime5Int646invertF7runtime5Int64SE0"(i64 %0) local_unnamed_addr #1 {
+define i64 @"7runtime5Int646invertF7runtime5Int64SE0"(i64 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i64, align 8
   %iinv = xor i64 %0, -1
@@ -3139,7 +3330,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int644initF7runtime5FloatSE5floor"(i64* nocapture writeonly %0, float %1) local_unnamed_addr #1 {
+define void @"7runtime5Int644initF7runtime5FloatSE5floor"(i64* nocapture writeonly %0, float %1) local_unnamed_addr #2 {
 bb:
   %fcnvi = fptosi float %1 to i64
   store i64 %fcnvi, i64* %0, align 8
@@ -3147,7 +3338,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int644initF7runtime6DoubleSE5floor"(i64* nocapture writeonly %0, double %1) local_unnamed_addr #1 {
+define void @"7runtime5Int644initF7runtime6DoubleSE5floor"(i64* nocapture writeonly %0, double %1) local_unnamed_addr #2 {
 bb:
   %fcnvi = fptosi double %1 to i64
   store i64 %fcnvi, i64* %0, align 8
@@ -3155,7 +3346,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int644initF7runtime4HalfSE5floor"(i64* nocapture writeonly %0, half %1) local_unnamed_addr #1 {
+define void @"7runtime5Int644initF7runtime4HalfSE5floor"(i64* nocapture writeonly %0, half %1) local_unnamed_addr #2 {
 bb:
   %fcnvi = fptosi half %1 to i64
   store i64 %fcnvi, i64* %0, align 8
@@ -3163,7 +3354,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int644initF7runtime5UInt8SE0"(i64* nocapture writeonly %0, i8 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int644initF7runtime5UInt8SE0"(i64* nocapture writeonly %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = zext i8 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -3171,7 +3362,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int644initF7runtime4Int8SE0"(i64* nocapture writeonly %0, i8 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int644initF7runtime4Int8SE0"(i64* nocapture writeonly %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = sext i8 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -3179,7 +3370,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int644initF7runtime6UInt16SE0"(i64* nocapture writeonly %0, i16 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int644initF7runtime6UInt16SE0"(i64* nocapture writeonly %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = zext i16 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -3187,7 +3378,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int644initF7runtime5Int16SE0"(i64* nocapture writeonly %0, i16 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int644initF7runtime5Int16SE0"(i64* nocapture writeonly %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = sext i16 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -3195,7 +3386,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int644initF7runtime6UInt32SE0"(i64* nocapture writeonly %0, i32 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int644initF7runtime6UInt32SE0"(i64* nocapture writeonly %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = zext i32 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -3203,7 +3394,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int644initF7runtime5Int32SE0"(i64* nocapture writeonly %0, i32 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int644initF7runtime5Int32SE0"(i64* nocapture writeonly %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = sext i32 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -3211,35 +3402,35 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int644initF7runtime6UInt64SE7bitcast"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int644initF7runtime6UInt64SE7bitcast"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   store i64 %1, i64* %0, align 8
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int644initF7runtime4UIntSE7bitcast"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int644initF7runtime4UIntSE7bitcast"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   store i64 %1, i64* %0, align 8
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int644initF7runtime3IntSE0"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int644initF7runtime3IntSE0"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   store i64 %1, i64* %0, align 8
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int644initFiE4repr"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime5Int644initFiE4repr"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   store i64 %1, i64* %0, align 8
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int6411ClosedRange4initF7runtime5Int64S7runtime5Int64SE4from2to"(%"7runtime5Int6411ClosedRangeS"* nocapture writeonly %0, i64 %1, i64 %2) local_unnamed_addr #1 {
+define void @"7runtime5Int6411ClosedRange4initF7runtime5Int64S7runtime5Int64SE4from2to"(%"7runtime5Int6411ClosedRangeS"* nocapture writeonly %0, i64 %1, i64 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime5Int6411ClosedRangeS", %"7runtime5Int6411ClosedRangeS"* %0, i64 0, i32 0
   store i64 %1, i64* %gep, align 8
@@ -3263,7 +3454,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5Int645Range4initF7runtime5Int64S7runtime5Int64SE4from2to"(%"7runtime5Int645RangeS"* nocapture writeonly %0, i64 %1, i64 %2) local_unnamed_addr #1 {
+define void @"7runtime5Int645Range4initF7runtime5Int64S7runtime5Int64SE4from2to"(%"7runtime5Int645RangeS"* nocapture writeonly %0, i64 %1, i64 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime5Int645RangeS", %"7runtime5Int645RangeS"* %0, i64 0, i32 0
   store i64 %1, i64* %gep, align 8
@@ -3449,7 +3640,7 @@ bb5:                                              ; preds = %bb, %bb3
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime5UInt83addF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime5UInt83addF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i8, align 1
   %iadd = add i8 %1, %0
@@ -3459,7 +3650,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime5UInt83subF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime5UInt83subF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i8, align 1
   %isub = sub i8 %0, %1
@@ -3469,7 +3660,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime5UInt83mulF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime5UInt83mulF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i8, align 1
   %imul = mul i8 %1, %0
@@ -3479,7 +3670,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime5UInt83divF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime5UInt83divF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i8, align 1
   %_4 = alloca i8, align 1
@@ -3493,7 +3684,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime5UInt83modF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime5UInt83modF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i8, align 1
   %_4 = alloca i8, align 1
@@ -3507,7 +3698,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime5UInt85bitOrF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime5UInt85bitOrF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i8, align 1
   %ior = or i8 %1, %0
@@ -3517,7 +3708,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime5UInt86bitXorF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime5UInt86bitXorF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i8, align 1
   %ixor = xor i8 %1, %0
@@ -3527,7 +3718,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime5UInt86bitAndF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime5UInt86bitAndF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i8, align 1
   %iand = and i8 %1, %0
@@ -3537,7 +3728,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime5UInt89shiftLeftF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime5UInt89shiftLeftF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i8, align 1
   %ishl = shl i8 %0, %1
@@ -3547,7 +3738,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime5UInt810shiftRightF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i8 @"7runtime5UInt810shiftRightF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i8, align 1
   %ishr = lshr i8 %0, %1
@@ -3557,7 +3748,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5UInt85equalF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5UInt85equalF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %eq = icmp eq i8 %0, %1
@@ -3567,7 +3758,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5UInt88notEqualF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5UInt88notEqualF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %neq = icmp ne i8 %0, %1
@@ -3577,7 +3768,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5UInt88lessThanF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5UInt88lessThanF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lt = icmp ult i8 %0, %1
@@ -3587,7 +3778,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5UInt811greaterThanF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5UInt811greaterThanF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gt = icmp ugt i8 %0, %1
@@ -3597,7 +3788,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5UInt810lessThanEqF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5UInt810lessThanEqF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lte = icmp ule i8 %0, %1
@@ -3607,7 +3798,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime5UInt813greaterThanEqF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define i1 @"7runtime5UInt813greaterThanEqF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gte = icmp uge i8 %0, %1
@@ -3623,7 +3814,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime5UInt85RangeS" @"7runtime5UInt89openRangeF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define %"7runtime5UInt85RangeS" @"7runtime5UInt89openRangeF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime5UInt85RangeS", align 8
   call void @"7runtime5UInt85Range4initF7runtime5UInt8S7runtime5UInt8SE4from2to"(%"7runtime5UInt85RangeS"* nonnull %_2, i8 %0, i8 %1)
@@ -3637,7 +3828,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime5UInt811ClosedRangeS" @"7runtime5UInt811closedRangeF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #1 {
+define %"7runtime5UInt811ClosedRangeS" @"7runtime5UInt811closedRangeF7runtime5UInt8S7runtime5UInt8SE00"(i8 %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime5UInt811ClosedRangeS", align 8
   call void @"7runtime5UInt811ClosedRange4initF7runtime5UInt8S7runtime5UInt8SE4from2to"(%"7runtime5UInt811ClosedRangeS"* nonnull %_2, i8 %0, i8 %1)
@@ -3651,7 +3842,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime5UInt86negateF7runtime5UInt8SE0"(i8 %0) local_unnamed_addr #1 {
+define i8 @"7runtime5UInt86negateF7runtime5UInt8SE0"(i8 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i8, align 1
   %ineg = sub i8 0, %0
@@ -3661,7 +3852,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i8 @"7runtime5UInt86invertF7runtime5UInt8SE0"(i8 %0) local_unnamed_addr #1 {
+define i8 @"7runtime5UInt86invertF7runtime5UInt8SE0"(i8 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i8, align 1
   %iinv = xor i8 %0, -1
@@ -3671,7 +3862,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5UInt84initF7runtime6UInt16SE10truncating"(i8* nocapture writeonly %0, i16 %1) local_unnamed_addr #1 {
+define void @"7runtime5UInt84initF7runtime6UInt16SE10truncating"(i8* nocapture writeonly %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %itrunc8 = trunc i16 %1 to i8
   store i8 %itrunc8, i8* %0, align 1
@@ -3679,7 +3870,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5UInt84initF7runtime6UInt32SE10truncating"(i8* nocapture writeonly %0, i32 %1) local_unnamed_addr #1 {
+define void @"7runtime5UInt84initF7runtime6UInt32SE10truncating"(i8* nocapture writeonly %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %itrunc8 = trunc i32 %1 to i8
   store i8 %itrunc8, i8* %0, align 1
@@ -3687,7 +3878,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5UInt84initF7runtime6UInt64SE10truncating"(i8* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime5UInt84initF7runtime6UInt64SE10truncating"(i8* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %itrunc8 = trunc i64 %1 to i8
   store i8 %itrunc8, i8* %0, align 1
@@ -3695,21 +3886,21 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5UInt84initF7runtime4Int8SE7bitcast"(i8* nocapture writeonly %0, i8 %1) local_unnamed_addr #1 {
+define void @"7runtime5UInt84initF7runtime4Int8SE7bitcast"(i8* nocapture writeonly %0, i8 %1) local_unnamed_addr #2 {
 bb:
   store i8 %1, i8* %0, align 1
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5UInt84initFaE4repr"(i8* nocapture writeonly %0, i8 %1) local_unnamed_addr #1 {
+define void @"7runtime5UInt84initFaE4repr"(i8* nocapture writeonly %0, i8 %1) local_unnamed_addr #2 {
 bb:
   store i8 %1, i8* %0, align 1
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5UInt811ClosedRange4initF7runtime5UInt8S7runtime5UInt8SE4from2to"(%"7runtime5UInt811ClosedRangeS"* nocapture writeonly %0, i8 %1, i8 %2) local_unnamed_addr #1 {
+define void @"7runtime5UInt811ClosedRange4initF7runtime5UInt8S7runtime5UInt8SE4from2to"(%"7runtime5UInt811ClosedRangeS"* nocapture writeonly %0, i8 %1, i8 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime5UInt811ClosedRangeS", %"7runtime5UInt811ClosedRangeS"* %0, i64 0, i32 0
   store i8 %1, i8* %gep, align 1
@@ -3733,7 +3924,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime5UInt85Range4initF7runtime5UInt8S7runtime5UInt8SE4from2to"(%"7runtime5UInt85RangeS"* nocapture writeonly %0, i8 %1, i8 %2) local_unnamed_addr #1 {
+define void @"7runtime5UInt85Range4initF7runtime5UInt8S7runtime5UInt8SE4from2to"(%"7runtime5UInt85RangeS"* nocapture writeonly %0, i8 %1, i8 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime5UInt85RangeS", %"7runtime5UInt85RangeS"* %0, i64 0, i32 0
   store i8 %1, i8* %gep, align 1
@@ -3800,7 +3991,7 @@ bb5:                                              ; preds = %bb, %bb3
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime6UInt163addF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime6UInt163addF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i16, align 2
   %iadd = add i16 %1, %0
@@ -3810,7 +4001,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime6UInt163subF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime6UInt163subF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i16, align 2
   %isub = sub i16 %0, %1
@@ -3820,7 +4011,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime6UInt163mulF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime6UInt163mulF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i16, align 2
   %imul = mul i16 %1, %0
@@ -3830,7 +4021,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime6UInt163divF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime6UInt163divF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i16, align 2
   %_4 = alloca i16, align 2
@@ -3844,7 +4035,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime6UInt163modF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime6UInt163modF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i16, align 2
   %_4 = alloca i16, align 2
@@ -3858,7 +4049,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime6UInt165bitOrF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime6UInt165bitOrF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i16, align 2
   %ior = or i16 %1, %0
@@ -3868,7 +4059,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime6UInt166bitXorF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime6UInt166bitXorF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i16, align 2
   %ixor = xor i16 %1, %0
@@ -3878,7 +4069,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime6UInt166bitAndF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime6UInt166bitAndF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i16, align 2
   %iand = and i16 %1, %0
@@ -3888,7 +4079,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime6UInt169shiftLeftF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime6UInt169shiftLeftF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i16, align 2
   %ishl = shl i16 %0, %1
@@ -3898,7 +4089,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime6UInt1610shiftRightF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i16 @"7runtime6UInt1610shiftRightF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i16, align 2
   %ishr = lshr i16 %0, %1
@@ -3908,7 +4099,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt165equalF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt165equalF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %eq = icmp eq i16 %0, %1
@@ -3918,7 +4109,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt168notEqualF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt168notEqualF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %neq = icmp ne i16 %0, %1
@@ -3928,7 +4119,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt168lessThanF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt168lessThanF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lt = icmp ult i16 %0, %1
@@ -3938,7 +4129,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt1611greaterThanF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt1611greaterThanF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gt = icmp ugt i16 %0, %1
@@ -3948,7 +4139,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt1610lessThanEqF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt1610lessThanEqF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lte = icmp ule i16 %0, %1
@@ -3958,7 +4149,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt1613greaterThanEqF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt1613greaterThanEqF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gte = icmp uge i16 %0, %1
@@ -3974,7 +4165,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime6UInt165RangeS" @"7runtime6UInt169openRangeF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define %"7runtime6UInt165RangeS" @"7runtime6UInt169openRangeF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime6UInt165RangeS", align 8
   call void @"7runtime6UInt165Range4initF7runtime6UInt16S7runtime6UInt16SE4from2to"(%"7runtime6UInt165RangeS"* nonnull %_2, i16 %0, i16 %1)
@@ -3988,7 +4179,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime6UInt1611ClosedRangeS" @"7runtime6UInt1611closedRangeF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #1 {
+define %"7runtime6UInt1611ClosedRangeS" @"7runtime6UInt1611closedRangeF7runtime6UInt16S7runtime6UInt16SE00"(i16 %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime6UInt1611ClosedRangeS", align 8
   call void @"7runtime6UInt1611ClosedRange4initF7runtime6UInt16S7runtime6UInt16SE4from2to"(%"7runtime6UInt1611ClosedRangeS"* nonnull %_2, i16 %0, i16 %1)
@@ -4002,7 +4193,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime6UInt166negateF7runtime6UInt16SE0"(i16 %0) local_unnamed_addr #1 {
+define i16 @"7runtime6UInt166negateF7runtime6UInt16SE0"(i16 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i16, align 2
   %ineg = sub i16 0, %0
@@ -4012,7 +4203,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i16 @"7runtime6UInt166invertF7runtime6UInt16SE0"(i16 %0) local_unnamed_addr #1 {
+define i16 @"7runtime6UInt166invertF7runtime6UInt16SE0"(i16 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i16, align 2
   %iinv = xor i16 %0, -1
@@ -4022,7 +4213,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt164initF7runtime5UInt8SE0"(i16* nocapture writeonly %0, i8 %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt164initF7runtime5UInt8SE0"(i16* nocapture writeonly %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %izext16 = zext i8 %1 to i16
   store i16 %izext16, i16* %0, align 2
@@ -4030,7 +4221,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt164initF7runtime6UInt32SE10truncating"(i16* nocapture writeonly %0, i32 %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt164initF7runtime6UInt32SE10truncating"(i16* nocapture writeonly %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %itrunc16 = trunc i32 %1 to i16
   store i16 %itrunc16, i16* %0, align 2
@@ -4038,7 +4229,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt164initF7runtime6UInt64SE10truncating"(i16* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt164initF7runtime6UInt64SE10truncating"(i16* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %itrunc16 = trunc i64 %1 to i16
   store i16 %itrunc16, i16* %0, align 2
@@ -4046,21 +4237,21 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt164initF7runtime5Int16SE7bitcast"(i16* nocapture writeonly %0, i16 %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt164initF7runtime5Int16SE7bitcast"(i16* nocapture writeonly %0, i16 %1) local_unnamed_addr #2 {
 bb:
   store i16 %1, i16* %0, align 2
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt164initFlE4repr"(i16* nocapture writeonly %0, i16 %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt164initFlE4repr"(i16* nocapture writeonly %0, i16 %1) local_unnamed_addr #2 {
 bb:
   store i16 %1, i16* %0, align 2
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt1611ClosedRange4initF7runtime6UInt16S7runtime6UInt16SE4from2to"(%"7runtime6UInt1611ClosedRangeS"* nocapture writeonly %0, i16 %1, i16 %2) local_unnamed_addr #1 {
+define void @"7runtime6UInt1611ClosedRange4initF7runtime6UInt16S7runtime6UInt16SE4from2to"(%"7runtime6UInt1611ClosedRangeS"* nocapture writeonly %0, i16 %1, i16 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime6UInt1611ClosedRangeS", %"7runtime6UInt1611ClosedRangeS"* %0, i64 0, i32 0
   store i16 %1, i16* %gep, align 2
@@ -4084,7 +4275,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt165Range4initF7runtime6UInt16S7runtime6UInt16SE4from2to"(%"7runtime6UInt165RangeS"* nocapture writeonly %0, i16 %1, i16 %2) local_unnamed_addr #1 {
+define void @"7runtime6UInt165Range4initF7runtime6UInt16S7runtime6UInt16SE4from2to"(%"7runtime6UInt165RangeS"* nocapture writeonly %0, i16 %1, i16 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime6UInt165RangeS", %"7runtime6UInt165RangeS"* %0, i64 0, i32 0
   store i16 %1, i16* %gep, align 2
@@ -4170,7 +4361,7 @@ bb5:                                              ; preds = %bb, %bb3
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime6UInt323addF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime6UInt323addF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i32, align 4
   %iadd = add i32 %1, %0
@@ -4180,7 +4371,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime6UInt323subF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime6UInt323subF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i32, align 4
   %isub = sub i32 %0, %1
@@ -4190,7 +4381,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime6UInt323mulF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime6UInt323mulF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i32, align 4
   %imul = mul i32 %1, %0
@@ -4200,7 +4391,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime6UInt323divF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime6UInt323divF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i32, align 4
   %_4 = alloca i32, align 4
@@ -4214,7 +4405,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime6UInt323modF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime6UInt323modF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i32, align 4
   %_4 = alloca i32, align 4
@@ -4228,7 +4419,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime6UInt325bitOrF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime6UInt325bitOrF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i32, align 4
   %ior = or i32 %1, %0
@@ -4238,7 +4429,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime6UInt326bitXorF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime6UInt326bitXorF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i32, align 4
   %ixor = xor i32 %1, %0
@@ -4248,7 +4439,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime6UInt326bitAndF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime6UInt326bitAndF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i32, align 4
   %iand = and i32 %1, %0
@@ -4258,7 +4449,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime6UInt329shiftLeftF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime6UInt329shiftLeftF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i32, align 4
   %ishl = shl i32 %0, %1
@@ -4268,7 +4459,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime6UInt3210shiftRightF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i32 @"7runtime6UInt3210shiftRightF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i32, align 4
   %ishr = lshr i32 %0, %1
@@ -4278,7 +4469,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt325equalF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt325equalF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %eq = icmp eq i32 %0, %1
@@ -4288,7 +4479,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt328notEqualF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt328notEqualF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %neq = icmp ne i32 %0, %1
@@ -4298,7 +4489,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt328lessThanF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt328lessThanF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lt = icmp ult i32 %0, %1
@@ -4308,7 +4499,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt3211greaterThanF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt3211greaterThanF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gt = icmp ugt i32 %0, %1
@@ -4318,7 +4509,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt3210lessThanEqF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt3210lessThanEqF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lte = icmp ule i32 %0, %1
@@ -4328,7 +4519,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt3213greaterThanEqF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt3213greaterThanEqF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gte = icmp uge i32 %0, %1
@@ -4344,7 +4535,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime6UInt325RangeS" @"7runtime6UInt329openRangeF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define %"7runtime6UInt325RangeS" @"7runtime6UInt329openRangeF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime6UInt325RangeS", align 8
   call void @"7runtime6UInt325Range4initF7runtime6UInt32S7runtime6UInt32SE4from2to"(%"7runtime6UInt325RangeS"* nonnull %_2, i32 %0, i32 %1)
@@ -4358,7 +4549,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime6UInt3211ClosedRangeS" @"7runtime6UInt3211closedRangeF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define %"7runtime6UInt3211ClosedRangeS" @"7runtime6UInt3211closedRangeF7runtime6UInt32S7runtime6UInt32SE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime6UInt3211ClosedRangeS", align 8
   call void @"7runtime6UInt3211ClosedRange4initF7runtime6UInt32S7runtime6UInt32SE4from2to"(%"7runtime6UInt3211ClosedRangeS"* nonnull %_2, i32 %0, i32 %1)
@@ -4372,7 +4563,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime6UInt326negateF7runtime6UInt32SE0"(i32 %0) local_unnamed_addr #1 {
+define i32 @"7runtime6UInt326negateF7runtime6UInt32SE0"(i32 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i32, align 4
   %ineg = sub i32 0, %0
@@ -4382,7 +4573,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i32 @"7runtime6UInt326invertF7runtime6UInt32SE0"(i32 %0) local_unnamed_addr #1 {
+define i32 @"7runtime6UInt326invertF7runtime6UInt32SE0"(i32 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i32, align 4
   %iinv = xor i32 %0, -1
@@ -4392,7 +4583,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt324initF7runtime5UInt8SE0"(i32* nocapture writeonly %0, i8 %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt324initF7runtime5UInt8SE0"(i32* nocapture writeonly %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %izext32 = zext i8 %1 to i32
   store i32 %izext32, i32* %0, align 4
@@ -4400,7 +4591,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt324initF7runtime6UInt16SE0"(i32* nocapture writeonly %0, i16 %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt324initF7runtime6UInt16SE0"(i32* nocapture writeonly %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %izext32 = zext i16 %1 to i32
   store i32 %izext32, i32* %0, align 4
@@ -4408,7 +4599,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt324initF7runtime6UInt64SE10truncating"(i32* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt324initF7runtime6UInt64SE10truncating"(i32* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %itrunc32 = trunc i64 %1 to i32
   store i32 %itrunc32, i32* %0, align 4
@@ -4416,21 +4607,21 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt324initF7runtime5Int32SE7bitcast"(i32* nocapture writeonly %0, i32 %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt324initF7runtime5Int32SE7bitcast"(i32* nocapture writeonly %0, i32 %1) local_unnamed_addr #2 {
 bb:
   store i32 %1, i32* %0, align 4
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt324initFjE4repr"(i32* nocapture writeonly %0, i32 %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt324initFjE4repr"(i32* nocapture writeonly %0, i32 %1) local_unnamed_addr #2 {
 bb:
   store i32 %1, i32* %0, align 4
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt3211ClosedRange4initF7runtime6UInt32S7runtime6UInt32SE4from2to"(%"7runtime6UInt3211ClosedRangeS"* nocapture writeonly %0, i32 %1, i32 %2) local_unnamed_addr #1 {
+define void @"7runtime6UInt3211ClosedRange4initF7runtime6UInt32S7runtime6UInt32SE4from2to"(%"7runtime6UInt3211ClosedRangeS"* nocapture writeonly %0, i32 %1, i32 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime6UInt3211ClosedRangeS", %"7runtime6UInt3211ClosedRangeS"* %0, i64 0, i32 0
   store i32 %1, i32* %gep, align 4
@@ -4454,7 +4645,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt325Range4initF7runtime6UInt32S7runtime6UInt32SE4from2to"(%"7runtime6UInt325RangeS"* nocapture writeonly %0, i32 %1, i32 %2) local_unnamed_addr #1 {
+define void @"7runtime6UInt325Range4initF7runtime6UInt32S7runtime6UInt32SE4from2to"(%"7runtime6UInt325RangeS"* nocapture writeonly %0, i32 %1, i32 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime6UInt325RangeS", %"7runtime6UInt325RangeS"* %0, i64 0, i32 0
   store i32 %1, i32* %gep, align 4
@@ -4574,7 +4765,7 @@ bb5:                                              ; preds = %bb, %bb3
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime6UInt643addF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime6UInt643addF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %iadd = add i64 %1, %0
@@ -4584,7 +4775,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime6UInt643subF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime6UInt643subF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %isub = sub i64 %0, %1
@@ -4594,7 +4785,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime6UInt643mulF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime6UInt643mulF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %imul = mul i64 %1, %0
@@ -4604,7 +4795,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime6UInt643divF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime6UInt643divF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i64, align 8
   %_4 = alloca i64, align 8
@@ -4618,7 +4809,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime6UInt643modF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime6UInt643modF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i64, align 8
   %_4 = alloca i64, align 8
@@ -4632,7 +4823,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime6UInt645bitOrF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime6UInt645bitOrF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %ior = or i64 %1, %0
@@ -4642,7 +4833,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime6UInt646bitXorF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime6UInt646bitXorF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %ixor = xor i64 %1, %0
@@ -4652,7 +4843,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime6UInt646bitAndF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime6UInt646bitAndF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %iand = and i64 %1, %0
@@ -4662,7 +4853,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime6UInt649shiftLeftF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime6UInt649shiftLeftF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %ishl = shl i64 %0, %1
@@ -4672,7 +4863,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime6UInt6410shiftRightF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i64 @"7runtime6UInt6410shiftRightF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i64, align 8
   %ishr = lshr i64 %0, %1
@@ -4682,7 +4873,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt645equalF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt645equalF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %eq = icmp eq i64 %0, %1
@@ -4692,7 +4883,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt648notEqualF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt648notEqualF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %neq = icmp ne i64 %0, %1
@@ -4702,7 +4893,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt648lessThanF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt648lessThanF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lt = icmp ult i64 %0, %1
@@ -4712,7 +4903,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt6411greaterThanF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt6411greaterThanF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gt = icmp ugt i64 %0, %1
@@ -4722,7 +4913,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt6410lessThanEqF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt6410lessThanEqF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lte = icmp ule i64 %0, %1
@@ -4732,7 +4923,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime6UInt6413greaterThanEqF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define i1 @"7runtime6UInt6413greaterThanEqF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gte = icmp uge i64 %0, %1
@@ -4748,7 +4939,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime6UInt645RangeS" @"7runtime6UInt649openRangeF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define %"7runtime6UInt645RangeS" @"7runtime6UInt649openRangeF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime6UInt645RangeS", align 8
   call void @"7runtime6UInt645Range4initF7runtime6UInt64S7runtime6UInt64SE4from2to"(%"7runtime6UInt645RangeS"* nonnull %_2, i64 %0, i64 %1)
@@ -4762,7 +4953,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define %"7runtime6UInt6411ClosedRangeS" @"7runtime6UInt6411closedRangeF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #1 {
+define %"7runtime6UInt6411ClosedRangeS" @"7runtime6UInt6411closedRangeF7runtime6UInt64S7runtime6UInt64SE00"(i64 %0, i64 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca %"7runtime6UInt6411ClosedRangeS", align 8
   call void @"7runtime6UInt6411ClosedRange4initF7runtime6UInt64S7runtime6UInt64SE4from2to"(%"7runtime6UInt6411ClosedRangeS"* nonnull %_2, i64 %0, i64 %1)
@@ -4776,7 +4967,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime6UInt646negateF7runtime6UInt64SE0"(i64 %0) local_unnamed_addr #1 {
+define i64 @"7runtime6UInt646negateF7runtime6UInt64SE0"(i64 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i64, align 8
   %ineg = sub i64 0, %0
@@ -4786,7 +4977,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime6UInt646invertF7runtime6UInt64SE0"(i64 %0) local_unnamed_addr #1 {
+define i64 @"7runtime6UInt646invertF7runtime6UInt64SE0"(i64 %0) local_unnamed_addr #2 {
 bb:
   %_1 = alloca i64, align 8
   %iinv = xor i64 %0, -1
@@ -4796,7 +4987,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt644initF7runtime5FloatSE5floor"(i64* nocapture writeonly %0, float %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt644initF7runtime5FloatSE5floor"(i64* nocapture writeonly %0, float %1) local_unnamed_addr #2 {
 bb:
   %fcnvi = fptosi float %1 to i64
   store i64 %fcnvi, i64* %0, align 8
@@ -4804,7 +4995,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt644initF7runtime6DoubleSE5floor"(i64* nocapture writeonly %0, double %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt644initF7runtime6DoubleSE5floor"(i64* nocapture writeonly %0, double %1) local_unnamed_addr #2 {
 bb:
   %fcnvi = fptosi double %1 to i64
   store i64 %fcnvi, i64* %0, align 8
@@ -4812,7 +5003,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt644initF7runtime4HalfSE5floor"(i64* nocapture writeonly %0, half %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt644initF7runtime4HalfSE5floor"(i64* nocapture writeonly %0, half %1) local_unnamed_addr #2 {
 bb:
   %fcnvi = fptosi half %1 to i64
   store i64 %fcnvi, i64* %0, align 8
@@ -4820,7 +5011,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt644initF7runtime5UInt8SE0"(i64* nocapture writeonly %0, i8 %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt644initF7runtime5UInt8SE0"(i64* nocapture writeonly %0, i8 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = zext i8 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -4828,7 +5019,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt644initF7runtime6UInt16SE0"(i64* nocapture writeonly %0, i16 %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt644initF7runtime6UInt16SE0"(i64* nocapture writeonly %0, i16 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = zext i16 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -4836,7 +5027,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt644initF7runtime6UInt32SE0"(i64* nocapture writeonly %0, i32 %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt644initF7runtime6UInt32SE0"(i64* nocapture writeonly %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %izext64 = zext i32 %1 to i64
   store i64 %izext64, i64* %0, align 8
@@ -4844,35 +5035,35 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt644initF7runtime5Int64SE7bitcast"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt644initF7runtime5Int64SE7bitcast"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   store i64 %1, i64* %0, align 8
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt644initF7runtime3IntSE7bitcast"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt644initF7runtime3IntSE7bitcast"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   store i64 %1, i64* %0, align 8
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt644initF7runtime4UIntSE0"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt644initF7runtime4UIntSE0"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   store i64 %1, i64* %0, align 8
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt644initFiE4repr"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #1 {
+define void @"7runtime6UInt644initFiE4repr"(i64* nocapture writeonly %0, i64 %1) local_unnamed_addr #2 {
 bb:
   store i64 %1, i64* %0, align 8
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt6411ClosedRange4initF7runtime6UInt64S7runtime6UInt64SE4from2to"(%"7runtime6UInt6411ClosedRangeS"* nocapture writeonly %0, i64 %1, i64 %2) local_unnamed_addr #1 {
+define void @"7runtime6UInt6411ClosedRange4initF7runtime6UInt64S7runtime6UInt64SE4from2to"(%"7runtime6UInt6411ClosedRangeS"* nocapture writeonly %0, i64 %1, i64 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime6UInt6411ClosedRangeS", %"7runtime6UInt6411ClosedRangeS"* %0, i64 0, i32 0
   store i64 %1, i64* %gep, align 8
@@ -4896,7 +5087,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6UInt645Range4initF7runtime6UInt64S7runtime6UInt64SE4from2to"(%"7runtime6UInt645RangeS"* nocapture writeonly %0, i64 %1, i64 %2) local_unnamed_addr #1 {
+define void @"7runtime6UInt645Range4initF7runtime6UInt64S7runtime6UInt64SE4from2to"(%"7runtime6UInt645RangeS"* nocapture writeonly %0, i64 %1, i64 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime6UInt645RangeS", %"7runtime6UInt645RangeS"* %0, i64 0, i32 0
   store i64 %1, i64* %gep, align 8
@@ -5082,7 +5273,7 @@ bb5:                                              ; preds = %bb, %bb3
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i64 @"7runtime6String6lengthFE"(%"7runtime6StringS" %0) local_unnamed_addr #1 {
+define i64 @"7runtime6String6lengthFE"(%"7runtime6StringS" %0) local_unnamed_addr #2 {
 bb:
   %.elt3 = extractvalue %"7runtime6StringS" %0, 1
   %_1 = alloca i64, align 8
@@ -5092,7 +5283,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime6String4initFtiE3ptr3len"(%"7runtime6StringS"* nocapture writeonly %0, i8* %1, i64 %2) local_unnamed_addr #1 {
+define void @"7runtime6String4initFtiE3ptr3len"(%"7runtime6StringS"* nocapture writeonly %0, i8* %1, i64 %2) local_unnamed_addr #2 {
 bb:
   %gep = getelementptr inbounds %"7runtime6StringS", %"7runtime6StringS"* %0, i64 0, i32 0
   store i8* %1, i8** %gep, align 8
@@ -5389,7 +5580,7 @@ bb5:                                              ; preds = %bb, %bb3
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Char10isBinDigitFE"(i32 %0) local_unnamed_addr #1 {
+define i1 @"7runtime4Char10isBinDigitFE"(i32 %0) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i32, align 4
   %_5 = alloca i32, align 4
@@ -5404,7 +5595,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Char7isDigitFE"(i32 %0) local_unnamed_addr #1 {
+define i1 @"7runtime4Char7isDigitFE"(i32 %0) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i32, align 4
   %_5 = alloca i32, align 4
@@ -5419,7 +5610,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Char10isOctDigitFE"(i32 %0) local_unnamed_addr #1 {
+define i1 @"7runtime4Char10isOctDigitFE"(i32 %0) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i32, align 4
   %_5 = alloca i32, align 4
@@ -5434,7 +5625,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Char10isHexDigitFE"(i32 %0) local_unnamed_addr #1 {
+define i1 @"7runtime4Char10isHexDigitFE"(i32 %0) local_unnamed_addr #2 {
 bb:
   %_3 = alloca i32, align 4
   %_5 = alloca i32, align 4
@@ -5469,14 +5660,14 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4Char4initF7runtime6UInt32SE3raw"(i32* nocapture writeonly %0, i32 %1) local_unnamed_addr #1 {
+define void @"7runtime4Char4initF7runtime6UInt32SE3raw"(i32* nocapture writeonly %0, i32 %1) local_unnamed_addr #2 {
 bb:
   store i32 %1, i32* %0, align 4
   ret void
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Char5equalF7runtime4CharS7runtime4CharSE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Char5equalF7runtime4CharS7runtime4CharSE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %eq = icmp eq i32 %0, %1
@@ -5486,7 +5677,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Char8notEqualF7runtime4CharS7runtime4CharSE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Char8notEqualF7runtime4CharS7runtime4CharSE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %neq = icmp ne i32 %0, %1
@@ -5496,7 +5687,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Char11greaterThanF7runtime4CharS7runtime4CharSE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Char11greaterThanF7runtime4CharS7runtime4CharSE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gt = icmp ugt i32 %0, %1
@@ -5506,7 +5697,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Char13greaterThanEqF7runtime4CharS7runtime4CharSE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Char13greaterThanEqF7runtime4CharS7runtime4CharSE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %gte = icmp uge i32 %0, %1
@@ -5516,7 +5707,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Char8lessThanF7runtime4CharS7runtime4CharSE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Char8lessThanF7runtime4CharS7runtime4CharSE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lt = icmp ult i32 %0, %1
@@ -5526,7 +5717,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define i1 @"7runtime4Char10lessThanEqF7runtime4CharS7runtime4CharSE00"(i32 %0, i32 %1) local_unnamed_addr #1 {
+define i1 @"7runtime4Char10lessThanEqF7runtime4CharS7runtime4CharSE00"(i32 %0, i32 %1) local_unnamed_addr #2 {
 bb:
   %_2 = alloca i1, align 1
   %lte = icmp ule i32 %0, %1
@@ -5546,7 +5737,7 @@ bb:
 }
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn writeonly
-define void @"7runtime4Char4initFjE4repr"(i32* nocapture writeonly %0, i32 %1) local_unnamed_addr #1 {
+define void @"7runtime4Char4initFjE4repr"(i32* nocapture writeonly %0, i32 %1) local_unnamed_addr #2 {
 bb:
   store i32 %1, i32* %0, align 4
   ret void
@@ -6414,114 +6605,6 @@ bb7:                                              ; preds = %bb4, %bb
   ret void
 }
 
-define void @"6tester4mainFE"() local_unnamed_addr {
-bb:
-  %_0 = alloca [5 x i64], align 8
-  %_2 = alloca i64, align 8
-  %_5 = alloca i64, align 8
-  %_7 = alloca i64, align 8
-  %_9 = alloca i64, align 8
-  %_10 = alloca i64, align 8
-  %_11 = alloca i64, align 8
-  %_13 = alloca i64, align 8
-  %_16 = alloca i64, align 8
-  %array_index = getelementptr inbounds [5 x i64], [5 x i64]* %_0, i64 0, i64 0
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %array_index, i64 1)
-  %array_index1 = getelementptr inbounds [5 x i64], [5 x i64]* %_0, i64 0, i64 1
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %array_index1, i64 2)
-  %array_index2 = getelementptr inbounds [5 x i64], [5 x i64]* %_0, i64 0, i64 2
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %array_index2, i64 3)
-  %array_index3 = getelementptr inbounds [5 x i64], [5 x i64]* %_0, i64 0, i64 3
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %array_index3, i64 4)
-  %array_index4 = getelementptr inbounds [5 x i64], [5 x i64]* %_0, i64 0, i64 4
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %array_index4, i64 5)
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_2, i64 0)
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_5, i64 1)
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_7, i64 0)
-  %_7.promoted44 = load i64, i64* %_7, align 8
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_9, i64 5)
-  %copy1746 = load i64, i64* %_9, align 8
-  %call47 = tail call i1 @"7runtime3Int8lessThanF7runtime3IntS7runtime3IntSE00"(i64 %_7.promoted44, i64 %copy1746)
-  br i1 %call47, label %bb8, label %bb11
-
-bb8:                                              ; preds = %bb, %bb8
-  %call284548 = phi i64 [ %call28, %bb8 ], [ %_7.promoted44, %bb ]
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_10, i64 2)
-  %array_index20 = getelementptr [5 x i64], [5 x i64]* %_0, i64 0, i64 %call284548
-  %copy23 = load i64, i64* %array_index20, align 8
-  %copy24 = load i64, i64* %_10, align 8
-  %call25 = tail call i64 @"7runtime3Int3mulF7runtime3IntS7runtime3IntSE00"(i64 %copy23, i64 %copy24)
-  store i64 %call25, i64* %array_index20, align 8
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_11, i64 1)
-  %copy27 = load i64, i64* %_11, align 8
-  %call28 = tail call i64 @"7runtime3Int3addF7runtime3IntS7runtime3IntSE00"(i64 %call284548, i64 %copy27)
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_9, i64 5)
-  %copy17 = load i64, i64* %_9, align 8
-  %call = tail call i1 @"7runtime3Int8lessThanF7runtime3IntS7runtime3IntSE00"(i64 %call28, i64 %copy17)
-  br i1 %call, label %bb8, label %bb11
-
-bb11:                                             ; preds = %bb8, %bb
-  %call2845.lcssa = phi i64 [ %_7.promoted44, %bb ], [ %call28, %bb8 ]
-  store i64 %call2845.lcssa, i64* %_7, align 8
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_7, i64 0)
-  %_7.promoted = load i64, i64* %_7, align 8
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_13, i64 5)
-  %copy3041 = load i64, i64* %_13, align 8
-  %call3142 = tail call i1 @"7runtime3Int8lessThanF7runtime3IntS7runtime3IntSE00"(i64 %_7.promoted, i64 %copy3041)
-  br i1 %call3142, label %bb15, label %bb18
-
-bb15:                                             ; preds = %bb11, %bb15
-  %call394043 = phi i64 [ %call39, %bb15 ], [ %_7.promoted, %bb11 ]
-  %array_index34 = getelementptr [5 x i64], [5 x i64]* %_0, i64 0, i64 %call394043
-  %copy35 = load i64, i64* %array_index34, align 8
-  tail call void @"7runtime5printF7runtime3IntSE0"(i64 %copy35)
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_16, i64 1)
-  %copy38 = load i64, i64* %_16, align 8
-  %call39 = tail call i64 @"7runtime3Int3addF7runtime3IntS7runtime3IntSE00"(i64 %call394043, i64 %copy38)
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_13, i64 5)
-  %copy30 = load i64, i64* %_13, align 8
-  %call31 = tail call i1 @"7runtime3Int8lessThanF7runtime3IntS7runtime3IntSE00"(i64 %call39, i64 %copy30)
-  br i1 %call31, label %bb15, label %bb18
-
-bb18:                                             ; preds = %bb15, %bb11
-  tail call void @"6tester14repeatingArrayFE"()
-  ret void
-}
-
-define void @"6tester14repeatingArrayFE"() local_unnamed_addr {
-bb:
-  %_0 = alloca [10 x i64], align 8
-  %_1 = alloca i64, align 8
-  %_4 = alloca i64, align 8
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_1, i64 1)
-  %copy1 = load i64, i64* %_1, align 8
-  %array_index = getelementptr inbounds [10 x i64], [10 x i64]* %_0, i64 0, i64 0
-  store i64 %copy1, i64* %array_index, align 8
-  %array_index.1 = getelementptr inbounds [10 x i64], [10 x i64]* %_0, i64 0, i64 1
-  store i64 %copy1, i64* %array_index.1, align 8
-  %array_index.2 = getelementptr inbounds [10 x i64], [10 x i64]* %_0, i64 0, i64 2
-  store i64 %copy1, i64* %array_index.2, align 8
-  %array_index.3 = getelementptr inbounds [10 x i64], [10 x i64]* %_0, i64 0, i64 3
-  store i64 %copy1, i64* %array_index.3, align 8
-  %array_index.4 = getelementptr inbounds [10 x i64], [10 x i64]* %_0, i64 0, i64 4
-  store i64 %copy1, i64* %array_index.4, align 8
-  %array_index.5 = getelementptr inbounds [10 x i64], [10 x i64]* %_0, i64 0, i64 5
-  store i64 %copy1, i64* %array_index.5, align 8
-  %array_index.6 = getelementptr inbounds [10 x i64], [10 x i64]* %_0, i64 0, i64 6
-  store i64 %copy1, i64* %array_index.6, align 8
-  %array_index.7 = getelementptr inbounds [10 x i64], [10 x i64]* %_0, i64 0, i64 7
-  store i64 %copy1, i64* %array_index.7, align 8
-  %array_index.8 = getelementptr inbounds [10 x i64], [10 x i64]* %_0, i64 0, i64 8
-  store i64 %copy1, i64* %array_index.8, align 8
-  %array_index.9 = getelementptr inbounds [10 x i64], [10 x i64]* %_0, i64 0, i64 9
-  store i64 %copy1, i64* %array_index.9, align 8
-  call void @"7runtime3Int4initFiE4repr"(i64* nonnull %_4, i64 5)
-  %copy4 = load i64, i64* %_4, align 8
-  %array_index5 = getelementptr [10 x i64], [10 x i64]* %_0, i64 0, i64 %copy4
-  %copy6 = load i64, i64* %array_index5, align 8
-  tail call void @"7runtime5printF7runtime3IntSE0"(i64 %copy6)
-  ret void
-}
-
 attributes #0 = { mustprogress nofree norecurse nosync nounwind readnone willreturn }
-attributes #1 = { mustprogress nofree norecurse nosync nounwind willreturn writeonly }
+attributes #1 = { nofree norecurse nosync nounwind writeonly }
+attributes #2 = { mustprogress nofree norecurse nosync nounwind willreturn writeonly }

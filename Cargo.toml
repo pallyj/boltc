@@ -51,6 +51,7 @@ members = [
 
 exclude = [
 	"examples/factorial/rust",
+	"examples/mandlebrot/rust",
 	"examples/extension_template"
 ]
 

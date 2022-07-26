@@ -291,8 +291,6 @@ impl Project
 
         reporter.errors()?;
 
-        println!("{project}");
-
         self.project_state = ProjectState::Mir(project);
         Ok(())
     }

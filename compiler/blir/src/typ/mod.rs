@@ -229,7 +229,9 @@ impl Type {
 
             TypeKind::Tuple(types, _) => MangledType::Tuple(types.iter().map(Self::mangle).collect()),
 
-            TypeKind::RawPointer { pointer_type: _ } => MangledType::Pointer, // todo: add arg
+            TypeKind::RawPointer { pointer_type } => MangledType::Pointer(Box::new(pointer_type.mangle())), // todo: add arg
+
+            TypeKind::Array { item, len } => MangledType::Array(Box::new(item.mangle()), *len as u64),
             // todo: add array and slice
 
             _ => panic!(),
