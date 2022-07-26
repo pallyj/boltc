@@ -11,7 +11,7 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 		}
 
 		let struct_name = struct_def.name();
-		let struct_id = struct_def.id();
+		//let struct_id = struct_def.id();
 
 		self.context.opaque_struct_type(struct_name);
 	}

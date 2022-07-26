@@ -328,8 +328,6 @@ fn get_array_index(item: &Type) -> Option<Symbol> {
             Type::infer(),
         ], labels: vec![None, None] }.anon();
 
-    println!("func_t: {func_type:?}");
-
     Some(Symbol::Value(ValueKind::BinaryIntrinsicFn(BinaryIntrinsicFn::ArrayItem).anon(func_type)))
 }
 

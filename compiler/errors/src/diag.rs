@@ -155,10 +155,10 @@ impl<'a> DiagnosticReporter<'a> {
 			match diagnostic.level {
 				Error => {
 					self.n_errors_thrown.fetch_add(1, Ordering::Relaxed);
-					println!("{}: {}", diagnostic.error_code.red().bold(), diagnostic.error_message.bold())
+					eprintln!("{}: {}", diagnostic.error_code.red().bold(), diagnostic.error_message.bold())
 				}
-				Warning => println!("{}: {}", "warning".yellow().bold(), diagnostic.error_message.bold()),
-				Info => println!("{}: {}", diagnostic.error_code.blue().bold(), diagnostic.error_message.bold()),
+				Warning => eprintln!("{}: {}", "warning".yellow().bold(), diagnostic.error_message.bold()),
+				Info => eprintln!("{}: {}", diagnostic.error_code.blue().bold(), diagnostic.error_message.bold()),
 			}
 
 			let mut last_file = u32::MAX;
@@ -169,7 +169,7 @@ impl<'a> DiagnosticReporter<'a> {
 				last_file = loc.span.file;
 			}
 
-			println!();
+			eprintln!();
 		} else {
 			if let Error = diagnostic.level {
 				self.n_errors_thrown.fetch_add(1, Ordering::Relaxed);
@@ -197,17 +197,17 @@ impl<'a> DiagnosticReporter<'a> {
 		// --> filename:line:col
 
 		if !combine_with_last {
-			println!("    {} {}:{}:{}",
+			eprintln!("    {} {}:{}:{}",
 					"-->".bold().blue(),
 					line_info.filename,
 					line_info.line,
 					line_info.col + 1);
 		}
 
-		println!("     {}", "|".bold().blue());
+		eprintln!("     {}", "|".bold().blue());
 				
 		// num | line_text
-		println!("{:>4} {} {}",
+		eprintln!("{:>4} {} {}",
 				 line_info.line.to_string().bold().blue(),
 				 "|".bold().blue(),
 				 line_info.text.replace("\t", "    ").trim_end());
@@ -237,9 +237,9 @@ impl<'a> DiagnosticReporter<'a> {
 			   width = leading_offset);
 
 		if let Some(suggestion) = &loc.suggestion {
-			println!(" {}",  colorify(suggestion.bold()));
+			eprintln!(" {}",  colorify(suggestion.bold()));
 		} else {
-			println!()
+			eprintln!()
 		}
 	}
 	

@@ -84,7 +84,7 @@ r#"func meaningOfLife (i64) -> i64 {
 
 	builder.build_terminator(Terminator::returns(RValue::const_int(42, Type::int(64), Default::default())));
 
-	println!("{project}");
+	eprintln!("{project}");
 	//assert_eq!(format!("{project}"), expected);
 }
 
@@ -125,11 +125,11 @@ fn loop_to_ten() {
 
 	builder.build_terminator(Terminator::returns(acc.copy(Default::default())));
 
-	//println!("{project}");
+	//eprintln!("{project}");
 
 	let ten = project.execute().run_function("loopToTen", vec![]);
 
-	println!("{ten:?}")
+	eprintln!("{ten:?}")
 }
 
 #[test]
@@ -167,9 +167,9 @@ fn construct_tuple() {
 		builder.build_terminator(Terminator::returns(tup.tuple_item(0).copy()))
 	}
 
-	println!("{project}");
+	eprintln!("{project}");
 
-	println!("{:?}", project.execute().run_function("destructureTuple", vec![]));
+	eprintln!("{:?}", project.execute().run_function("destructureTuple", vec![]));
 }
 
 #[test]
@@ -206,7 +206,7 @@ fn macros() {
 
 
 
-	println!("{:?}", project.execute().run_function("hello_world", vec![]));
+	eprintln!("{:?}", project.execute().run_function("hello_world", vec![]));
 }
 
 #[test]
@@ -249,5 +249,5 @@ fn int_struct() {
 		}
 	}};
 
-	println!("{:?}", project.execute().run_function("hello_world", vec![]))
+	eprintln!("{:?}", project.execute().run_function("hello_world", vec![]))
 }

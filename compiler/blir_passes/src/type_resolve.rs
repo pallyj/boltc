@@ -1,4 +1,3 @@
-use core::borrow;
 use std::{collections::{HashMap}};
 
 use blir::{attributes::AttributeFactory,
@@ -771,7 +770,6 @@ impl<'a, 'l> TypeResolvePass<'a, 'l> {
 }
 
 
-#[derive(Debug)]
 enum Error {
     ClosureIsNotAFunc,
     RPExpectsGenericParam { count: usize, span: Span },

@@ -1,0 +1,7 @@
+@entryPoint
+func main()
+{
+	let i = 0;
+	let f = 0.0;
+	let s = "";
+}

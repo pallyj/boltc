@@ -1,7 +1,8 @@
 use blir::value::GlobalVarRef;
+use errors::Diagnostic;
 use itertools::Itertools;
 
-use crate::BlirLowerer;
+use crate::{BlirLowerer, err::LoweringErrorKind};
 
 mod struct_;
 mod enum_;
@@ -32,7 +33,9 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
 			Metatype(metatype) => panic!("compiler error: failed to catch metatype {metatype:?}"),
 
 			UnknownInfer |
-			Infer { .. } => panic!("compiler error: failed to catch uninferred type"),
+			Infer { .. } =>{
+				panic!("compiler error: failed to catch uninferred type")
+			}
 
 			SomeInteger => panic!("compiler error: failed to catch uninferred type"),
 			SomeFloat => panic!("compiler error: failed to catch uninferred type"),

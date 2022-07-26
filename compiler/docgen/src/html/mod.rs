@@ -57,9 +57,9 @@ fn save_struct(structure: &Struct, path: &Path, root: &Path, rel_path: &str) {
 
 	let html = create_file(structure.into_html(&n_rel_path), &structure.name, newroot.as_os_str().to_str().unwrap(), &n_rel_path).into_string();
 	let dir = path.join(&structure.name);
-	std::fs::create_dir_all(&dir);
+	std::fs::create_dir_all(&dir).unwrap();
 	let mut file = File::create(dir.join("index.html")).unwrap();
-	file.write_all(html.as_bytes());
+	file.write_all(html.as_bytes()).unwrap();
 
 	for substruct in &structure.substructs {
 		save_struct(substruct, &path.join(&structure.name), &newroot, &n_rel_path);
@@ -77,9 +77,9 @@ fn save_enum(enumeration: &Enum, path: &Path, root: &Path, rel_path: &str) {
 
 	let html = create_file(enumeration.into_html(&n_rel_path), &enumeration.name, newroot.as_os_str().to_str().unwrap(), &n_rel_path).into_string();
 	let dir = path.join(&enumeration.name);
-	std::fs::create_dir_all(&dir);
+	std::fs::create_dir_all(&dir).unwrap();
 	let mut file = File::create(dir.join("index.html")).unwrap();
-	file.write_all(html.as_bytes());
+	file.write_all(html.as_bytes()).unwrap();
 
 	for substruct in &enumeration.substructs {
 		save_struct(substruct, &path.join(&enumeration.name), &newroot, &n_rel_path);
@@ -337,6 +337,7 @@ fn create_file(markup: Markup, title: &str, root: &str, steps: &str) -> Markup {
 	}
 }
 
+#[allow(unstable_name_collisions)]
 fn render_function(func: &Function) -> Markup {
 	let params = func.params.iter().map(render_param).intersperse_with(|| html!(", "));
 	html! {
@@ -390,6 +391,7 @@ fn render_field(field: &StructField) -> Markup {
 	)
 }
 
+#[allow(unstable_name_collisions)]
 fn render_variant(variant: &EnumVariant) -> Markup {
 	let associated_types = variant.associated_types
 		.iter()
@@ -420,6 +422,7 @@ fn render_variant(variant: &EnumVariant) -> Markup {
 	}
 }
 
+#[allow(unstable_name_collisions)]
 fn render_init(func: &Function) -> Markup {
 	let params = func.params.iter().map(render_param).intersperse_with(|| html!(", "));
 	html! {
@@ -564,14 +567,14 @@ fn render_block(block: &markdown::Block) -> Markup {
 					}
 				}
 			},
-			CodeBlock(lang, code) => html! {
+			CodeBlock(_, code) => html! {
 				pre {
 					code {
 						(code)
 					}
 				}
 			},
-			OrderedList(list_items, list_type) => html! {
+			OrderedList(list_items, _) => html! {
 				ol {
 					@for li in list_items {
 						(list_item_to_html(li))
@@ -626,12 +629,12 @@ fn render_span(span: &markdown::Span) -> Markup {
 				(code)
 			}
 		},
-		Link(link, desc, idk) => html! {
+		Link(_, desc, _) => html! {
 			span {
 				(desc)
 			}
 		}, // todo: add the linke
-		Image(path, desc, idk) => html! {
+		Image(_, desc, _) => html! {
 			span {
 				(desc)
 			}

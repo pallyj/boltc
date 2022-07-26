@@ -1,5 +1,5 @@
-use blir::typ::{StructRef, Type, TypeKind, EnumRef};
-use rusttyc::{Constructable, Partial, Variant};
+use blir::typ::{StructRef, Type, EnumRef};
+use rusttyc::{Partial, Variant};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TypeVariant {

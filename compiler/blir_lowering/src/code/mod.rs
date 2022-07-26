@@ -36,7 +36,7 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
 
 		match &smt.kind {
 			Eval { value, escaped } => (!escaped).then_some(self.lower_rvalue(value)),
-			Bind { pattern, value, typ } => {
+			Bind { pattern, value, .. } => {
 				// Assign a value, if we can
 				// todo: check if these are mutable
 

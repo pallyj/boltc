@@ -1,24 +1,35 @@
 @entryPoint
 func main() {
+	let size = 160;
+
 	let level = 1;
 
-	for((-39)..<39) { i =>
-		for((-39)..<39) { j =>
-			let fj = Float(j); // error inits dont have a type
-			let fi = Float(i);
+	let var i = -(size / 2);
+
+	while (i < (size / 2))
+	{
+		let var j = -(size / 2);
+
+		while (j < (size / 2)) {
+			let fj: Float = Float(i); // error inits dont have a type
+			let fi: Float = Float(j);
 			let x = fj / 40.0
 			let y = fi / 40.0
 
-			let dist = getDistance(x: x, y: y)
+			let dist = getDistance(x, y)
 
 			if dist > level {
-				print("*")
+				print("**", newline: false)
 			} else {
-				print(" ")
+				print("  ", newline: false)
 			}
+
+			j += 1;
 		}
 
-		printLine()
+		printLine();
+
+		i += 1;
 	}
 }
 

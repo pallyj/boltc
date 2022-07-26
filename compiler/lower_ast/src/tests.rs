@@ -41,7 +41,7 @@ func gcd(a: Int64, b: Int64): Int64 {
 
     AstLowerer::new(parse(&code, &mut debugger, 0, &operator_factory), &mut debugger, &operator_factory, &imports).lower_file(&mut lib);
 
-    println!("{lib:?}");
+    eprintln!("{lib:?}");
 }
 
 // Static

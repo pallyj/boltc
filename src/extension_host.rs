@@ -85,7 +85,7 @@ impl FuncAttribute for AnyFuncAttribute {
         self.attribute.borrow().label()
     }
 
-    fn apply(&self, args: &AttributeArgs, info: &mut blir::code::FunctionInfo, _context: &mut blir::BlirContext, debugger: &mut errors::DiagnosticReporter) {
+    fn apply(&self, _args: &AttributeArgs, info: &mut blir::code::FunctionInfo, _context: &mut blir::BlirContext, debugger: &mut errors::DiagnosticReporter) {
 		let mut inline = false;
 		let name = info.name().clone();
 		let mut link_name = info.link_name().clone();

@@ -176,7 +176,7 @@ struct FileMacro;
 impl FuncAttribute for EntryPointAttribute {
     fn name(&self) -> &'static str { "entryPoint" }
 
-    fn apply(&self, args: &AttributeArgs, info: &mut FunctionInfo, context: &mut BlirContext, _debugger: &mut DiagnosticReporter) {
+    fn apply(&self, _args: &AttributeArgs, info: &mut FunctionInfo, context: &mut BlirContext, _debugger: &mut DiagnosticReporter) {
         info.set_entry_point();
         let _ = context.entry_point.insert(info.link_name().clone());
     }
@@ -185,13 +185,13 @@ impl FuncAttribute for EntryPointAttribute {
 impl FuncAttribute for ExportCAttribute {
     fn name(&self) -> &'static str { "exportC" }
 
-    fn apply(&self, args: &AttributeArgs, info: &mut FunctionInfo, _context: &mut BlirContext, _debugger: &mut DiagnosticReporter) { info.set_link_name(info.name().clone()) }
+    fn apply(&self, _args: &AttributeArgs, info: &mut FunctionInfo, _context: &mut BlirContext, _debugger: &mut DiagnosticReporter) { info.set_link_name(info.name().clone()) }
 }
 
 impl FuncAttribute for HiddenFuncAttribute {
     fn name(&self) -> &'static str { "hidden" }
 
-    fn apply(&self, args: &AttributeArgs, info: &mut FunctionInfo, _context: &mut BlirContext, _debugger: &mut DiagnosticReporter) { info.hide() }
+    fn apply(&self, _args: &AttributeArgs, info: &mut FunctionInfo, _context: &mut BlirContext, _debugger: &mut DiagnosticReporter) { info.hide() }
 }
 
 impl FuncAttribute for ExternAttribute {
@@ -234,7 +234,7 @@ impl FuncAttribute for ExternAttribute {
 impl StructAttribute for TransparentAttribute {
     fn name(&self) -> &'static str { "transparent" }
 
-    fn apply(&self, args: &AttributeArgs, struct_ref: &StructRef, _context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
+    fn apply(&self, _args: &AttributeArgs, struct_ref: &StructRef, _context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
         let struct_span = Span::empty();
         let attribute_span = Span::empty();
 
@@ -250,7 +250,7 @@ impl StructAttribute for TransparentAttribute {
 impl StructAttribute for DefaultIntegerReprAttribute {
     fn name(&self) -> &'static str { "defaultIntegerRepr" }
 
-    fn apply(&self, args: &AttributeArgs, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
+    fn apply(&self, _args: &AttributeArgs, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
         let struct_span = Span::empty();
         let attribute_span = Span::empty();
 
@@ -269,7 +269,7 @@ impl StructAttribute for DefaultIntegerReprAttribute {
 impl StructAttribute for DefaultFloatReprAttribute {
     fn name(&self) -> &'static str { "defaultFloatRepr" }
 
-    fn apply(&self, args: &AttributeArgs, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
+    fn apply(&self, _args: &AttributeArgs, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
         let struct_span = Span::empty();
         let attribute_span = Span::empty();
 
@@ -288,7 +288,7 @@ impl StructAttribute for DefaultFloatReprAttribute {
 impl StructAttribute for DefaultBoolReprAttribute {
     fn name(&self) -> &'static str { "defaultBooleanRepr" }
 
-    fn apply(&self, args: &AttributeArgs, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
+    fn apply(&self, _args: &AttributeArgs, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
         let struct_span = Span::empty();
         let attribute_span = Span::empty();
 
@@ -307,7 +307,7 @@ impl StructAttribute for DefaultBoolReprAttribute {
 impl StructAttribute for DefaultStringReprAttribute {
     fn name(&self) -> &'static str { "defaultStringRepr" }
 
-    fn apply(&self, args: &AttributeArgs, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
+    fn apply(&self, _args: &AttributeArgs, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
         let struct_span = Span::empty();
         let attribute_span = Span::empty();
 
@@ -326,7 +326,7 @@ impl StructAttribute for DefaultStringReprAttribute {
 impl StructAttribute for DefaultCharReprAttribute {
     fn name(&self) -> &'static str { "defaultCharRepr" }
 
-    fn apply(&self, args: &AttributeArgs, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
+    fn apply(&self, _args: &AttributeArgs, struct_ref: &StructRef, context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
         let struct_span = Span::empty();
         let attribute_span = Span::empty();
 
@@ -345,7 +345,7 @@ impl StructAttribute for DefaultCharReprAttribute {
 impl StructAttribute for CharExpressibleAttribute {
     fn name(&self) -> &'static str { "charExpressible" }
 
-    fn apply(&self, args: &AttributeArgs, struct_ref: &StructRef, _context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
+    fn apply(&self, _args: &AttributeArgs, struct_ref: &StructRef, _context: &mut BlirContext, debugger: &mut DiagnosticReporter) {
         let struct_span = Span::empty();
         let attribute_span = Span::empty();
 
@@ -406,7 +406,7 @@ impl IntoDiagnostic for AttributeErrorSpanned {
                                     CodeLocation::new(self.attribute_span, Some(String::from("remove the attribute")))
                                 ])
             }
-            AttributeError::TransparentOneVar { struct_name, var_spans } => {
+            AttributeError::TransparentOneVar { struct_name: _, var_spans } => {
                 let vsl = var_spans.len();
                 let locs = std::iter::once(CodeLocation::new(self.attribute_span, Some(String::from("remove this attribute"))))
                     .chain(var_spans.into_iter().map(|span| CodeLocation::new(span, None)))
@@ -435,7 +435,7 @@ impl IntoDiagnostic for AttributeErrorSpanned {
                                     CodeLocation::new(self.struct_span, None),
                                 ])
             }
-            AttributeError::TooManyVars { struct_name, primitive_name, var_spans } => {
+            AttributeError::TooManyVars { struct_name: _, primitive_name, var_spans } => {
                 let vsl = var_spans.len();
                 let locs = std::iter::once(CodeLocation::new(self.attribute_span, Some(String::from("remove this attribute"))))
                     .chain(var_spans.into_iter().map(|span| CodeLocation::new(span, None)))
@@ -531,7 +531,7 @@ impl MacroAttribute for PrintMacro {
         "print"
     }
 
-    fn expand(&self, args: &AttributeArgs, source: Span, debugger: &mut DiagnosticReporter) -> Value {
+    fn expand(&self, args: &AttributeArgs, source: Span, _debugger: &mut DiagnosticReporter) -> Value {
         let arguments =  (0..args.count()).map(|arg_n| args.get_indexed(arg_n).unwrap());
 
         let prints = arguments.map(|arg| {

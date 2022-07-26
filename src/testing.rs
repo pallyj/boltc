@@ -1,4 +1,4 @@
-use std::{path::{PathBuf, Path}, io::Read, collections::HashMap};
+use std::{path::{Path}, io::Read, collections::HashMap};
 
 use colored::Colorize;
 use json::JsonValue;
@@ -10,7 +10,7 @@ pub fn run_tests()  {
 	use std::fs;
 
 	let Ok(test_folder) = fs::read_dir("test") else {
-		println!("{} folder `test` doesn't exist", "error:".red().bold());
+		eprintln!("{} folder `test` doesn't exist", "error:".red().bold());
 		return;
 	};
 
@@ -25,7 +25,7 @@ pub fn run_tests()  {
 	for subfolder in subfolders {
 		let test_path = subfolder.join("test.json");
 		let Ok(mut test_manifest) = std::fs::File::open(&test_path) else {
-			println!("{} test manifest `{}` not found", "error:".red().bold(), test_path.as_os_str().to_str().unwrap());
+			eprintln!("{} test manifest `{}` not found", "error:".red().bold(), test_path.as_os_str().to_str().unwrap());
 			return
 		};
 
@@ -43,7 +43,7 @@ pub fn run_test_manifest(path: &Path, test: JsonValue) {
 		panic!()
 	};
 
-	println!("     {} `{}`", "Running".green().bold(), group_name);
+	eprintln!("     {} `{}`", "Running".green().bold(), group_name);
 
 	for test in test["tests"].members() {
 		run_test(path, &test);
@@ -52,7 +52,7 @@ pub fn run_test_manifest(path: &Path, test: JsonValue) {
 
 fn run_test(path: &Path, test: &JsonValue) {
 	if let Some(test_name) = test.as_str() {
-		println!("test {test_name} ... {}", "ok".green());
+		eprintln!("test {test_name} ... {}", "ok".green());
 	} else if test.is_object() {
 		let test_name = test["name"].as_str().unwrap();
 		let include = test["include"].as_str().unwrap();
@@ -92,8 +92,8 @@ fn run_test(path: &Path, test: &JsonValue) {
 					}
 				}
 			} else {
-				if let Some(err) = test["expected"]["error"].as_str() {
-					println!("{}", "ok".green().bold())
+				if let Some(_err) = test["expected"]["error"].as_str() {
+					eprintln!("{}", "ok".green().bold())
 				}
 			}
 		}
@@ -104,14 +104,14 @@ fn switch_output(expect: &JsonValue, found: Value) -> bool {
 	match found {
 		Value::Int(n) => {
 			if Some(n) == expect.as_u64() {
-				println!("{}", "ok".green());
+				eprintln!("{}", "ok".green());
 				return true;
 			}
 		}
 
 		Value::Float(n) => {
 			if Some(n) == expect.as_f64() {
-				println!("{}", "ok".green());
+				eprintln!("{}", "ok".green());
 				return true
 			}
 		}
@@ -123,7 +123,7 @@ fn switch_output(expect: &JsonValue, found: Value) -> bool {
 		_ => {}
 	}
 
-	println!("{} {} != {:?}", "error".red(), expect, found);
+	eprintln!("{} {} != {:?}", "error".red(), expect, found);
 	return false
 }
 

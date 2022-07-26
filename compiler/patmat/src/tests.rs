@@ -65,7 +65,7 @@ fn test_basic_example() {
 
 	let matrix = matrix.expand();
 
-	println!("{:?}", matrix.solve::<Maranget>());
+	eprintln!("{:?}", matrix.solve::<Maranget>());
 }
 /*
 
@@ -141,5 +141,5 @@ fn test_complex_example() {
 
 	let matrix = matrix.expand();
 
-	println!("{:?}", matrix.solve::<Maranget>());
+	eprintln!("{:?}", matrix.solve::<Maranget>());
 }*/

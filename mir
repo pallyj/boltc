@@ -1,0 +1,7573 @@
+@transparent
+struct 7runtime4BoolS {
+	repr: i1
+}
+@transparent
+struct 7runtime4HalfS {
+	repr: f16
+}
+@transparent
+struct 7runtime5FloatS {
+	repr: f32
+}
+@transparent
+struct 7runtime6DoubleS {
+	repr: f64
+}
+@transparent
+struct 7runtime3IntS {
+	repr: i64
+}
+struct 7runtime3Int11ClosedRangeS {
+	low: 7runtime3IntS
+	high: 7runtime3IntS
+}
+struct 7runtime3Int5RangeS {
+	low: 7runtime3IntS
+	high: 7runtime3IntS
+}
+@transparent
+struct 7runtime4UIntS {
+	repr: i64
+}
+struct 7runtime4UInt11ClosedRangeS {
+	high: 7runtime4UIntS
+	low: 7runtime4UIntS
+}
+struct 7runtime4UInt5RangeS {
+	high: 7runtime4UIntS
+	low: 7runtime4UIntS
+}
+@transparent
+struct 7runtime4Int8S {
+	repr: i8
+}
+struct 7runtime4Int811ClosedRangeS {
+	high: 7runtime4Int8S
+	low: 7runtime4Int8S
+}
+struct 7runtime4Int85RangeS {
+	high: 7runtime4Int8S
+	low: 7runtime4Int8S
+}
+@transparent
+struct 7runtime5Int16S {
+	repr: i16
+}
+struct 7runtime5Int1611ClosedRangeS {
+	low: 7runtime5Int16S
+	high: 7runtime5Int16S
+}
+struct 7runtime5Int165RangeS {
+	high: 7runtime5Int16S
+	low: 7runtime5Int16S
+}
+@transparent
+struct 7runtime5Int32S {
+	repr: i32
+}
+struct 7runtime5Int3211ClosedRangeS {
+	high: 7runtime5Int32S
+	low: 7runtime5Int32S
+}
+struct 7runtime5Int325RangeS {
+	low: 7runtime5Int32S
+	high: 7runtime5Int32S
+}
+@transparent
+struct 7runtime5Int64S {
+	repr: i64
+}
+struct 7runtime5Int6411ClosedRangeS {
+	high: 7runtime5Int64S
+	low: 7runtime5Int64S
+}
+struct 7runtime5Int645RangeS {
+	high: 7runtime5Int64S
+	low: 7runtime5Int64S
+}
+@transparent
+struct 7runtime5UInt8S {
+	repr: i8
+}
+struct 7runtime5UInt811ClosedRangeS {
+	low: 7runtime5UInt8S
+	high: 7runtime5UInt8S
+}
+struct 7runtime5UInt85RangeS {
+	high: 7runtime5UInt8S
+	low: 7runtime5UInt8S
+}
+@transparent
+struct 7runtime6UInt16S {
+	repr: i16
+}
+struct 7runtime6UInt1611ClosedRangeS {
+	high: 7runtime6UInt16S
+	low: 7runtime6UInt16S
+}
+struct 7runtime6UInt165RangeS {
+	high: 7runtime6UInt16S
+	low: 7runtime6UInt16S
+}
+@transparent
+struct 7runtime6UInt32S {
+	repr: i32
+}
+struct 7runtime6UInt3211ClosedRangeS {
+	low: 7runtime6UInt32S
+	high: 7runtime6UInt32S
+}
+struct 7runtime6UInt325RangeS {
+	high: 7runtime6UInt32S
+	low: 7runtime6UInt32S
+}
+@transparent
+struct 7runtime6UInt64S {
+	repr: i64
+}
+struct 7runtime6UInt6411ClosedRangeS {
+	low: 7runtime6UInt64S
+	high: 7runtime6UInt64S
+}
+struct 7runtime6UInt645RangeS {
+	high: 7runtime6UInt64S
+	low: 7runtime6UInt64S
+}
+struct 7runtime6StringS {
+	len: i64
+	ptr: shared i8
+}
+@transparent
+struct 7runtime4CharS {
+	repr: i32
+}
+enum 7runtime4Bool8OptionalV: i32 {
+	0: ()
+	1: (7runtime4BoolS, )
+}
+enum 7runtime3Int8OptionalV: i32 {
+	0: ()
+	1: (7runtime3IntS, )
+}
+enum 7runtime4UInt8OptionalV: i32 {
+	0: ()
+	1: (7runtime4UIntS, )
+}
+enum 7runtime4Int88OptionalV: i32 {
+	0: ()
+	1: (7runtime4Int8S, )
+}
+enum 7runtime5Int168OptionalV: i32 {
+	0: ()
+	1: (7runtime5Int16S, )
+}
+enum 7runtime5Int328OptionalV: i32 {
+	0: ()
+	1: (7runtime5Int32S, )
+}
+enum 7runtime5Int648OptionalV: i32 {
+	0: ()
+	1: (7runtime5Int64S, )
+}
+enum 7runtime5UInt88OptionalV: i32 {
+	0: ()
+	1: (7runtime5UInt8S, )
+}
+enum 7runtime6UInt168OptionalV: i32 {
+	0: ()
+	1: (7runtime6UInt16S, )
+}
+enum 7runtime6UInt328OptionalV: i32 {
+	0: ()
+	1: (7runtime6UInt32S, )
+}
+enum 7runtime6UInt648OptionalV: i32 {
+	0: ()
+	1: (7runtime6UInt64S, )
+}
+enum 7runtime6String8OptionalV: i32 {
+	0: ()
+	1: (7runtime6StringS, )
+}
+enum 7runtime4Char8OptionalV: i32 {
+	0: ()
+	1: (7runtime4CharS, )
+}
+func printInt8 (_0: i8, ) -> ()
+func printUInt8 (_0: i8, ) -> ()
+func printInt16 (_0: i16, ) -> ()
+func printUInt16 (_0: i16, ) -> ()
+func printInt32 (_0: i32, ) -> ()
+func printUInt32 (_0: i32, ) -> ()
+func printInt64 (_0: i64, ) -> ()
+func printUInt64 (_0: i64, ) -> ()
+func printDouble (_0: f64, ) -> ()
+func printFloat (_0: f32, ) -> ()
+func printBool (_0: i1, ) -> ()
+func printString (_0: shared i8, _1: i64, ) -> ()
+func printChar (_0: i32, ) -> ()
+func readInternalInt () -> i64
+func readInternalUInt () -> i64
+func readInternalChar () -> i32
+func printLine () -> ()
+func .init () -> () {
+	bb0 : {
+		return
+	}
+	
+}
+func 7runtime4Bool3andF7runtime4BoolS7runtime4BoolSE00 (_0: 7runtime4BoolS, _1: 7runtime4BoolS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.and copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Bool2orF7runtime4BoolS7runtime4BoolSE00 (_0: 7runtime4BoolS, _1: 7runtime4BoolS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.or copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Bool6invertF7runtime4BoolSE0 (_0: 7runtime4BoolS, ) -> 7runtime4BoolS {
+	let var _1: 7runtime4BoolS
+	let var _2: i1
+
+	bb0 : {
+		_2 = llvm.int.inv copy _0.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime4Bool5equalF7runtime4BoolS7runtime4BoolSE00 (_0: 7runtime4BoolS, _1: 7runtime4BoolS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.eq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Bool8notEqualF7runtime4BoolS7runtime4BoolSE00 (_0: 7runtime4BoolS, _1: 7runtime4BoolS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.neq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Bool4initFbE4repr (_0: shared 7runtime4BoolS, _1: i1, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1
+		return
+	}
+	
+}
+func 7runtime4Bool8Optional6unwrapF7runtime4BoolSE6orElse (_0: 7runtime4Bool8OptionalV, _1: 7runtime4BoolS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_2 = copy _0 as .some.0
+		goto bb1
+	}
+	
+	bb4 : {
+		_2 = copy _1
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime4Bool8Optional3mapFF7runtime4BoolSE7runtime4BoolSE0 (_0: 7runtime4Bool8OptionalV, _1: func (7runtime4BoolS, ) -> 7runtime4BoolS, ) -> 7runtime4Bool8OptionalV {
+	let var _2: 7runtime4Bool8OptionalV
+	let var _3: 7runtime4Bool8OptionalV
+	let var _4: 7runtime4BoolS
+	let var _5: 7runtime4Bool8OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_4 = call copy _1 (copy _0 as .some.0)
+		discriminant _3 = const 1
+		_3 as .some.0 = copy _4
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _5 = const 0
+		_2 = copy _5
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime4Bool8Optional7flatMapFF7runtime4BoolSE7runtime4Bool8OptionalVE0 (_0: 7runtime4Bool8OptionalV, _1: func (7runtime4BoolS, ) -> 7runtime4Bool8OptionalV, ) -> 7runtime4Bool8OptionalV {
+	let var _2: 7runtime4Bool8OptionalV
+	let var _3: 7runtime4Bool8OptionalV
+	let var _4: 7runtime4Bool8OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_3 = call copy _1 (copy _0 as .some.0)
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _4 = const 0
+		_2 = copy _4
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime4Half3addF7runtime4HalfS7runtime4HalfSE00 (_0: 7runtime4HalfS, _1: 7runtime4HalfS, ) -> 7runtime4HalfS {
+	let var _2: 7runtime4HalfS
+	let var _3: f16
+
+	bb0 : {
+		_3 = llvm.float.add copy _0.repr, copy _1.repr
+		call function "7runtime4Half4initFhE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Half3subF7runtime4HalfS7runtime4HalfSE00 (_0: 7runtime4HalfS, _1: 7runtime4HalfS, ) -> 7runtime4HalfS {
+	let var _2: 7runtime4HalfS
+	let var _3: f16
+
+	bb0 : {
+		_3 = llvm.float.sub copy _0.repr, copy _1.repr
+		call function "7runtime4Half4initFhE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Half3mulF7runtime4HalfS7runtime4HalfSE00 (_0: 7runtime4HalfS, _1: 7runtime4HalfS, ) -> 7runtime4HalfS {
+	let var _2: 7runtime4HalfS
+	let var _3: f16
+
+	bb0 : {
+		_3 = llvm.float.mul copy _0.repr, copy _1.repr
+		call function "7runtime4Half4initFhE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Half3divF7runtime4HalfS7runtime4HalfSE00 (_0: 7runtime4HalfS, _1: 7runtime4HalfS, ) -> 7runtime4HalfS {
+	let var _2: 7runtime4HalfS
+	let var _3: f16
+
+	bb0 : {
+		_3 = llvm.float.div copy _0.repr, copy _1.repr
+		call function "7runtime4Half4initFhE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Half3modF7runtime4HalfS7runtime4HalfSE00 (_0: 7runtime4HalfS, _1: 7runtime4HalfS, ) -> 7runtime4HalfS {
+	let var _2: 7runtime4HalfS
+	let var _3: f16
+
+	bb0 : {
+		_3 = llvm.float.rem copy _0.repr, copy _1.repr
+		call function "7runtime4Half4initFhE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Half5equalF7runtime4HalfS7runtime4HalfSE00 (_0: 7runtime4HalfS, _1: 7runtime4HalfS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.eq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Half8notEqualF7runtime4HalfS7runtime4HalfSE00 (_0: 7runtime4HalfS, _1: 7runtime4HalfS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.neq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Half8lessThanF7runtime4HalfS7runtime4HalfSE00 (_0: 7runtime4HalfS, _1: 7runtime4HalfS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.lt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Half11greaterThanF7runtime4HalfS7runtime4HalfSE00 (_0: 7runtime4HalfS, _1: 7runtime4HalfS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.gt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Half10lessThanEqF7runtime4HalfS7runtime4HalfSE00 (_0: 7runtime4HalfS, _1: 7runtime4HalfS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.lte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Half13greaterThanEqF7runtime4HalfS7runtime4HalfSE00 (_0: 7runtime4HalfS, _1: 7runtime4HalfS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.gte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Half6negateF7runtime4HalfSE0 (_0: 7runtime4HalfS, ) -> 7runtime4HalfS {
+	let var _1: 7runtime4HalfS
+	let var _2: f16
+
+	bb0 : {
+		_2 = llvm.float.neg copy _0.repr
+		call function "7runtime4Half4initFhE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime4Half4unitF7runtime4HalfSE0 (_0: 7runtime4HalfS, ) -> 7runtime4HalfS {
+	bb0 : {
+		return copy _0
+	}
+	
+}
+func 7runtime4Half4initF7runtime5FloatSE10truncating (_0: shared 7runtime4HalfS, _1: 7runtime5FloatS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.trunc.16 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4Half4initF7runtime6DoubleSE10truncating (_0: shared 7runtime4HalfS, _1: 7runtime6DoubleS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.trunc.16 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4Half4initF7runtime6UInt64SE0 (_0: shared 7runtime4HalfS, _1: 7runtime6UInt64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.fconv.16 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4Half4initF7runtime5Int64SE0 (_0: shared 7runtime4HalfS, _1: 7runtime5Int64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.fconv.sig.16 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4Half4initF7runtime4UIntSE0 (_0: shared 7runtime4HalfS, _1: 7runtime4UIntS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.fconv.16 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4Half4initF7runtime3IntSE0 (_0: shared 7runtime4HalfS, _1: 7runtime3IntS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.fconv.sig.16 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4Half4initFhE4repr (_0: shared 7runtime4HalfS, _1: f16, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1
+		return
+	}
+	
+}
+func 7runtime5Float3addF7runtime5FloatS7runtime5FloatSE00 (_0: 7runtime5FloatS, _1: 7runtime5FloatS, ) -> 7runtime5FloatS {
+	let var _2: 7runtime5FloatS
+	let var _3: f32
+
+	bb0 : {
+		_3 = llvm.float.add copy _0.repr, copy _1.repr
+		call function "7runtime5Float4initFfE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Float3subF7runtime5FloatS7runtime5FloatSE00 (_0: 7runtime5FloatS, _1: 7runtime5FloatS, ) -> 7runtime5FloatS {
+	let var _2: 7runtime5FloatS
+	let var _3: f32
+
+	bb0 : {
+		_3 = llvm.float.sub copy _0.repr, copy _1.repr
+		call function "7runtime5Float4initFfE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Float3mulF7runtime5FloatS7runtime5FloatSE00 (_0: 7runtime5FloatS, _1: 7runtime5FloatS, ) -> 7runtime5FloatS {
+	let var _2: 7runtime5FloatS
+	let var _3: f32
+
+	bb0 : {
+		_3 = llvm.float.mul copy _0.repr, copy _1.repr
+		call function "7runtime5Float4initFfE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Float3divF7runtime5FloatS7runtime5FloatSE00 (_0: 7runtime5FloatS, _1: 7runtime5FloatS, ) -> 7runtime5FloatS {
+	let var _2: 7runtime5FloatS
+	let var _3: f32
+
+	bb0 : {
+		_3 = llvm.float.div copy _0.repr, copy _1.repr
+		call function "7runtime5Float4initFfE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Float3modF7runtime5FloatS7runtime5FloatSE00 (_0: 7runtime5FloatS, _1: 7runtime5FloatS, ) -> 7runtime5FloatS {
+	let var _2: 7runtime5FloatS
+	let var _3: f32
+
+	bb0 : {
+		_3 = llvm.float.rem copy _0.repr, copy _1.repr
+		call function "7runtime5Float4initFfE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Float5equalF7runtime5FloatS7runtime5FloatSE00 (_0: 7runtime5FloatS, _1: 7runtime5FloatS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.eq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Float8notEqualF7runtime5FloatS7runtime5FloatSE00 (_0: 7runtime5FloatS, _1: 7runtime5FloatS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.neq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Float8lessThanF7runtime5FloatS7runtime5FloatSE00 (_0: 7runtime5FloatS, _1: 7runtime5FloatS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.lt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Float11greaterThanF7runtime5FloatS7runtime5FloatSE00 (_0: 7runtime5FloatS, _1: 7runtime5FloatS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.gt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Float10lessThanEqF7runtime5FloatS7runtime5FloatSE00 (_0: 7runtime5FloatS, _1: 7runtime5FloatS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.lte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Float13greaterThanEqF7runtime5FloatS7runtime5FloatSE00 (_0: 7runtime5FloatS, _1: 7runtime5FloatS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.gte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Float6negateF7runtime5FloatSE0 (_0: 7runtime5FloatS, ) -> 7runtime5FloatS {
+	let var _1: 7runtime5FloatS
+	let var _2: f32
+
+	bb0 : {
+		_2 = llvm.float.neg copy _0.repr
+		call function "7runtime5Float4initFfE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime5Float4unitF7runtime5FloatSE0 (_0: 7runtime5FloatS, ) -> 7runtime5FloatS {
+	bb0 : {
+		return copy _0
+	}
+	
+}
+func 7runtime5Float4initF7runtime4HalfSE0 (_0: shared 7runtime5FloatS, _1: 7runtime4HalfS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.ext.32 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Float4initF7runtime6DoubleSE10truncating (_0: shared 7runtime5FloatS, _1: 7runtime6DoubleS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.trunc.32 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Float4initF7runtime6UInt64SE0 (_0: shared 7runtime5FloatS, _1: 7runtime6UInt64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.fconv.32 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Float4initF7runtime5Int64SE0 (_0: shared 7runtime5FloatS, _1: 7runtime5Int64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.fconv.sig.32 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Float4initF7runtime4UIntSE0 (_0: shared 7runtime5FloatS, _1: 7runtime4UIntS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.fconv.32 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Float4initF7runtime3IntSE0 (_0: shared 7runtime5FloatS, _1: 7runtime3IntS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.fconv.sig.32 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Float4initFfE4repr (_0: shared 7runtime5FloatS, _1: f32, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1
+		return
+	}
+	
+}
+func 7runtime6Double3addF7runtime6DoubleS7runtime6DoubleSE00 (_0: 7runtime6DoubleS, _1: 7runtime6DoubleS, ) -> 7runtime6DoubleS {
+	let var _2: 7runtime6DoubleS
+	let var _3: f64
+
+	bb0 : {
+		_3 = llvm.float.add copy _0.repr, copy _1.repr
+		call function "7runtime6Double4initFdE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6Double3subF7runtime6DoubleS7runtime6DoubleSE00 (_0: 7runtime6DoubleS, _1: 7runtime6DoubleS, ) -> 7runtime6DoubleS {
+	let var _2: 7runtime6DoubleS
+	let var _3: f64
+
+	bb0 : {
+		_3 = llvm.float.sub copy _0.repr, copy _1.repr
+		call function "7runtime6Double4initFdE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6Double3mulF7runtime6DoubleS7runtime6DoubleSE00 (_0: 7runtime6DoubleS, _1: 7runtime6DoubleS, ) -> 7runtime6DoubleS {
+	let var _2: 7runtime6DoubleS
+	let var _3: f64
+
+	bb0 : {
+		_3 = llvm.float.mul copy _0.repr, copy _1.repr
+		call function "7runtime6Double4initFdE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6Double3divF7runtime6DoubleS7runtime6DoubleSE00 (_0: 7runtime6DoubleS, _1: 7runtime6DoubleS, ) -> 7runtime6DoubleS {
+	let var _2: 7runtime6DoubleS
+	let var _3: f64
+
+	bb0 : {
+		_3 = llvm.float.div copy _0.repr, copy _1.repr
+		call function "7runtime6Double4initFdE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6Double3modF7runtime6DoubleS7runtime6DoubleSE00 (_0: 7runtime6DoubleS, _1: 7runtime6DoubleS, ) -> 7runtime6DoubleS {
+	let var _2: 7runtime6DoubleS
+	let var _3: f64
+
+	bb0 : {
+		_3 = llvm.float.rem copy _0.repr, copy _1.repr
+		call function "7runtime6Double4initFdE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6Double5equalF7runtime6DoubleS7runtime6DoubleSE00 (_0: 7runtime6DoubleS, _1: 7runtime6DoubleS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.eq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6Double8notEqualF7runtime6DoubleS7runtime6DoubleSE00 (_0: 7runtime6DoubleS, _1: 7runtime6DoubleS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.neq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6Double8lessThanF7runtime6DoubleS7runtime6DoubleSE00 (_0: 7runtime6DoubleS, _1: 7runtime6DoubleS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.lt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6Double11greaterThanF7runtime6DoubleS7runtime6DoubleSE00 (_0: 7runtime6DoubleS, _1: 7runtime6DoubleS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.gt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6Double10lessThanEqF7runtime6DoubleS7runtime6DoubleSE00 (_0: 7runtime6DoubleS, _1: 7runtime6DoubleS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.lte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6Double13greaterThanEqF7runtime6DoubleS7runtime6DoubleSE00 (_0: 7runtime6DoubleS, _1: 7runtime6DoubleS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.float.cmp.gte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6Double6negateF7runtime6DoubleSE0 (_0: 7runtime6DoubleS, ) -> 7runtime6DoubleS {
+	let var _1: 7runtime6DoubleS
+	let var _2: f64
+
+	bb0 : {
+		_2 = llvm.float.neg copy _0.repr
+		call function "7runtime6Double4initFdE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime6Double4unitF7runtime6DoubleSE0 (_0: 7runtime6DoubleS, ) -> 7runtime6DoubleS {
+	bb0 : {
+		return copy _0
+	}
+	
+}
+func 7runtime6Double4initF7runtime4HalfSE0 (_0: shared 7runtime6DoubleS, _1: 7runtime4HalfS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.ext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6Double4initF7runtime5FloatSE0 (_0: shared 7runtime6DoubleS, _1: 7runtime5FloatS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.ext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6Double4initF7runtime6UInt64SE0 (_0: shared 7runtime6DoubleS, _1: 7runtime6UInt64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.fconv.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6Double4initF7runtime5Int64SE0 (_0: shared 7runtime6DoubleS, _1: 7runtime5Int64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.fconv.sig.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6Double4initF7runtime4UIntSE0 (_0: shared 7runtime6DoubleS, _1: 7runtime4UIntS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.fconv.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6Double4initF7runtime3IntSE0 (_0: shared 7runtime6DoubleS, _1: 7runtime3IntS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.fconv.sig.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6Double4initFdE4repr (_0: shared 7runtime6DoubleS, _1: f64, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1
+		return
+	}
+	
+}
+func 7runtime3Int3addF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime3IntS {
+	let var _2: 7runtime3IntS
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.add copy _0.repr, copy _1.repr
+		call function "7runtime3Int4initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime3Int3subF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime3IntS {
+	let var _2: 7runtime3IntS
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.sub copy _0.repr, copy _1.repr
+		call function "7runtime3Int4initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime3Int3mulF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime3IntS {
+	let var _2: 7runtime3IntS
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.mul copy _0.repr, copy _1.repr
+		call function "7runtime3Int4initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime3Int3divF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime3IntS {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime3IntS
+	let var _4: 7runtime3IntS
+	let var _5: i64
+
+	bb0 : {
+		call function "7runtime3Int4initFiE4repr" (shared _3, const 0)
+		_2 = call function "7runtime3Int5equalF7runtime3IntS7runtime3IntSE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.div.sig copy _0.repr, copy _1.repr
+		call function "7runtime3Int4initFiE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime3Int3modF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime3IntS {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime3IntS
+	let var _4: 7runtime3IntS
+	let var _5: i64
+
+	bb0 : {
+		call function "7runtime3Int4initFiE4repr" (shared _3, const 0)
+		_2 = call function "7runtime3Int5equalF7runtime3IntS7runtime3IntSE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.rem.sig copy _0.repr, copy _1.repr
+		call function "7runtime3Int4initFiE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime3Int5bitOrF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime3IntS {
+	let var _2: 7runtime3IntS
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.or copy _0.repr, copy _1.repr
+		call function "7runtime3Int4initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime3Int6bitXorF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime3IntS {
+	let var _2: 7runtime3IntS
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.xor copy _0.repr, copy _1.repr
+		call function "7runtime3Int4initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime3Int6bitAndF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime3IntS {
+	let var _2: 7runtime3IntS
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.and copy _0.repr, copy _1.repr
+		call function "7runtime3Int4initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime3Int9shiftLeftF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime3IntS {
+	let var _2: 7runtime3IntS
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.shl copy _0.repr, copy _1.repr
+		call function "7runtime3Int4initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime3Int10shiftRightF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime3IntS {
+	let var _2: 7runtime3IntS
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.shr.sig copy _0.repr, copy _1.repr
+		call function "7runtime3Int4initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime3Int5equalF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.eq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime3Int8notEqualF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.neq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime3Int8lessThanF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lt.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime3Int11greaterThanF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gt.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime3Int10lessThanEqF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lte.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime3Int13greaterThanEqF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gte.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime3Int4unitF7runtime3IntSE0 (_0: 7runtime3IntS, ) -> 7runtime3IntS {
+	bb0 : {
+		return copy _0
+	}
+	
+}
+func 7runtime3Int9openRangeF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime3Int5RangeS {
+	let var _2: 7runtime3Int5RangeS
+
+	bb0 : {
+		call function "7runtime3Int5Range4initF7runtime3IntS7runtime3IntSE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime3Int11closedRangeF7runtime3IntS7runtime3IntSE00 (_0: 7runtime3IntS, _1: 7runtime3IntS, ) -> 7runtime3Int11ClosedRangeS {
+	let var _2: 7runtime3Int11ClosedRangeS
+
+	bb0 : {
+		call function "7runtime3Int11ClosedRange4initF7runtime3IntS7runtime3IntSE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime3Int6negateF7runtime3IntSE0 (_0: 7runtime3IntS, ) -> 7runtime3IntS {
+	let var _1: 7runtime3IntS
+	let var _2: i64
+
+	bb0 : {
+		_2 = llvm.int.neg copy _0.repr
+		call function "7runtime3Int4initFiE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime3Int6invertF7runtime3IntSE0 (_0: 7runtime3IntS, ) -> 7runtime3IntS {
+	let var _1: 7runtime3IntS
+	let var _2: i64
+
+	bb0 : {
+		_2 = llvm.int.inv copy _0.repr
+		call function "7runtime3Int4initFiE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime3Int4initF7runtime5FloatSE5floor (_0: shared 7runtime3IntS, _1: 7runtime5FloatS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.icnv.64 copy _1.repr
+		return
+	}
+	
+}
+func 7runtime3Int4initF7runtime6DoubleSE5floor (_0: shared 7runtime3IntS, _1: 7runtime6DoubleS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.icnv.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime3Int4initF7runtime4HalfSE5floor (_0: shared 7runtime3IntS, _1: 7runtime4HalfS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.icnv.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime3Int4initF7runtime5UInt8SE0 (_0: shared 7runtime3IntS, _1: 7runtime5UInt8S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime3Int4initF7runtime4Int8SE0 (_0: shared 7runtime3IntS, _1: 7runtime4Int8S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.sext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime3Int4initF7runtime6UInt16SE0 (_0: shared 7runtime3IntS, _1: 7runtime6UInt16S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime3Int4initF7runtime5Int16SE0 (_0: shared 7runtime3IntS, _1: 7runtime5Int16S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.sext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime3Int4initF7runtime6UInt32SE0 (_0: shared 7runtime3IntS, _1: 7runtime6UInt32S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime3Int4initF7runtime5Int32SE0 (_0: shared 7runtime3IntS, _1: 7runtime5Int32S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.sext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime3Int4initF7runtime6UInt64SE7bitcast (_0: shared 7runtime3IntS, _1: 7runtime6UInt64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime3Int4initF7runtime4UIntSE7bitcast (_0: shared 7runtime3IntS, _1: 7runtime4UIntS, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime3Int4initF7runtime5Int64SE0 (_0: shared 7runtime3IntS, _1: 7runtime5Int64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime3Int4initFiE4repr (_0: shared 7runtime3IntS, _1: i64, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1
+		return
+	}
+	
+}
+func 7runtime3Int11ClosedRange4initF7runtime3IntS7runtime3IntSE4from2to (_0: shared 7runtime3Int11ClosedRangeS, _1: 7runtime3IntS, _2: 7runtime3IntS, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime3Int11ClosedRange6bottomFE (_0: 7runtime3Int11ClosedRangeS, ) -> 7runtime3IntS {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime3Int11ClosedRange3topFE (_0: 7runtime3Int11ClosedRangeS, ) -> 7runtime3IntS {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime3Int5Range4initF7runtime3IntS7runtime3IntSE4from2to (_0: shared 7runtime3Int5RangeS, _1: 7runtime3IntS, _2: 7runtime3IntS, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime3Int5Range6bottomFE (_0: 7runtime3Int5RangeS, ) -> 7runtime3IntS {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime3Int5Range3topFE (_0: 7runtime3Int5RangeS, ) -> 7runtime3IntS {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime3Int8Optional6unwrapF7runtime3IntSE6orElse (_0: 7runtime3Int8OptionalV, _1: 7runtime3IntS, ) -> 7runtime3IntS {
+	let var _2: 7runtime3IntS
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_2 = copy _0 as .some.0
+		goto bb1
+	}
+	
+	bb4 : {
+		_2 = copy _1
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime3Int8Optional3mapFF7runtime3IntSE7runtime3IntSE0 (_0: 7runtime3Int8OptionalV, _1: func (7runtime3IntS, ) -> 7runtime3IntS, ) -> 7runtime3Int8OptionalV {
+	let var _2: 7runtime3Int8OptionalV
+	let var _3: 7runtime3Int8OptionalV
+	let var _4: 7runtime3IntS
+	let var _5: 7runtime3Int8OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_4 = call copy _1 (copy _0 as .some.0)
+		discriminant _3 = const 1
+		_3 as .some.0 = copy _4
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _5 = const 0
+		_2 = copy _5
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime3Int8Optional7flatMapFF7runtime3IntSE7runtime3Int8OptionalVE0 (_0: 7runtime3Int8OptionalV, _1: func (7runtime3IntS, ) -> 7runtime3Int8OptionalV, ) -> 7runtime3Int8OptionalV {
+	let var _2: 7runtime3Int8OptionalV
+	let var _3: 7runtime3Int8OptionalV
+	let var _4: 7runtime3Int8OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_3 = call copy _1 (copy _0 as .some.0)
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _4 = const 0
+		_2 = copy _4
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt3addF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4UIntS {
+	let var _2: 7runtime4UIntS
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.add copy _0.repr, copy _1.repr
+		call function "7runtime4UInt4initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt3subF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4UIntS {
+	let var _2: 7runtime4UIntS
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.sub copy _0.repr, copy _1.repr
+		call function "7runtime4UInt4initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt3mulF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4UIntS {
+	let var _2: 7runtime4UIntS
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.mul copy _0.repr, copy _1.repr
+		call function "7runtime4UInt4initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt3divF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4UIntS {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime4UIntS
+	let var _4: 7runtime4UIntS
+	let var _5: i64
+
+	bb0 : {
+		call function "7runtime4UInt4initFiE4repr" (shared _3, const 0)
+		_2 = call function "7runtime4UInt5equalF7runtime4UIntS7runtime4UIntSE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.div copy _0.repr, copy _1.repr
+		call function "7runtime4UInt4initFiE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime4UInt3modF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4UIntS {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime4UIntS
+	let var _4: 7runtime4UIntS
+	let var _5: i64
+
+	bb0 : {
+		call function "7runtime4UInt4initFiE4repr" (shared _3, const 0)
+		_2 = call function "7runtime4UInt5equalF7runtime4UIntS7runtime4UIntSE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.rem copy _0.repr, copy _1.repr
+		call function "7runtime4UInt4initFiE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime4UInt5bitOrF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4UIntS {
+	let var _2: 7runtime4UIntS
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.or copy _0.repr, copy _1.repr
+		call function "7runtime4UInt4initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt6bitXorF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4UIntS {
+	let var _2: 7runtime4UIntS
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.xor copy _0.repr, copy _1.repr
+		call function "7runtime4UInt4initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt6bitAndF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4UIntS {
+	let var _2: 7runtime4UIntS
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.and copy _0.repr, copy _1.repr
+		call function "7runtime4UInt4initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt9shiftLeftF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4UIntS {
+	let var _2: 7runtime4UIntS
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.shl copy _0.repr, copy _1.repr
+		call function "7runtime4UInt4initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt10shiftRightF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4UIntS {
+	let var _2: 7runtime4UIntS
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.shr copy _0.repr, copy _1.repr
+		call function "7runtime4UInt4initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt5equalF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.eq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt8notEqualF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.neq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt8lessThanF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt11greaterThanF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt10lessThanEqF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt13greaterThanEqF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt4unitF7runtime4UIntSE0 (_0: 7runtime4UIntS, ) -> 7runtime4UIntS {
+	bb0 : {
+		return copy _0
+	}
+	
+}
+func 7runtime4UInt9openRangeF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4UInt5RangeS {
+	let var _2: 7runtime4UInt5RangeS
+
+	bb0 : {
+		call function "7runtime4UInt5Range4initF7runtime4UIntS7runtime4UIntSE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt11closedRangeF7runtime4UIntS7runtime4UIntSE00 (_0: 7runtime4UIntS, _1: 7runtime4UIntS, ) -> 7runtime4UInt11ClosedRangeS {
+	let var _2: 7runtime4UInt11ClosedRangeS
+
+	bb0 : {
+		call function "7runtime4UInt11ClosedRange4initF7runtime4UIntS7runtime4UIntSE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt6negateF7runtime4UIntSE0 (_0: 7runtime4UIntS, ) -> 7runtime4UIntS {
+	let var _1: 7runtime4UIntS
+	let var _2: i64
+
+	bb0 : {
+		_2 = llvm.int.neg copy _0.repr
+		call function "7runtime4UInt4initFiE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime4UInt6invertF7runtime4UIntSE0 (_0: 7runtime4UIntS, ) -> 7runtime4UIntS {
+	let var _1: 7runtime4UIntS
+	let var _2: i64
+
+	bb0 : {
+		_2 = llvm.int.inv copy _0.repr
+		call function "7runtime4UInt4initFiE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime4UInt4initF7runtime5FloatSE5floor (_0: shared 7runtime4UIntS, _1: 7runtime5FloatS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.icnv.64 copy _1.repr
+		return
+	}
+	
+}
+func 7runtime4UInt4initF7runtime6DoubleSE5floor (_0: shared 7runtime4UIntS, _1: 7runtime6DoubleS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.icnv.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4UInt4initF7runtime4HalfSE5floor (_0: shared 7runtime4UIntS, _1: 7runtime4HalfS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.icnv.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4UInt4initF7runtime5UInt8SE0 (_0: shared 7runtime4UIntS, _1: 7runtime5UInt8S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4UInt4initF7runtime6UInt16SE0 (_0: shared 7runtime4UIntS, _1: 7runtime6UInt16S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4UInt4initF7runtime6UInt32SE0 (_0: shared 7runtime4UIntS, _1: 7runtime6UInt32S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4UInt4initF7runtime5Int64SE7bitcast (_0: shared 7runtime4UIntS, _1: 7runtime5Int64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4UInt4initF7runtime3IntSE7bitcast (_0: shared 7runtime4UIntS, _1: 7runtime3IntS, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4UInt4initF7runtime6UInt64SE0 (_0: shared 7runtime4UIntS, _1: 7runtime6UInt64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4UInt4initFiE4repr (_0: shared 7runtime4UIntS, _1: i64, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1
+		return
+	}
+	
+}
+func 7runtime4UInt11ClosedRange4initF7runtime4UIntS7runtime4UIntSE4from2to (_0: shared 7runtime4UInt11ClosedRangeS, _1: 7runtime4UIntS, _2: 7runtime4UIntS, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime4UInt11ClosedRange6bottomFE (_0: 7runtime4UInt11ClosedRangeS, ) -> 7runtime4UIntS {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime4UInt11ClosedRange3topFE (_0: 7runtime4UInt11ClosedRangeS, ) -> 7runtime4UIntS {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime4UInt5Range4initF7runtime4UIntS7runtime4UIntSE4from2to (_0: shared 7runtime4UInt5RangeS, _1: 7runtime4UIntS, _2: 7runtime4UIntS, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime4UInt5Range6bottomFE (_0: 7runtime4UInt5RangeS, ) -> 7runtime4UIntS {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime4UInt5Range3topFE (_0: 7runtime4UInt5RangeS, ) -> 7runtime4UIntS {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime4UInt8Optional6unwrapF7runtime4UIntSE6orElse (_0: 7runtime4UInt8OptionalV, _1: 7runtime4UIntS, ) -> 7runtime4UIntS {
+	let var _2: 7runtime4UIntS
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_2 = copy _0 as .some.0
+		goto bb1
+	}
+	
+	bb4 : {
+		_2 = copy _1
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt8Optional3mapFF7runtime4UIntSE7runtime4UIntSE0 (_0: 7runtime4UInt8OptionalV, _1: func (7runtime4UIntS, ) -> 7runtime4UIntS, ) -> 7runtime4UInt8OptionalV {
+	let var _2: 7runtime4UInt8OptionalV
+	let var _3: 7runtime4UInt8OptionalV
+	let var _4: 7runtime4UIntS
+	let var _5: 7runtime4UInt8OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_4 = call copy _1 (copy _0 as .some.0)
+		discriminant _3 = const 1
+		_3 as .some.0 = copy _4
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _5 = const 0
+		_2 = copy _5
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime4UInt8Optional7flatMapFF7runtime4UIntSE7runtime4UInt8OptionalVE0 (_0: 7runtime4UInt8OptionalV, _1: func (7runtime4UIntS, ) -> 7runtime4UInt8OptionalV, ) -> 7runtime4UInt8OptionalV {
+	let var _2: 7runtime4UInt8OptionalV
+	let var _3: 7runtime4UInt8OptionalV
+	let var _4: 7runtime4UInt8OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_3 = call copy _1 (copy _0 as .some.0)
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _4 = const 0
+		_2 = copy _4
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime4Int83addF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4Int8S {
+	let var _2: 7runtime4Int8S
+	let var _3: i8
+
+	bb0 : {
+		_3 = llvm.int.add copy _0.repr, copy _1.repr
+		call function "7runtime4Int84initFaE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Int83subF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4Int8S {
+	let var _2: 7runtime4Int8S
+	let var _3: i8
+
+	bb0 : {
+		_3 = llvm.int.sub copy _0.repr, copy _1.repr
+		call function "7runtime4Int84initFaE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Int83mulF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4Int8S {
+	let var _2: 7runtime4Int8S
+	let var _3: i8
+
+	bb0 : {
+		_3 = llvm.int.mul copy _0.repr, copy _1.repr
+		call function "7runtime4Int84initFaE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Int83divF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4Int8S {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime4Int8S
+	let var _4: 7runtime4Int8S
+	let var _5: i8
+
+	bb0 : {
+		call function "7runtime4Int84initFaE4repr" (shared _3, const 0)
+		_2 = call function "7runtime4Int85equalF7runtime4Int8S7runtime4Int8SE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.div.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Int84initFaE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime4Int83modF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4Int8S {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime4Int8S
+	let var _4: 7runtime4Int8S
+	let var _5: i8
+
+	bb0 : {
+		call function "7runtime4Int84initFaE4repr" (shared _3, const 0)
+		_2 = call function "7runtime4Int85equalF7runtime4Int8S7runtime4Int8SE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.rem.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Int84initFaE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime4Int85bitOrF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4Int8S {
+	let var _2: 7runtime4Int8S
+	let var _3: i8
+
+	bb0 : {
+		_3 = llvm.int.or copy _0.repr, copy _1.repr
+		call function "7runtime4Int84initFaE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Int86bitXorF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4Int8S {
+	let var _2: 7runtime4Int8S
+	let var _3: i8
+
+	bb0 : {
+		_3 = llvm.int.xor copy _0.repr, copy _1.repr
+		call function "7runtime4Int84initFaE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Int86bitAndF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4Int8S {
+	let var _2: 7runtime4Int8S
+	let var _3: i8
+
+	bb0 : {
+		_3 = llvm.int.and copy _0.repr, copy _1.repr
+		call function "7runtime4Int84initFaE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Int89shiftLeftF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4Int8S {
+	let var _2: 7runtime4Int8S
+	let var _3: i8
+
+	bb0 : {
+		_3 = llvm.int.shl copy _0.repr, copy _1.repr
+		call function "7runtime4Int84initFaE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Int810shiftRightF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4Int8S {
+	let var _2: 7runtime4Int8S
+	let var _3: i8
+
+	bb0 : {
+		_3 = llvm.int.shr.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Int84initFaE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Int85equalF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.eq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Int88notEqualF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.neq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Int88lessThanF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lt.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Int811greaterThanF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gt.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Int810lessThanEqF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lte.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Int813greaterThanEqF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gte.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Int84unitF7runtime4Int8SE0 (_0: 7runtime4Int8S, ) -> 7runtime4Int8S {
+	bb0 : {
+		return copy _0
+	}
+	
+}
+func 7runtime4Int89openRangeF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4Int85RangeS {
+	let var _2: 7runtime4Int85RangeS
+
+	bb0 : {
+		call function "7runtime4Int85Range4initF7runtime4Int8S7runtime4Int8SE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime4Int811closedRangeF7runtime4Int8S7runtime4Int8SE00 (_0: 7runtime4Int8S, _1: 7runtime4Int8S, ) -> 7runtime4Int811ClosedRangeS {
+	let var _2: 7runtime4Int811ClosedRangeS
+
+	bb0 : {
+		call function "7runtime4Int811ClosedRange4initF7runtime4Int8S7runtime4Int8SE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime4Int86negateF7runtime4Int8SE0 (_0: 7runtime4Int8S, ) -> 7runtime4Int8S {
+	let var _1: 7runtime4Int8S
+	let var _2: i8
+
+	bb0 : {
+		_2 = llvm.int.neg copy _0.repr
+		call function "7runtime4Int84initFaE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime4Int86invertF7runtime4Int8SE0 (_0: 7runtime4Int8S, ) -> 7runtime4Int8S {
+	let var _1: 7runtime4Int8S
+	let var _2: i8
+
+	bb0 : {
+		_2 = llvm.int.inv copy _0.repr
+		call function "7runtime4Int84initFaE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime4Int84initF7runtime5Int16SE10truncating (_0: shared 7runtime4Int8S, _1: 7runtime5Int16S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.trunc.8 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4Int84initF7runtime5Int32SE10truncating (_0: shared 7runtime4Int8S, _1: 7runtime5Int32S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.trunc.8 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4Int84initF7runtime5Int64SE10truncating (_0: shared 7runtime4Int8S, _1: 7runtime5Int64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.trunc.8 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4Int84initF7runtime5UInt8SE7bitcast (_0: shared 7runtime4Int8S, _1: 7runtime5UInt8S, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime4Int84initFaE4repr (_0: shared 7runtime4Int8S, _1: i8, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1
+		return
+	}
+	
+}
+func 7runtime4Int811ClosedRange4initF7runtime4Int8S7runtime4Int8SE4from2to (_0: shared 7runtime4Int811ClosedRangeS, _1: 7runtime4Int8S, _2: 7runtime4Int8S, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime4Int811ClosedRange6bottomFE (_0: 7runtime4Int811ClosedRangeS, ) -> 7runtime4Int8S {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime4Int811ClosedRange3topFE (_0: 7runtime4Int811ClosedRangeS, ) -> 7runtime4Int8S {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime4Int85Range4initF7runtime4Int8S7runtime4Int8SE4from2to (_0: shared 7runtime4Int85RangeS, _1: 7runtime4Int8S, _2: 7runtime4Int8S, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime4Int85Range6bottomFE (_0: 7runtime4Int85RangeS, ) -> 7runtime4Int8S {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime4Int85Range3topFE (_0: 7runtime4Int85RangeS, ) -> 7runtime4Int8S {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime4Int88Optional6unwrapF7runtime4Int8SE6orElse (_0: 7runtime4Int88OptionalV, _1: 7runtime4Int8S, ) -> 7runtime4Int8S {
+	let var _2: 7runtime4Int8S
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_2 = copy _0 as .some.0
+		goto bb1
+	}
+	
+	bb4 : {
+		_2 = copy _1
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime4Int88Optional3mapFF7runtime4Int8SE7runtime4Int8SE0 (_0: 7runtime4Int88OptionalV, _1: func (7runtime4Int8S, ) -> 7runtime4Int8S, ) -> 7runtime4Int88OptionalV {
+	let var _2: 7runtime4Int88OptionalV
+	let var _3: 7runtime4Int88OptionalV
+	let var _4: 7runtime4Int8S
+	let var _5: 7runtime4Int88OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_4 = call copy _1 (copy _0 as .some.0)
+		discriminant _3 = const 1
+		_3 as .some.0 = copy _4
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _5 = const 0
+		_2 = copy _5
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime4Int88Optional7flatMapFF7runtime4Int8SE7runtime4Int88OptionalVE0 (_0: 7runtime4Int88OptionalV, _1: func (7runtime4Int8S, ) -> 7runtime4Int88OptionalV, ) -> 7runtime4Int88OptionalV {
+	let var _2: 7runtime4Int88OptionalV
+	let var _3: 7runtime4Int88OptionalV
+	let var _4: 7runtime4Int88OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_3 = call copy _1 (copy _0 as .some.0)
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _4 = const 0
+		_2 = copy _4
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime5Int163addF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime5Int16S {
+	let var _2: 7runtime5Int16S
+	let var _3: i16
+
+	bb0 : {
+		_3 = llvm.int.add copy _0.repr, copy _1.repr
+		call function "7runtime5Int164initFlE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int163subF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime5Int16S {
+	let var _2: 7runtime5Int16S
+	let var _3: i16
+
+	bb0 : {
+		_3 = llvm.int.sub copy _0.repr, copy _1.repr
+		call function "7runtime5Int164initFlE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int163mulF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime5Int16S {
+	let var _2: 7runtime5Int16S
+	let var _3: i16
+
+	bb0 : {
+		_3 = llvm.int.mul copy _0.repr, copy _1.repr
+		call function "7runtime5Int164initFlE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int163divF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime5Int16S {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime5Int16S
+	let var _4: 7runtime5Int16S
+	let var _5: i16
+
+	bb0 : {
+		call function "7runtime5Int164initFlE4repr" (shared _3, const 0)
+		_2 = call function "7runtime5Int165equalF7runtime5Int16S7runtime5Int16SE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.div.sig copy _0.repr, copy _1.repr
+		call function "7runtime5Int164initFlE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime5Int163modF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime5Int16S {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime5Int16S
+	let var _4: 7runtime5Int16S
+	let var _5: i16
+
+	bb0 : {
+		call function "7runtime5Int164initFlE4repr" (shared _3, const 0)
+		_2 = call function "7runtime5Int165equalF7runtime5Int16S7runtime5Int16SE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.rem.sig copy _0.repr, copy _1.repr
+		call function "7runtime5Int164initFlE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime5Int165bitOrF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime5Int16S {
+	let var _2: 7runtime5Int16S
+	let var _3: i16
+
+	bb0 : {
+		_3 = llvm.int.or copy _0.repr, copy _1.repr
+		call function "7runtime5Int164initFlE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int166bitXorF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime5Int16S {
+	let var _2: 7runtime5Int16S
+	let var _3: i16
+
+	bb0 : {
+		_3 = llvm.int.xor copy _0.repr, copy _1.repr
+		call function "7runtime5Int164initFlE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int166bitAndF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime5Int16S {
+	let var _2: 7runtime5Int16S
+	let var _3: i16
+
+	bb0 : {
+		_3 = llvm.int.and copy _0.repr, copy _1.repr
+		call function "7runtime5Int164initFlE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int169shiftLeftF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime5Int16S {
+	let var _2: 7runtime5Int16S
+	let var _3: i16
+
+	bb0 : {
+		_3 = llvm.int.shl copy _0.repr, copy _1.repr
+		call function "7runtime5Int164initFlE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int1610shiftRightF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime5Int16S {
+	let var _2: 7runtime5Int16S
+	let var _3: i16
+
+	bb0 : {
+		_3 = llvm.int.shr.sig copy _0.repr, copy _1.repr
+		call function "7runtime5Int164initFlE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int165equalF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.eq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int168notEqualF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.neq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int168lessThanF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lt.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int1611greaterThanF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gt.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int1610lessThanEqF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lte.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int1613greaterThanEqF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gte.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int164unitF7runtime5Int16SE0 (_0: 7runtime5Int16S, ) -> 7runtime5Int16S {
+	bb0 : {
+		return copy _0
+	}
+	
+}
+func 7runtime5Int169openRangeF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime5Int165RangeS {
+	let var _2: 7runtime5Int165RangeS
+
+	bb0 : {
+		call function "7runtime5Int165Range4initF7runtime5Int16S7runtime5Int16SE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int1611closedRangeF7runtime5Int16S7runtime5Int16SE00 (_0: 7runtime5Int16S, _1: 7runtime5Int16S, ) -> 7runtime5Int1611ClosedRangeS {
+	let var _2: 7runtime5Int1611ClosedRangeS
+
+	bb0 : {
+		call function "7runtime5Int1611ClosedRange4initF7runtime5Int16S7runtime5Int16SE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int166negateF7runtime5Int16SE0 (_0: 7runtime5Int16S, ) -> 7runtime5Int16S {
+	let var _1: 7runtime5Int16S
+	let var _2: i16
+
+	bb0 : {
+		_2 = llvm.int.neg copy _0.repr
+		call function "7runtime5Int164initFlE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime5Int166invertF7runtime5Int16SE0 (_0: 7runtime5Int16S, ) -> 7runtime5Int16S {
+	let var _1: 7runtime5Int16S
+	let var _2: i16
+
+	bb0 : {
+		_2 = llvm.int.inv copy _0.repr
+		call function "7runtime5Int164initFlE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime5Int164initF7runtime5UInt8SE0 (_0: shared 7runtime5Int16S, _1: 7runtime5UInt8S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.16 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int164initF7runtime4Int8SE0 (_0: shared 7runtime5Int16S, _1: 7runtime4Int8S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.sext.16 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int164initF7runtime5Int32SE10truncating (_0: shared 7runtime5Int16S, _1: 7runtime5Int32S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.trunc.16 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int164initF7runtime5Int64SE10truncating (_0: shared 7runtime5Int16S, _1: 7runtime5Int64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.trunc.16 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int164initF7runtime6UInt16SE7bitcast (_0: shared 7runtime5Int16S, _1: 7runtime6UInt16S, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int164initFlE4repr (_0: shared 7runtime5Int16S, _1: i16, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1
+		return
+	}
+	
+}
+func 7runtime5Int1611ClosedRange4initF7runtime5Int16S7runtime5Int16SE4from2to (_0: shared 7runtime5Int1611ClosedRangeS, _1: 7runtime5Int16S, _2: 7runtime5Int16S, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime5Int1611ClosedRange6bottomFE (_0: 7runtime5Int1611ClosedRangeS, ) -> 7runtime5Int16S {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime5Int1611ClosedRange3topFE (_0: 7runtime5Int1611ClosedRangeS, ) -> 7runtime5Int16S {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime5Int165Range4initF7runtime5Int16S7runtime5Int16SE4from2to (_0: shared 7runtime5Int165RangeS, _1: 7runtime5Int16S, _2: 7runtime5Int16S, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime5Int165Range6bottomFE (_0: 7runtime5Int165RangeS, ) -> 7runtime5Int16S {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime5Int165Range3topFE (_0: 7runtime5Int165RangeS, ) -> 7runtime5Int16S {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime5Int168Optional6unwrapF7runtime5Int16SE6orElse (_0: 7runtime5Int168OptionalV, _1: 7runtime5Int16S, ) -> 7runtime5Int16S {
+	let var _2: 7runtime5Int16S
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_2 = copy _0 as .some.0
+		goto bb1
+	}
+	
+	bb4 : {
+		_2 = copy _1
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime5Int168Optional3mapFF7runtime5Int16SE7runtime5Int16SE0 (_0: 7runtime5Int168OptionalV, _1: func (7runtime5Int16S, ) -> 7runtime5Int16S, ) -> 7runtime5Int168OptionalV {
+	let var _2: 7runtime5Int168OptionalV
+	let var _3: 7runtime5Int168OptionalV
+	let var _4: 7runtime5Int16S
+	let var _5: 7runtime5Int168OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_4 = call copy _1 (copy _0 as .some.0)
+		discriminant _3 = const 1
+		_3 as .some.0 = copy _4
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _5 = const 0
+		_2 = copy _5
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime5Int168Optional7flatMapFF7runtime5Int16SE7runtime5Int168OptionalVE0 (_0: 7runtime5Int168OptionalV, _1: func (7runtime5Int16S, ) -> 7runtime5Int168OptionalV, ) -> 7runtime5Int168OptionalV {
+	let var _2: 7runtime5Int168OptionalV
+	let var _3: 7runtime5Int168OptionalV
+	let var _4: 7runtime5Int168OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_3 = call copy _1 (copy _0 as .some.0)
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _4 = const 0
+		_2 = copy _4
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime5Int323addF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime5Int32S {
+	let var _2: 7runtime5Int32S
+	let var _3: i32
+
+	bb0 : {
+		_3 = llvm.int.add copy _0.repr, copy _1.repr
+		call function "7runtime5Int324initFjE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int323subF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime5Int32S {
+	let var _2: 7runtime5Int32S
+	let var _3: i32
+
+	bb0 : {
+		_3 = llvm.int.sub copy _0.repr, copy _1.repr
+		call function "7runtime5Int324initFjE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int323mulF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime5Int32S {
+	let var _2: 7runtime5Int32S
+	let var _3: i32
+
+	bb0 : {
+		_3 = llvm.int.mul copy _0.repr, copy _1.repr
+		call function "7runtime5Int324initFjE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int323divF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime5Int32S {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime5Int32S
+	let var _4: 7runtime5Int32S
+	let var _5: i32
+
+	bb0 : {
+		call function "7runtime5Int324initFjE4repr" (shared _3, const 0)
+		_2 = call function "7runtime5Int325equalF7runtime5Int32S7runtime5Int32SE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.div.sig copy _0.repr, copy _1.repr
+		call function "7runtime5Int324initFjE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime5Int323modF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime5Int32S {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime5Int32S
+	let var _4: 7runtime5Int32S
+	let var _5: i32
+
+	bb0 : {
+		call function "7runtime5Int324initFjE4repr" (shared _3, const 0)
+		_2 = call function "7runtime5Int325equalF7runtime5Int32S7runtime5Int32SE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.rem.sig copy _0.repr, copy _1.repr
+		call function "7runtime5Int324initFjE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime5Int325bitOrF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime5Int32S {
+	let var _2: 7runtime5Int32S
+	let var _3: i32
+
+	bb0 : {
+		_3 = llvm.int.or copy _0.repr, copy _1.repr
+		call function "7runtime5Int324initFjE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int326bitXorF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime5Int32S {
+	let var _2: 7runtime5Int32S
+	let var _3: i32
+
+	bb0 : {
+		_3 = llvm.int.xor copy _0.repr, copy _1.repr
+		call function "7runtime5Int324initFjE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int326bitAndF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime5Int32S {
+	let var _2: 7runtime5Int32S
+	let var _3: i32
+
+	bb0 : {
+		_3 = llvm.int.and copy _0.repr, copy _1.repr
+		call function "7runtime5Int324initFjE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int329shiftLeftF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime5Int32S {
+	let var _2: 7runtime5Int32S
+	let var _3: i32
+
+	bb0 : {
+		_3 = llvm.int.shl copy _0.repr, copy _1.repr
+		call function "7runtime5Int324initFjE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int3210shiftRightF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime5Int32S {
+	let var _2: 7runtime5Int32S
+	let var _3: i32
+
+	bb0 : {
+		_3 = llvm.int.shr.sig copy _0.repr, copy _1.repr
+		call function "7runtime5Int324initFjE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int325equalF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.eq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int328notEqualF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.neq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int328lessThanF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lt.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int3211greaterThanF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gt.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int3210lessThanEqF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lte.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int3213greaterThanEqF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gte.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int324unitF7runtime5Int32SE0 (_0: 7runtime5Int32S, ) -> 7runtime5Int32S {
+	bb0 : {
+		return copy _0
+	}
+	
+}
+func 7runtime5Int329openRangeF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime5Int325RangeS {
+	let var _2: 7runtime5Int325RangeS
+
+	bb0 : {
+		call function "7runtime5Int325Range4initF7runtime5Int32S7runtime5Int32SE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int3211closedRangeF7runtime5Int32S7runtime5Int32SE00 (_0: 7runtime5Int32S, _1: 7runtime5Int32S, ) -> 7runtime5Int3211ClosedRangeS {
+	let var _2: 7runtime5Int3211ClosedRangeS
+
+	bb0 : {
+		call function "7runtime5Int3211ClosedRange4initF7runtime5Int32S7runtime5Int32SE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int326negateF7runtime5Int32SE0 (_0: 7runtime5Int32S, ) -> 7runtime5Int32S {
+	let var _1: 7runtime5Int32S
+	let var _2: i32
+
+	bb0 : {
+		_2 = llvm.int.neg copy _0.repr
+		call function "7runtime5Int324initFjE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime5Int326invertF7runtime5Int32SE0 (_0: 7runtime5Int32S, ) -> 7runtime5Int32S {
+	let var _1: 7runtime5Int32S
+	let var _2: i32
+
+	bb0 : {
+		_2 = llvm.int.inv copy _0.repr
+		call function "7runtime5Int324initFjE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime5Int324initF7runtime5UInt8SE0 (_0: shared 7runtime5Int32S, _1: 7runtime5UInt8S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.32 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int324initF7runtime4Int8SE0 (_0: shared 7runtime5Int32S, _1: 7runtime4Int8S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.sext.32 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int324initF7runtime6UInt16SE0 (_0: shared 7runtime5Int32S, _1: 7runtime6UInt16S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.32 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int324initF7runtime5Int16SE0 (_0: shared 7runtime5Int32S, _1: 7runtime5Int16S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.sext.32 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int324initF7runtime5Int64SE10truncating (_0: shared 7runtime5Int32S, _1: 7runtime5Int64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.trunc.32 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int324initF7runtime6UInt32SE7bitcast (_0: shared 7runtime5Int32S, _1: 7runtime6UInt32S, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int324initFjE4repr (_0: shared 7runtime5Int32S, _1: i32, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1
+		return
+	}
+	
+}
+func 7runtime5Int3211ClosedRange4initF7runtime5Int32S7runtime5Int32SE4from2to (_0: shared 7runtime5Int3211ClosedRangeS, _1: 7runtime5Int32S, _2: 7runtime5Int32S, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime5Int3211ClosedRange6bottomFE (_0: 7runtime5Int3211ClosedRangeS, ) -> 7runtime5Int32S {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime5Int3211ClosedRange3topFE (_0: 7runtime5Int3211ClosedRangeS, ) -> 7runtime5Int32S {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime5Int325Range4initF7runtime5Int32S7runtime5Int32SE4from2to (_0: shared 7runtime5Int325RangeS, _1: 7runtime5Int32S, _2: 7runtime5Int32S, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime5Int325Range6bottomFE (_0: 7runtime5Int325RangeS, ) -> 7runtime5Int32S {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime5Int325Range3topFE (_0: 7runtime5Int325RangeS, ) -> 7runtime5Int32S {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime5Int328Optional6unwrapF7runtime5Int32SE6orElse (_0: 7runtime5Int328OptionalV, _1: 7runtime5Int32S, ) -> 7runtime5Int32S {
+	let var _2: 7runtime5Int32S
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_2 = copy _0 as .some.0
+		goto bb1
+	}
+	
+	bb4 : {
+		_2 = copy _1
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime5Int328Optional3mapFF7runtime5Int32SE7runtime5Int32SE0 (_0: 7runtime5Int328OptionalV, _1: func (7runtime5Int32S, ) -> 7runtime5Int32S, ) -> 7runtime5Int328OptionalV {
+	let var _2: 7runtime5Int328OptionalV
+	let var _3: 7runtime5Int328OptionalV
+	let var _4: 7runtime5Int32S
+	let var _5: 7runtime5Int328OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_4 = call copy _1 (copy _0 as .some.0)
+		discriminant _3 = const 1
+		_3 as .some.0 = copy _4
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _5 = const 0
+		_2 = copy _5
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime5Int328Optional7flatMapFF7runtime5Int32SE7runtime5Int328OptionalVE0 (_0: 7runtime5Int328OptionalV, _1: func (7runtime5Int32S, ) -> 7runtime5Int328OptionalV, ) -> 7runtime5Int328OptionalV {
+	let var _2: 7runtime5Int328OptionalV
+	let var _3: 7runtime5Int328OptionalV
+	let var _4: 7runtime5Int328OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_3 = call copy _1 (copy _0 as .some.0)
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _4 = const 0
+		_2 = copy _4
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime5Int643addF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime5Int64S {
+	let var _2: 7runtime5Int64S
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.add copy _0.repr, copy _1.repr
+		call function "7runtime5Int644initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int643subF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime5Int64S {
+	let var _2: 7runtime5Int64S
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.sub copy _0.repr, copy _1.repr
+		call function "7runtime5Int644initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int643mulF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime5Int64S {
+	let var _2: 7runtime5Int64S
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.mul copy _0.repr, copy _1.repr
+		call function "7runtime5Int644initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int643divF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime5Int64S {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime5Int64S
+	let var _4: 7runtime5Int64S
+	let var _5: i64
+
+	bb0 : {
+		call function "7runtime5Int644initFiE4repr" (shared _3, const 0)
+		_2 = call function "7runtime5Int645equalF7runtime5Int64S7runtime5Int64SE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.div.sig copy _0.repr, copy _1.repr
+		call function "7runtime5Int644initFiE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime5Int643modF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime5Int64S {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime5Int64S
+	let var _4: 7runtime5Int64S
+	let var _5: i64
+
+	bb0 : {
+		call function "7runtime5Int644initFiE4repr" (shared _3, const 0)
+		_2 = call function "7runtime5Int645equalF7runtime5Int64S7runtime5Int64SE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.rem.sig copy _0.repr, copy _1.repr
+		call function "7runtime5Int644initFiE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime5Int645bitOrF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime5Int64S {
+	let var _2: 7runtime5Int64S
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.or copy _0.repr, copy _1.repr
+		call function "7runtime5Int644initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int646bitXorF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime5Int64S {
+	let var _2: 7runtime5Int64S
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.xor copy _0.repr, copy _1.repr
+		call function "7runtime5Int644initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int646bitAndF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime5Int64S {
+	let var _2: 7runtime5Int64S
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.and copy _0.repr, copy _1.repr
+		call function "7runtime5Int644initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int649shiftLeftF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime5Int64S {
+	let var _2: 7runtime5Int64S
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.shl copy _0.repr, copy _1.repr
+		call function "7runtime5Int644initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int6410shiftRightF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime5Int64S {
+	let var _2: 7runtime5Int64S
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.shr.sig copy _0.repr, copy _1.repr
+		call function "7runtime5Int644initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int645equalF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.eq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int648notEqualF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.neq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int648lessThanF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lt.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int6411greaterThanF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gt.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int6410lessThanEqF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lte.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int6413greaterThanEqF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gte.sig copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int644unitF7runtime5Int64SE0 (_0: 7runtime5Int64S, ) -> 7runtime5Int64S {
+	bb0 : {
+		return copy _0
+	}
+	
+}
+func 7runtime5Int649openRangeF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime5Int645RangeS {
+	let var _2: 7runtime5Int645RangeS
+
+	bb0 : {
+		call function "7runtime5Int645Range4initF7runtime5Int64S7runtime5Int64SE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int6411closedRangeF7runtime5Int64S7runtime5Int64SE00 (_0: 7runtime5Int64S, _1: 7runtime5Int64S, ) -> 7runtime5Int6411ClosedRangeS {
+	let var _2: 7runtime5Int6411ClosedRangeS
+
+	bb0 : {
+		call function "7runtime5Int6411ClosedRange4initF7runtime5Int64S7runtime5Int64SE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime5Int646negateF7runtime5Int64SE0 (_0: 7runtime5Int64S, ) -> 7runtime5Int64S {
+	let var _1: 7runtime5Int64S
+	let var _2: i64
+
+	bb0 : {
+		_2 = llvm.int.neg copy _0.repr
+		call function "7runtime5Int644initFiE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime5Int646invertF7runtime5Int64SE0 (_0: 7runtime5Int64S, ) -> 7runtime5Int64S {
+	let var _1: 7runtime5Int64S
+	let var _2: i64
+
+	bb0 : {
+		_2 = llvm.int.inv copy _0.repr
+		call function "7runtime5Int644initFiE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime5Int644initF7runtime5FloatSE5floor (_0: shared 7runtime5Int64S, _1: 7runtime5FloatS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.icnv.64 copy _1.repr
+		return
+	}
+	
+}
+func 7runtime5Int644initF7runtime6DoubleSE5floor (_0: shared 7runtime5Int64S, _1: 7runtime6DoubleS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.icnv.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int644initF7runtime4HalfSE5floor (_0: shared 7runtime5Int64S, _1: 7runtime4HalfS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.icnv.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int644initF7runtime5UInt8SE0 (_0: shared 7runtime5Int64S, _1: 7runtime5UInt8S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int644initF7runtime4Int8SE0 (_0: shared 7runtime5Int64S, _1: 7runtime4Int8S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.sext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int644initF7runtime6UInt16SE0 (_0: shared 7runtime5Int64S, _1: 7runtime6UInt16S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int644initF7runtime5Int16SE0 (_0: shared 7runtime5Int64S, _1: 7runtime5Int16S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.sext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int644initF7runtime6UInt32SE0 (_0: shared 7runtime5Int64S, _1: 7runtime6UInt32S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int644initF7runtime5Int32SE0 (_0: shared 7runtime5Int64S, _1: 7runtime5Int32S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.sext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int644initF7runtime6UInt64SE7bitcast (_0: shared 7runtime5Int64S, _1: 7runtime6UInt64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int644initF7runtime4UIntSE7bitcast (_0: shared 7runtime5Int64S, _1: 7runtime4UIntS, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int644initF7runtime3IntSE0 (_0: shared 7runtime5Int64S, _1: 7runtime3IntS, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5Int644initFiE4repr (_0: shared 7runtime5Int64S, _1: i64, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1
+		return
+	}
+	
+}
+func 7runtime5Int6411ClosedRange4initF7runtime5Int64S7runtime5Int64SE4from2to (_0: shared 7runtime5Int6411ClosedRangeS, _1: 7runtime5Int64S, _2: 7runtime5Int64S, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime5Int6411ClosedRange6bottomFE (_0: 7runtime5Int6411ClosedRangeS, ) -> 7runtime5Int64S {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime5Int6411ClosedRange3topFE (_0: 7runtime5Int6411ClosedRangeS, ) -> 7runtime5Int64S {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime5Int645Range4initF7runtime5Int64S7runtime5Int64SE4from2to (_0: shared 7runtime5Int645RangeS, _1: 7runtime5Int64S, _2: 7runtime5Int64S, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime5Int645Range6bottomFE (_0: 7runtime5Int645RangeS, ) -> 7runtime5Int64S {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime5Int645Range3topFE (_0: 7runtime5Int645RangeS, ) -> 7runtime5Int64S {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime5Int648Optional6unwrapF7runtime5Int64SE6orElse (_0: 7runtime5Int648OptionalV, _1: 7runtime5Int64S, ) -> 7runtime5Int64S {
+	let var _2: 7runtime5Int64S
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_2 = copy _0 as .some.0
+		goto bb1
+	}
+	
+	bb4 : {
+		_2 = copy _1
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime5Int648Optional3mapFF7runtime5Int64SE7runtime5Int64SE0 (_0: 7runtime5Int648OptionalV, _1: func (7runtime5Int64S, ) -> 7runtime5Int64S, ) -> 7runtime5Int648OptionalV {
+	let var _2: 7runtime5Int648OptionalV
+	let var _3: 7runtime5Int648OptionalV
+	let var _4: 7runtime5Int64S
+	let var _5: 7runtime5Int648OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_4 = call copy _1 (copy _0 as .some.0)
+		discriminant _3 = const 1
+		_3 as .some.0 = copy _4
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _5 = const 0
+		_2 = copy _5
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime5Int648Optional7flatMapFF7runtime5Int64SE7runtime5Int648OptionalVE0 (_0: 7runtime5Int648OptionalV, _1: func (7runtime5Int64S, ) -> 7runtime5Int648OptionalV, ) -> 7runtime5Int648OptionalV {
+	let var _2: 7runtime5Int648OptionalV
+	let var _3: 7runtime5Int648OptionalV
+	let var _4: 7runtime5Int648OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_3 = call copy _1 (copy _0 as .some.0)
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _4 = const 0
+		_2 = copy _4
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt83addF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime5UInt8S {
+	let var _2: 7runtime5UInt8S
+	let var _3: i8
+
+	bb0 : {
+		_3 = llvm.int.add copy _0.repr, copy _1.repr
+		call function "7runtime5UInt84initFaE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt83subF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime5UInt8S {
+	let var _2: 7runtime5UInt8S
+	let var _3: i8
+
+	bb0 : {
+		_3 = llvm.int.sub copy _0.repr, copy _1.repr
+		call function "7runtime5UInt84initFaE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt83mulF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime5UInt8S {
+	let var _2: 7runtime5UInt8S
+	let var _3: i8
+
+	bb0 : {
+		_3 = llvm.int.mul copy _0.repr, copy _1.repr
+		call function "7runtime5UInt84initFaE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt83divF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime5UInt8S {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime5UInt8S
+	let var _4: 7runtime5UInt8S
+	let var _5: i8
+
+	bb0 : {
+		call function "7runtime5UInt84initFaE4repr" (shared _3, const 0)
+		_2 = call function "7runtime5UInt85equalF7runtime5UInt8S7runtime5UInt8SE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.div copy _0.repr, copy _1.repr
+		call function "7runtime5UInt84initFaE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime5UInt83modF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime5UInt8S {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime5UInt8S
+	let var _4: 7runtime5UInt8S
+	let var _5: i8
+
+	bb0 : {
+		call function "7runtime5UInt84initFaE4repr" (shared _3, const 0)
+		_2 = call function "7runtime5UInt85equalF7runtime5UInt8S7runtime5UInt8SE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.rem copy _0.repr, copy _1.repr
+		call function "7runtime5UInt84initFaE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime5UInt85bitOrF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime5UInt8S {
+	let var _2: 7runtime5UInt8S
+	let var _3: i8
+
+	bb0 : {
+		_3 = llvm.int.or copy _0.repr, copy _1.repr
+		call function "7runtime5UInt84initFaE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt86bitXorF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime5UInt8S {
+	let var _2: 7runtime5UInt8S
+	let var _3: i8
+
+	bb0 : {
+		_3 = llvm.int.xor copy _0.repr, copy _1.repr
+		call function "7runtime5UInt84initFaE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt86bitAndF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime5UInt8S {
+	let var _2: 7runtime5UInt8S
+	let var _3: i8
+
+	bb0 : {
+		_3 = llvm.int.and copy _0.repr, copy _1.repr
+		call function "7runtime5UInt84initFaE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt89shiftLeftF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime5UInt8S {
+	let var _2: 7runtime5UInt8S
+	let var _3: i8
+
+	bb0 : {
+		_3 = llvm.int.shl copy _0.repr, copy _1.repr
+		call function "7runtime5UInt84initFaE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt810shiftRightF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime5UInt8S {
+	let var _2: 7runtime5UInt8S
+	let var _3: i8
+
+	bb0 : {
+		_3 = llvm.int.shr copy _0.repr, copy _1.repr
+		call function "7runtime5UInt84initFaE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt85equalF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.eq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt88notEqualF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.neq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt88lessThanF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt811greaterThanF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt810lessThanEqF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt813greaterThanEqF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt84unitF7runtime5UInt8SE0 (_0: 7runtime5UInt8S, ) -> 7runtime5UInt8S {
+	bb0 : {
+		return copy _0
+	}
+	
+}
+func 7runtime5UInt89openRangeF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime5UInt85RangeS {
+	let var _2: 7runtime5UInt85RangeS
+
+	bb0 : {
+		call function "7runtime5UInt85Range4initF7runtime5UInt8S7runtime5UInt8SE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt811closedRangeF7runtime5UInt8S7runtime5UInt8SE00 (_0: 7runtime5UInt8S, _1: 7runtime5UInt8S, ) -> 7runtime5UInt811ClosedRangeS {
+	let var _2: 7runtime5UInt811ClosedRangeS
+
+	bb0 : {
+		call function "7runtime5UInt811ClosedRange4initF7runtime5UInt8S7runtime5UInt8SE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt86negateF7runtime5UInt8SE0 (_0: 7runtime5UInt8S, ) -> 7runtime5UInt8S {
+	let var _1: 7runtime5UInt8S
+	let var _2: i8
+
+	bb0 : {
+		_2 = llvm.int.neg copy _0.repr
+		call function "7runtime5UInt84initFaE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime5UInt86invertF7runtime5UInt8SE0 (_0: 7runtime5UInt8S, ) -> 7runtime5UInt8S {
+	let var _1: 7runtime5UInt8S
+	let var _2: i8
+
+	bb0 : {
+		_2 = llvm.int.inv copy _0.repr
+		call function "7runtime5UInt84initFaE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime5UInt84initF7runtime6UInt16SE10truncating (_0: shared 7runtime5UInt8S, _1: 7runtime6UInt16S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.trunc.8 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5UInt84initF7runtime6UInt32SE10truncating (_0: shared 7runtime5UInt8S, _1: 7runtime6UInt32S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.trunc.8 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5UInt84initF7runtime6UInt64SE10truncating (_0: shared 7runtime5UInt8S, _1: 7runtime6UInt64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.trunc.8 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5UInt84initF7runtime4Int8SE7bitcast (_0: shared 7runtime5UInt8S, _1: 7runtime4Int8S, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime5UInt84initFaE4repr (_0: shared 7runtime5UInt8S, _1: i8, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1
+		return
+	}
+	
+}
+func 7runtime5UInt811ClosedRange4initF7runtime5UInt8S7runtime5UInt8SE4from2to (_0: shared 7runtime5UInt811ClosedRangeS, _1: 7runtime5UInt8S, _2: 7runtime5UInt8S, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime5UInt811ClosedRange6bottomFE (_0: 7runtime5UInt811ClosedRangeS, ) -> 7runtime5UInt8S {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime5UInt811ClosedRange3topFE (_0: 7runtime5UInt811ClosedRangeS, ) -> 7runtime5UInt8S {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime5UInt85Range4initF7runtime5UInt8S7runtime5UInt8SE4from2to (_0: shared 7runtime5UInt85RangeS, _1: 7runtime5UInt8S, _2: 7runtime5UInt8S, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime5UInt85Range6bottomFE (_0: 7runtime5UInt85RangeS, ) -> 7runtime5UInt8S {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime5UInt85Range3topFE (_0: 7runtime5UInt85RangeS, ) -> 7runtime5UInt8S {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime5UInt88Optional6unwrapF7runtime5UInt8SE6orElse (_0: 7runtime5UInt88OptionalV, _1: 7runtime5UInt8S, ) -> 7runtime5UInt8S {
+	let var _2: 7runtime5UInt8S
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_2 = copy _0 as .some.0
+		goto bb1
+	}
+	
+	bb4 : {
+		_2 = copy _1
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt88Optional3mapFF7runtime5UInt8SE7runtime5UInt8SE0 (_0: 7runtime5UInt88OptionalV, _1: func (7runtime5UInt8S, ) -> 7runtime5UInt8S, ) -> 7runtime5UInt88OptionalV {
+	let var _2: 7runtime5UInt88OptionalV
+	let var _3: 7runtime5UInt88OptionalV
+	let var _4: 7runtime5UInt8S
+	let var _5: 7runtime5UInt88OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_4 = call copy _1 (copy _0 as .some.0)
+		discriminant _3 = const 1
+		_3 as .some.0 = copy _4
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _5 = const 0
+		_2 = copy _5
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime5UInt88Optional7flatMapFF7runtime5UInt8SE7runtime5UInt88OptionalVE0 (_0: 7runtime5UInt88OptionalV, _1: func (7runtime5UInt8S, ) -> 7runtime5UInt88OptionalV, ) -> 7runtime5UInt88OptionalV {
+	let var _2: 7runtime5UInt88OptionalV
+	let var _3: 7runtime5UInt88OptionalV
+	let var _4: 7runtime5UInt88OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_3 = call copy _1 (copy _0 as .some.0)
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _4 = const 0
+		_2 = copy _4
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt163addF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime6UInt16S {
+	let var _2: 7runtime6UInt16S
+	let var _3: i16
+
+	bb0 : {
+		_3 = llvm.int.add copy _0.repr, copy _1.repr
+		call function "7runtime6UInt164initFlE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt163subF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime6UInt16S {
+	let var _2: 7runtime6UInt16S
+	let var _3: i16
+
+	bb0 : {
+		_3 = llvm.int.sub copy _0.repr, copy _1.repr
+		call function "7runtime6UInt164initFlE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt163mulF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime6UInt16S {
+	let var _2: 7runtime6UInt16S
+	let var _3: i16
+
+	bb0 : {
+		_3 = llvm.int.mul copy _0.repr, copy _1.repr
+		call function "7runtime6UInt164initFlE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt163divF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime6UInt16S {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime6UInt16S
+	let var _4: 7runtime6UInt16S
+	let var _5: i16
+
+	bb0 : {
+		call function "7runtime6UInt164initFlE4repr" (shared _3, const 0)
+		_2 = call function "7runtime6UInt165equalF7runtime6UInt16S7runtime6UInt16SE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.div copy _0.repr, copy _1.repr
+		call function "7runtime6UInt164initFlE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime6UInt163modF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime6UInt16S {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime6UInt16S
+	let var _4: 7runtime6UInt16S
+	let var _5: i16
+
+	bb0 : {
+		call function "7runtime6UInt164initFlE4repr" (shared _3, const 0)
+		_2 = call function "7runtime6UInt165equalF7runtime6UInt16S7runtime6UInt16SE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.rem copy _0.repr, copy _1.repr
+		call function "7runtime6UInt164initFlE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime6UInt165bitOrF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime6UInt16S {
+	let var _2: 7runtime6UInt16S
+	let var _3: i16
+
+	bb0 : {
+		_3 = llvm.int.or copy _0.repr, copy _1.repr
+		call function "7runtime6UInt164initFlE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt166bitXorF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime6UInt16S {
+	let var _2: 7runtime6UInt16S
+	let var _3: i16
+
+	bb0 : {
+		_3 = llvm.int.xor copy _0.repr, copy _1.repr
+		call function "7runtime6UInt164initFlE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt166bitAndF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime6UInt16S {
+	let var _2: 7runtime6UInt16S
+	let var _3: i16
+
+	bb0 : {
+		_3 = llvm.int.and copy _0.repr, copy _1.repr
+		call function "7runtime6UInt164initFlE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt169shiftLeftF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime6UInt16S {
+	let var _2: 7runtime6UInt16S
+	let var _3: i16
+
+	bb0 : {
+		_3 = llvm.int.shl copy _0.repr, copy _1.repr
+		call function "7runtime6UInt164initFlE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt1610shiftRightF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime6UInt16S {
+	let var _2: 7runtime6UInt16S
+	let var _3: i16
+
+	bb0 : {
+		_3 = llvm.int.shr copy _0.repr, copy _1.repr
+		call function "7runtime6UInt164initFlE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt165equalF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.eq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt168notEqualF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.neq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt168lessThanF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt1611greaterThanF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt1610lessThanEqF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt1613greaterThanEqF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt164unitF7runtime6UInt16SE0 (_0: 7runtime6UInt16S, ) -> 7runtime6UInt16S {
+	bb0 : {
+		return copy _0
+	}
+	
+}
+func 7runtime6UInt169openRangeF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime6UInt165RangeS {
+	let var _2: 7runtime6UInt165RangeS
+
+	bb0 : {
+		call function "7runtime6UInt165Range4initF7runtime6UInt16S7runtime6UInt16SE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt1611closedRangeF7runtime6UInt16S7runtime6UInt16SE00 (_0: 7runtime6UInt16S, _1: 7runtime6UInt16S, ) -> 7runtime6UInt1611ClosedRangeS {
+	let var _2: 7runtime6UInt1611ClosedRangeS
+
+	bb0 : {
+		call function "7runtime6UInt1611ClosedRange4initF7runtime6UInt16S7runtime6UInt16SE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt166negateF7runtime6UInt16SE0 (_0: 7runtime6UInt16S, ) -> 7runtime6UInt16S {
+	let var _1: 7runtime6UInt16S
+	let var _2: i16
+
+	bb0 : {
+		_2 = llvm.int.neg copy _0.repr
+		call function "7runtime6UInt164initFlE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime6UInt166invertF7runtime6UInt16SE0 (_0: 7runtime6UInt16S, ) -> 7runtime6UInt16S {
+	let var _1: 7runtime6UInt16S
+	let var _2: i16
+
+	bb0 : {
+		_2 = llvm.int.inv copy _0.repr
+		call function "7runtime6UInt164initFlE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime6UInt164initF7runtime5UInt8SE0 (_0: shared 7runtime6UInt16S, _1: 7runtime5UInt8S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.16 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6UInt164initF7runtime6UInt32SE10truncating (_0: shared 7runtime6UInt16S, _1: 7runtime6UInt32S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.trunc.16 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6UInt164initF7runtime6UInt64SE10truncating (_0: shared 7runtime6UInt16S, _1: 7runtime6UInt64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.trunc.16 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6UInt164initF7runtime5Int16SE7bitcast (_0: shared 7runtime6UInt16S, _1: 7runtime5Int16S, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6UInt164initFlE4repr (_0: shared 7runtime6UInt16S, _1: i16, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1
+		return
+	}
+	
+}
+func 7runtime6UInt1611ClosedRange4initF7runtime6UInt16S7runtime6UInt16SE4from2to (_0: shared 7runtime6UInt1611ClosedRangeS, _1: 7runtime6UInt16S, _2: 7runtime6UInt16S, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime6UInt1611ClosedRange6bottomFE (_0: 7runtime6UInt1611ClosedRangeS, ) -> 7runtime6UInt16S {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime6UInt1611ClosedRange3topFE (_0: 7runtime6UInt1611ClosedRangeS, ) -> 7runtime6UInt16S {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime6UInt165Range4initF7runtime6UInt16S7runtime6UInt16SE4from2to (_0: shared 7runtime6UInt165RangeS, _1: 7runtime6UInt16S, _2: 7runtime6UInt16S, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime6UInt165Range6bottomFE (_0: 7runtime6UInt165RangeS, ) -> 7runtime6UInt16S {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime6UInt165Range3topFE (_0: 7runtime6UInt165RangeS, ) -> 7runtime6UInt16S {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime6UInt168Optional6unwrapF7runtime6UInt16SE6orElse (_0: 7runtime6UInt168OptionalV, _1: 7runtime6UInt16S, ) -> 7runtime6UInt16S {
+	let var _2: 7runtime6UInt16S
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_2 = copy _0 as .some.0
+		goto bb1
+	}
+	
+	bb4 : {
+		_2 = copy _1
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt168Optional3mapFF7runtime6UInt16SE7runtime6UInt16SE0 (_0: 7runtime6UInt168OptionalV, _1: func (7runtime6UInt16S, ) -> 7runtime6UInt16S, ) -> 7runtime6UInt168OptionalV {
+	let var _2: 7runtime6UInt168OptionalV
+	let var _3: 7runtime6UInt168OptionalV
+	let var _4: 7runtime6UInt16S
+	let var _5: 7runtime6UInt168OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_4 = call copy _1 (copy _0 as .some.0)
+		discriminant _3 = const 1
+		_3 as .some.0 = copy _4
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _5 = const 0
+		_2 = copy _5
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt168Optional7flatMapFF7runtime6UInt16SE7runtime6UInt168OptionalVE0 (_0: 7runtime6UInt168OptionalV, _1: func (7runtime6UInt16S, ) -> 7runtime6UInt168OptionalV, ) -> 7runtime6UInt168OptionalV {
+	let var _2: 7runtime6UInt168OptionalV
+	let var _3: 7runtime6UInt168OptionalV
+	let var _4: 7runtime6UInt168OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_3 = call copy _1 (copy _0 as .some.0)
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _4 = const 0
+		_2 = copy _4
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt323addF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime6UInt32S {
+	let var _2: 7runtime6UInt32S
+	let var _3: i32
+
+	bb0 : {
+		_3 = llvm.int.add copy _0.repr, copy _1.repr
+		call function "7runtime6UInt324initFjE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt323subF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime6UInt32S {
+	let var _2: 7runtime6UInt32S
+	let var _3: i32
+
+	bb0 : {
+		_3 = llvm.int.sub copy _0.repr, copy _1.repr
+		call function "7runtime6UInt324initFjE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt323mulF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime6UInt32S {
+	let var _2: 7runtime6UInt32S
+	let var _3: i32
+
+	bb0 : {
+		_3 = llvm.int.mul copy _0.repr, copy _1.repr
+		call function "7runtime6UInt324initFjE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt323divF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime6UInt32S {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime6UInt32S
+	let var _4: 7runtime6UInt32S
+	let var _5: i32
+
+	bb0 : {
+		call function "7runtime6UInt324initFjE4repr" (shared _3, const 0)
+		_2 = call function "7runtime6UInt325equalF7runtime6UInt32S7runtime6UInt32SE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.div copy _0.repr, copy _1.repr
+		call function "7runtime6UInt324initFjE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime6UInt323modF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime6UInt32S {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime6UInt32S
+	let var _4: 7runtime6UInt32S
+	let var _5: i32
+
+	bb0 : {
+		call function "7runtime6UInt324initFjE4repr" (shared _3, const 0)
+		_2 = call function "7runtime6UInt325equalF7runtime6UInt32S7runtime6UInt32SE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.rem copy _0.repr, copy _1.repr
+		call function "7runtime6UInt324initFjE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime6UInt325bitOrF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime6UInt32S {
+	let var _2: 7runtime6UInt32S
+	let var _3: i32
+
+	bb0 : {
+		_3 = llvm.int.or copy _0.repr, copy _1.repr
+		call function "7runtime6UInt324initFjE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt326bitXorF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime6UInt32S {
+	let var _2: 7runtime6UInt32S
+	let var _3: i32
+
+	bb0 : {
+		_3 = llvm.int.xor copy _0.repr, copy _1.repr
+		call function "7runtime6UInt324initFjE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt326bitAndF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime6UInt32S {
+	let var _2: 7runtime6UInt32S
+	let var _3: i32
+
+	bb0 : {
+		_3 = llvm.int.and copy _0.repr, copy _1.repr
+		call function "7runtime6UInt324initFjE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt329shiftLeftF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime6UInt32S {
+	let var _2: 7runtime6UInt32S
+	let var _3: i32
+
+	bb0 : {
+		_3 = llvm.int.shl copy _0.repr, copy _1.repr
+		call function "7runtime6UInt324initFjE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt3210shiftRightF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime6UInt32S {
+	let var _2: 7runtime6UInt32S
+	let var _3: i32
+
+	bb0 : {
+		_3 = llvm.int.shr copy _0.repr, copy _1.repr
+		call function "7runtime6UInt324initFjE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt325equalF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.eq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt328notEqualF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.neq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt328lessThanF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt3211greaterThanF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt3210lessThanEqF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt3213greaterThanEqF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt324unitF7runtime6UInt32SE0 (_0: 7runtime6UInt32S, ) -> 7runtime6UInt32S {
+	bb0 : {
+		return copy _0
+	}
+	
+}
+func 7runtime6UInt329openRangeF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime6UInt325RangeS {
+	let var _2: 7runtime6UInt325RangeS
+
+	bb0 : {
+		call function "7runtime6UInt325Range4initF7runtime6UInt32S7runtime6UInt32SE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt3211closedRangeF7runtime6UInt32S7runtime6UInt32SE00 (_0: 7runtime6UInt32S, _1: 7runtime6UInt32S, ) -> 7runtime6UInt3211ClosedRangeS {
+	let var _2: 7runtime6UInt3211ClosedRangeS
+
+	bb0 : {
+		call function "7runtime6UInt3211ClosedRange4initF7runtime6UInt32S7runtime6UInt32SE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt326negateF7runtime6UInt32SE0 (_0: 7runtime6UInt32S, ) -> 7runtime6UInt32S {
+	let var _1: 7runtime6UInt32S
+	let var _2: i32
+
+	bb0 : {
+		_2 = llvm.int.neg copy _0.repr
+		call function "7runtime6UInt324initFjE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime6UInt326invertF7runtime6UInt32SE0 (_0: 7runtime6UInt32S, ) -> 7runtime6UInt32S {
+	let var _1: 7runtime6UInt32S
+	let var _2: i32
+
+	bb0 : {
+		_2 = llvm.int.inv copy _0.repr
+		call function "7runtime6UInt324initFjE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime6UInt324initF7runtime5UInt8SE0 (_0: shared 7runtime6UInt32S, _1: 7runtime5UInt8S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.32 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6UInt324initF7runtime6UInt16SE0 (_0: shared 7runtime6UInt32S, _1: 7runtime6UInt16S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.32 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6UInt324initF7runtime6UInt64SE10truncating (_0: shared 7runtime6UInt32S, _1: 7runtime6UInt64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.trunc.32 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6UInt324initF7runtime5Int32SE7bitcast (_0: shared 7runtime6UInt32S, _1: 7runtime5Int32S, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6UInt324initFjE4repr (_0: shared 7runtime6UInt32S, _1: i32, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1
+		return
+	}
+	
+}
+func 7runtime6UInt3211ClosedRange4initF7runtime6UInt32S7runtime6UInt32SE4from2to (_0: shared 7runtime6UInt3211ClosedRangeS, _1: 7runtime6UInt32S, _2: 7runtime6UInt32S, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime6UInt3211ClosedRange6bottomFE (_0: 7runtime6UInt3211ClosedRangeS, ) -> 7runtime6UInt32S {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime6UInt3211ClosedRange3topFE (_0: 7runtime6UInt3211ClosedRangeS, ) -> 7runtime6UInt32S {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime6UInt325Range4initF7runtime6UInt32S7runtime6UInt32SE4from2to (_0: shared 7runtime6UInt325RangeS, _1: 7runtime6UInt32S, _2: 7runtime6UInt32S, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime6UInt325Range6bottomFE (_0: 7runtime6UInt325RangeS, ) -> 7runtime6UInt32S {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime6UInt325Range3topFE (_0: 7runtime6UInt325RangeS, ) -> 7runtime6UInt32S {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime6UInt328Optional6unwrapF7runtime6UInt32SE6orElse (_0: 7runtime6UInt328OptionalV, _1: 7runtime6UInt32S, ) -> 7runtime6UInt32S {
+	let var _2: 7runtime6UInt32S
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_2 = copy _0 as .some.0
+		goto bb1
+	}
+	
+	bb4 : {
+		_2 = copy _1
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt328Optional3mapFF7runtime6UInt32SE7runtime6UInt32SE0 (_0: 7runtime6UInt328OptionalV, _1: func (7runtime6UInt32S, ) -> 7runtime6UInt32S, ) -> 7runtime6UInt328OptionalV {
+	let var _2: 7runtime6UInt328OptionalV
+	let var _3: 7runtime6UInt328OptionalV
+	let var _4: 7runtime6UInt32S
+	let var _5: 7runtime6UInt328OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_4 = call copy _1 (copy _0 as .some.0)
+		discriminant _3 = const 1
+		_3 as .some.0 = copy _4
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _5 = const 0
+		_2 = copy _5
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt328Optional7flatMapFF7runtime6UInt32SE7runtime6UInt328OptionalVE0 (_0: 7runtime6UInt328OptionalV, _1: func (7runtime6UInt32S, ) -> 7runtime6UInt328OptionalV, ) -> 7runtime6UInt328OptionalV {
+	let var _2: 7runtime6UInt328OptionalV
+	let var _3: 7runtime6UInt328OptionalV
+	let var _4: 7runtime6UInt328OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_3 = call copy _1 (copy _0 as .some.0)
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _4 = const 0
+		_2 = copy _4
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt643addF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime6UInt64S {
+	let var _2: 7runtime6UInt64S
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.add copy _0.repr, copy _1.repr
+		call function "7runtime6UInt644initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt643subF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime6UInt64S {
+	let var _2: 7runtime6UInt64S
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.sub copy _0.repr, copy _1.repr
+		call function "7runtime6UInt644initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt643mulF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime6UInt64S {
+	let var _2: 7runtime6UInt64S
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.mul copy _0.repr, copy _1.repr
+		call function "7runtime6UInt644initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt643divF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime6UInt64S {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime6UInt64S
+	let var _4: 7runtime6UInt64S
+	let var _5: i64
+
+	bb0 : {
+		call function "7runtime6UInt644initFiE4repr" (shared _3, const 0)
+		_2 = call function "7runtime6UInt645equalF7runtime6UInt64S7runtime6UInt64SE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.div copy _0.repr, copy _1.repr
+		call function "7runtime6UInt644initFiE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime6UInt643modF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime6UInt64S {
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime6UInt64S
+	let var _4: 7runtime6UInt64S
+	let var _5: i64
+
+	bb0 : {
+		call function "7runtime6UInt644initFiE4repr" (shared _3, const 0)
+		_2 = call function "7runtime6UInt645equalF7runtime6UInt64S7runtime6UInt64SE00" (copy _1, copy _3)
+		branchif copy _2.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_5 = llvm.int.rem copy _0.repr, copy _1.repr
+		call function "7runtime6UInt644initFiE4repr" (shared _4, copy _5)
+		return copy _4
+	}
+	
+}
+func 7runtime6UInt645bitOrF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime6UInt64S {
+	let var _2: 7runtime6UInt64S
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.or copy _0.repr, copy _1.repr
+		call function "7runtime6UInt644initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt646bitXorF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime6UInt64S {
+	let var _2: 7runtime6UInt64S
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.xor copy _0.repr, copy _1.repr
+		call function "7runtime6UInt644initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt646bitAndF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime6UInt64S {
+	let var _2: 7runtime6UInt64S
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.and copy _0.repr, copy _1.repr
+		call function "7runtime6UInt644initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt649shiftLeftF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime6UInt64S {
+	let var _2: 7runtime6UInt64S
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.shl copy _0.repr, copy _1.repr
+		call function "7runtime6UInt644initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt6410shiftRightF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime6UInt64S {
+	let var _2: 7runtime6UInt64S
+	let var _3: i64
+
+	bb0 : {
+		_3 = llvm.int.shr copy _0.repr, copy _1.repr
+		call function "7runtime6UInt644initFiE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt645equalF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.eq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt648notEqualF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.neq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt648lessThanF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt6411greaterThanF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt6410lessThanEqF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt6413greaterThanEqF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt644unitF7runtime6UInt64SE0 (_0: 7runtime6UInt64S, ) -> 7runtime6UInt64S {
+	bb0 : {
+		return copy _0
+	}
+	
+}
+func 7runtime6UInt649openRangeF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime6UInt645RangeS {
+	let var _2: 7runtime6UInt645RangeS
+
+	bb0 : {
+		call function "7runtime6UInt645Range4initF7runtime6UInt64S7runtime6UInt64SE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt6411closedRangeF7runtime6UInt64S7runtime6UInt64SE00 (_0: 7runtime6UInt64S, _1: 7runtime6UInt64S, ) -> 7runtime6UInt6411ClosedRangeS {
+	let var _2: 7runtime6UInt6411ClosedRangeS
+
+	bb0 : {
+		call function "7runtime6UInt6411ClosedRange4initF7runtime6UInt64S7runtime6UInt64SE4from2to" (shared _2, copy _0, copy _1)
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt646negateF7runtime6UInt64SE0 (_0: 7runtime6UInt64S, ) -> 7runtime6UInt64S {
+	let var _1: 7runtime6UInt64S
+	let var _2: i64
+
+	bb0 : {
+		_2 = llvm.int.neg copy _0.repr
+		call function "7runtime6UInt644initFiE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime6UInt646invertF7runtime6UInt64SE0 (_0: 7runtime6UInt64S, ) -> 7runtime6UInt64S {
+	let var _1: 7runtime6UInt64S
+	let var _2: i64
+
+	bb0 : {
+		_2 = llvm.int.inv copy _0.repr
+		call function "7runtime6UInt644initFiE4repr" (shared _1, copy _2)
+		return copy _1
+	}
+	
+}
+func 7runtime6UInt644initF7runtime5FloatSE5floor (_0: shared 7runtime6UInt64S, _1: 7runtime5FloatS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.icnv.64 copy _1.repr
+		return
+	}
+	
+}
+func 7runtime6UInt644initF7runtime6DoubleSE5floor (_0: shared 7runtime6UInt64S, _1: 7runtime6DoubleS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.icnv.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6UInt644initF7runtime4HalfSE5floor (_0: shared 7runtime6UInt64S, _1: 7runtime4HalfS, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.float.icnv.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6UInt644initF7runtime5UInt8SE0 (_0: shared 7runtime6UInt64S, _1: 7runtime5UInt8S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6UInt644initF7runtime6UInt16SE0 (_0: shared 7runtime6UInt64S, _1: 7runtime6UInt16S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6UInt644initF7runtime6UInt32SE0 (_0: shared 7runtime6UInt64S, _1: 7runtime6UInt32S, ) -> () {
+	bb0 : {
+		*copy _0.repr = llvm.int.zext.64 copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6UInt644initF7runtime5Int64SE7bitcast (_0: shared 7runtime6UInt64S, _1: 7runtime5Int64S, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6UInt644initF7runtime3IntSE7bitcast (_0: shared 7runtime6UInt64S, _1: 7runtime3IntS, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6UInt644initF7runtime4UIntSE0 (_0: shared 7runtime6UInt64S, _1: 7runtime4UIntS, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return tuple ()
+	}
+	
+}
+func 7runtime6UInt644initFiE4repr (_0: shared 7runtime6UInt64S, _1: i64, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1
+		return
+	}
+	
+}
+func 7runtime6UInt6411ClosedRange4initF7runtime6UInt64S7runtime6UInt64SE4from2to (_0: shared 7runtime6UInt6411ClosedRangeS, _1: 7runtime6UInt64S, _2: 7runtime6UInt64S, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime6UInt6411ClosedRange6bottomFE (_0: 7runtime6UInt6411ClosedRangeS, ) -> 7runtime6UInt64S {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime6UInt6411ClosedRange3topFE (_0: 7runtime6UInt6411ClosedRangeS, ) -> 7runtime6UInt64S {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime6UInt645Range4initF7runtime6UInt64S7runtime6UInt64SE4from2to (_0: shared 7runtime6UInt645RangeS, _1: 7runtime6UInt64S, _2: 7runtime6UInt64S, ) -> () {
+	bb0 : {
+		*copy _0.low = copy _1
+		*copy _0.high = copy _2
+		return
+	}
+	
+}
+func 7runtime6UInt645Range6bottomFE (_0: 7runtime6UInt645RangeS, ) -> 7runtime6UInt64S {
+	bb0 : {
+		return copy _0.low
+	}
+	
+}
+func 7runtime6UInt645Range3topFE (_0: 7runtime6UInt645RangeS, ) -> 7runtime6UInt64S {
+	bb0 : {
+		return copy _0.high
+	}
+	
+}
+func 7runtime6UInt648Optional6unwrapF7runtime6UInt64SE6orElse (_0: 7runtime6UInt648OptionalV, _1: 7runtime6UInt64S, ) -> 7runtime6UInt64S {
+	let var _2: 7runtime6UInt64S
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_2 = copy _0 as .some.0
+		goto bb1
+	}
+	
+	bb4 : {
+		_2 = copy _1
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt648Optional3mapFF7runtime6UInt64SE7runtime6UInt64SE0 (_0: 7runtime6UInt648OptionalV, _1: func (7runtime6UInt64S, ) -> 7runtime6UInt64S, ) -> 7runtime6UInt648OptionalV {
+	let var _2: 7runtime6UInt648OptionalV
+	let var _3: 7runtime6UInt648OptionalV
+	let var _4: 7runtime6UInt64S
+	let var _5: 7runtime6UInt648OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_4 = call copy _1 (copy _0 as .some.0)
+		discriminant _3 = const 1
+		_3 as .some.0 = copy _4
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _5 = const 0
+		_2 = copy _5
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime6UInt648Optional7flatMapFF7runtime6UInt64SE7runtime6UInt648OptionalVE0 (_0: 7runtime6UInt648OptionalV, _1: func (7runtime6UInt64S, ) -> 7runtime6UInt648OptionalV, ) -> 7runtime6UInt648OptionalV {
+	let var _2: 7runtime6UInt648OptionalV
+	let var _3: 7runtime6UInt648OptionalV
+	let var _4: 7runtime6UInt648OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_3 = call copy _1 (copy _0 as .some.0)
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _4 = const 0
+		_2 = copy _4
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime6String6lengthFE (_0: 7runtime6StringS, ) -> 7runtime3IntS {
+	let var _1: 7runtime3IntS
+
+	bb0 : {
+		call function "7runtime3Int4initFiE4repr" (shared _1, copy _0.len)
+		return copy _1
+	}
+	
+}
+func 7runtime6String4initFtiE3ptr3len (_0: shared 7runtime6StringS, _1: shared i8, _2: i64, ) -> () {
+	bb0 : {
+		*copy _0.ptr = copy _1
+		*copy _0.len = copy _2
+		return
+	}
+	
+}
+func 7runtime6String8Optional6unwrapF7runtime6StringSE6orElse (_0: 7runtime6String8OptionalV, _1: 7runtime6StringS, ) -> 7runtime6StringS {
+	let var _2: 7runtime6StringS
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_2 = copy _0 as .some.0
+		goto bb1
+	}
+	
+	bb4 : {
+		_2 = copy _1
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime6String8Optional3mapFF7runtime6StringSE7runtime6StringSE0 (_0: 7runtime6String8OptionalV, _1: func (7runtime6StringS, ) -> 7runtime6StringS, ) -> 7runtime6String8OptionalV {
+	let var _2: 7runtime6String8OptionalV
+	let var _3: 7runtime6String8OptionalV
+	let var _4: 7runtime6StringS
+	let var _5: 7runtime6String8OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_4 = call copy _1 (copy _0 as .some.0)
+		discriminant _3 = const 1
+		_3 as .some.0 = copy _4
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _5 = const 0
+		_2 = copy _5
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime6String8Optional7flatMapFF7runtime6StringSE7runtime6String8OptionalVE0 (_0: 7runtime6String8OptionalV, _1: func (7runtime6StringS, ) -> 7runtime6String8OptionalV, ) -> 7runtime6String8OptionalV {
+	let var _2: 7runtime6String8OptionalV
+	let var _3: 7runtime6String8OptionalV
+	let var _4: 7runtime6String8OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_3 = call copy _1 (copy _0 as .some.0)
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _4 = const 0
+		_2 = copy _4
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime4Char10isBinDigitFE (_0: 7runtime4CharS, ) -> 7runtime4BoolS {
+	let var _1: 7runtime4BoolS
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime4CharS
+	let var _4: 7runtime4BoolS
+	let var _5: 7runtime4CharS
+
+	bb0 : {
+		call function "7runtime4Char4initFjE4repr" (shared _3, const 48)
+		_2 = call function "7runtime4Char5equalF7runtime4CharS7runtime4CharSE00" (copy _0, copy _3)
+		call function "7runtime4Char4initFjE4repr" (shared _5, const 49)
+		_4 = call function "7runtime4Char5equalF7runtime4CharS7runtime4CharSE00" (copy _0, copy _5)
+		_1 = call function "7runtime4Bool2orF7runtime4BoolS7runtime4BoolSE00" (copy _2, copy _4)
+		return copy _1
+	}
+	
+}
+func 7runtime4Char7isDigitFE (_0: 7runtime4CharS, ) -> 7runtime4BoolS {
+	let var _1: 7runtime4BoolS
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime4CharS
+	let var _4: 7runtime4BoolS
+	let var _5: 7runtime4CharS
+
+	bb0 : {
+		call function "7runtime4Char4initFjE4repr" (shared _3, const 48)
+		_2 = call function "7runtime4Char13greaterThanEqF7runtime4CharS7runtime4CharSE00" (copy _0, copy _3)
+		call function "7runtime4Char4initFjE4repr" (shared _5, const 57)
+		_4 = call function "7runtime4Char10lessThanEqF7runtime4CharS7runtime4CharSE00" (copy _0, copy _5)
+		_1 = call function "7runtime4Bool3andF7runtime4BoolS7runtime4BoolSE00" (copy _2, copy _4)
+		return copy _1
+	}
+	
+}
+func 7runtime4Char10isOctDigitFE (_0: 7runtime4CharS, ) -> 7runtime4BoolS {
+	let var _1: 7runtime4BoolS
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime4CharS
+	let var _4: 7runtime4BoolS
+	let var _5: 7runtime4CharS
+
+	bb0 : {
+		call function "7runtime4Char4initFjE4repr" (shared _3, const 48)
+		_2 = call function "7runtime4Char13greaterThanEqF7runtime4CharS7runtime4CharSE00" (copy _0, copy _3)
+		call function "7runtime4Char4initFjE4repr" (shared _5, const 55)
+		_4 = call function "7runtime4Char10lessThanEqF7runtime4CharS7runtime4CharSE00" (copy _0, copy _5)
+		_1 = call function "7runtime4Bool3andF7runtime4BoolS7runtime4BoolSE00" (copy _2, copy _4)
+		return copy _1
+	}
+	
+}
+func 7runtime4Char10isHexDigitFE (_0: 7runtime4CharS, ) -> 7runtime4BoolS {
+	let var _1: 7runtime4BoolS
+	let var _2: 7runtime4BoolS
+	let var _3: 7runtime4CharS
+	let var _4: 7runtime4BoolS
+	let var _5: 7runtime4CharS
+	let var _6: 7runtime4BoolS
+	let var _7: 7runtime4BoolS
+	let var _8: 7runtime4CharS
+	let var _9: 7runtime4BoolS
+	let var _10: 7runtime4CharS
+	let var _11: 7runtime4BoolS
+	let var _12: 7runtime4BoolS
+	let var _13: 7runtime4CharS
+	let var _14: 7runtime4BoolS
+	let var _15: 7runtime4CharS
+	let var _16: 7runtime4BoolS
+	let var _17: 7runtime4BoolS
+
+	bb0 : {
+		call function "7runtime4Char4initFjE4repr" (shared _3, const 48)
+		_2 = call function "7runtime4Char13greaterThanEqF7runtime4CharS7runtime4CharSE00" (copy _0, copy _3)
+		call function "7runtime4Char4initFjE4repr" (shared _5, const 57)
+		_4 = call function "7runtime4Char10lessThanEqF7runtime4CharS7runtime4CharSE00" (copy _0, copy _5)
+		_1 = call function "7runtime4Bool3andF7runtime4BoolS7runtime4BoolSE00" (copy _2, copy _4)
+		call function "7runtime4Char4initFjE4repr" (shared _8, const 97)
+		_7 = call function "7runtime4Char13greaterThanEqF7runtime4CharS7runtime4CharSE00" (copy _0, copy _8)
+		call function "7runtime4Char4initFjE4repr" (shared _10, const 102)
+		_9 = call function "7runtime4Char10lessThanEqF7runtime4CharS7runtime4CharSE00" (copy _0, copy _10)
+		_6 = call function "7runtime4Bool3andF7runtime4BoolS7runtime4BoolSE00" (copy _7, copy _9)
+		call function "7runtime4Char4initFjE4repr" (shared _13, const 65)
+		_12 = call function "7runtime4Char13greaterThanEqF7runtime4CharS7runtime4CharSE00" (copy _0, copy _13)
+		call function "7runtime4Char4initFjE4repr" (shared _15, const 70)
+		_14 = call function "7runtime4Char10lessThanEqF7runtime4CharS7runtime4CharSE00" (copy _0, copy _15)
+		_11 = call function "7runtime4Bool3andF7runtime4BoolS7runtime4BoolSE00" (copy _12, copy _14)
+		_17 = call function "7runtime4Bool2orF7runtime4BoolS7runtime4BoolSE00" (copy _1, copy _6)
+		_16 = call function "7runtime4Bool2orF7runtime4BoolS7runtime4BoolSE00" (copy _17, copy _11)
+		return copy _16
+	}
+	
+}
+func 7runtime4Char4initF7runtime6UInt32SE3raw (_0: shared 7runtime4CharS, _1: 7runtime6UInt32S, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1.repr
+		return
+	}
+	
+}
+func 7runtime4Char5equalF7runtime4CharS7runtime4CharSE00 (_0: 7runtime4CharS, _1: 7runtime4CharS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.eq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Char8notEqualF7runtime4CharS7runtime4CharSE00 (_0: 7runtime4CharS, _1: 7runtime4CharS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.neq copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Char11greaterThanF7runtime4CharS7runtime4CharSE00 (_0: 7runtime4CharS, _1: 7runtime4CharS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Char13greaterThanEqF7runtime4CharS7runtime4CharSE00 (_0: 7runtime4CharS, _1: 7runtime4CharS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.gte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Char8lessThanF7runtime4CharS7runtime4CharSE00 (_0: 7runtime4CharS, _1: 7runtime4CharS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lt copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Char10lessThanEqF7runtime4CharS7runtime4CharSE00 (_0: 7runtime4CharS, _1: 7runtime4CharS, ) -> 7runtime4BoolS {
+	let var _2: 7runtime4BoolS
+	let var _3: i1
+
+	bb0 : {
+		_3 = llvm.int.cmp.lte copy _0.repr, copy _1.repr
+		call function "7runtime4Bool4initFbE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Char6promptF7runtime6StringSE0 (_0: 7runtime6StringS, ) -> 7runtime4CharS {
+	let var _1: ()
+	let var _2: 7runtime4CharS
+	let var _3: i32
+
+	bb0 : {
+		_1 = call function "7runtime5printF7runtime6StringSE0" (copy _0)
+		_3 = call extern function "readInternalChar" ()
+		call function "7runtime4Char4initFjE4repr" (shared _2, copy _3)
+		return copy _2
+	}
+	
+}
+func 7runtime4Char4initFjE4repr (_0: shared 7runtime4CharS, _1: i32, ) -> () {
+	bb0 : {
+		*copy _0.repr = copy _1
+		return
+	}
+	
+}
+func 7runtime4Char8Optional6unwrapF7runtime4CharSE6orElse (_0: 7runtime4Char8OptionalV, _1: 7runtime4CharS, ) -> 7runtime4CharS {
+	let var _2: 7runtime4CharS
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_2 = copy _0 as .some.0
+		goto bb1
+	}
+	
+	bb4 : {
+		_2 = copy _1
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime4Char8Optional3mapFF7runtime4CharSE7runtime4CharSE0 (_0: 7runtime4Char8OptionalV, _1: func (7runtime4CharS, ) -> 7runtime4CharS, ) -> 7runtime4Char8OptionalV {
+	let var _2: 7runtime4Char8OptionalV
+	let var _3: 7runtime4Char8OptionalV
+	let var _4: 7runtime4CharS
+	let var _5: 7runtime4Char8OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_4 = call copy _1 (copy _0 as .some.0)
+		discriminant _3 = const 1
+		_3 as .some.0 = copy _4
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _5 = const 0
+		_2 = copy _5
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime4Char8Optional7flatMapFF7runtime4CharSE7runtime4Char8OptionalVE0 (_0: 7runtime4Char8OptionalV, _1: func (7runtime4CharS, ) -> 7runtime4Char8OptionalV, ) -> 7runtime4Char8OptionalV {
+	let var _2: 7runtime4Char8OptionalV
+	let var _3: 7runtime4Char8OptionalV
+	let var _4: 7runtime4Char8OptionalV
+
+	bb0 : {
+		switch copy discriminant _0 else bb2 {
+			1 => bb3
+			0 => bb4
+		}
+	}
+	
+	bb1 : {
+		goto bb5
+	}
+	
+	bb2 : {
+		goto bb1
+	}
+	
+	bb3 : {
+		_3 = call copy _1 (copy _0 as .some.0)
+		_2 = copy _3
+		goto bb1
+	}
+	
+	bb4 : {
+		discriminant _4 = const 0
+		_2 = copy _4
+		goto bb1
+	}
+	
+	bb5 : {
+		return copy _2
+	}
+	
+}
+func 7runtime5printF7runtime4BoolS7runtime4BoolSE07newline (_0: 7runtime4BoolS, _1: 7runtime4BoolS, ) -> () {
+	let var _2: ()
+	let var _3: ()
+
+	bb0 : {
+		_2 = call extern function "printBool" (copy _0.repr)
+		branchif copy _1.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		_3 = call extern function "printLine" ()
+		goto bb1
+	}
+	
+	bb3 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime5printF7runtime4HalfS7runtime4BoolSE07newline (_0: 7runtime4HalfS, _1: 7runtime4BoolS, ) -> () {
+	let var _2: ()
+	let var _3: f32
+	let var _4: ()
+
+	bb0 : {
+		_3 = llvm.float.ext.32 copy _0.repr
+		_2 = call extern function "printFloat" (copy _3)
+		branchif copy _1.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		_4 = call extern function "printLine" ()
+		goto bb1
+	}
+	
+	bb3 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime5printF7runtime5FloatS7runtime4BoolSE07newline (_0: 7runtime5FloatS, _1: 7runtime4BoolS, ) -> () {
+	let var _2: ()
+	let var _3: ()
+
+	bb0 : {
+		_2 = call extern function "printFloat" (copy _0.repr)
+		branchif copy _1.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		_3 = call extern function "printLine" ()
+		goto bb1
+	}
+	
+	bb3 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime5printF7runtime6DoubleS7runtime4BoolSE07newline (_0: 7runtime6DoubleS, _1: 7runtime4BoolS, ) -> () {
+	let var _2: ()
+	let var _3: ()
+
+	bb0 : {
+		_2 = call extern function "printDouble" (copy _0.repr)
+		branchif copy _1.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		_3 = call extern function "printLine" ()
+		goto bb1
+	}
+	
+	bb3 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime5printF7runtime3IntS7runtime4BoolSE07newline (_0: 7runtime3IntS, _1: 7runtime4BoolS, ) -> () {
+	let var _2: ()
+	let var _3: ()
+
+	bb0 : {
+		_2 = call extern function "printInt64" (copy _0.repr)
+		branchif copy _1.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		_3 = call extern function "printLine" ()
+		goto bb1
+	}
+	
+	bb3 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime5printF7runtime5Int64S7runtime4BoolSE07newline (_0: 7runtime5Int64S, _1: 7runtime4BoolS, ) -> () {
+	let var _2: ()
+	let var _3: ()
+
+	bb0 : {
+		_2 = call extern function "printInt64" (copy _0.repr)
+		branchif copy _1.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		_3 = call extern function "printLine" ()
+		goto bb1
+	}
+	
+	bb3 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime5printF7runtime5Int32S7runtime4BoolSE07newline (_0: 7runtime5Int32S, _1: 7runtime4BoolS, ) -> () {
+	let var _2: ()
+	let var _3: ()
+
+	bb0 : {
+		_2 = call extern function "printInt32" (copy _0.repr)
+		branchif copy _1.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		_3 = call extern function "printLine" ()
+		goto bb1
+	}
+	
+	bb3 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime5printF7runtime5Int16S7runtime4BoolSE07newline (_0: 7runtime5Int16S, _1: 7runtime4BoolS, ) -> () {
+	let var _2: ()
+	let var _3: ()
+
+	bb0 : {
+		_2 = call extern function "printInt16" (copy _0.repr)
+		branchif copy _1.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		_3 = call extern function "printLine" ()
+		goto bb1
+	}
+	
+	bb3 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime5printF7runtime4Int8S7runtime4BoolSE07newline (_0: 7runtime4Int8S, _1: 7runtime4BoolS, ) -> () {
+	let var _2: ()
+	let var _3: ()
+
+	bb0 : {
+		_2 = call extern function "printInt8" (copy _0.repr)
+		branchif copy _1.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		_3 = call extern function "printLine" ()
+		goto bb1
+	}
+	
+	bb3 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime5printF7runtime4UIntS7runtime4BoolSE07newline (_0: 7runtime4UIntS, _1: 7runtime4BoolS, ) -> () {
+	let var _2: ()
+	let var _3: ()
+
+	bb0 : {
+		_2 = call extern function "printUInt64" (copy _0.repr)
+		branchif copy _1.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		_3 = call extern function "printLine" ()
+		goto bb1
+	}
+	
+	bb3 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime5printF7runtime6UInt64S7runtime4BoolSE07newline (_0: 7runtime6UInt64S, _1: 7runtime4BoolS, ) -> () {
+	let var _2: ()
+	let var _3: ()
+
+	bb0 : {
+		_2 = call extern function "printUInt64" (copy _0.repr)
+		branchif copy _1.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		_3 = call extern function "printLine" ()
+		goto bb1
+	}
+	
+	bb3 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime5printF7runtime6UInt32S7runtime4BoolSE07newline (_0: 7runtime6UInt32S, _1: 7runtime4BoolS, ) -> () {
+	let var _2: ()
+	let var _3: ()
+
+	bb0 : {
+		_2 = call extern function "printUInt32" (copy _0.repr)
+		branchif copy _1.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		_3 = call extern function "printLine" ()
+		goto bb1
+	}
+	
+	bb3 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime5printF7runtime6UInt16S7runtime4BoolSE07newline (_0: 7runtime6UInt16S, _1: 7runtime4BoolS, ) -> () {
+	let var _2: ()
+	let var _3: ()
+
+	bb0 : {
+		_2 = call extern function "printUInt16" (copy _0.repr)
+		branchif copy _1.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		_3 = call extern function "printLine" ()
+		goto bb1
+	}
+	
+	bb3 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime5printF7runtime5UInt8S7runtime4BoolSE07newline (_0: 7runtime5UInt8S, _1: 7runtime4BoolS, ) -> () {
+	let var _2: ()
+	let var _3: ()
+
+	bb0 : {
+		_2 = call extern function "printUInt8" (copy _0.repr)
+		branchif copy _1.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		_3 = call extern function "printLine" ()
+		goto bb1
+	}
+	
+	bb3 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime5printF7runtime6StringS7runtime4BoolSE07newline (_0: 7runtime6StringS, _1: 7runtime4BoolS, ) -> () {
+	let var _2: ()
+	let var _3: ()
+
+	bb0 : {
+		_2 = call extern function "printString" (copy _0.ptr, copy _0.len)
+		branchif copy _1.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		_3 = call extern function "printLine" ()
+		goto bb1
+	}
+	
+	bb3 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime5printF7runtime4CharS7runtime4BoolSE07newline (_0: 7runtime4CharS, _1: 7runtime4BoolS, ) -> () {
+	let var _2: ()
+	let var _3: ()
+
+	bb0 : {
+		_2 = call extern function "printChar" (copy _0.repr)
+		branchif copy _1.repr bb2; else bb1
+	}
+	
+	bb1 : {
+		goto bb3
+	}
+	
+	bb2 : {
+		_3 = call extern function "printLine" ()
+		goto bb1
+	}
+	
+	bb3 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime5printF7runtime4BoolSE0 (_0: 7runtime4BoolS, ) -> () {
+	let var _1: ()
+	let var _2: ()
+
+	bb0 : {
+		_1 = call extern function "printBool" (copy _0.repr)
+		_2 = call extern function "printLine" ()
+		return copy _2
+	}
+	
+}
+func 7runtime5printF7runtime4HalfSE0 (_0: 7runtime4HalfS, ) -> () {
+	let var _1: ()
+	let var _2: f32
+	let var _3: ()
+
+	bb0 : {
+		_2 = llvm.float.ext.32 copy _0.repr
+		_1 = call extern function "printFloat" (copy _2)
+		_3 = call extern function "printLine" ()
+		return copy _3
+	}
+	
+}
+func 7runtime5printF7runtime5FloatSE0 (_0: 7runtime5FloatS, ) -> () {
+	let var _1: ()
+	let var _2: ()
+
+	bb0 : {
+		_1 = call extern function "printFloat" (copy _0.repr)
+		_2 = call extern function "printLine" ()
+		return copy _2
+	}
+	
+}
+func 7runtime5printF7runtime6DoubleSE0 (_0: 7runtime6DoubleS, ) -> () {
+	let var _1: ()
+	let var _2: ()
+
+	bb0 : {
+		_1 = call extern function "printDouble" (copy _0.repr)
+		_2 = call extern function "printLine" ()
+		return copy _2
+	}
+	
+}
+func 7runtime5printF7runtime3IntSE0 (_0: 7runtime3IntS, ) -> () {
+	let var _1: ()
+	let var _2: ()
+
+	bb0 : {
+		_1 = call extern function "printInt64" (copy _0.repr)
+		_2 = call extern function "printLine" ()
+		return copy _2
+	}
+	
+}
+func 7runtime5printF7runtime5Int64SE0 (_0: 7runtime5Int64S, ) -> () {
+	let var _1: ()
+	let var _2: ()
+
+	bb0 : {
+		_1 = call extern function "printInt64" (copy _0.repr)
+		_2 = call extern function "printLine" ()
+		return copy _2
+	}
+	
+}
+func 7runtime5printF7runtime5Int32SE0 (_0: 7runtime5Int32S, ) -> () {
+	let var _1: ()
+	let var _2: ()
+
+	bb0 : {
+		_1 = call extern function "printInt32" (copy _0.repr)
+		_2 = call extern function "printLine" ()
+		return copy _2
+	}
+	
+}
+func 7runtime5printF7runtime5Int16SE0 (_0: 7runtime5Int16S, ) -> () {
+	let var _1: ()
+	let var _2: ()
+
+	bb0 : {
+		_1 = call extern function "printInt16" (copy _0.repr)
+		_2 = call extern function "printLine" ()
+		return copy _2
+	}
+	
+}
+func 7runtime5printF7runtime4Int8SE0 (_0: 7runtime4Int8S, ) -> () {
+	let var _1: ()
+	let var _2: ()
+
+	bb0 : {
+		_1 = call extern function "printInt8" (copy _0.repr)
+		_2 = call extern function "printLine" ()
+		return copy _2
+	}
+	
+}
+func 7runtime5printF7runtime4UIntSE0 (_0: 7runtime4UIntS, ) -> () {
+	let var _1: ()
+	let var _2: ()
+
+	bb0 : {
+		_1 = call extern function "printUInt64" (copy _0.repr)
+		_2 = call extern function "printLine" ()
+		return copy _2
+	}
+	
+}
+func 7runtime5printF7runtime6UInt64SE0 (_0: 7runtime6UInt64S, ) -> () {
+	let var _1: ()
+	let var _2: ()
+
+	bb0 : {
+		_1 = call extern function "printUInt64" (copy _0.repr)
+		_2 = call extern function "printLine" ()
+		return copy _2
+	}
+	
+}
+func 7runtime5printF7runtime6UInt32SE0 (_0: 7runtime6UInt32S, ) -> () {
+	let var _1: ()
+	let var _2: ()
+
+	bb0 : {
+		_1 = call extern function "printUInt32" (copy _0.repr)
+		_2 = call extern function "printLine" ()
+		return copy _2
+	}
+	
+}
+func 7runtime5printF7runtime6UInt16SE0 (_0: 7runtime6UInt16S, ) -> () {
+	let var _1: ()
+	let var _2: ()
+
+	bb0 : {
+		_1 = call extern function "printUInt16" (copy _0.repr)
+		_2 = call extern function "printLine" ()
+		return copy _2
+	}
+	
+}
+func 7runtime5printF7runtime5UInt8SE0 (_0: 7runtime5UInt8S, ) -> () {
+	let var _1: ()
+	let var _2: ()
+
+	bb0 : {
+		_1 = call extern function "printUInt8" (copy _0.repr)
+		_2 = call extern function "printLine" ()
+		return copy _2
+	}
+	
+}
+func 7runtime5printF7runtime6StringSE0 (_0: 7runtime6StringS, ) -> () {
+	let var _1: ()
+	let var _2: ()
+
+	bb0 : {
+		_1 = call extern function "printString" (copy _0.ptr, copy _0.len)
+		_2 = call extern function "printLine" ()
+		return copy _2
+	}
+	
+}
+func 7runtime5printF7runtime4CharSE0 (_0: 7runtime4CharS, ) -> () {
+	let var _1: ()
+	let var _2: ()
+
+	bb0 : {
+		_1 = call extern function "printChar" (copy _0.repr)
+		_2 = call extern function "printLine" ()
+		return copy _2
+	}
+	
+}
+func 7runtime5printF7runtime6StringS7runtime3IntSE00 (_0: 7runtime6StringS, _1: 7runtime3IntS, ) -> () {
+	let var _2: ()
+	let var _3: ()
+	let var _4: ()
+
+	bb0 : {
+		_2 = call extern function "printString" (copy _0.ptr, copy _0.len)
+		_3 = call extern function "printInt64" (copy _1.repr)
+		_4 = call extern function "printLine" ()
+		return copy _4
+	}
+	
+}
+func 7runtime5printF7runtime6StringS7runtime5FloatSE00 (_0: 7runtime6StringS, _1: 7runtime5FloatS, ) -> () {
+	let var _2: ()
+	let var _3: ()
+	let var _4: ()
+
+	bb0 : {
+		_2 = call extern function "printString" (copy _0.ptr, copy _0.len)
+		_3 = call extern function "printFloat" (copy _1.repr)
+		_4 = call extern function "printLine" ()
+		return copy _4
+	}
+	
+}
+func 7runtime3forF7runtime3Int5RangeSF7runtime3IntSEuE00 (_0: 7runtime3Int5RangeS, _1: func (7runtime3IntS, ) -> (), ) -> () {
+	let var _2: 7runtime3Int5RangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime3IntS
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime3Int8lessThanF7runtime3IntS7runtime3IntSE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime3Int4initFiE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime3Int3addF7runtime3IntS7runtime3IntSE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime3Int11ClosedRangeSF7runtime3IntSEuE00 (_0: 7runtime3Int11ClosedRangeS, _1: func (7runtime3IntS, ) -> (), ) -> () {
+	let var _2: 7runtime3Int11ClosedRangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime3IntS
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime3Int10lessThanEqF7runtime3IntS7runtime3IntSE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime3Int4initFiE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime3Int3addF7runtime3IntS7runtime3IntSE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime4UInt5RangeSF7runtime4UIntSEuE00 (_0: 7runtime4UInt5RangeS, _1: func (7runtime4UIntS, ) -> (), ) -> () {
+	let var _2: 7runtime4UInt5RangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime4UIntS
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime4UInt8lessThanF7runtime4UIntS7runtime4UIntSE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime4UInt4initFiE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime4UInt3addF7runtime4UIntS7runtime4UIntSE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime4UInt11ClosedRangeSF7runtime4UIntSEuE00 (_0: 7runtime4UInt11ClosedRangeS, _1: func (7runtime4UIntS, ) -> (), ) -> () {
+	let var _2: 7runtime4UInt11ClosedRangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime4UIntS
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime4UInt10lessThanEqF7runtime4UIntS7runtime4UIntSE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime4UInt4initFiE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime4UInt3addF7runtime4UIntS7runtime4UIntSE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime4Int85RangeSF7runtime4Int8SEuE00 (_0: 7runtime4Int85RangeS, _1: func (7runtime4Int8S, ) -> (), ) -> () {
+	let var _2: 7runtime4Int85RangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime4Int8S
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime4Int88lessThanF7runtime4Int8S7runtime4Int8SE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime4Int84initFaE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime4Int83addF7runtime4Int8S7runtime4Int8SE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime4Int811ClosedRangeSF7runtime4Int8SEuE00 (_0: 7runtime4Int811ClosedRangeS, _1: func (7runtime4Int8S, ) -> (), ) -> () {
+	let var _2: 7runtime4Int811ClosedRangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime4Int8S
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime4Int810lessThanEqF7runtime4Int8S7runtime4Int8SE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime4Int84initFaE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime4Int83addF7runtime4Int8S7runtime4Int8SE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime5Int165RangeSF7runtime5Int16SEuE00 (_0: 7runtime5Int165RangeS, _1: func (7runtime5Int16S, ) -> (), ) -> () {
+	let var _2: 7runtime5Int165RangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime5Int16S
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime5Int168lessThanF7runtime5Int16S7runtime5Int16SE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime5Int164initFlE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime5Int163addF7runtime5Int16S7runtime5Int16SE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime5Int1611ClosedRangeSF7runtime5Int16SEuE00 (_0: 7runtime5Int1611ClosedRangeS, _1: func (7runtime5Int16S, ) -> (), ) -> () {
+	let var _2: 7runtime5Int1611ClosedRangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime5Int16S
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime5Int1610lessThanEqF7runtime5Int16S7runtime5Int16SE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime5Int164initFlE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime5Int163addF7runtime5Int16S7runtime5Int16SE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime5Int325RangeSF7runtime5Int32SEuE00 (_0: 7runtime5Int325RangeS, _1: func (7runtime5Int32S, ) -> (), ) -> () {
+	let var _2: 7runtime5Int325RangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime5Int32S
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime5Int328lessThanF7runtime5Int32S7runtime5Int32SE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime5Int324initFjE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime5Int323addF7runtime5Int32S7runtime5Int32SE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime5Int3211ClosedRangeSF7runtime5Int32SEuE00 (_0: 7runtime5Int3211ClosedRangeS, _1: func (7runtime5Int32S, ) -> (), ) -> () {
+	let var _2: 7runtime5Int3211ClosedRangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime5Int32S
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime5Int3210lessThanEqF7runtime5Int32S7runtime5Int32SE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime5Int324initFjE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime5Int323addF7runtime5Int32S7runtime5Int32SE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime5Int645RangeSF7runtime5Int64SEuE00 (_0: 7runtime5Int645RangeS, _1: func (7runtime5Int64S, ) -> (), ) -> () {
+	let var _2: 7runtime5Int645RangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime5Int64S
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime5Int648lessThanF7runtime5Int64S7runtime5Int64SE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime5Int644initFiE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime5Int643addF7runtime5Int64S7runtime5Int64SE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime5Int6411ClosedRangeSF7runtime5Int64SEuE00 (_0: 7runtime5Int6411ClosedRangeS, _1: func (7runtime5Int64S, ) -> (), ) -> () {
+	let var _2: 7runtime5Int6411ClosedRangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime5Int64S
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime5Int6410lessThanEqF7runtime5Int64S7runtime5Int64SE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime5Int644initFiE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime5Int643addF7runtime5Int64S7runtime5Int64SE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime5UInt85RangeSF7runtime5UInt8SEuE00 (_0: 7runtime5UInt85RangeS, _1: func (7runtime5UInt8S, ) -> (), ) -> () {
+	let var _2: 7runtime5UInt85RangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime5UInt8S
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime5UInt88lessThanF7runtime5UInt8S7runtime5UInt8SE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime5UInt84initFaE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime5UInt83addF7runtime5UInt8S7runtime5UInt8SE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime5UInt811ClosedRangeSF7runtime5UInt8SEuE00 (_0: 7runtime5UInt811ClosedRangeS, _1: func (7runtime5UInt8S, ) -> (), ) -> () {
+	let var _2: 7runtime5UInt811ClosedRangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime5UInt8S
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime5UInt810lessThanEqF7runtime5UInt8S7runtime5UInt8SE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime5UInt84initFaE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime5UInt83addF7runtime5UInt8S7runtime5UInt8SE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime6UInt165RangeSF7runtime6UInt16SEuE00 (_0: 7runtime6UInt165RangeS, _1: func (7runtime6UInt16S, ) -> (), ) -> () {
+	let var _2: 7runtime6UInt165RangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime6UInt16S
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime6UInt168lessThanF7runtime6UInt16S7runtime6UInt16SE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime6UInt164initFlE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime6UInt163addF7runtime6UInt16S7runtime6UInt16SE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime6UInt1611ClosedRangeSF7runtime6UInt16SEuE00 (_0: 7runtime6UInt1611ClosedRangeS, _1: func (7runtime6UInt16S, ) -> (), ) -> () {
+	let var _2: 7runtime6UInt1611ClosedRangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime6UInt16S
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime6UInt1610lessThanEqF7runtime6UInt16S7runtime6UInt16SE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime6UInt164initFlE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime6UInt163addF7runtime6UInt16S7runtime6UInt16SE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime6UInt325RangeSF7runtime6UInt32SEuE00 (_0: 7runtime6UInt325RangeS, _1: func (7runtime6UInt32S, ) -> (), ) -> () {
+	let var _2: 7runtime6UInt325RangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime6UInt32S
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime6UInt328lessThanF7runtime6UInt32S7runtime6UInt32SE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime6UInt324initFjE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime6UInt323addF7runtime6UInt32S7runtime6UInt32SE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime6UInt3211ClosedRangeSF7runtime6UInt32SEuE00 (_0: 7runtime6UInt3211ClosedRangeS, _1: func (7runtime6UInt32S, ) -> (), ) -> () {
+	let var _2: 7runtime6UInt3211ClosedRangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime6UInt32S
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime6UInt3210lessThanEqF7runtime6UInt32S7runtime6UInt32SE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime6UInt324initFjE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime6UInt323addF7runtime6UInt32S7runtime6UInt32SE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime6UInt645RangeSF7runtime6UInt64SEuE00 (_0: 7runtime6UInt645RangeS, _1: func (7runtime6UInt64S, ) -> (), ) -> () {
+	let var _2: 7runtime6UInt645RangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime6UInt64S
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime6UInt648lessThanF7runtime6UInt64S7runtime6UInt64SE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime6UInt644initFiE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime6UInt643addF7runtime6UInt64S7runtime6UInt64SE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 7runtime3forF7runtime6UInt6411ClosedRangeSF7runtime6UInt64SEuE00 (_0: 7runtime6UInt6411ClosedRangeS, _1: func (7runtime6UInt64S, ) -> (), ) -> () {
+	let var _2: 7runtime6UInt6411ClosedRangeS
+	let var _3: 7runtime4BoolS
+	let var _4: ()
+	let var _5: 7runtime6UInt64S
+
+	bb0 : {
+		_2 = copy _0
+		goto bb2
+	}
+	
+	bb1 : {
+		goto bb7
+	}
+	
+	bb2 : {
+		_3 = call function "7runtime6UInt6410lessThanEqF7runtime6UInt64S7runtime6UInt64SE00" (copy _2.low, copy _2.high)
+		branchif copy _3.repr bb4; else bb5
+	}
+	
+	bb3 : {
+		goto bb6
+	}
+	
+	bb4 : {
+		_4 = call copy _1 (copy _2.low)
+		call function "7runtime6UInt644initFiE4repr" (shared _5, const 1)
+		_2.low = call function "7runtime6UInt643addF7runtime6UInt64S7runtime6UInt64SE00" (copy _2.low, copy _5)
+		goto bb3
+	}
+	
+	bb5 : {
+		goto bb1
+	}
+	
+	bb6 : {
+		goto bb2
+	}
+	
+	bb7 : {
+		return tuple ()
+	}
+	
+}
+func 6tester4mainFE () -> () {
+	let var _0: [7runtime3IntS; 5]
+	let var _1: [7runtime3IntS; 10]
+	let var _2: 7runtime3IntS
+	let var _3: i64
+	let var _4: [7runtime3IntS; 20]
+	let var _5: 7runtime3IntS
+	let var _6: i64
+	let var _7: 7runtime3IntS
+	let var _8: 7runtime4BoolS
+	let var _9: 7runtime3IntS
+	let var _10: 7runtime3IntS
+	let var _11: 7runtime3IntS
+	let var _12: 7runtime4BoolS
+	let var _13: 7runtime3IntS
+	let var _14: 7runtime3IntS
+	let var _15: ()
+	let var _16: 7runtime3IntS
+	let var _17: ()
+
+	bb0 : {
+		call function "7runtime3Int4initFiE4repr" (shared index const 0 of _0, const 1)
+		call function "7runtime3Int4initFiE4repr" (shared index const 1 of _0, const 2)
+		call function "7runtime3Int4initFiE4repr" (shared index const 2 of _0, const 3)
+		call function "7runtime3Int4initFiE4repr" (shared index const 3 of _0, const 4)
+		call function "7runtime3Int4initFiE4repr" (shared index const 4 of _0, const 5)
+		call function "7runtime3Int4initFiE4repr" (shared _2, const 0)
+		_3 = const 0
+		goto bb1
+	}
+	
+	bb1 : {
+		index copy _3 of _1 = copy _2
+		_3 = llvm.int.add copy _3, const 1
+		branchif llvm.int.cmp.gte copy _3, const 10 bb2; else bb1
+	}
+	
+	bb2 : {
+		call function "7runtime3Int4initFiE4repr" (shared _5, const 1)
+		_6 = const 0
+		goto bb3
+	}
+	
+	bb3 : {
+		index copy _6 of _4 = copy _5
+		_6 = llvm.int.add copy _6, const 1
+		branchif llvm.int.cmp.gte copy _6, const 20 bb4; else bb3
+	}
+	
+	bb4 : {
+		call function "7runtime3Int4initFiE4repr" (shared _7, const 0)
+		goto bb6
+	}
+	
+	bb5 : {
+		goto bb11
+	}
+	
+	bb6 : {
+		call function "7runtime3Int4initFiE4repr" (shared _9, const 5)
+		_8 = call function "7runtime3Int8lessThanF7runtime3IntS7runtime3IntSE00" (copy _7, copy _9)
+		branchif copy _8.repr bb8; else bb9
+	}
+	
+	bb7 : {
+		goto bb10
+	}
+	
+	bb8 : {
+		call function "7runtime3Int4initFiE4repr" (shared _10, const 2)
+		index copy _7.repr of _0 = call function "7runtime3Int3mulF7runtime3IntS7runtime3IntSE00" (copy index copy _7.repr of _0, copy _10)
+		call function "7runtime3Int4initFiE4repr" (shared _11, const 1)
+		_7 = call function "7runtime3Int3addF7runtime3IntS7runtime3IntSE00" (copy _7, copy _11)
+		goto bb7
+	}
+	
+	bb9 : {
+		goto bb5
+	}
+	
+	bb10 : {
+		goto bb6
+	}
+	
+	bb11 : {
+		call function "7runtime3Int4initFiE4repr" (shared _7, const 0)
+		goto bb13
+	}
+	
+	bb12 : {
+		goto bb18
+	}
+	
+	bb13 : {
+		call function "7runtime3Int4initFiE4repr" (shared _13, const 5)
+		_12 = call function "7runtime3Int8lessThanF7runtime3IntS7runtime3IntSE00" (copy _7, copy _13)
+		branchif copy _12.repr bb15; else bb16
+	}
+	
+	bb14 : {
+		goto bb17
+	}
+	
+	bb15 : {
+		_14 = copy index copy _7.repr of _0
+		_15 = call function "7runtime5printF7runtime3IntSE0" (copy _14)
+		call function "7runtime3Int4initFiE4repr" (shared _16, const 1)
+		_7 = call function "7runtime3Int3addF7runtime3IntS7runtime3IntSE00" (copy _7, copy _16)
+		goto bb14
+	}
+	
+	bb16 : {
+		goto bb12
+	}
+	
+	bb17 : {
+		goto bb13
+	}
+	
+	bb18 : {
+		_17 = call function "6tester14repeatingArrayFE" ()
+		return
+	}
+	
+}
+func 6tester14repeatingArrayFE () -> () {
+	let var _0: [7runtime3IntS; 10]
+	let var _1: 7runtime3IntS
+	let var _2: i64
+	let var _3: ()
+	let var _4: 7runtime3IntS
+
+	bb0 : {
+		call function "7runtime3Int4initFiE4repr" (shared _1, const 1)
+		_2 = const 0
+		goto bb1
+	}
+	
+	bb1 : {
+		index copy _2 of _0 = copy _1
+		_2 = llvm.int.add copy _2, const 1
+		branchif llvm.int.cmp.gte copy _2, const 10 bb2; else bb1
+	}
+	
+	bb2 : {
+		call function "7runtime3Int4initFiE4repr" (shared _4, const 5)
+		_3 = call function "7runtime5printF7runtime3IntSE0" (copy index copy _4.repr of _0)
+		return copy _3
+	}
+	
+}
+

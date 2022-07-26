@@ -196,8 +196,8 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 self.debugger.throw_diagnostic(TypeCheckError::CouldNotInfer(value.span.clone().unwrap_or_else(Span::empty)));
             }
 
-            TypeKind::Named(name) =>  self.debugger.throw_diagnostic(TypeCheckError::CouldNotInfer(value.span.clone().unwrap_or_else(Span::empty))),
-            TypeKind::Member { member, .. } =>  self.debugger.throw_diagnostic(TypeCheckError::CouldNotInfer(value.span.clone().unwrap_or_else(Span::empty))),
+            TypeKind::Named(_) =>  self.debugger.throw_diagnostic(TypeCheckError::CouldNotInfer(value.span.clone().unwrap_or_else(Span::empty))),
+            TypeKind::Member { .. } =>  self.debugger.throw_diagnostic(TypeCheckError::CouldNotInfer(value.span.clone().unwrap_or_else(Span::empty))),
 
             _ => {}
         }
@@ -219,9 +219,9 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 self.check_codeblock(&closure.code, Some(return_type), return_type);
             }
             ValueKind::FuncCall { function, args } => {
-                //println!();
-                //println!("{function:?}");
-                //println!();
+                //eprintln!();
+                //eprintln!("{function:?}");
+                //eprintln!();
                 self.check_value(function, return_type);
 
                 let (params_are_shared, params_labels): (Vec<bool>, Vec<_>) =
@@ -308,7 +308,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
                 }
 
                 for (param, arg) in params.iter().zip(&args.args) {
-                    //println!("{param:?} <-> {arg:?}");
+                    //eprintln!("{param:?} <-> {arg:?}");
                     self.check_value(arg, return_type);
 
                     self.check_type(param, &arg.typ);
@@ -490,7 +490,7 @@ impl<'a, 'b> TypeCheckPass<'a, 'b> {
         }
     }
 
-    fn check_if_value(&mut self, if_value: &IfValue, if_type: &Type, return_type: &Type, mut spans: Vec<Span>) {
+    fn check_if_value(&mut self, if_value: &IfValue, if_type: &Type, return_type: &Type, spans: Vec<Span>) {
         self.check_value(if_value.condition.as_ref(), &if_value.condition.typ);
 
         // Get the value of the if
@@ -664,7 +664,7 @@ impl IntoDiagnostic for TypeCheckError {
             TypeCheckError::OperatorDNE(operator, span) => {
                 Diagnostic::new(DiagnosticLevel::Error,
                                 "operator_dne",
-                                format!("operator `{operator}` is not define"),
+                                format!("operator `{operator}` is not defined"),
                                 vec![ CodeLocation::new(span, None) ])
             }
             TypeCheckError::SymbolNotAValue(name, span) => {

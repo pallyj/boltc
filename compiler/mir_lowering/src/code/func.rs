@@ -2,7 +2,7 @@ use inkwell::{module::Linkage, values::PointerValue, basic_block::BasicBlock};
 use itertools::Itertools;
 use mir::{instr::{Terminator, TerminatorKind, LocalId, Instruction}, code::BasicBlockId, ty::TypeKind};
 
-use crate::{MirLowerContext, code::func};
+use crate::{MirLowerContext};
 
 impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 {

@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use mir::ty::Enum;
 
 use crate::MirLowerContext;

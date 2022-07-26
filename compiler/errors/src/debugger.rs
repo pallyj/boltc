@@ -18,18 +18,18 @@ impl<'a> Debugger<'a> {
     }
 
     pub fn throw_parse(&mut self, error: String, span: (usize, (usize, usize))) {
-        println!("{}", format!("{}: {error}", "  error".red()).bold());
+        eprintln!("{}", format!("{}: {error}", "  error".red()).bold());
 
         let line_info = self.interner.get_line_info(span.0, span.1 .0);
 
-        println!("    {} {}:{}:{}",
+        eprintln!("    {} {}:{}:{}",
                  "-->".bold().blue(),
                  line_info.filename,
                  line_info.line,
                  line_info.col + 1);
 
-        println!("     {} ", "|".bold().blue());
-        println!("{:>4} {} {}",
+        eprintln!("     {} ", "|".bold().blue());
+        eprintln!("{:>4} {} {}",
                  line_info.line.to_string().bold().blue(),
                  "|".bold().blue(),
                  line_info.text.replace("\t", "    ").trim_end());
@@ -43,16 +43,16 @@ impl<'a> Debugger<'a> {
                                               .red()
                                               .bold();
 
-        println!("     {:width$}  {sep}", "|".bold().blue());
+        eprintln!("     {:width$}  {sep}", "|".bold().blue());
 
-        println!("     {} ", "|".bold().blue());
+        eprintln!("     {} ", "|".bold().blue());
 
         self.parser_errors += 1;
     }
 
     pub fn throw(&mut self, code: ErrorCode, spans: Vec<Span>) {
         let description = code.description();
-        println!("  {}",
+        eprintln!("  {}",
                  format!("[{}] {}", code.error_code().red(), description).bold());
 
         for span in spans.iter() {
@@ -61,15 +61,15 @@ impl<'a> Debugger<'a> {
             let mut line_info = self.interner
                                     .get_line_info(span.file as usize, start as usize);
 
-            println!("    {} {}:{}:{}",
+            eprintln!("    {} {}:{}:{}",
                      "-->".bold().blue(),
                      line_info.filename,
                      line_info.line,
                      line_info.col + 1);
 
-            println!("     {} ", "|".bold().blue());
+            eprintln!("     {} ", "|".bold().blue());
             while start < end {
-                println!("{:>4} {} {}",
+                eprintln!("{:>4} {} {}",
                          line_info.line.to_string().bold().blue(),
                          "|".bold().blue(),
                          line_info.text.replace("\t", "    ").trim_end());
@@ -84,7 +84,7 @@ impl<'a> Debugger<'a> {
                                             .collect::<String>()
                                             .red()
                                             .bold();
-                println!("     {} {space:width$}{sep}", "|".bold().blue(), space = "");
+                eprintln!("     {} {space:width$}{sep}", "|".bold().blue(), space = "");
 
                 start += line_info.text.len() as u32;
                 let old_line = line_info.line;
@@ -94,7 +94,7 @@ impl<'a> Debugger<'a> {
                     break;
                 }
             }
-            println!();
+            eprintln!();
         }
 
         self.errors.push(Error::new(code, spans));

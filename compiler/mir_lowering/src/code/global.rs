@@ -1,10 +1,7 @@
-use inkwell::{values::{BasicValueEnum, IntValue, FloatValue, PointerValue, BasicMetadataValueEnum, CallableValue, BasicValue, GlobalValue}, IntPredicate, FloatPredicate, AddressSpace, module::Linkage, types::BasicType};
-use itertools::Itertools;
-use mir::{val::{RValueKind, ConstValue, PlaceKind, DuoIntrinsic, RValue, SoloIntrinsic, Global}, ty::TypeKind, code::Function};
+use inkwell::{module::Linkage, AddressSpace};
+use mir::val::Global;
 
-use crate::{MirLowerContext, code::func};
-
-use super::func::FunctionContext;
+use crate::{MirLowerContext};
 
 impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 {
@@ -24,7 +21,7 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 		global.set_initializer(&llvm_global_type.const_zero());
 	}
 
-	pub fn lower_global_init(&self)
+	/*pub fn lower_global_init(&self)
 	{
 		if let Some(init) = self.module.get_function(".init")
 		{
@@ -50,5 +47,5 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 			ctors.set_section(".ctor");
 			ctors.set_initializer(&initializer);*/
 		}
-	}
+	}*/
 }

@@ -228,7 +228,7 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
         &mut self,
         typ: &Type,
         patterns: &Vec<(Pattern, DecisionTree)>,
-        span: &Option<Span>)
+        _span: &Option<Span>)
     {
         match typ.kind() {
             TypeKind::Enum(enum_ref) => {
@@ -348,7 +348,7 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
         patterns: &Vec<(Pattern, DecisionTree)>,
         default_block: BasicBlockId,
         struct_ref: &StructRef,
-        scrutinee_span: &Option<Span>) -> Vec<BasicBlockId>
+        _scrutinee_span: &Option<Span>) -> Vec<BasicBlockId>
     {
         let Some(Symbol::Function(mut equal_function)) = struct_ref.lookup_static_item("op~equal") else {
             //self.debugger.throw_single(ErrorCode::OperatorNotDefined("equals".to_string(), struct_ref.name()), scrutinee_span);

@@ -29,17 +29,22 @@ pub struct Args {
 }
 
 impl Args {
-    pub fn validate(&self) -> bool {
+    pub fn validate(&mut self) -> bool {
         let mut is_valid = true;
 
         if self.optimization_level > 3 {
-            println!("{} optimization level {} is too high, use 0, 1, 2 or 3", "error:".red().bold(), self.optimization_level);
+            eprintln!("{} optimization level {} is too high, use 0, 1, 2 or 3", "error:".red().bold(), self.optimization_level);
             is_valid = false;
         }
 
-        if self.output_file.is_none() {
-           println!("{} no output file specified", "error:".red().bold());
-           is_valid = false;
+
+
+        if self.output_file.is_none() && self.lib.is_some() {
+            self.output_file = Some(match self.emit {
+                Emit::Asm => format!("{}.asm", self.lib.as_ref().unwrap()),
+                Emit::Llvm => format!("{}.ll", self.lib.as_ref().unwrap()),
+                Emit::Object => format!("{}", self.lib.as_ref().unwrap()),
+            })
         }
 
         return is_valid

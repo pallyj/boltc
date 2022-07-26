@@ -1,4 +1,4 @@
-use std::{path::Path, fmt::format};
+use std::{path::Path};
 
 use crate::{args::Args, cstd};
 
@@ -22,5 +22,5 @@ pub fn with_args(
 			.unwrap()
 			.stderr;
 
-	println!("{}", std::str::from_utf8(&output).unwrap());
+	eprintln!("{}", std::str::from_utf8(&output).unwrap());
 }

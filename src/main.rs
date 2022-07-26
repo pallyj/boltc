@@ -6,7 +6,7 @@ mod extension_host;
 mod testing;
 mod link;
 
-use std::{process::Command, collections::HashMap, mem};
+use std::{collections::HashMap, mem};
 
 use args::{Args, Emit};
 use blir::{BlirContext, Library};
@@ -15,6 +15,7 @@ use blir_passes::{MacroExpansionPass, TypeCheckPass, ClosureResolvePass, TypeInf
 use clap::StructOpt;
 //use codegen::config::{BuildConfig, BuildOutput, BuildProfile};
 use colored::Colorize;
+use cstd::StandardLib;
 use errors::{fileinterner::FileInterner, DiagnosticReporter};
 use extension_host::{ExtensionHost, ExtensionError};
 use lower_ast::AstLowerer;
@@ -27,15 +28,15 @@ use parser::{parser::parse};
 fn main() {
     let args = Args::parse();
 
-    let Some(lib_name) = args.lib.clone() else {
-        println!("{} {}", "error:".red().bold(), "missing project name".bold());
+    if args.lib.is_none() {
+        eprintln!("{} {}", "error:".red().bold(), "missing project name".bold());
         return
     };
 
-    run(args);
+    let _ =run(args);
 }
 
-fn run(args: Args) -> Result<(), ()>
+fn run(mut args: Args) -> Result<(), ()>
 {
     feature_gate::enable_features(&args.feature);
 
@@ -50,12 +51,11 @@ fn run(args: Args) -> Result<(), ()>
         Some(s) if s.as_str() == "install" => {
             let standard = cstd::StandardLib::default();
 
-            println!("{:?}", standard.get_lib_path());
-
             standard.install();
         }
         Some(s) if s.as_str() == "doc" => {
             if !args.validate() { return Err(()); }
+            if !StandardLib::default().is_installed() { StandardLib::default().install() }
             project.open_files(&args.files[1..]); // open files
             project.compile_to_blir()?; // compile to blir
             project.run_passes()?; // run passes
@@ -63,6 +63,7 @@ fn run(args: Args) -> Result<(), ()>
         }
         Some(s) if s.as_str() == "emu" => {
             if !args.validate() { return Err(()); }
+            if !StandardLib::default().is_installed() { StandardLib::default().install() }
             project.open_files(&args.files[1..]); // open files
             project.compile_to_blir()?; // compile to blir
             project.run_passes()?; // run passes
@@ -71,6 +72,7 @@ fn run(args: Args) -> Result<(), ()>
         }
         _ => {
             if !args.validate() { return Err(()); }
+            if !StandardLib::default().is_installed() { StandardLib::default().install() }
             project.open_files(&args.files); // open files
             project.compile_to_blir()?; // compile to blir
             project.run_passes()?; // run passes
@@ -183,6 +185,7 @@ impl Project
         // Load extensions
         for extension in &self.extensions
         {
+            let _ =
             unsafe { self.host.load_extension(extension) }
                 .map_err(|_| {
                      reporter.throw_diagnostic(ExtensionError::LoadFailed(extension.clone()))
@@ -280,7 +283,7 @@ impl Project
 
     pub fn compile_to_mir(&mut self) -> Result<(), ()>
     {
-        let ProjectState::ProcessedBlir(mut libraries) = mem::take(&mut self.project_state) else { panic!() };
+        let ProjectState::ProcessedBlir(libraries) = mem::take(&mut self.project_state) else { panic!() };
         let mut reporter = DiagnosticReporter::new(&self.interner);
 
         let mut project = mir::Project::new(&self.project_name);
@@ -288,15 +291,17 @@ impl Project
 
         reporter.errors()?;
 
+        println!("{project}");
+
         self.project_state = ProjectState::Mir(project);
         Ok(())
     }
 
     pub fn compile_to_llvm(&mut self, args: &Args)
     {
-        let ProjectState::Mir(mut project) = mem::take(&mut self.project_state) else { panic!() };
+        let ProjectState::Mir(project) = mem::take(&mut self.project_state) else { panic!() };
 
-        let mut mir_lowerer = MirLowerer::new(project);
+        let mir_lowerer = MirLowerer::new(project);
 
         let build_output = match args.emit {
             Emit::Llvm => BuildOutput::Llvm,
@@ -311,14 +316,14 @@ impl Project
             if let Some(entry_point) = &self.context.entry_point {
                 link::with_args(&temp_path, args, &entry_point)
             } else {
-                println!("{} {}", "error:".red().bold(), "no entry point provided".bold());
+                eprintln!("{} {}", "error:".red().bold(), "no entry point provided".bold());
             }
         }
     }
 
     pub fn emulate(&mut self) -> mir::exc::val::Value
     {
-        let ProjectState::Mir(mut project) = mem::take(&mut self.project_state) else { panic!() };
+        let ProjectState::Mir(project) = mem::take(&mut self.project_state) else { panic!() };
 
         let entry = self.context.entry_point.as_ref();
         project.execute().enter(&entry.unwrap(), vec![])
@@ -326,7 +331,7 @@ impl Project
 
 
     pub fn document(mut self) {
-        let ProjectState::ProcessedBlir(mut libraries) = mem::take(&mut self.project_state) else { panic!() };
+        let ProjectState::ProcessedBlir(libraries) = mem::take(&mut self.project_state) else { panic!() };
 
         let mut bundle = docgen::Bundle::new(self.project_name.clone());
 

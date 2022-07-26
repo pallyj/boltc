@@ -30,7 +30,7 @@ We are looking to expand into:
 - Distributed computing
 - Servers
 
-Check out the [wiki](https://github.com/pallyj/boltc/wiki) for more details!
+Check out the [wiki](https://github.com/pallyj/boltc/wiki) for more details, or the documentation for our [runtime](https://pallyj.github.io/boltdoc/runtime/)!
 
 The Bolt Language focuses on
 
@@ -95,7 +95,7 @@ boltc examples/guessing_game/game.bolt --lib=game
 
 ## Development
 
-### Bolt 0.6
+### Bolt 0.6 [ Current Version ]
 
 - Loops
 - Mutating functions
@@ -112,7 +112,7 @@ boltc examples/guessing_game/game.bolt --lib=game
 - Global Variables
 - Bolt playgroud
 
-### Bolt 0.5 [ Current Version ]
+### Bolt 0.5
 
 - Patterns
 - Match

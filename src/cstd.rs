@@ -1,7 +1,6 @@
-use std::{path::PathBuf, process::Command, io::Write};
+use std::{path::PathBuf, process::Command};
 
 use etcetera::app_strategy::{AppStrategyArgs, AppStrategy};
-use fs_extra::dir::CopyOptions;
 use tera::Context;
 
 const PATH_TO_STD: &str = "lib/0.6/";
@@ -172,7 +171,7 @@ const FLOATS: &[FloatModel] = &[
 ///		to any float, and any calculation with NaN as an operand is poisoned and becomes NaN.
 ///		"#,
 		bits: 32,
-		is_default: false,
+		is_default: true,
 	},
 	FloatModel {
 		name: "Double",

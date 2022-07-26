@@ -59,10 +59,10 @@ pub fn enable_feature(name: &str) {
         "if_let" => IF_LET.store(true, Ordering::Relaxed),
         "guard" => GUARD.store(true, Ordering::Relaxed),
         "guard_let" => GUARD_LET.store(true, Ordering::Relaxed),
-        _ => { println!("{} feature {} is not recognized", "error:".red().bold(), name.bold()); return }
+        _ => { eprintln!("{} feature {} is not recognized", "error:".red().bold(), name.bold()); return }
     }
 
-    println!("{} feature {} is unstable", "warning:".yellow().bold(), name.bold());
+    eprintln!("{} feature {} is unstable", "warning:".yellow().bold(), name.bold());
 }
 
 pub fn enable_features(features: &[String])

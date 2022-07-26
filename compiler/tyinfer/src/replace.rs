@@ -33,9 +33,9 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
         match &mut statement.kind {
             StatementKind::Eval { value, .. } => self.replace_value(value, scope),
             StatementKind::Bind { typ, value, pattern } => {
-                self.replace_pattern(pattern, scope);
                 let span = typ.span();
                 self.replace_type(typ, &span);
+                self.replace_pattern(pattern, scope);
                 if let Some(value) = value {
                     self.replace_value(value, scope);
                     self.meet_types(typ, &mut value.typ);
@@ -192,7 +192,9 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
             ValueKind::Operator(operator) => {
                 let operator_params = match value.typ.kind() {
                     TypeKind::Function { params, .. } => params,
-                    _ => return,
+                    _ => {
+                        return
+                    },
                 };
 
                 let container_type = operator_params.first().unwrap();
@@ -203,7 +205,7 @@ impl<'a, 'b> TypeReplaceContext<'a, 'b> {
                 // Now we turn it into a polymorphizer
                 let operator_name = format!("op~{operator}");
 
-                //println!("{operator_name}");
+                //eprintln!("{operator_name}");
 
                 match container_type.lookup_static_item(&operator_name) {
                     Some(Symbol::Function(polymorphizer)) => {

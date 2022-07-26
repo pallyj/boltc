@@ -1,8 +1,8 @@
 use inkwell::{values::{BasicValueEnum, IntValue, FloatValue, PointerValue, BasicMetadataValueEnum, CallableValue}, IntPredicate, FloatPredicate};
 use itertools::Itertools;
-use mir::{val::{RValueKind, ConstValue, PlaceKind, DuoIntrinsic, RValue, SoloIntrinsic}, ty::TypeKind, code::Function};
+use mir::{val::{RValueKind, PlaceKind, DuoIntrinsic, RValue, SoloIntrinsic}, ty::TypeKind};
 
-use crate::{MirLowerContext, code::func};
+use crate::{MirLowerContext};
 
 use super::func::FunctionContext;
 
@@ -14,7 +14,6 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 		function: FunctionContext<'a, 'ctx>) -> BasicValueEnum<'ctx>
 	{
 		use RValueKind::*;
-		use ConstValue::*;
 
 		match value.kind() {
 			Const(const_value) => match const_value {
@@ -99,7 +98,7 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 
 				self.builder.build_struct_gep(llvm_place, field_index as u32, "gep").unwrap()
 			}
-			CastEnumVariant(place, tag, name) => {
+			CastEnumVariant(place, tag, _) => {
 				let TypeKind::Enum { id } = place.ty().kind() else {
 					panic!()
 				};
@@ -119,10 +118,11 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 			ArrayIndex(array, index) => {
 				let array_place = self.lower_place(array, function);
 
+				let zero_index = self.context.i64_type().const_zero();
 				let index = self.lower_rvalue(index, function).into_int_value();
 
 				unsafe {
-					self.builder.build_gep(array_place, &[index], "array_index")
+					self.builder.build_gep(array_place, &[zero_index, index], "array_index")
 				}
 			} 
 			Deref(rvalue) => {
@@ -273,10 +273,28 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 			}
 		}
 		else if llvm_left.is_pointer_value() {
-			todo!()
+			match intrinsic
+			{
+				PtrAdd => {
+					let pointer = llvm_left.into_pointer_value();
+					let index = llvm_right.into_int_value();
+					// what kind of value is right
+					unsafe {
+						self.builder.build_gep(pointer, &[index], "ptr_add").into()
+					}
+				}
+				_ => unreachable!()
+			}
 		}
 		else if llvm_left.is_array_value() {
-			todo!()
+			//let aggregate = llvm_left.into_array_value();
+			//let index = llvm_right.into_int_value();
+
+			match intrinsic
+			{
+				AItem => todo!(),
+				_ => unreachable!(),
+			}
 		}
 		else {
 			unreachable!()
@@ -322,7 +340,7 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 
 		match function.kind()
 		{
-			RValueKind::Function { is_extern, name } => {
+			RValueKind::Function { name, .. } => {
 				let function = self.module.get_function(name).unwrap();
 
 				self.builder.build_call(function, &args, "call")

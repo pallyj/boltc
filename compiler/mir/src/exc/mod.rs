@@ -102,13 +102,13 @@ impl<'a> ExecutionEngine<'a> {
 	pub fn run_instruction(&self, instruction: &Instruction, frame: &mut StackFrame) {
 		use crate::instr::InstructionKind::*;
 
-		//println!("{instruction}");
+		//eprintln!("{instruction}");
 
 
 		match instruction.kind() {
 			Assign(place, value) => self.assign(place, self.eval(value, frame), frame),
 			Drop(_) => todo!(),
-			Eval(value) => { self.eval(value, frame); },
+			Eval(value) => { self.eval(value, frame); }
 		}
 	}
 
@@ -367,6 +367,11 @@ impl<'a> ExecutionEngine<'a> {
 				_ => unreachable!()
 			}
 
+			(Value::Ref(ptr), Value::Int(n)) => match intrinsic {
+				PtrAdd => Value::Ref( unsafe { ptr.add(n as usize) } ),
+				_ => unreachable!(),
+			}
+
 			(left, right) => panic!("{intrinsic:?} {left:?} {right:?}"),
 		}
 	}
@@ -415,7 +420,7 @@ impl<'a> ExecutionEngine<'a> {
 				}
 			}
 
-			"printLine" => println!(),
+			"printLine" => eprintln!(),
 
 			_ => panic!("Function {name} isn't defined")
 		}

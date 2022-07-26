@@ -197,6 +197,7 @@ impl Value {
                     ValueKind::BinaryIntrinsicFn(BinaryIntrinsicFn::ArrayItem) => {
                         args.args[0].is_mutable()
                     }
+                    ValueKind::UnaryIntrinsicFn(UnaryIntrinsicFn::RawPointerDeref) => true,
                     _ => false
                 }
             }, // todo: maybe

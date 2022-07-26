@@ -128,6 +128,11 @@ impl<'a, 'l> TypeInferPass<'a, 'l> {
         infer_context.finish()
                      .replace_codeblock(function_block, &function_scope);
 
+        infer_context.infer_codeblock(function_block, &function_type, &function_scope);
+
+        infer_context.finish()
+                     .replace_codeblock(function_block, &function_scope);
+
         /*infer_context.infer_codeblock(function_block, &function_type, &function_scope);
 
         infer_context.finish()
@@ -162,6 +167,11 @@ impl<'a, 'l> TypeInferPass<'a, 'l> {
 
         infer_context.finish()
                      .replace_codeblock(function_block, &function_scope);
+
+        infer_context.infer_codeblock(function_block, &function_type, &function_scope);
+
+        infer_context.finish()
+                     .replace_codeblock(function_block, &function_scope);
     }
 
     pub fn infer_closure(&mut self, func: &mut Closure, closure_type: &mut Type, scope: &ScopeRef) {
@@ -185,6 +195,11 @@ impl<'a, 'l> TypeInferPass<'a, 'l> {
                      .replace_codeblock(function_block, scope);
 
         infer_context.infer_codeblock(function_block, function_type, scope);
+
+        infer_context.finish()
+                     .replace_codeblock(function_block, scope);
+
+        infer_context.infer_codeblock(function_block, &function_type, scope);
 
         infer_context.finish()
                      .replace_codeblock(function_block, scope);

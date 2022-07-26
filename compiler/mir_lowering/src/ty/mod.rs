@@ -1,9 +1,7 @@
 pub mod struct_;
 pub mod enum_;
 
-use std::ops::Add;
-
-use inkwell::{types::{IntType, FloatType, BasicTypeEnum, BasicType, PointerType, ArrayType, FunctionType, StructType, BasicMetadataTypeEnum, AnyTypeEnum}, AddressSpace};
+use inkwell::{types::{IntType, FloatType, BasicTypeEnum, BasicType, PointerType, ArrayType, FunctionType, StructType, BasicMetadataTypeEnum}, AddressSpace};
 use itertools::Itertools;
 use mir::ty::{StructId, EnumId, TypeKind};
 

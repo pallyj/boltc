@@ -1,10 +1,8 @@
 #![feature(let_else)]
 
-use std::{collections::HashMap, marker::PhantomData, path::Path};
+use std::{marker::PhantomData, path::Path};
 
-use inkwell::{passes::{PassManagerBuilder, PassManager}, builder, OptimizationLevel, module::Module, targets::{TargetTriple, Target, TargetMachine, FileType, CodeModel, RelocMode}};
-use itertools::Itertools;
-use mir::ty::StructId;
+use inkwell::{passes::{PassManagerBuilder, PassManager}, OptimizationLevel, module::Module, targets::{Target, TargetMachine, FileType, CodeModel, RelocMode}};
 use tempfile::{NamedTempFile, TempPath};
 
 mod ty;
@@ -22,7 +20,7 @@ impl MirLowerer
         Self { project }
     }
 
-    pub fn lower_project(mut self, config: BuildConfig) -> Option<TempPath>
+    pub fn lower_project(self, config: BuildConfig) -> Option<TempPath>
     {
         let context = inkwell::context::Context::create();
 
@@ -64,7 +62,7 @@ impl MirLowerer
                                                       RelocMode::Static,
                                                       CodeModel::Default).unwrap();
 
-        let file_type = match config.build_output {
+        match config.build_output {
             BuildOutput::Assembly => {
                 target_machine.write_to_file(&context.module, FileType::Assembly, Path::new(&config.output_file)).unwrap();
             }
@@ -101,22 +99,20 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
 {
     pub fn new(project: mir::Project, context: &'ctx inkwell::context::Context) -> Self
     {
-        unsafe {
-            let module = context.create_module(project.name());
-            let builder = context.create_builder();
-            let exe = Box::leak(Box::new(module.create_execution_engine().unwrap()));
-            let target_data = exe.get_target_data();
+        let module = context.create_module(project.name());
+        let builder = context.create_builder();
+        let exe = Box::leak(Box::new(module.create_execution_engine().unwrap()));
+        let target_data = exe.get_target_data();
 
-            Self {
-                context,
-                module,
-                builder,
-                layout: &target_data,
+        Self {
+            context,
+            module,
+            builder,
+            layout: &target_data,
 
-                phantom: PhantomData,
+            phantom: PhantomData,
 
-                project
-            }
+            project
         }
     }
 
@@ -163,6 +159,7 @@ impl<'a, 'ctx> MirLowerContext<'a, 'ctx>
         }
     }
 
+    #[allow(dead_code)]
     pub fn display(&self)
     {
         self.module.print_to_stderr();

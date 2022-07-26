@@ -71,7 +71,7 @@ macro_rules! ast {
 						$name::KIND => unsafe { <$enum_name>::$name($name::unsafe_cast(node)) },
 					)*
 					_ => {
-						println!("error {:?}", node);
+						eprintln!("error {:?}", node);
 						$enum_name::Error
 					},
 				}

@@ -1,4 +1,4 @@
-use std::{fmt::Display, collections::HashMap, sync::atomic::{AtomicBool, Ordering}};
+use std::{fmt::Display, collections::HashMap};
 
 use crate::{code::{BasicBlock, BasicBlockId, FunctionId, Function, ExternFunction, ExternFunctionId}, ty::{Type, Struct, StructId, Enum, EnumId}, Builder, exc::ExecutionEngine, val::{Global, GlobalId}};
 

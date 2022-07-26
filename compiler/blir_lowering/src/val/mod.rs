@@ -5,7 +5,7 @@ use std::sync::atomic::AtomicU32;
 use blir::{value::{Value, ValueKind, Closure}, typ::{TypeKind, Type}, intrinsics::{UnaryIntrinsicFn as Unary, BinaryIntrinsicFn as Binary}};
 use errors::Span;
 use itertools::Itertools;
-use mir::{val::{RValue, Place, SoloIntrinsic, DuoIntrinsic}};
+use mir::{val::{RValue, Place, SoloIntrinsic, DuoIntrinsic}, instr::Terminator};
 use rand::Rng;
 
 use crate::{BlirLowerer, err::LoweringErrorKind};
@@ -183,12 +183,44 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
 			}
 
 			RepeatingLiteral { repeating, count } => {
-				// todo: roll this loop
-				for i in 0..count.unwrap() {
-					let item_place = place.array_index(RValue::const_int(i, mir::ty::Type::int(64), Self::span_of(value.span)), Self::span_of(repeating.span));
+				// build the repeated value
+				let repeated = self.lower_rvalue(&repeating);
 
-					self.lower_assign(&item_place, &repeating);
-				}
+				// create a counter variable
+				let counter = self.builder.build_local(mir::ty::Type::int(64), true, Default::default());
+
+				// set the counter to zero
+				self.builder.build_assign(&counter, RValue::const_int(0, mir::ty::Type::int(64), Default::default()));
+
+				let start_label = self.builder.append_block();
+				let end_label = self.builder.append_block();
+
+				self.builder.build_terminator(Terminator::goto(start_label));
+
+				self.builder.position_at_end(start_label);
+
+				// copy repeated
+				let item_place = place.array_index(counter.copy(Default::default()), Default::default());
+				self.builder.build_assign(&item_place, repeated);
+
+				// increment counter
+				let counter_plus_one = RValue::intrinsic2(DuoIntrinsic::IAdd,
+														  counter.copy(Default::default()),
+														  RValue::const_int(1, mir::ty::Type::int(64), Default::default()),
+														  Default::default());
+
+				self.builder.build_assign(&counter, counter_plus_one);
+
+				// check if counter has exceeded one
+				let has_exceeded = RValue::intrinsic2(DuoIntrinsic::ICmpGte,
+													  counter.copy(Default::default()),
+													  RValue::const_int(count.unwrap_or(0), mir::ty::Type::int(64), Default::default()),
+													  Default::default());
+
+				// branch to either the end or the start
+				self.builder.build_terminator(Terminator::branch_if(has_exceeded, end_label, start_label));
+
+				self.builder.position_at_end(end_label);
 			}
 
 			_ => {
@@ -246,14 +278,15 @@ impl<'a, 'b> BlirLowerer<'a, 'b> {
 			Closure(closure) => self.lower_closure(closure, &value.typ),
 
 			FuncCall { function, args } => {
-
 				match &function.kind {
 					ValueKind::UnaryIntrinsicFn(intrinsic) => match intrinsic {
 						Unary::RawPointerRef => self.lower_place(&args.args[0]).get_ref(Self::span_of(value.span)),
 						_ => unreachable!(),
 					},
 					ValueKind::BinaryIntrinsicFn(intrinsic) => match intrinsic {
-						Binary::RawPointerAdd => todo!(),
+						Binary::RawPointerAdd => {
+							unreachable!()
+						}
 						_ => unreachable!()
 					},
 					_ => unreachable!(),

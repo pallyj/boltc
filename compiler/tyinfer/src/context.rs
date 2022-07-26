@@ -72,7 +72,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
         //
         //
 
-        // println!("Constraining {value:?}");
+        // eprintln!("Constraining {value:?}");
 
         match &value.kind {
             ValueKind::BoolLiteral(_) => self.constrain_bool(value),
@@ -312,7 +312,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
     }
 
     fn constrain_bool(&mut self, value: &Value) {
-        // println!("{value:?} <- some Bool");
+        // eprintln!("{value:?} <- some Bool");
         if let Some(infer_key) = self.infer_key(&value.typ) {
             let _constraint = self.checker
                                   .impose(infer_key.concretizes_explicit(TypeVariant::SomeBool));
@@ -322,7 +322,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
     }
 
     fn constrain_divergent(&mut self, value: &Value) {
-        // println!("{value:?} <- some Bool");
+        // eprintln!("{value:?} <- some Bool");
         if let Some(infer_key) = self.infer_key(&value.typ) {
             let _constraint = self.checker
                                   .impose(infer_key.concretizes_explicit(TypeVariant::SomeDiverges));
@@ -332,7 +332,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
     }
 
     fn constrain_int(&mut self, value: &Value) {
-        // println!("{value:?} <- some Int");
+        // eprintln!("{value:?} <- some Int");
         if let Some(infer_key) = self.infer_key(&value.typ) {
             let constraint = self.checker
                                  .impose(infer_key.concretizes_explicit(TypeVariant::SomeInteger));
@@ -356,7 +356,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
     }
 
     fn constrain_float(&mut self, value: &Value) {
-        // println!("{value:?} <- some Float");
+        // eprintln!("{value:?} <- some Float");
         if let Some(infer_key) = self.infer_key(&value.typ) {
             let _constraint = self.checker
                                   .impose(infer_key.concretizes_explicit(TypeVariant::SomeFloat));
@@ -366,7 +366,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
     }
 
     fn constrain_string(&mut self, value: &Value, len: usize) {
-        //println!("{value:?} <- some String");
+        //eprintln!("{value:?} <- some String");
 
         if let Some(infer_key) = self.infer_key(&value.typ) {
             let variant = if len == 1 { TypeVariant::SomeChar } else { TypeVariant::SomeString };
@@ -379,7 +379,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
     }
 
     fn constrain_func(&mut self, value: &Value) {
-        // println!("{value:?} <- some Function");
+        // eprintln!("{value:?} <- some Function");
         if let Some(infer_key) = self.infer_key(&value.typ) {
             let _constraint = self.checker
                                   .impose(infer_key.concretizes_explicit(TypeVariant::SomeFunction));
@@ -389,7 +389,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
     }
 
     fn constrain_one_way(&mut self, constrain: &Type, absolute: &Type) {
-        // println!("{constrain:?} <- {absolute:?}");
+        // eprintln!("{constrain:?} <- {absolute:?}");
 
         if let (TypeKind::Function { return_type: return_type_1,
                                      params: params_1,
@@ -436,7 +436,7 @@ impl<'a, 'b> TypeInferContext<'a, 'b> {
     }
 
     fn constrain_two_way(&mut self, ty1: &Type, ty2: &Type) {
-        //println!("{ty1:?} <-> {ty2:?}");
+        //eprintln!("{ty1:?} <-> {ty2:?}");
         let _constraint = match (self.infer_key(ty1), self.infer_key(ty2)) {
             (Some(key1), Some(key2)) if key1 != key2 => self.checker.impose(key1.equate_with(key2)),
             (Some(key1), None) => {

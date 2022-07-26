@@ -2,7 +2,6 @@ import intrinsics
 
 @entryPoint
 func main() {
-	// todo: array's infer key gets deleted
 	let var numbers = [ 1, 2, 3, 4, 5 ]
 	let var zeroes: Int[10] = [repeating: 0]
 	let ones = [repeating: 1, count: 20]
@@ -34,8 +33,13 @@ func main() {
 
 	// What's left to do?
 	/*
-	- Array literal
-	- Array repeating literal
-	- arrayIndex(shared array<T>, index: i64) -> T
 	*/
+
+	repeatingArray();
+}
+
+func repeatingArray() {
+	let arr = [repeating: 1, count: 10];
+
+	print(arr[5])
 }
